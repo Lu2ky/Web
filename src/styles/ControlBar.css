@@ -1,0 +1,71 @@
+.ControlBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%; 
+    box-sizing: border-box; 
+    padding: 0.8rem 2rem;
+
+    background: linear-gradient(to right, #ffffff, #f9fafb);
+    border-bottom: 2px solid transparent;
+    background-image:
+        linear-gradient(#ffffff, #ffffff),
+        linear-gradient(90deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Agrupaciones */
+.ControlBar .Left,
+.ControlBar .Center,
+.ControlBar .Right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Centrar el bloque del medio */
+.ControlBar .Center {
+    flex: 1;
+    justify-content: center;
+}
+
+/* Alinear el bloque derecho */
+.ControlBar .Right {
+    justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .ControlBar {
+        max-width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .ControlBar .Left,
+    .ControlBar .Center,
+    .ControlBar .Right {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .ControlBar {
+        max-width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem;
+    }
+
+    .ControlBar .Left,
+    .ControlBar .Center,
+    .ControlBar .Right {
+        width: 100%;
+        justify-content: center;
+    }
+}

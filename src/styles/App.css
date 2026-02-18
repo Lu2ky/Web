@@ -1,0 +1,74 @@
+#root {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.App {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+header {
+    flex-shrink: 0;
+    background: white;
+}
+
+.ControlBar {
+    flex-shrink: 0;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.mainContent {
+    display: grid;
+    grid-template-columns: 0.85fr 2.15fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    min-height: 0;
+}
+
+.ToDoSection {
+    background: #f9fafb;
+    border-radius: 0.8rem;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+    min-height: 0;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.ToDoSection::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.CalendarSection {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-sizing: border-box;
+    min-height: 0;
+}
+
+.Calendar {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}

@@ -1,0 +1,78 @@
+<<<<<<<< Updated upstream:Horarios_Estudiantes_UPB/segmented.css
+.segmented{
+    position: relative;
+    display: inline-flex;
+    background: #F3F4F6;
+    border-radius: 12px;
+    padding: 4px;  
+    width: 200px;
+    overflow: hidden;
+}
+
+.segmented button{
+    flex: 1;
+    position: relative;
+    z-index: 2;
+    border: none;
+    background: transparent;
+    color: #000000;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 500;
+    border-radius: 12px;
+    transition: color 0.3s ease;
+}
+
+.segmented button.active{
+    color:#ffffff;
+}
+
+.indicator{
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    border-radius: 12px;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+========
+.segmented{
+    position: relative;
+    display: inline-flex;
+    background: #F3F4F6;
+    border-radius: 12px;
+    padding: 4px;  
+    width: 200px;
+    overflow: hidden;
+}
+
+.segmented button{
+    flex: 1;
+    position: relative;
+    z-index: 2;
+    border: none;
+    background: transparent;
+    color: #000000;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 500;
+    border-radius: 12px;
+    transition: color 0.3s ease;
+}
+
+.segmented button.active{
+    color:#ffffff;
+}
+
+.indicator{
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    border-radius: 12px;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+>>>>>>>> Stashed changes:Horarios_Estudiantes_UPB/src/styles/ViewButton.css
+}

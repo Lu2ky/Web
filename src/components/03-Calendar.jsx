@@ -1,0 +1,23 @@
+
+import WeekView from "./03.1-WeekView";
+import DayView from "./03.2-DayView";
+
+// se recibe la vista seleccionada, los eventos de clase y personales
+// Tambien el onClicks que si se le da a una clase, se muestra la info
+function Calendar({ viewMode, events = [], personalEvents = [], onClassClick = () => {}, onDeletePersonal = () => {} }) {
+    const isDayView = viewMode === "Diario";
+
+    return (
+        <div className="Calendar">
+            {isDayView ? (
+                <DayView events={events} personalEvents={personalEvents} onClassClick={onClassClick} onDeletePersonal={onDeletePersonal} />
+            ) : (
+                <WeekView events={events} personalEvents={personalEvents} onClassClick={onClassClick} onDeletePersonal={onDeletePersonal} />
+            )}
+        </div>
+    );
+}
+
+export default Calendar;
+
+

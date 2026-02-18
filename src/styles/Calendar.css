@@ -1,0 +1,11 @@
+.Calendar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background: white;
+    border: none;
+    border-radius: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}

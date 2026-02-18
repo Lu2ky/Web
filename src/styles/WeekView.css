@@ -1,0 +1,239 @@
+/* Contenedor principal */
+.weekViewWrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: white;
+  box-sizing: border-box;
+}
+
+/* Encabezados */
+.weekHeaderRow {
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  width: 100%;
+}
+
+.hourHeaderCell {
+  flex: 0 0 5rem;
+  padding: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  border-right: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dayHeaderCell {
+  flex: 1;
+  padding: 1rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+  border-right: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.dayHeaderCell:last-child {
+  border-right: none;
+}
+
+/* Scroll principal */
+.weekScrollArea {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.weekScrollArea::-webkit-scrollbar {
+  display: none;
+}
+
+/* Grid general */
+.weekGrid {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  position: relative;
+}
+
+/* Columna de horas */
+.hoursColumn {
+  flex: 0 0 5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Columnas de días */
+.dayColumn {
+  flex: 1;
+  height: calc(24 * 4rem);
+  display: grid;
+  grid-template-rows: repeat(24, 4rem);
+  position: relative;
+  border-right: 1px solid #f3f4f6;
+}
+
+.dayColumn:last-child {
+  border-right: none;
+}
+
+/* Filas de horas */
+.hourRow {
+  display: flex;
+  flex-direction: row;
+  min-height: 4rem;
+  border-bottom: 1px solid #f3f4f6;
+  width: 100%;
+}
+
+.hourCell {
+  flex: 0 0 5rem;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: #fafbfc;
+}
+
+/* Celdas de cada día */
+.dayCell {
+  flex: 0 0 4rem; /* altura exacta de cada hora */
+  border-bottom: 1px solid #f3f4f6;
+  background: white;
+  box-sizing: border-box;
+}
+
+.dayCell:hover {
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+/* Capa de eventos */
+.eventsLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(24 * 4rem); /* 24 horas * altura por hora */
+  pointer-events: none;
+  z-index: 10;
+}
+
+.eventsLayer > * {
+  pointer-events: auto;
+  z-index: 20;
+  position: absolute;
+}
+
+/* Tarjetas de actividad */
+.activity-card {
+  min-height: 0;
+  /* height viene del inline style — no poner height: auto aquí */
+  padding: 6px 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #e0e7ff; /* color base, puedes personalizar */
+  position: relative;
+}
+
+.activity-card-header {
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.activity-delete-button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,0.06);
+  border: none;
+  color: rgba(0,0,0,0.9);
+  font-size: 0.85rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 30;
+}
+
+.activity-delete-button:hover {
+  background: rgba(185, 28, 28, 0.12);
+  color: #b91c1c;
+}
+
+.activity-card-title {
+  font-size: 0.78rem;
+  line-height: 1.2;
+  text-align: left;
+  margin: 0;
+}
+
+.activity-card-professor,
+.activity-card-time,
+.activity-card-footer,
+.activity-card-classroom,
+.activity-card-nrc {
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.activity-card-footer {
+  margin-top: 6px;
+  gap: 4px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .hourHeaderCell,
+  .hourCell {
+    flex: 0 0 4rem;
+    font-size: 0.7rem;
+  }
+
+  .dayHeaderCell {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hourHeaderCell,
+  .hourCell {
+    flex: 0 0 3.5rem;
+    font-size: 0.65rem;
+  }
+
+  .dayHeaderCell {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.2rem;
+  }
+
+  .hourRow {
+    min-height: 3.5rem;
+  }
+
+  .dayCell {
+    flex: 0 0 3.5rem;
+  }
+}
+

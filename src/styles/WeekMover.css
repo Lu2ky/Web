@@ -1,0 +1,44 @@
+.navigatorContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: fit-content;
+    min-width: 280px;
+
+    background-color: #f4f4f4;
+    border-radius: 999px;
+    /* efecto píldora */
+    padding: 0.4rem;
+
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Botones de flechas */
+.dateBoxArrowBox {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.dateBoxArrowBox:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.dateBoxArrowBox:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+}
+
+/* Texto del rango */
+.dateBoxCenterBox {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #222;
+    padding: 0 1rem;
+    white-space: nowrap;
+}

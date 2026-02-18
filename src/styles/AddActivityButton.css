@@ -1,0 +1,191 @@
+/* Botón principal con borde degradado */
+.addButton {
+    padding: 0.7rem 1.2rem;
+    font-weight: 600;
+    color: #000;
+    border: 2px solid transparent;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    background-image:
+        linear-gradient(white, white),
+        linear-gradient(135deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    transition: all 0.25s ease;
+}
+
+.addButton:hover {
+    color: white;
+    background-image: linear-gradient(135deg, #ff006e, #c026d3);
+    box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Overlay más suave */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.25s ease;
+    z-index: 200;
+}
+
+/* Contenedor con borde degradado */
+.modalContainer {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    padding: 2.2rem;
+    border-radius: 1.2rem;
+    background: white;
+
+    border: 2px solid transparent;
+    background-image:
+        linear-gradient(white, white),
+        linear-gradient(135deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    animation: slideUp 0.3s ease;
+}
+
+/* Header del modal */
+.modalContainer h2 {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Botón cerrar */
+.modalClose {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.modalClose:hover {
+    color: #ff006e;
+}
+
+/* Inputs más suaves */
+.modalContainer input,
+.modalContainer textarea,
+.modalContainer select {
+    padding: 0.75rem;
+    border-radius: 0.7rem;
+    border: 1px solid #e5e7eb;
+    font-size: 0.9rem;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+}
+
+.modalContainer input:focus,
+.modalContainer textarea:focus,
+.modalContainer select:focus {
+    background-color: white;
+    border-color: #c026d3;
+    box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.15);
+    outline: none;
+}
+
+.modalContainer textarea {
+    resize: none;
+    height: 90px;
+}
+
+/* Preview de horas */
+.hourPreview {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: -0.5rem;
+}
+
+/* Mensajes de error */
+.errorMessage {
+    color: #ff006e;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* Acciones del modal */
+.modalActions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Botón cancelar */
+.cancelButton {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 0.8rem;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+    background: #f3f4f6;
+}
+
+/* Botón guardar */
+.saveButton {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 0.8rem;
+    border: none;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.saveButton:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

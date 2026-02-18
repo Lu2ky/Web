@@ -1,0 +1,157 @@
+.dayViewContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Selector de día */
+.daySelector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-bottom: 2px solid transparent;
+    border-image: linear-gradient(135deg, #ff006e, #c026d3) 1;
+}
+
+.daySelectorArrow {
+    padding: 0.5rem 0.8rem;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    border: none;
+    border-radius: 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(192, 38, 211, 0.2);
+}
+
+.daySelectorArrow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(192, 38, 211, 0.35);
+}
+
+.daySelectorArrow:active {
+    transform: translateY(0);
+}
+
+.daySelectorText {
+    flex: 1;
+    text-align: center;
+}
+
+.daySelectorDate {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    text-transform: capitalize;
+}
+
+
+/* Titulos */
+.calendarHeader {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
+.hoursColumnHeader,
+.activitiesColumnHeader {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.hoursColumnHeader {
+    border-right: 1px solid #e5e7eb;
+    color: #6b7280;
+}
+
+
+/* Calendario  */
+.calendarBody {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.calendarBody::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* Capa de eventos posicionados */
+.eventsLayer-day {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.eventsLayer-day > * {
+    pointer-events: auto;
+    z-index: 20;
+    position: absolute;
+}
+
+.hourRow {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    min-height: 4rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.hourCell {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    align-items: flex-start;
+}
+
+.dayCell-day {
+    position: relative;
+    min-height: 4rem;
+}
+
+
+/* Animaciones */
+.hourRow:hover .dayCell-day {
+    background-color: #f9fafb;
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+
+    .calendarHeader,
+    .hourRow {
+        grid-template-columns: 4rem 1fr;
+    }
+
+    .hourCell {
+        font-size: 0.65rem;
+    }
+
+    .eventsLayer-day {
+        left: 4rem;
+    }
+}

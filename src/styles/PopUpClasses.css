@@ -1,0 +1,485 @@
+/* Overlay del popup */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Contenedor del popup con borde degradado */
+.popup-container {
+  background-color: #ffffff;
+  border-radius: 1.2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header del popup */
+.popup-header {
+  background: linear-gradient(135deg, #ff006e, #c026d3);
+  border-radius: 1.0rem 1.0rem 0 0;
+  padding: 20px 24px;
+  color: white;
+  border-bottom: none;
+  flex-shrink: 0;
+}
+
+.popup-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Contenido del popup */
+.popup-content {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Encabezado de la asignatura */
+.subject-header {
+  margin-bottom: 28px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 16px;
+}
+
+.subject-name {
+  margin: 0 0 12px 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.subject-meta {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.subject-code,
+.subject-date {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.subject-date {
+  background-color: #f5f5f5;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+/* Secciones de información */
+.info-section {
+  margin-bottom: 28px;
+}
+
+.section-title {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-transform: none;
+}
+
+/* Grid de información general */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background-color: #f9fafb;
+  border-radius: 0.7rem;
+  border-left: 4px solid #ff006e;
+  transition: all 0.2s ease;
+}
+
+.info-item:hover {
+  background-color: #fff5f9;
+  border-left-color: #c026d3;
+}
+
+.info-icon {
+  font-size: 20px;
+  min-width: 24px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.info-text {
+  flex: 1;
+}
+
+.info-label {
+  margin: 0;
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.info-value {
+  margin: 4px 0 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* Lista de horarios */
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.schedule-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 0.7rem;
+  border-left: 5px solid #ff006e;
+  transition: all 0.2s ease;
+}
+
+.schedule-item:hover {
+  background-color: #fff5f9;
+  border-left-color: #c026d3;
+}
+
+.schedule-day-badge {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #ff006e, #c026d3);
+  color: white;
+  border-radius: 0.7rem;
+  padding: 12px 16px;
+  min-width: 80px;
+  text-align: center;
+  gap: 4px;
+}
+
+.schedule-day {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.schedule-type {
+  font-size: 10px;
+  background-color: rgba(255, 255, 255, 0.25);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.schedule-details {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  align-items: center;
+}
+
+.schedule-detail {
+  flex: 1;
+}
+
+.detail-label {
+  display: block;
+  font-size: 10px;
+  color: #999;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* Footer del popup */
+.popup-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: center;
+}
+
+.close-button {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 12px 32px;
+  border-radius: 0.8rem;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.close-button:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  color: #333;
+}
+
+.close-button:active {
+  transform: scale(0.98);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .popup-container {
+    border-radius: 16px;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .popup-content {
+    padding: 16px;
+  }
+
+  .subject-name {
+    font-size: 24px;
+  }
+
+  .subject-meta {
+    gap: 16px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-item {
+    flex-direction: column;
+  }
+
+  .schedule-details {
+    width: 100%;
+    gap: 16px;
+  }
+}
+
+/* Scrollbar personalizado */
+.popup-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.popup-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.popup-container::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 10px;
+}
+
+.popup-container::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Estilos para la sección de comentarios */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.comment-item {
+  padding: 12px;
+  background-color: #f9fafb;
+  border-left: 4px solid #ff006e;
+  border-radius: 6px;
+  word-break: break-word;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-timestamp {
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+}
+
+.delete-comment-button {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.delete-comment-button:hover {
+  color: #ff006e;
+  background-color: #fff5f9;
+}
+
+.delete-comment-button:active {
+  transform: scale(0.95);
+}
+
+.comment-text {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 20px 12px;
+  color: #999;
+  font-size: 13px;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Estilos personalizados para CommentButton dentro del popup */
+.info-section .add-comment-container {
+  margin-bottom: 16px;
+}
+
+.add-comment-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #ff006e, #c026d3);
+  color: white;
+  border: none;
+  border-radius: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.add-comment-button:hover {
+  box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
+  transform: translateY(-2px);
+}
+
+.add-comment-textarea:focus {
+  outline: none;
+  border-color: #ff006e;
+  box-shadow: 0 0 0 2px rgba(255, 0, 110, 0.1);
+}
+
+.add-comment-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.add-comment-action-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-comment-action-button.save {
+  background: linear-gradient(135deg, #ff006e, #c026d3);
+  color: white;
+}
+
+.add-comment-action-button.save:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(192, 38, 211, 0.3);
+  transform: translateY(-1px);
+}
+
+.add-comment-action-button.save:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.add-comment-action-button.cancel {
+  background-color: #f9fafb;
+  color: #666;
+  border: 1px solid #e5e7eb;
+}
+
+.add-comment-action-button.cancel:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+@media (max-width: 600px) {
+  .add-comment-button {
+    font-size: 12px;
+  }
+
+  .add-comment-textarea {
+    font-size: 12px;
+  }
+}
