@@ -12,7 +12,7 @@ import {PopUpClasses} from "./components/PopUpClasses";
 import {getAllActivities} from "./services/personalActivitiesService";
 // Prueba de test CI/CD
 // Paleta de colores
-//otro test
+//otro test, este es el bueno
 const colorPalette = [
 	"#FF6B6B",
 	"#4ECDC4",
