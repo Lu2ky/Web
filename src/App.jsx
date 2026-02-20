@@ -1,14 +1,14 @@
 import "./styles/App.css";
 import {useState, useEffect} from "react";
 import {useCallback} from "react";
-import ApiFetcher from "./components/ApiFetcher";
-import IdInput from "./components/IdInput";
-import Header from "./components/01-Header";
-import ControlBar from "./components/02-ControlBar";
-import Calendar from "./components/03-Calendar";
+import ApiFetcher from "./services/OficialFetcher";
+import IdInput from "./components/LogIn/IdInput";
+import Header from "./components/Navegation/Header";
+import ControlBar from "./components/ControlBar/ControlBar";
+import Calendar from "./components/Calendar/Calendar";
 import {deleteActivity} from "./services/personalActivitiesService";
-import ToDoList from "./components/04-ToDoList";
-import {PopUpClasses} from "./components/PopUpClasses";
+import ToDoList from "./components/TodoList/ToDoList";
+import {PopUpClasses} from "./components/Calendar/PopUpClasses";
 import {getAllActivities} from "./services/personalActivitiesService";
 // Prueba de test CI/CD
 // Paleta de colores
@@ -43,8 +43,10 @@ function getColorForSubject(subjectName) {
 	return colorPalette[Math.abs(hash) % colorPalette.length];
 }
 
+// Transforma los datos de la API al formato que usa la app
 function normalizeApiData(apiData) {
 	const dayMap = {
+		// de número a día de la semana
 		1: "Lunes",
 		2: "Martes",
 		3: "Miércoles",
@@ -63,12 +65,12 @@ function normalizeApiData(apiData) {
 		start_time: item.times[0].slice(0, 5),
 		end_time: item.times[1].slice(0, 5),
 		day: dayMap[item.times[2]] || "Lunes",
-		etiqueta: item.Tag,
+		etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
 		// Datos para PopUp
 		campus: item.Campus,
 		credits: item.Credits?.Float64 || 0,
 		academicPeriod: item.academicPeriod,
-		tag: item.Tag,
+		tagColour: item.tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 		// Color asignado por materia
 		color: getColorForSubject(item.subject_name),
 		// Datos originales
@@ -77,20 +79,20 @@ function normalizeApiData(apiData) {
 }
 
 function App() {
-	const [viewMode, setViewMode] = useState("Semanal");
-	const [classEvents, setClassEvents] = useState([]);
-	const [personalEvents, setPersonalEvents] = useState([]);
-	const [showClassPopup, setShowClassPopup] = useState(false);
-	const [selectedClass, setSelectedClass] = useState(null);
-	const [userId, setUserId] = useState("");
-	const [submittedId, setSubmittedId] = useState("");
+	const [viewMode, setViewMode] = useState("Semanal"); // "Semanal" o "Diario"
+	const [classEvents, setClassEvents] = useState([]); // Eventos de clases oficiales
+	const [personalEvents, setPersonalEvents] = useState([]); // Eventos personales (actividades guardadas)
+	const [showClassPopup, setShowClassPopup] = useState(false); // Para mostrar/ocultar el popup de detalles de clase
+	const [selectedClass, setSelectedClass] = useState(null); // Datos de la clase seleccionada para el popup
+	const [userId, setUserId] = useState(""); // ID ingresado por el usuario para cargar su horario
+	const [submittedId, setSubmittedId] = useState(""); // ID que se ha enviado para cargar datos (se actualiza al enviar el formulario)
 
-	// Cargar actividades personales al montar
+	// Cargar actividades personales desde localStorage al iniciar la app
 	useEffect(() => {
 		const personalActivities = getAllActivities();
 		setPersonalEvents(personalActivities);
 	}, []);
-
+	// Los datos de la API se cargan a través del componente ApiFetcher, que llama a handleDataLoaded cuando los datos están listos
 	const handleDataLoaded = useCallback(data => {
 		const normalized = normalizeApiData(data);
 		setClassEvents(normalized);
@@ -121,18 +123,18 @@ function App() {
 		setSelectedClass(classData);
 		setShowClassPopup(true);
 	};
-
+	// Cierra el popup de detalles de clase y limpia la clase seleccionada
 	const handleClosePopup = () => {
 		setShowClassPopup(false);
 		setSelectedClass(null);
 	};
 
 	const handleActivitySaved = () => {
-		// Recargar actividades personales del localStorage
+		// Recargar actividades personales despues de guardar una nueva actividad
 		const personalActivities = getAllActivities();
 		setPersonalEvents(personalActivities);
 	};
-
+	// Elomona actividad personal, recarga la lista de actividades personales para actualizar la vista
 	const handleDeletePersonal = id => {
 		deleteActivity(id);
 		const personalActivities = getAllActivities();
@@ -140,40 +142,46 @@ function App() {
 	};
 
 	return (
-		<div className="App">
-			<Header />
-			<IdInput
-				userId={userId}
-				setUserId={setUserId}
-				onSubmit={setSubmittedId}
-			/>
-			<ControlBar
-				viewMode={viewMode}
-				setViewMode={setViewMode}
-				onActivitySaved={handleActivitySaved}
-			/>
-			<div className="mainContent">
-				<div className="ToDoSection">
-					<ToDoList />
-				</div>
-				<div className="CalendarSection">
-					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
-					<Calendar
+		<div className="container">
+			<div className="Card">
+				<div className="App">
+					<Header />
+					<IdInput
+						userId={userId}
+						setUserId={setUserId}
+						onSubmit={setSubmittedId}
+					/>
+					<ControlBar
 						viewMode={viewMode}
-						events={classEvents}
-						personalEvents={personalEvents}
-						onClassClick={handleClassClick}
-						onDeletePersonal={handleDeletePersonal}
+						setViewMode={setViewMode}
+						onActivitySaved={handleActivitySaved}
+					/>
+					<div className="mainContent">
+						<div className="ToDoSection">
+							<ToDoList />
+						</div>
+						<div className="CalendarSection">
+							<ApiFetcher
+								onDataLoaded={handleDataLoaded}
+								userId={submittedId}
+							/>
+							<Calendar
+								viewMode={viewMode}
+								events={classEvents}
+								personalEvents={personalEvents}
+								onClassClick={handleClassClick}
+								onDeletePersonal={handleDeletePersonal}
+							/>
+						</div>
+					</div>
+					{/* Popup para detalles de clases */}
+					<PopUpClasses
+						isOpen={showClassPopup}
+						onClose={handleClosePopup}
+						classData={selectedClass}
 					/>
 				</div>
 			</div>
-
-			{/* Popup para detalles de clases */}
-			<PopUpClasses
-				isOpen={showClassPopup}
-				onClose={handleClosePopup}
-				classData={selectedClass}
-			/>
 		</div>
 	);
 }

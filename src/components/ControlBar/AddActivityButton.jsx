@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import "../styles/AddActivityButton.css";
-import { saveActivity } from "../services/personalActivitiesService";
+import "../../styles/AddActivityButton.css";
+import { saveActivity } from "../../services/personalActivitiesService";
 
 function AddActivityButton({ onActivitySaved }) {
     const [isOpen, setIsOpen] = useState(false);

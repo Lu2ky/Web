@@ -1,5 +1,7 @@
 import { useState } from "react";
-import "../styles/ToDoList.css";
+import "../../styles/ToDoList.css";
+import EditButton from "./EditButton";
+import ToDoFilterButton from "./ToDoFilterButton";
 
 const initialTasks = [
     {
@@ -59,17 +61,21 @@ function ToDoList() {
         setTasks((prev) => prev.filter((task) => task.id !== id));
     };
 
+    const editTask = (id) => {
+        // Placeholder: abrir modal o formulario de edición.
+        // Actualmente solo hace log para integrarlo visualmente.
+        console.log('Edit task', id);
+    };
+
     return (
         <div className="todolist-panel">
             <div className="todolist-header">
                 <h2 className="todolist-title">To-Do List</h2>
-                <button className="todolist-add-btn" title="Add task">+</button>
+                <div className="todolist-header-actions">
+                    <ToDoFilterButton onClick={() => console.log('Filters clicked')} />
+                    <button className="todolist-add-btn" title="Add task">+</button>
+                </div>
             </div>
-
-            <button className="todolist-filters-btn">
-                <span className="todolist-filters-icon">🔽</span>
-                Filters
-            </button>
 
             <div className="todolist-section-label">
                 TASKS <span className="todolist-task-count">({tasks.length})</span>
@@ -88,10 +94,13 @@ function ToDoList() {
                                 aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
                             />
                             <span className="todolist-task-name">{task.name}</span>
+                                                        <EditButton onClick={() => editTask(task.id)} />
+
                             <button
                                 className="todolist-task-delete"
                                 onClick={() => deleteTask(task.id)}
                                 aria-label="Delete task"
+                                title="Eliminar"
                             >
                                 ×
                             </button>
