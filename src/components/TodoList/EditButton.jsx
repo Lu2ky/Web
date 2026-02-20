@@ -25,15 +25,15 @@ export default function EditButton({
 				<path
 					d="M7 42H41"
 					stroke="#333333"
-					stroke-width="4"
-					stroke-linecap="round"
-					stroke-linejoin="round"
+					strokeWidth="4"
+					strokeLinecap="round"
+					strokeLinejoin="round"
 				/>
 				<path
 					d="M11 26.7199V34H18.3172L39 13.3081L31.6919 6L11 26.7199Z"
 					stroke="#333333"
-					stroke-width="4"
-					stroke-linejoin="round"
+					strokeWidth="4"
+					strokeLinejoin="round"
 				/>
 			</svg>
 		</button>
