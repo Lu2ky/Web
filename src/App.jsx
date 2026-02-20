@@ -64,7 +64,6 @@ function normalizeApiData(apiData) {
 		start_time: item.times[0].slice(0, 5),
 		end_time: item.times[1].slice(0, 5),
 		day: dayMap[item.times[2]] || "Lunes",
-		tag: item.Tag,
 		// Datos para PopUp
 		campus: item.Campus,
 		credits: item.Credits?.Float64 || 0,
