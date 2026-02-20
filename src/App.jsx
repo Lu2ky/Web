@@ -3,12 +3,12 @@ import {useState, useEffect} from "react";
 import {useCallback} from "react";
 import ApiFetcher from "./services/ApiFetcher";
 import IdInput from "./components/IdInput";
-import Header from "./components/Navegación/Header";
+import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/03-Calendar";
 import {deleteActivity} from "./services/personalActivitiesService";
 import ToDoList from "./components/TodoList/04-ToDoList";
-import {PopUpClasses} from "./components/PopUpClasses";
+import {PopUpClasses} from "./components/Calendar/PopUpClasses";
 import {getAllActivities} from "./services/personalActivitiesService";
 // Prueba de test CI/CD
 // Paleta de colores

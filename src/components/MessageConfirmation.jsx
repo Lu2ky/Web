@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/confirmacionMessage.css';
 
-export default function ConfirmacionMessage({ 
+export default function MessageConfirmation({ 
     isOpen, 
     onClose, 
     onConfirm,

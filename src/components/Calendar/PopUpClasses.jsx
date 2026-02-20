@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CommentButton } from "./CommentButton";
+import { CommentButton } from "../CommentButton";
 import "../styles/PopUpClasses.css";
 
 export const PopUpClasses = ({
