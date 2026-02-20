@@ -1,20 +1,6 @@
 // servicio para guardar y recuperar actividades personales en localStorage
 
 const STORAGE_KEY = "personalActivities";
-const colorPalette = [
-  "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7",
-  "#DFE6E9", "#74B9FF", "#A29BFE", "#FD79A8", "#FDCB6E",
-  "#6C5CE7", "#00B894", "#FF7675", "#55EFC4", "#81ECEC",
-  "#FAB1A0", "#E17055", "#00CEC9",
-];
-
-function getColorForSubject(subjectName) {
-  let hash = 0;
-  for (let i = 0; i < subjectName.length; i++) {
-    hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colorPalette[Math.abs(hash) % colorPalette.length];
-}
 
 export function saveActivity(formData) {
   const activities = getAllActivities();
@@ -29,7 +15,6 @@ export function saveActivity(formData) {
     start_time: formData.startHour,
     end_time: formData.endHour,
     day: formData.day,
-    color: getColorForSubject(formData.title),
     tag: "Personal",
     credits: 0,
     campus: "Personal",
