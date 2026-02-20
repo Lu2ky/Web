@@ -140,40 +140,44 @@ function App() {
 	};
 
 	return (
-		<div className="App">
-			<Header />
-			<IdInput
-				userId={userId}
-				setUserId={setUserId}
-				onSubmit={setSubmittedId}
-			/>
-			<ControlBar
-				viewMode={viewMode}
-				setViewMode={setViewMode}
-				onActivitySaved={handleActivitySaved}
-			/>
-			<div className="mainContent">
-				<div className="ToDoSection">
-					<ToDoList />
-				</div>
-				<div className="CalendarSection">
-					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
-					<Calendar
+		<div className="container">
+			<div className="Card">
+				<div className="App">
+					<Header />
+					<IdInput
+						userId={userId}
+						setUserId={setUserId}
+						onSubmit={setSubmittedId}
+					/>
+					<ControlBar
 						viewMode={viewMode}
-						events={classEvents}
-						personalEvents={personalEvents}
-						onClassClick={handleClassClick}
-						onDeletePersonal={handleDeletePersonal}
+						setViewMode={setViewMode}
+						onActivitySaved={handleActivitySaved}
+					/>
+					<div className="mainContent">
+						<div className="ToDoSection">
+							<ToDoList />
+						</div>
+						<div className="CalendarSection">
+							<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
+							<Calendar
+								viewMode={viewMode}
+								events={classEvents}
+								personalEvents={personalEvents}
+								onClassClick={handleClassClick}
+								onDeletePersonal={handleDeletePersonal}
+							/>
+						</div>
+					</div>
+
+					{/* Popup para detalles de clases */}
+					<PopUpClasses
+						isOpen={showClassPopup}
+						onClose={handleClosePopup}
+						classData={selectedClass}
 					/>
 				</div>
 			</div>
-
-			{/* Popup para detalles de clases */}
-			<PopUpClasses
-				isOpen={showClassPopup}
-				onClose={handleClosePopup}
-				classData={selectedClass}
-			/>
 		</div>
 	);
 }

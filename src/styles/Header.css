@@ -22,9 +22,9 @@ header img {
 /* Titulo */
 
 header h1 {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin: 0;
     font-size: 2rem;
     font-weight: 600;
