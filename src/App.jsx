@@ -45,7 +45,8 @@ function getColorForSubject(subjectName) {
 
 // Transforma los datos de la API al formato que usa la app
 function normalizeApiData(apiData) {
-	const dayMap = { // de número a día de la semana
+	const dayMap = {
+		// de número a día de la semana
 		1: "Lunes",
 		2: "Martes",
 		3: "Miércoles",
@@ -64,14 +65,14 @@ function normalizeApiData(apiData) {
 		start_time: item.times[0].slice(0, 5),
 		end_time: item.times[1].slice(0, 5),
 		day: dayMap[item.times[2]] || "Lunes",
-		tag: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
+		etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
 		// Datos para PopUp
 		campus: item.Campus,
 		credits: item.Credits?.Float64 || 0,
 		academicPeriod: item.academicPeriod,
-		tagColour: item.Tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
+		tagColour: item.tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 		// Color asignado por materia
-		color: getColorForSubject(item.subjectName),
+		color: getColorForSubject(item.subject_name),
 		// Datos originales
 		apiData: item
 	}));
@@ -160,7 +161,10 @@ function App() {
 							<ToDoList />
 						</div>
 						<div className="CalendarSection">
-							<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
+							<ApiFetcher
+								onDataLoaded={handleDataLoaded}
+								userId={submittedId}
+							/>
 							<Calendar
 								viewMode={viewMode}
 								events={classEvents}
