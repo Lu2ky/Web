@@ -2,30 +2,6 @@ import { useState } from "react";
 import "../../styles/ThemeSelector.css";
 
 // Temas disponibles, por Id, nombre y paleta según etiqueta de la materia (o tema)
-const THEME_OPTIONS = [
-  {
-    id: "Nombre",
-    name: "Nombre",
-    palette: {
-      "Teoría": "",
-      "Laboratorio": "",
-      "Cultural": "",
-      "Teoría": "",
-      "Teoría": "",
-      "Teoría": "",
-      "Teoría": "",
-    }
-  }
-
-]
-
-
-
-
-
-
-
-
 
 // Componente selector de temas
 export const ThemeSelector = ({ on_theme_change }) => {
