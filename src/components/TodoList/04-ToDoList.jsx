@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../styles/ToDoList.css";
 import EditButton from "../EditButton";
-import ToDoFilterButton from "../ToDoFilterButton";
+import ToDoFilterButton from "./ToDoFilterButton";
 
 const initialTasks = [
     {
