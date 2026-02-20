@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaFilter } from "react-icons/fa";
-import "../styles/ToDoFilterButton.css";
+import "../../styles/ToDoFilterButton.css";
 
 export default function ToDoFilterButton({ onClick }) {
     return (

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import "../styles/ControlBar.css";
+import "../../styles/ControlBar.css";
 import WeekMover from "./WeekMover";
 import ViewButton from "./ViewButton";
-import AddButton from "../02.3-AddActivityButton";
-import FilterButton from "../02.4-FilterButton";
+import AddButton from "./AddActivityButton";
+import FilterButton from "./FilterButton";
 import ThemeSelect from "./ThemeSelector";
 
 function ControlBar({viewMode, setViewMode, onActivitySaved}) {

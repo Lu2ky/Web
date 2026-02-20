@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "../styles/DayView.css";
+import "../../styles/DayView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
 
