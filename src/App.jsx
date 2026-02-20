@@ -64,11 +64,12 @@ function normalizeApiData(apiData) {
 		start_time: item.times[0].slice(0, 5),
 		end_time: item.times[1].slice(0, 5),
 		day: dayMap[item.times[2]] || "Lunes",
+		tag: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
 		// Datos para PopUp
 		campus: item.Campus,
 		credits: item.Credits?.Float64 || 0,
 		academicPeriod: item.academicPeriod,
-		tag: item.Tag,
+		tagColour: item.Tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 		// Color asignado por materia
 		color: getColorForSubject(item.tag),
 		// Datos originales
