@@ -2,7 +2,7 @@ import "./styles/App.css";
 import {useState, useEffect} from "react";
 import {useCallback} from "react";
 import ApiFetcher from "./services/ApiFetcher";
-import IdInput from "./components/IdInput";
+import IdInput from "./components/LogIn/IdInput";
 import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/03-Calendar";
