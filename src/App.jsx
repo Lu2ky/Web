@@ -71,7 +71,7 @@ function normalizeApiData(apiData) {
 		academicPeriod: item.academicPeriod,
 		tagColour: item.Tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 		// Color asignado por materia
-		color: getColorForSubject(item.tag),
+		color: getColorForSubject(item.subjectName),
 		// Datos originales
 		apiData: item
 	}));
