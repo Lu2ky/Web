@@ -5,7 +5,7 @@ import ApiFetcher from "./services/ApiFetcher";
 import IdInput from "./components/LogIn/IdInput";
 import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
-import Calendar from "./components/Calendar/03-Calendar";
+import Calendar from "./components/Calendar/Calendar";
 import {deleteActivity} from "./services/personalActivitiesService";
 import ToDoList from "./components/TodoList/04-ToDoList";
 import {PopUpClasses} from "./components/Calendar/PopUpClasses";

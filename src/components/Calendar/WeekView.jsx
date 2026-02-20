@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../styles/WeekView.css";
-import { BlockClasses } from "./03.3-BlockClasses";
-import { BlockPersonal } from "./03.4-BlockPersonal";
+import { BlockClasses } from "./BlockClasses";
+import { BlockPersonal } from "./BlockPersonal";
 
 function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, onDeletePersonal = () => {} }) {
   const hours = Array.from({ length: 24 }, (_, i) => i);
