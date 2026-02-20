@@ -1,13 +1,13 @@
 import "./styles/App.css";
 import {useState, useEffect} from "react";
 import {useCallback} from "react";
-import ApiFetcher from "./components/ApiFetcher";
+import ApiFetcher from "./services/ApiFetcher";
 import IdInput from "./components/IdInput";
-import Header from "./components/01-Header";
-import ControlBar from "./components/02-ControlBar";
-import Calendar from "./components/03-Calendar";
+import Header from "./components/Navegación/Header";
+import ControlBar from "./components/ControlBar/ControlBar";
+import Calendar from "./components/Calendar/03-Calendar";
 import {deleteActivity} from "./services/personalActivitiesService";
-import ToDoList from "./components/04-ToDoList";
+import ToDoList from "./components/TodoList/04-ToDoList";
 import {PopUpClasses} from "./components/PopUpClasses";
 import {getAllActivities} from "./services/personalActivitiesService";
 // Prueba de test CI/CD

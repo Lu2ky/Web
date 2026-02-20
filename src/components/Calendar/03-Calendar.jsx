@@ -1,5 +1,5 @@
 
-import WeekView from "./03.1-WeekView";
+import WeekView from "../03.1-WeekView";
 import DayView from "./03.2-DayView";
 
 // se recibe la vista seleccionada, los eventos de clase y personales

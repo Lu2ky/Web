@@ -1,10 +1,10 @@
 import { useState } from "react";
 import "../styles/ControlBar.css";
-import WeekMover from "./02.1-WeekMover";
-import ViewButton from "./02.2-ViewButton";
-import AddButton from "./02.3-AddActivityButton";
-import FilterButton from "./02.4-FilterButton";
-import ThemeSelect from "./02.5-ThemeSelector";
+import WeekMover from "./WeekMover";
+import ViewButton from "./ViewButton";
+import AddButton from "../02.3-AddActivityButton";
+import FilterButton from "../02.4-FilterButton";
+import ThemeSelect from "./ThemeSelector";
 
 function ControlBar({viewMode, setViewMode, onActivitySaved}) {
     const [selectedTag, setSelectedTag] = useState("Todo");
