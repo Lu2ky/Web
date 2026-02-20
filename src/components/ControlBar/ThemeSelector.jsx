@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../styles/ThemeSelector.css";
+import "../../styles/ThemeSelector.css";
 
 // Temas disponibles, por Id, nombre y paleta según etiqueta de la materia (o tema)
 const THEME_OPTIONS = [
