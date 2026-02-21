@@ -79,7 +79,10 @@ function normalizeApiData(apiData) {
 }
 
 function App() {
-	const [viewMode, setViewMode] = useState("Semanal"); // "Semanal" o "Diario"
+	const getInitialView = () => {
+		return window.innerWidth <= 425 ? "Diario" : "Semanal"; // Vista inicial basada en el ancho de la pantalla (mobile chiquito vs desktop)
+	};
+	const [viewMode, setViewMode] = useState(getInitialView()); // "Semanal" o "Diario"
 	const [classEvents, setClassEvents] = useState([]); // Eventos de clases oficiales
 	const [personalEvents, setPersonalEvents] = useState([]); // Eventos personales (actividades guardadas)
 	const [showClassPopup, setShowClassPopup] = useState(false); // Para mostrar/ocultar el popup de detalles de clase
@@ -142,17 +145,27 @@ function App() {
 	};
 
 	return (
-		<div className="container">
-			<div className="Card">
-				<div className="App">
-					<Header />
-					<IdInput
-						userId={userId}
-						setUserId={setUserId}
-						onSubmit={setSubmittedId}
-					/>
-					<ControlBar
+		<div className="App">
+			<Header />
+			<IdInput
+				userId={userId}
+				setUserId={setUserId}
+				onSubmit={setSubmittedId}
+			/>
+			<ControlBar
+				viewMode={viewMode}
+				setViewMode={setViewMode}
+				onActivitySaved={handleActivitySaved}
+			/>
+			<div className="mainContent">
+				<div className="ToDoSection">
+					<ToDoList />
+				</div>
+				<div className="CalendarSection">
+					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
+					<Calendar
 						viewMode={viewMode}
+<<<<<<< Updated upstream
 						setViewMode={setViewMode}
 						onActivitySaved={handleActivitySaved}
 					/>
@@ -179,9 +192,21 @@ function App() {
 						isOpen={showClassPopup}
 						onClose={handleClosePopup}
 						classData={selectedClass}
+=======
+						events={classEvents}
+						personalEvents={personalEvents}
+						onClassClick={handleClassClick}
+						onDeletePersonal={handleDeletePersonal}
+>>>>>>> Stashed changes
 					/>
 				</div>
 			</div>
+			{/* Popup para detalles de clases */}
+			<PopUpClasses
+				isOpen={showClassPopup}
+				onClose={handleClosePopup}
+				classData={selectedClass}
+			/>
 		</div>
 	);
 }

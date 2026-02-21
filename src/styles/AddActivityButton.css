@@ -189,3 +189,24 @@
         opacity: 1;
     }
 }
+
+/* Responsive  para celulares */
+@media (max-width: 768px) {
+    .addButton {
+        font-size: 0;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: 25%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .addButton::before {
+        content: "+";
+        font-size: 1.5rem;
+        color: rgb(0, 0, 0);
+    }
+
+}
