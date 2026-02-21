@@ -24,7 +24,9 @@ function ApiFetcher({onDataLoaded, userId}) {
 			try {
 				const response = await fetch(
 					// Hace la peticipin a la API con el ID del usuario
-					`http://209.25.140.20:3380/api/official-schedule/${userId}`
+					`Vistas que permiten insertar registros
+Es una declaración que lee filas de un archivo de texto para insertarlas a una tabla a una alta velocidad. El archivo puede ser leído de un server host o del client host, dependiendo si se estable local o no, esto afecta la interpretación de los datos y manejo de errores. Este comando es un complemento del SELECT --- INTO OUTFILE, que permite escribir datos de una tabla a un texto. Para hacer el proceso inverso, es decir, leer el archivo por escribir o insertar en una tabla se usa el LOAD DATA. Es más eficiente que la inserción de datos por el método tradicional de INSERT.
+`
 				);
 				const json = await response.json(); // Convierte respuesta en un json
 
