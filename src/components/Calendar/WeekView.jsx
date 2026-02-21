@@ -95,7 +95,7 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
                     },
                     start_time: event.start_time,
                     end_time: event.end_time,
-                    background_color: event.color || "#c4bebe",
+                    background_color: event.color || "#a54545",
                   };
 
                   return isClass ? (
