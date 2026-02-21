@@ -24,7 +24,7 @@ function ApiFetcher({ onDataLoaded, userId }) {
       try {
         const response = await fetch(
           // Hace la peticipin a la API con el ID del usuario
-          `http://209.25.140.20:28043/api/official-schedule/${userId}`,
+          `http://209.25.140.20:3380/api/official-schedule/${userId}`,
         );
         const json = await response.json(); // Convierte respuesta en un json
 
