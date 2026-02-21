@@ -1,15 +1,15 @@
 import "./styles/App.css";
-import {useState, useEffect} from "react";
-import {useCallback} from "react";
+import { useState, useEffect } from "react";
+import { useCallback } from "react";
 import ApiFetcher from "./services/OficialFetcher";
 import IdInput from "./components/LogIn/IdInput";
 import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
-import {deleteActivity} from "./services/personalActivitiesService";
+import { deleteActivity } from "./services/personalActivitiesService";
 import ToDoList from "./components/TodoList/ToDoList";
-import {PopUpClasses} from "./components/Calendar/PopUpClasses";
-import {getAllActivities} from "./services/personalActivitiesService";
+import { PopUpClasses } from "./components/Calendar/PopUpClasses";
+import { getAllActivities } from "./services/personalActivitiesService";
 // Prueba de test CI/CD
 // Transforma los datos de la API al formato que usa la app
 function normalizeApiData(apiData) {
@@ -131,39 +131,16 @@ function App() {
 					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
 					<Calendar
 						viewMode={viewMode}
-<<<<<<< Updated upstream
-						setViewMode={setViewMode}
-						onActivitySaved={handleActivitySaved}
+						events={classEvents}
+						personalEvents={personalEvents}
+						onClassClick={handleClassClick}
+						onDeletePersonal={handleDeletePersonal}
 					/>
-					<div className="mainContent">
-						<div className="ToDoSection">
-							<ToDoList />
-						</div>
-						<div className="CalendarSection">
-							<ApiFetcher
-								onDataLoaded={handleDataLoaded}
-								userId={submittedId}
-							/>
-							<Calendar
-								viewMode={viewMode}
-								events={classEvents}
-								personalEvents={personalEvents}
-								onClassClick={handleClassClick}
-								onDeletePersonal={handleDeletePersonal}
-							/>
-						</div>
-					</div>
 					{/* Popup para detalles de clases */}
 					<PopUpClasses
 						isOpen={showClassPopup}
 						onClose={handleClosePopup}
 						classData={selectedClass}
-=======
-						events={classEvents}
-						personalEvents={personalEvents}
-						onClassClick={handleClassClick}
-						onDeletePersonal={handleDeletePersonal}
->>>>>>> Stashed changes
 					/>
 				</div>
 			</div>
