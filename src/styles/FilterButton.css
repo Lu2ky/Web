@@ -115,3 +115,31 @@
         transform: translateY(0);
     }
 }
+
+/*RESPONSIVE EN MOBILE*/
+@media (max-width: 768px) {
+    .filterButton > * {
+        display: none;
+    }
+    .filterButton {
+        font-size: 0;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: 25%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .filterButton::before {
+        content: "\1F50D";
+        font-size: 1.5rem;
+        color: rgb(0, 0, 0);
+        line-height:1;
+        display: flex; /*ESO DEL TRANSFORM ES PQ NO SE QUERIA CENTRAR */
+        align-items: center;
+        justify-content: center;
+        transform: translateX(4.5px);
+    }
+}

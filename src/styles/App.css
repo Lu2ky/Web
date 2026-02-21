@@ -1,5 +1,11 @@
+/**, *::before,
+ *::after {
+    box-sizing: border-box;
+}
+* {                                     Esto es para ver un outline y ver q componentes se andan saliendo y eso
+  outline: 1px solid red;
+}                                           A TODO LO DE ABAJO LE SAQUE EL OVERFLOW HIDDEN PQ DAÑABA EL RESPONSIVE*/
 #root {
-    width: 100%;
     min-height: 100vh;
     margin: 0;
     padding: 0;
@@ -8,9 +14,8 @@
 .App {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
     width: 100%;
-    overflow: hidden;
 }
 
 header {
@@ -23,17 +28,15 @@ header {
     background: white;
     border-bottom: 1px solid #e5e7eb;
 }
-
+ /* Lo cambie a mobile first */
 .mainContent {
     display: grid;
-    grid-template-columns: 0.85fr 2.15fr;
+    grid-template-columns: 1fr; /*Cambiado a una sola columna para mobile first*/
     gap: 1.5rem;
     padding: 1.5rem;
     flex: 1;
     width: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
-    min-height: 0;
+    overflow: visible;
 }
 
 .ToDoSection {
@@ -45,6 +48,7 @@ header {
     min-height: 0;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    order: 2;
 }
 
 .ToDoSection::-webkit-scrollbar {
@@ -61,9 +65,10 @@ header {
     background: white;
     border: 1px solid #e5e7eb;
     border-radius: 0.75rem;
-    overflow: hidden;
     box-sizing: border-box;
     min-height: 0;
+    order: 1;
+    overflow-x: auto; 
 }
 
 .Calendar {
@@ -71,4 +76,20 @@ header {
     flex-direction: column;
     flex: 1;
     min-height: 0;
+    overflow-x: visible;
 }
+
+@media (min-width: 1024px) {
+    .mainContent {
+        grid-template-columns: 0.85fr 2.15fr; /* Cambiado a dos columnas para pantallas más grandes */
+    }
+
+    .ToDoSection {
+        order: 1; /* Cambiado el orden para pantallas más grandes */
+    }
+    
+    .CalendarSection {
+        order: 2; /* Cambiado el orden para pantallas más grandes */
+    }
+}
+

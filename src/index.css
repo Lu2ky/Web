@@ -29,3 +29,6 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+/*html, body {
+    overflow-x: hidden;   No me acuerdo pq lo pues pero creo q era porq se me salia algo de la pantalla, pero parece que ya no es necesario
+}*/
