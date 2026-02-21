@@ -18,7 +18,15 @@ function ApiFetcher({ onDataLoaded, userId }) {
       }
       return;
     }
-
+		const fetchData = async () => {
+			// Función asincrona para cargar datos
+			setLoading(true); // Activar estado de carga
+			try {
+				const response = await fetch(
+					// Hace la peticipin a la API con el ID del usuario
+					`http://209.25.140.20:3380/api/official-schedule/${userId}`
+				);
+				const json = await response.json(); // Convierte respuesta en un json
     const fetchData = async () => {
       // Función asincrona para cargar datos
       setLoading(true); // Activar estado de carga
@@ -28,7 +36,6 @@ function ApiFetcher({ onDataLoaded, userId }) {
           `http://209.25.140.20:3380/api/official-schedule/${userId}`,
         );
         const json = await response.json(); // Convierte respuesta en un json
-
         if (!json.data || json.data.length === 0) {
           // Si no tiene datos:
           console.log("No hay datos"); // Mostrar mensaje en consola

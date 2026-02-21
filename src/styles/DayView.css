@@ -6,7 +6,7 @@
     background-color: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 0.75rem;
-    overflow: hidden;
+    overflow: visible; /*NO MAS OVERFLOW HIDDEN*/
     font-family: system-ui, -apple-system, sans-serif;
 }
 

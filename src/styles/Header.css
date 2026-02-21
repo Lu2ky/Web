@@ -10,6 +10,12 @@ header {
     font-family: system-ui, -apple-system, sans-serif;
 }
 
+/* PARTE IZQUIERDA PA RESPONSIVE */
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 
 /* Logo */
 
@@ -55,6 +61,14 @@ header nav ul li a:hover {
     color: #c026d3;
 }
 
+/* Botón de menú para mobile */
+.menuButton {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
 
 /* Responsive */
 
@@ -67,8 +81,38 @@ header nav ul li a:hover {
         font-size: 1.1rem;
     }
 
+    header nav {
+        position: fixed;
+        top:0;
+        left: 0;
+        height: 100vh;
+        min-width: 50%;         /*MENU HAMBUEGUESA*/
+        background: white;
+        padding: 2rem 1.5rem;
+        box-shadow: 2px 0px 10px black;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1001;
+    }
+
+    header nav.open {
+        transform: translateX(0);
+    }
+
     header nav ul {
-        gap: 0.8rem;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .menuButton {
+        display: block;
+    }
+
+    .overlay {
+        position: fixed;
+        inset:0;
+        background: #00000080;
+        z-index: 1000;
     }
 
     header nav ul li a {

@@ -1,16 +1,17 @@
 import "./styles/App.css";
-import {useState, useEffect} from "react";
-import {useCallback} from "react";
+import { useState, useEffect } from "react";
+import { useCallback } from "react";
 import ApiFetcher from "./services/OficialFetcher";
 import IdInput from "./components/LogIn/IdInput";
 import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
-import {deleteActivity} from "./services/personalActivitiesService";
+import { deleteActivity } from "./services/personalActivitiesService";
 import ToDoList from "./components/TodoList/ToDoList";
-import {PopUpClasses} from "./components/Calendar/PopUpClasses";
-import {getAllActivities} from "./services/personalActivitiesService";
+import { PopUpClasses } from "./components/Calendar/PopUpClasses";
+import { getAllActivities } from "./services/personalActivitiesService";
 // Prueba de test CI/CD
+
 // Paleta de colores
 //otro test, este es el bueno
 const colorPalette = [
@@ -42,7 +43,6 @@ function getColorForSubject(subjectName) {
 	}
 	return colorPalette[Math.abs(hash) % colorPalette.length];
 }
-
 // Transforma los datos de la API al formato que usa la app
 function normalizeApiData(apiData) {
 	const dayMap = {
@@ -71,15 +71,16 @@ function normalizeApiData(apiData) {
 		credits: item.Credits?.Float64 || 0,
 		academicPeriod: item.academicPeriod,
 		tagColour: item.tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
-		// Color asignado por materia
-		color: getColorForSubject(item.subject_name),
 		// Datos originales
 		apiData: item
 	}));
 }
 
 function App() {
-	const [viewMode, setViewMode] = useState("Semanal"); // "Semanal" o "Diario"
+	const getInitialView = () => {
+		return window.innerWidth <= 425 ? "Diario" : "Semanal"; // Vista inicial basada en el ancho de la pantalla (mobile chiquito vs desktop)
+	};
+	const [viewMode, setViewMode] = useState(getInitialView()); // "Semanal" o "Diario"
 	const [classEvents, setClassEvents] = useState([]); // Eventos de clases oficiales
 	const [personalEvents, setPersonalEvents] = useState([]); // Eventos personales (actividades guardadas)
 	const [showClassPopup, setShowClassPopup] = useState(false); // Para mostrar/ocultar el popup de detalles de clase
@@ -142,38 +143,31 @@ function App() {
 	};
 
 	return (
-		<div className="container">
-			<div className="Card">
-				<div className="App">
-					<Header />
-					<IdInput
-						userId={userId}
-						setUserId={setUserId}
-						onSubmit={setSubmittedId}
-					/>
-					<ControlBar
+		<div className="App">
+			<Header />
+			<IdInput
+				userId={userId}
+				setUserId={setUserId}
+				onSubmit={setSubmittedId}
+			/>
+			<ControlBar
+				viewMode={viewMode}
+				setViewMode={setViewMode}
+				onActivitySaved={handleActivitySaved}
+			/>
+			<div className="mainContent">
+				<div className="ToDoSection">
+					<ToDoList />
+				</div>
+				<div className="CalendarSection">
+					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
+					<Calendar
 						viewMode={viewMode}
-						setViewMode={setViewMode}
-						onActivitySaved={handleActivitySaved}
+						events={classEvents}
+						personalEvents={personalEvents}
+						onClassClick={handleClassClick}
+						onDeletePersonal={handleDeletePersonal}
 					/>
-					<div className="mainContent">
-						<div className="ToDoSection">
-							<ToDoList />
-						</div>
-						<div className="CalendarSection">
-							<ApiFetcher
-								onDataLoaded={handleDataLoaded}
-								userId={submittedId}
-							/>
-							<Calendar
-								viewMode={viewMode}
-								events={classEvents}
-								personalEvents={personalEvents}
-								onClassClick={handleClassClick}
-								onDeletePersonal={handleDeletePersonal}
-							/>
-						</div>
-					</div>
 					{/* Popup para detalles de clases */}
 					<PopUpClasses
 						isOpen={showClassPopup}
@@ -182,8 +176,13 @@ function App() {
 					/>
 				</div>
 			</div>
+			{/* Popup para detalles de clases */}
+			<PopUpClasses
+				isOpen={showClassPopup}
+				onClose={handleClosePopup}
+				classData={selectedClass}
+			/>
 		</div>
 	);
 }
-
 export default App;

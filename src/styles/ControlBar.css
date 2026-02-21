@@ -24,7 +24,7 @@
 .ControlBar .Right {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 2.5rem; /* SE PUEDE MEJORAR, ES PARA ESPACIAR LOS BOTONES */
 }
 
 /* Centrar el bloque del medio */
@@ -54,7 +54,8 @@
     }
 }
 
-@media (max-width: 600px) {
+/* Ajustes para mobile */
+@media (max-width: 768px) {
     .ControlBar {
         max-width: 100%;
         flex-direction: column;
@@ -65,7 +66,6 @@
     .ControlBar .Left,
     .ControlBar .Center,
     .ControlBar .Right {
-        width: 100%;
         justify-content: center;
     }
 }
