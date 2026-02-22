@@ -2,8 +2,10 @@
 .weekViewWrapper {
   display: flex;
   flex-direction: column;
+  flex: 1;
   height: 100%;
   width: 100%;
+  min-height: 0;
   min-width: 0;
   background: white;
   box-sizing: border-box;
@@ -52,6 +54,7 @@
 /* Scroll principal */
 .weekScrollArea {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: auto;
   width: 100%;
