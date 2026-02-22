@@ -130,32 +130,32 @@ export const PopUpClasses = ({
               </div>
             </div>
           )}
-        </div>
 
-        {/* Comentarios */}
-        <div className="info-section">
-          <h3 className="section-title">Comentarios y Observaciones</h3>
-          <CommentButton on_add_comment={handle_add_comment} />
+          {/* Comentarios */}
+          <div className="info-section">
+            <h3 className="section-title">Comentarios y Observaciones</h3>
+            <CommentButton on_add_comment={handle_add_comment} />
 
-          {comments.length > 0 && (
-            <div className="comments-list">
-              {comments.map((comment) => (
-                <div key={comment.id} className="comment-item">
-                  <div className="comment-header">
-                    <span className="comment-timestamp">{comment.timestamp}</span>
-                    <button
-                      className="delete-comment-button"
-                      onClick={() => handle_delete_comment(comment.id)}
-                      title="Eliminar comentario"
-                    >
-                      ✕
-                    </button>
+            {comments.length > 0 && (
+              <div className="comments-list">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="comment-item">
+                    <div className="comment-header">
+                      <span className="comment-timestamp">{comment.timestamp}</span>
+                      <button
+                        className="delete-comment-button"
+                        onClick={() => handle_delete_comment(comment.id)}
+                        title="Eliminar comentario"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <p className="comment-text">{comment.text}</p>
                   </div>
-                  <p className="comment-text">{comment.text}</p>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Footer */}

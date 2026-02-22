@@ -13,18 +13,31 @@
     background-color: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(4px);
     font-family: system-ui, -apple-system, sans-serif;
+    animation: fadeIn 0.2s ease;
+}
+
+.task-edit-modal-overlay.closing {
+    animation: fadeOut 0.2s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
 }
 
 /* Contenedor Principal del Modal */
 .task-edit-modal-container {
     background: white;
     width: 100%;
-    max-width: 32rem; /* 512px - más ancho para el formulario */
+    max-width: 30rem; /* 448px */
     border-radius: 1rem;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     overflow: hidden;
-    max-height: 90vh;
-    overflow-y: auto;
 }
 
 /* Barra decorativa con gradiente */
