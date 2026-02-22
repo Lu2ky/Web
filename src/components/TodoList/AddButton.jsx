@@ -5,6 +5,20 @@ import Calendar from "react-calendar"; // npm install react-calendar para instal
 import "react-calendar/dist/Calendar.css"; // Estilos para el calendario
 
 
+const TAGS_STORAGE_KEY = "savedTags"; // Clave para guardar y recuperar etiquetas en localStorage
+
+const getSavedTags = () => { // Función para obtener las etiquetas guardadas en localStorage
+    try {
+        return JSON.parse(localStorage.getItem(TAGS_STORAGE_KEY)) || []; // Si no hay etiquetas guardadas, devuelve un array vacío
+    } catch {
+        return [];
+    }
+};
+
+const persistTags = (tags) => { // Función para guardar las etiquetas en localStorage
+    localStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(tags)); // Guarda el array de etiquetas como una cadena JSON en localStorage
+};
+
 function AddButton({ onToDoSaved }) {
     const [isOpen, setIsOpen] = useState(false); // Controla si esta abierto el modal
     const [showCalendar, setShowCalendar] = useState(false); // Controla si se muestra el calendario para seleccionar fecha
@@ -20,6 +34,52 @@ function AddButton({ onToDoSaved }) {
     const [dateText, setDateText] = useState(""); // texto dd/mm/aaaa
     const [error, setError] = useState(""); // guarda mensajes de validación 
 
+    // Etiquetas 
+    const [tagInput, setTagInput] = useState(""); // Usuario las escribe
+    const [savedTags, setSavedTags] = useState(getSavedTags()); // Etiquetas disponibles para seleccionar
+    const [showSuggestions, setShowSuggestions] = useState(false); // Controla si se muestran las sugerencias de etiquetas
+
+    useEffect(() => { // Cargar etiquetas guardadas al montar el componente
+        setSavedTags(getSavedTags());
+    }, []);
+
+
+    const filteredSuggestions = savedTags.filter( // Filtrar sugerencias mientras escribe
+        (type) =>
+            type.toLowerCase().includes(tagInput.toLowerCase()) &&
+            !formData.tag.includes(type) // no sugerir las que ya están seleccionadas
+    );
+
+    // Agregar etiqueta (Enter o clic en sugerencia)
+    const addTag = (tagName) => {
+        const cleaned = tagName.trim();
+        if (!cleaned) return;
+        if (formData.tag.includes(cleaned)) return; // ya existe
+
+        // Agregar al formulario
+        setFormData((prev) => ({
+            ...prev,
+            tag: [...prev.tag, cleaned]
+        }));
+
+        // Guardar en localStorage si es nueva
+        if (!savedTags.includes(cleaned)) {
+            const updated = [...savedTags, cleaned];
+            setSavedTags(updated);
+            persistTags(updated);
+        }
+
+        setTagInput("");
+        setShowSuggestions(false);
+    };
+
+    // Quitar etiqueta del formulario
+    const removeTag = (tagName) => {
+        setFormData((prev) => ({
+            ...prev,
+            tag: prev.tag.filter((t) => t !== tagName)
+        }));
+    };
     // Para mostrar la fecha en formato dd/mm/aaaa y mostrarla en el input
     const formatDate = (date) => {
         const day = String(date.getDate()).padStart(2, "0"); // para que sea 02 y no solo 2 
@@ -30,17 +90,17 @@ function AddButton({ onToDoSaved }) {
 
     // Para convertir el texto dd/mm/aaaa a un objeto Date
     const parseDate = (dataString) => {
-        const date = dataString.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        const date = dataString.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
         if (!date) return null;
         const day = Number(date[1]);
-        const month = Number(date[2] - 1); // los meses en javascript van de 0 a 11
+        const month = Number(date[2]) - 1; // los meses en javascript van de 0 a 11
         const year = Number(date[3]);
         const reviewDate = new Date(year, month, day);
 
         if (
-            date.getFullYear() !== year ||
-            date.getMonth() !== month ||
-            date.getDate() !== day
+            reviewDate.getFullYear() !== year ||
+            reviewDate.getMonth() !== month ||
+            reviewDate.getDate() !== day
         ) {
             return null; // fecha no válida
         }
@@ -192,18 +252,96 @@ function AddButton({ onToDoSaved }) {
                                 <Calendar
                                     onChange={(date) => {
                                         setFormData((prev) => ({ ...prev, endDay: date }));
-                                        setShowCalendar(false); 
+                                        setShowCalendar(false);
                                     }}
                                     value={formData.endDay}
                                     locale="es-ES"
                                 />
                             </div>
                         )}
+                        {/* ── Prioridad ── */}
+                        <h4>Prioridad</h4>
+                        <div className="priorityGroup">
+                            {["alta", "media", "baja"].map((level) => (
+                                <button
+                                    key={level}
+                                    type="button"
+                                    className={`priorityButton priority-${level} ${formData.priority === level ? "priorityActive" : ""
+                                        }`}
+                                    onClick={() =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            priority: prev.priority === level ? "" : level
+                                        }))
+                                    }
+                                >
+                                    {level.charAt(0).toUpperCase() + level.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+
+                        <h4>Etiquetas</h4>
+                        <div className="tagsSection" onClick={(e) => e.stopPropagation()}>
+                            {/* Chips de etiquetas seleccionadas */}
+                            {formData.tag.length > 0 && (
+                                <div className="tagChips">
+                                    {formData.tag.map((t) => (
+                                        <span key={t} className="tagChip">
+                                            {t}
+                                            <button
+                                                type="button"
+                                                className="tagChipRemove"
+                                                onClick={() => removeTag(t)}
+                                                aria-label={`Quitar ${t}`}
+                                            >
+                                                ✕
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Input + sugerencias */}
+                            <div className="tagInputWrapper">
+                                <input
+                                    type="text"
+                                    placeholder="Escribe una etiqueta..."
+                                    value={tagInput}
+                                    onChange={(e) => {
+                                        setTagInput(e.target.value);
+                                        setShowSuggestions(true);
+                                    }}
+                                    onFocus={() => setShowSuggestions(true)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            addTag(tagInput);
+                                        }
+                                    }}
+                                />
+
+                                {showSuggestions && tagInput && filteredSuggestions.length > 0 && (
+                                    <ul className="tagSuggestions">
+                                        {filteredSuggestions.map((s) => (
+                                            <li
+                                                key={s}
+                                                onMouseDown={(e) => {
+                                                    e.preventDefault();
+                                                    addTag(s);
+                                                }}
+                                            >
+                                                {s}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        </div>
 
                         <div className="modalActions">
                             <button
                                 className="cancelButton"
-                                onClick={() =>{
+                                onClick={() => {
                                     setShowCalendar(false);
                                     setIsOpen(false);
                                 }}
