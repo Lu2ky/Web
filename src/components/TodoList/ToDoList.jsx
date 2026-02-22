@@ -2,6 +2,7 @@ import { useState } from "react";
 import "../../styles/ToDoList.css";
 import EditButton from "./EditButton";
 import ToDoFilterButton from "./ToDoFilterButton";
+import AddButton from "./AddButton";
 
 const initialTasks = [
     {
@@ -73,7 +74,7 @@ function ToDoList() {
                 <h2 className="todolist-title">To-Do List</h2>
                 <div className="todolist-header-actions">
                     <ToDoFilterButton onClick={() => console.log('Filters clicked')} />
-                    <button className="todolist-add-btn" title="Add task">+</button>
+                    <AddButton onToDoSaved={() => setTasks(initialTasks)} />
                 </div>
             </div>
 
@@ -94,7 +95,7 @@ function ToDoList() {
                                 aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
                             />
                             <span className="todolist-task-name">{task.name}</span>
-                                                        <EditButton onClick={() => editTask(task.id)} />
+                            <EditButton onClick={() => editTask(task.id)} />
 
                             <button
                                 className="todolist-task-delete"

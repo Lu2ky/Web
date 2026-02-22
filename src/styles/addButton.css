@@ -2,6 +2,10 @@
 .addButton {
     padding: 0.7rem 1.2rem;
     font-weight: 600;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     color: #000;
     border: 2px solid transparent;
     border-radius: 0.8rem;
@@ -86,7 +90,6 @@
 
 /* Inputs más suaves */
 .modalContainer input,
-.modalContainer textarea,
 .modalContainer select {
     padding: 0.75rem;
     border-radius: 0.7rem;
@@ -94,6 +97,17 @@
     font-size: 0.9rem;
     background-color: #f9fafb;
     transition: all 0.2s ease;
+}
+
+.modalContainer textarea {
+    padding: 0.75rem;
+    border-radius: 0.7rem;
+    border: 1px solid #e5e7eb;
+    font-size: 0.9rem;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+    min-height: 44px;
+    resize: vertical;
 }
 
 .modalContainer input:focus,
@@ -108,13 +122,6 @@
 .modalContainer textarea {
     resize: none;
     height: 90px;
-}
-
-/* Preview de horas */
-.hourPreview {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin-top: -0.5rem;
 }
 
 /* Mensajes de error */
@@ -162,11 +169,6 @@
     transition: all 0.2s ease;
 }
 
-.react-calendar {
-    margin-top: 0.8rem;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
 .saveButton:hover {
     opacity: 0.9;
     transform: translateY(-2px);
@@ -195,7 +197,37 @@
     }
 }
 
-/* Responsive  para celulares */
+/* Estilos del calendario */
+.react-calendar {
+    background: #fff;
+    border: 2px solid #c026d3;
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+.react-calendar__tile {
+    background: #f9fafb;
+    color: #333;
+    border-radius: 0.6rem;
+    transition: all 0.2s ease;
+}
+
+.react-calendar__tile:hover {
+    background: #c026d3;
+    color: white;
+}
+
+.react-calendar__tile--active {
+    background: #ff006e !important;
+    color: white !important;
+}
+
+.react-calendar__navigation button {
+    color: #c026d3;
+    font-weight: 600;
+}
+
 @media (max-width: 768px) {
     .addButton {
         font-size: 0;
@@ -207,11 +239,69 @@
         align-items: center;
         justify-content: center;
     }
+}
 
-    .addButton::before {
-        content: "+";
-        font-size: 1.5rem;
-        color: rgb(0, 0, 0);
-    }
+.addButton::before {
+    content: "+";
+    font-size: 1.5rem;
+    color: black;
+    transition: color 0.25s ease;
+}
 
+.addButton:hover::before {
+    color: white;
+    /* ← AQUÍ cambia a blanco */
+}
+
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    z-index: 200;
+}
+
+.modalContainer {
+    width: 100%;
+    max-width: 430px;
+    /* ancho controlado */
+    max-height: 85vh;
+    /* NO ocupa toda la pantalla */
+    overflow-y: auto;
+    /* scroll interno */
+    padding: 2rem;
+}
+
+.dateInputContainer {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.dateInputContainer input {
+    flex: 1;
+    text-align: left;
+}
+
+.calendarToggle {
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.7rem;
+    border: 1px solid #e5e7eb;
+    background: #f3f4f6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calendarToggle:hover {
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+}
+
+.calendarWrapper {
+    margin-top: 0.8rem;
 }
