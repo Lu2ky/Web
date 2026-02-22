@@ -171,6 +171,7 @@
     padding: 1rem 1.5rem; /* 16px 24px */
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem; /* 8px */
     border-top: 1px solid #f3f4f6; /* gray-100 */
 }
