@@ -305,3 +305,65 @@
 .calendarWrapper {
     margin-top: 0.8rem;
 }
+
+
+/* Grupo prioridad */
+.priorityGroup {
+    display: flex;
+    gap: 0.6rem;
+}
+
+/* Botón base prioridad */
+.priorityButton {
+    flex: 1;
+    padding: 0.6rem;
+    border-radius: 0.7rem;
+    border: 2px solid transparent;
+    background: #f3f4f6;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* Alta */
+.priority-alta {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.priority-alta.priorityActive {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
+}
+
+/* Media */
+.priority-media {
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.priority-media.priorityActive {
+    background: #f59e0b;
+    color: white;
+    box-shadow: 0 6px 15px rgba(245, 158, 11, 0.3);
+}
+
+/* Baja */
+.priority-baja {
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.priority-baja.priorityActive {
+    background: #22c55e;
+    color: white;
+    box-shadow: 0 6px 15px rgba(34, 197, 94, 0.3);
+}
+.priorityActive {
+    animation: pop 0.2s ease;
+}
+
+@keyframes pop {
+    0% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}

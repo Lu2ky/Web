@@ -67,7 +67,7 @@ function AddActivityButton({ onActivitySaved }) {
             endHour: ""
         });
         setError("");
-        
+
         // Notificar al padre que se guardó una actividad
         if (onActivitySaved) {
             onActivitySaved();
@@ -88,9 +88,9 @@ function AddActivityButton({ onActivitySaved }) {
     return (
         <>
             <button className="addButton" onClick={() => setIsOpen(true)}>
-                + Agregar actividad
+                Agregar actividad
             </button>
-            
+
 
             {isOpen && (
                 <div
@@ -104,7 +104,7 @@ function AddActivityButton({ onActivitySaved }) {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <h2>Nueva Actividad</h2>
-                        
+
                         <button className="modalClose" onClick={() => setIsOpen(false)}>
                             X
                         </button>
