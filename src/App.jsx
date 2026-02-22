@@ -11,6 +11,38 @@ import ToDoList from "./components/TodoList/ToDoList";
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
 import { getAllActivities } from "./services/personalActivitiesService";
 // Prueba de test CI/CD
+
+// Paleta de colores
+//otro test, este es el bueno
+const colorPalette = [
+	"#FF6B6B",
+	"#4ECDC4",
+	"#45B7D1",
+	"#96CEB4",
+	"#FFEAA7",
+	"#DFE6E9",
+	"#74B9FF",
+	"#A29BFE",
+	"#FD79A8",
+	"#FDCB6E",
+	"#6C5CE7",
+	"#00B894",
+	"#FF7675",
+	"#55EFC4",
+	"#81ECEC",
+	"#FAB1A0",
+	"#E17055",
+	"#00CEC9"
+];
+
+// Función para asignar color consistente basado en nombre de materia
+function getColorForSubject(subjectName) {
+	let hash = 0;
+	for (let i = 0; i < subjectName.length; i++) {
+		hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
+	}
+	return colorPalette[Math.abs(hash) % colorPalette.length];
+}
 // Transforma los datos de la API al formato que usa la app
 function normalizeApiData(apiData) {
 	const dayMap = {
@@ -153,5 +185,4 @@ function App() {
 		</div>
 	);
 }
-
 export default App;
