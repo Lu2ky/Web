@@ -3,6 +3,8 @@ import "../../styles/ToDoList.css";
 import EditButton from "./EditButton";
 import ToDoFilterButton from "./ToDoFilterButton";
 import AddButton from "./AddButton";
+import TaskEditModal from "./TaskEditModal";
+import MessageConfirmation from "./MessageConfirmation";
 
 const initialTasks = [
     {
@@ -49,6 +51,10 @@ const initialTasks = [
 
 function ToDoList() {
     const [tasks, setTasks] = useState(initialTasks);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [taskToEdit, setTaskToEdit] = useState(null);
+    const [taskToDelete, setTaskToDelete] = useState(null);
 
     const toggleTask = (id) => {
         setTasks((prev) =>
@@ -59,13 +65,51 @@ function ToDoList() {
     };
 
     const deleteTask = (id) => {
-        setTasks((prev) => prev.filter((task) => task.id !== id));
+        setTaskToDelete(id);
+        setIsDeleteModalOpen(true);
     };
 
     const editTask = (id) => {
         // Placeholder: abrir modal o formulario de edición.
         // Actualmente solo hace log para integrarlo visualmente.
-        console.log('Edit task', id);
+        const task = tasks.find(t => t.id === id);
+        setTaskToEdit(task);
+        setIsEditModalOpen(true);
+    };
+
+    const handleSave = (formData) => {
+        if (taskToEdit) {
+            // Editar tarea existente
+            setTasks(prev => prev.map(task => 
+                task.id === taskToEdit.id 
+                    ? { 
+                        ...task, 
+                        name: formData.name, 
+                        dueDate: formData.dueDate,
+                        tags: formData.tags,
+                        priority: formData.priority
+                    }
+                    : task
+            ));
+        }
+        setIsEditModalOpen(false);
+        setTaskToEdit(null);
+    };
+
+    const handleDelete = () => {
+        setTasks(prev => prev.filter(task => task.id !== taskToDelete));
+        setIsDeleteModalOpen(false);
+        setTaskToDelete(null);
+    };
+
+    const handleCloseEditModal = () => {
+        setIsEditModalOpen(false);
+        setTaskToEdit(null);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+        setTaskToDelete(null);
     };
 
     return (
@@ -117,6 +161,22 @@ function ToDoList() {
                     </div>
                 ))}
             </div>
+
+            <TaskEditModal
+                isOpen={isEditModalOpen}
+                onClose={handleCloseEditModal}
+                onSave={handleSave}
+                task={taskToEdit}
+                title={taskToEdit ? "Editar Tarea" : "Nueva Tarea"}
+            />
+
+            <MessageConfirmation
+                isOpen={isDeleteModalOpen}
+                onClose={handleCloseDeleteModal}
+                onConfirm={handleDelete}
+                title="Eliminar Tarea"
+                message="¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer."
+            />
         </div>
     );
 }

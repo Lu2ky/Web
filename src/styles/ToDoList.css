@@ -157,8 +157,8 @@
 .todolist-task-delete {
     background: none;
     border: none;
-    color: #9ca3af;
-    font-size: 13px;
+    color: #2e2e2e;
+    font-size: 25px;
     cursor: pointer;
     padding: 0;
     line-height: 1;
