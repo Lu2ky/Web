@@ -2,7 +2,7 @@ import React from "react";
 import "../../styles/EditButton.css";
 
 export default function EditButton({
-	onClick,
+	onClick  = () => {},
 	title = "Editar",
 	className = ""
 }) {

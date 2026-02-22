@@ -1,0 +1,280 @@
+/* Overlay del modal */
+.task-edit-modal-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Contenedor Principal del Modal */
+.task-edit-modal-container {
+    background: white;
+    width: 100%;
+    max-width: 32rem; /* 512px - más ancho para el formulario */
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Barra decorativa con gradiente */
+.task-edit-modal-gradient-bar {
+    height: 0.5rem; /* 8px */
+    background: linear-gradient(to right, #d11c7f, #7e22ce, #6b21a8);
+}
+
+/* Contenido principal */
+.task-edit-modal-content {
+    padding: 1.5rem; /* 24px */
+}
+
+/* Container del botón de cierre */
+.task-edit-modal-close-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem; /* 8px */
+}
+
+/* Botón de cierre */
+.task-edit-modal-close-btn {
+    padding: 0.25rem; /* 4px */
+    border-radius: 9999px;
+    background: none;
+    border: none;
+    color: #9ca3af; /* gray-400 */
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.task-edit-modal-close-btn:hover {
+    background-color: #f3f4f6; /* gray-100 */
+}
+
+/* Header del modal */
+.task-edit-modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 1.5rem; /* 24px */
+}
+
+/* Contenedor del icono */
+.task-edit-modal-icon-container {
+    width: 4rem; /* 64px */
+    height: 4rem; /* 64px */
+    background-color: #fdf2f8; /* pink-50 */
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem; /* 16px */
+    color: #d11c7f;
+}
+
+/* Título */
+.task-edit-modal-title {
+    font-size: 1.25rem; /* 20px */
+    font-weight: 700;
+    color: #1f2937; /* gray-800 */
+    margin: 0;
+}
+
+/* Formulario */
+.task-edit-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* 16px */
+    margin-bottom: 1.5rem; /* 24px */
+}
+
+/* Campo del formulario */
+.task-edit-modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* 8px */
+}
+
+/* Etiqueta */
+.task-edit-modal-label {
+    font-size: 0.875rem; /* 14px */
+    font-weight: 600;
+    color: #374151; /* gray-700 */
+}
+
+/* Input de texto */
+.task-edit-modal-input {
+    padding: 0.75rem; /* 12px */
+    border: 1px solid #d1d5db; /* gray-300 */
+    border-radius: 0.5rem; /* 8px */
+    font-size: 0.875rem; /* 14px */
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+
+.task-edit-modal-input:focus {
+    border-color: #d11c7f;
+    box-shadow: 0 0 0 3px rgba(209, 28, 127, 0.1);
+}
+
+/* Select */
+.task-edit-modal-select {
+    padding: 0.75rem; /* 12px */
+    border: 1px solid #d1d5db; /* gray-300 */
+    border-radius: 0.5rem; /* 8px */
+    font-size: 0.875rem; /* 14px */
+    background: white;
+    cursor: pointer;
+    outline: none;
+}
+
+.task-edit-modal-select:focus {
+    border-color: #d11c7f;
+    box-shadow: 0 0 0 3px rgba(209, 28, 127, 0.1);
+}
+
+/* Contenedor de input para tags */
+.task-edit-modal-tags-input {
+    display: flex;
+    gap: 0.5rem; /* 8px */
+}
+
+/* Botón de agregar tag */
+.task-edit-modal-add-tag-btn {
+    padding: 0.75rem 1rem; /* 12px 16px */
+    background-color: #d11c7f;
+    color: white;
+    border: none;
+    border-radius: 0.5rem; /* 8px */
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    min-width: 40px;
+}
+
+.task-edit-modal-add-tag-btn:hover {
+    background-color: #b0166a;
+}
+
+/* Lista de tags */
+.task-edit-modal-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem; /* 8px */
+    margin-top: 0.5rem;
+}
+
+/* Tag individual */
+.task-edit-modal-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: #f3f4f6; /* gray-100 */
+    color: #374151; /* gray-700 */
+    padding: 0.25rem 0.5rem; /* 4px 8px */
+    border-radius: 0.375rem; /* 6px */
+    font-size: 0.75rem; /* 12px */
+    font-weight: 500;
+}
+
+/* Botón de eliminar tag */
+.task-edit-modal-tag-remove {
+    background: none;
+    border: none;
+    color: #9ca3af; /* gray-400 */
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.task-edit-modal-tag-remove:hover {
+    color: #ef4444; /* red-500 */
+}
+
+/* Contenedor de botones de acción */
+.task-edit-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* 12px */
+}
+
+@media (min-width: 640px) {
+    .task-edit-modal-actions {
+        flex-direction: row;
+    }
+}
+
+/* Botón cancelar */
+.task-edit-modal-cancel-btn {
+    flex: 1;
+    padding: 0.75rem 1rem; /* 12px 16px */
+    border-radius: 0.75rem; /* 12px */
+    border: 2px solid #f3f4f6; /* gray-100 */
+    background: white;
+    color: #4b5563; /* gray-600 */
+    font-weight: 600;
+    font-size: 0.875rem; /* 14px */
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.task-edit-modal-cancel-btn:hover {
+    background-color: #f9fafb; /* gray-50 */
+}
+
+/* Botón guardar */
+.task-edit-modal-save-btn {
+    flex: 1;
+    padding: 0.75rem 1rem; /* 12px 16px */
+    border-radius: 0.75rem; /* 12px */
+    background-color: #d11c7f;
+    color: white;
+    border: none;
+    font-weight: 600;
+    font-size: 0.875rem; /* 14px */
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(219, 39, 119, 0.1), 0 2px 4px -1px rgba(219, 39, 119, 0.06);
+    transition: all 0.2s;
+    outline: none;
+}
+
+.task-edit-modal-save-btn:hover {
+    background-color: #b0166a;
+}
+
+.task-edit-modal-save-btn:disabled {
+    background-color: #d1d5db;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Footer */
+.task-edit-modal-footer {
+    background-color: #f9fafb; /* gray-50 */
+    padding: 1rem 1.5rem; /* 16px 24px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #f3f4f6; /* gray-100 */
+}
+
+/* Texto del footer */
+.task-edit-modal-footer-text {
+    font-size: 0.625rem; /* 10px */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9ca3af; /* gray-400 */
+    font-weight: 700;
+}

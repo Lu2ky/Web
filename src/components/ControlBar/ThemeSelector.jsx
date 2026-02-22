@@ -14,12 +14,13 @@ export const ThemeSelector = ({ on_theme_change }) => {
 
   // Opciones de temas disponibles
   const THEME_OPTIONS = [
-    { id: "default", name: "MInion", color: "#ffd900" },
+    { id: "default", name: "Papoi", color: "#c2a501" },
     { id: "dark", name: "Oscuro", color: "#1f1f1f" },
     { id: "light", name: "Claro", color: "#f5f5f5" },
     { id: "nature", name: "Naturaleza", color: "#2d8659" },
     { id: "sunset", name: "Atardecer", color: "#ff6b35" },
   ];
+  const DEFAULT_THEME = "default"; // Tema por defecto
 
   // Alternar visibilidad del desplegable
   const toggle_dropdown = () => {

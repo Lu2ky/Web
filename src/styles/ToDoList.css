@@ -212,3 +212,8 @@
     color: #16a34a;
     border-color: #86efac;
 }
+
+.todolist-tag.active-filter {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    transform: translateY(-1px);
+}

@@ -1,3 +1,4 @@
+
 import "./styles/App.css";
 import { useState, useEffect } from "react";
 import { useCallback } from "react";
@@ -168,7 +169,7 @@ function App() {
 						onClassClick={handleClassClick}
 						onDeletePersonal={handleDeletePersonal}
 					/>
-					{/* Popup para detalles de clases */}
+					{/* Popup para detalles de clases  */}
 					<PopUpClasses
 						isOpen={showClassPopup}
 						onClose={handleClosePopup}
@@ -176,12 +177,6 @@ function App() {
 					/>
 				</div>
 			</div>
-			{/* Popup para detalles de clases */}
-			<PopUpClasses
-				isOpen={showClassPopup}
-				onClose={handleClosePopup}
-				classData={selectedClass}
-			/>
 		</div>
 	);
 }
