@@ -43,7 +43,7 @@
 /* Barra decorativa con gradiente */
 .confirmacion-message-gradient-bar {
     height: 0.5rem; /* 8px */
-    background: linear-gradient(to right, #d11c7f, #7e22ce, #6b21a8);
+    background: linear-gradient(to right, #f6047b, #c820c5,#c820c5);
 }
 
 /* Contenido principal */
@@ -150,7 +150,7 @@
     flex: 1;
     padding: 0.625rem 1rem; /* 10px 16px */
     border-radius: 0.75rem; /* 12px */
-    background-color: #d11c7f;
+    background-color: #f40780;
     color: white;
     border: none;
     font-weight: 600;
