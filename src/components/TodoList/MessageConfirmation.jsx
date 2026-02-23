@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../../styles/ConfirmMessage.css';
+import '../../styles/ConfirmMessage.css';
 
 export default function MessageConfirmation({ 
     isOpen, 
