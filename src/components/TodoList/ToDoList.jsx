@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "../../styles/ToDoList.css";
 import EditButton from "./EditButton";
 import ToDoFilterButton from "./ToDoFilterButton";
 import AddButton from "./AddButton";
 import TaskEditModal from "./TaskEditModal";
 import MessageConfirmation from "./MessageConfirmation";
+import ToDoFilterModal from "./ToDoFilterModal";
+import ToDoListTagFetcher from "../../services/ToDoListTagFetcher";
 
 const initialTasks = [
     {
@@ -49,12 +51,76 @@ const initialTasks = [
     },
 ];
 
-function ToDoList() {
+const defaultFilters = {
+    status: "all",
+    priority: "all",
+    tag: ""
+};
+
+const normalizePriority = value => {
+    const normalized = String(value || "").toLowerCase();
+    if (normalized === "high" || normalized === "alta") return "alta";
+    if (normalized === "medium" || normalized === "media") return "media";
+    if (normalized === "low" || normalized === "baja") return "baja";
+    return "";
+};
+
+const getTaskPriority = task => {
+    if (task.priority) {
+        return normalizePriority(task.priority);
+    }
+
+    const priorityTag = task.tags?.find(tag =>
+        ["priority-high", "priority-medium", "priority-low"].includes(tag.type)
+    );
+
+    if (!priorityTag) return "";
+    if (priorityTag.type === "priority-high") return "alta";
+    if (priorityTag.type === "priority-medium") return "media";
+    if (priorityTag.type === "priority-low") return "baja";
+    return "";
+};
+
+function ToDoList({ userId = "" }) {
     const [tasks, setTasks] = useState(initialTasks);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
     const [taskToEdit, setTaskToEdit] = useState(null);
     const [taskToDelete, setTaskToDelete] = useState(null);
+    const [activeFilters, setActiveFilters] = useState(defaultFilters);
+
+    useEffect(() => {
+        if (!userId) {
+            setTasks(initialTasks);
+        }
+    }, [userId]);
+
+    const [availableTags, setAvailableTags] = useState([]);
+
+    const filteredTasks = useMemo(() => {
+        return tasks.filter(task => {
+            const statusMatches =
+                activeFilters.status === "all" ||
+                (activeFilters.status === "completed" && task.completed) ||
+                (activeFilters.status === "pending" && !task.completed);
+
+            const taskPriority = getTaskPriority(task);
+            const priorityMatches =
+                activeFilters.priority === "all" || taskPriority === activeFilters.priority;
+
+            const normalizedTagFilter = activeFilters.tag.trim().toLowerCase();
+            const tagMatches =
+                !normalizedTagFilter ||
+                task.tags?.some(tag =>
+                    String(tag.label || "")
+                        .toLowerCase()
+                        .includes(normalizedTagFilter)
+                );
+
+            return statusMatches && priorityMatches && tagMatches;
+        });
+    }, [tasks, activeFilters]);
 
     const toggleTask = (id) => {
         setTasks((prev) =>
@@ -112,22 +178,30 @@ function ToDoList() {
         setTaskToDelete(null);
     };
 
+    const hasActiveFilters =
+        activeFilters.status !== "all" ||
+        activeFilters.priority !== "all" ||
+        activeFilters.tag.trim() !== "";
+
     return (
         <div className="todolist-panel">
+            <ToDoListTagFetcher onDataLoaded={setAvailableTags} />
+
             <div className="todolist-header">
                 <h2 className="todolist-title">To-Do List</h2>
                 <div className="todolist-header-actions">
-                    <ToDoFilterButton onClick={() => console.log('Filters clicked')} />
+                    <ToDoFilterButton onClick={() => setIsFilterModalOpen(true)} />
                     <AddButton onToDoSaved={() => setTasks(initialTasks)} />
                 </div>
             </div>
 
             <div className="todolist-section-label">
-                TASKS <span className="todolist-task-count">({tasks.length})</span>
+                TASKS <span className="todolist-task-count">({filteredTasks.length})</span>
+                {hasActiveFilters && <span className="todolist-active-filter-chip">Filtrado</span>}
             </div>
 
             <div className="todolist-tasks">
-                {tasks.map((task) => (
+                {filteredTasks.map((task) => (
                     <div
                         key={task.id}
                         className={`todolist-task-card${task.completed ? " completed" : ""}`}
@@ -152,7 +226,7 @@ function ToDoList() {
                         </div>
 
                         <div className="todolist-task-tags">
-                            {task.tags.map((tag, index) => (
+                            {(task.tags || []).map((tag, index) => (
                                 <span key={index} className={`todolist-tag ${tag.type}`}>
                                     {tag.label}
                                 </span>
@@ -160,6 +234,10 @@ function ToDoList() {
                         </div>
                     </div>
                 ))}
+
+                {filteredTasks.length === 0 && (
+                    <p className="todolist-empty-state">No hay tareas para los filtros seleccionados.</p>
+                )}
             </div>
 
             <TaskEditModal
@@ -168,6 +246,7 @@ function ToDoList() {
                 onSave={handleSave}
                 task={taskToEdit}
                 title={taskToEdit ? "Editar Tarea" : "Nueva Tarea"}
+                availableTags={availableTags}
             />
 
             <MessageConfirmation
@@ -176,6 +255,14 @@ function ToDoList() {
                 onConfirm={handleDelete}
                 title="Eliminar Tarea"
                 message="¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer."
+            />
+
+            <ToDoFilterModal
+                isOpen={isFilterModalOpen}
+                onClose={() => setIsFilterModalOpen(false)}
+                onApply={setActiveFilters}
+                initialFilters={activeFilters}
+                availableTags={availableTags}
             />
         </div>
     );

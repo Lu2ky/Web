@@ -157,7 +157,7 @@ function App() {
 			/>
 			<div className="mainContent">
 				<div className="ToDoSection">
-					<ToDoList />
+					<ToDoList userId={submittedId} />
 				</div>
 				<div className="CalendarSection">
 					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />

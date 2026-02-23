@@ -196,6 +196,24 @@
         opacity: 1;
     }
 }
+@keyframes fadeOff {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+@keyframes SlideDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+}
 
 /* Estilos del calendario */
 .react-calendar {

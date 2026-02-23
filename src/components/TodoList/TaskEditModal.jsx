@@ -8,7 +8,8 @@ export default function TaskEditModal({
     onClose, 
     onSave,
     task = null, // Si es null, es para crear nueva tarea
-    title = "Editar Tarea"
+    title = "Editar Tarea",
+    availableTags = []
 }) {
     const normalizeTags = (tags) => {
         if (!tags) return [];
@@ -64,6 +65,20 @@ export default function TaskEditModal({
             setDateText(formatDate(stringToDate(formData.dueDate)));
         }
     }, [formData.dueDate]);
+
+    // Reset tag input and ensure defaults when modal opens or task changes
+    useEffect(() => {
+        if (isOpen) {
+            setTagLabel('');
+            setTagType('custom');
+            setFormData({
+                name: task?.name || '',
+                dueDate: task?.dueDate || '',
+                tags: normalizeTags(task?.tags) || [],
+                priority: task?.priority || 'media'
+            });
+        }
+    }, [isOpen, task]);
 
     if (!isOpen) return null;
 
@@ -248,17 +263,32 @@ export default function TaskEditModal({
                                 }
                             }}
                         />
+
                         <select
                             value={tagType}
-                            onChange={(e) => setTagType(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === 'custom') {
+                                    setTagType('custom');
+                                    return;
+                                }
+                                // Try to find the selected tag in availableTags
+                                const found = availableTags.find(t => String(t.label) === String(val));
+                                if (found) {
+                                    setTagLabel(found.label);
+                                    setTagType(found.type || 'custom');
+                                } else {
+                                    // Fallback: treat as custom
+                                    setTagType('custom');
+                                }
+                            }}
                         >
-                            <option value="subject">Materia</option>
-                            <option value="category">Categoría</option>
-                            <option value="priority-high">Prioridad Alta</option>
-                            <option value="priority-medium">Prioridad Media</option>
-                            <option value="priority-low">Prioridad Baja</option>
                             <option value="custom">Personalizado</option>
+                            {availableTags.map(t => (
+                                <option key={t.id} value={t.label}>{t.label}</option>
+                            ))}
                         </select>
+
                         <button
                             type="button"
                             className="addTagButton"
