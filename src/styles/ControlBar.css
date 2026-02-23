@@ -27,7 +27,7 @@
 .ControlBar .Right {
     display: flex;
     align-items: center;
-    gap: 1.5rem; /* SE PUEDE MEJORAR, ES PARA ESPACIAR LOS BOTONES */
+    gap: 1rem; /* SE PUEDE MEJORAR, ES PARA ESPACIAR LOS BOTONES */
 }
 
 /* Centrar el bloque del medio */
