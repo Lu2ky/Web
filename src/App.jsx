@@ -157,7 +157,7 @@ function App() {
 			/>
 			<div className="mainContent">
 				<div className="ToDoSection">
-					<ToDoList />
+					<ToDoList userId={submittedId} />
 				</div>
 				<div className="CalendarSection">
 					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
@@ -168,7 +168,7 @@ function App() {
 						onClassClick={handleClassClick}
 						onDeletePersonal={handleDeletePersonal}
 					/>
-					{/* Popup para detalles de clases */}
+					{/* Popup para detalles de clases  */}
 					<PopUpClasses
 						isOpen={showClassPopup}
 						onClose={handleClosePopup}
@@ -176,12 +176,6 @@ function App() {
 					/>
 				</div>
 			</div>
-			{/* Popup para detalles de clases */}
-			<PopUpClasses
-				isOpen={showClassPopup}
-				onClose={handleClosePopup}
-				classData={selectedClass}
-			/>
 		</div>
 	);
 }

@@ -162,6 +162,11 @@
     transition: all 0.2s ease;
 }
 
+.react-calendar {
+    margin-top: 0.8rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
 .saveButton:hover {
     opacity: 0.9;
     transform: translateY(-2px);

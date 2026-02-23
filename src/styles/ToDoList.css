@@ -92,6 +92,17 @@
     color: #9ca3af;
 }
 
+.todolist-active-filter-chip {
+    margin-left: 8px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 0.56rem;
+    font-weight: 600;
+    color: #6d28d9;
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
+}
+
 .todolist-tasks {
     display: flex;
     flex-direction: column;
@@ -157,8 +168,8 @@
 .todolist-task-delete {
     background: none;
     border: none;
-    color: #9ca3af;
-    font-size: 13px;
+    color: #2e2e2e;
+    font-size: 25px;
     cursor: pointer;
     padding: 0;
     line-height: 1;
@@ -211,4 +222,16 @@
     background: #f0fdf4;
     color: #16a34a;
     border-color: #86efac;
+}
+
+.todolist-tag.active-filter {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    transform: translateY(-1px);
+}
+
+.todolist-empty-state {
+    margin: 10px 6px;
+    font-size: 0.72rem;
+    color: #6b7280;
+    text-align: center;
 }

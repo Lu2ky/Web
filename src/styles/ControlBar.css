@@ -2,6 +2,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
+    z-index: 40;
+    overflow: visible;
 
     width: 100%; 
     box-sizing: border-box; 
@@ -24,7 +27,7 @@
 .ControlBar .Right {
     display: flex;
     align-items: center;
-    gap: 2.5rem; /* SE PUEDE MEJORAR, ES PARA ESPACIAR LOS BOTONES */
+    gap: 1rem; /* SE PUEDE MEJORAR, ES PARA ESPACIAR LOS BOTONES */
 }
 
 /* Centrar el bloque del medio */
@@ -39,7 +42,7 @@
 }
 
 /* Responsive */
-@media (max-width: 900px) {
+@media (min-width: 900px) {
     .ControlBar {
         max-width: 100%;
         flex-wrap: wrap;
@@ -49,23 +52,24 @@
     .ControlBar .Left,
     .ControlBar .Center,
     .ControlBar .Right {
-        flex: 1 1 100%;
         justify-content: center;
     }
 }
 
 /* Ajustes para mobile */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     .ControlBar {
-        max-width: 100%;
         flex-direction: column;
         align-items: stretch;
+        gap:1rem;
         padding: 1rem;
     }
 
     .ControlBar .Left,
     .ControlBar .Center,
     .ControlBar .Right {
+        width: 100%;
+        gap:1rem;
         justify-content: center;
     }
 }

@@ -65,7 +65,7 @@ export const CommentButton = ({ on_add_comment }) => {
         aria-expanded={is_open}
       >
         <span className="add-comment-plus">+</span>
-        <span className="add-comment-label">Add New Comment</span>
+        <span className="add-comment-label">Agregar Comentario</span>
       </button>
 
       {is_open && (
@@ -85,7 +85,7 @@ export const CommentButton = ({ on_add_comment }) => {
               onClick={handle_save}
               disabled={comment_text.trim() === ""}
             >
-              Save
+              Guardar
             </button>
 
             <button
@@ -93,7 +93,7 @@ export const CommentButton = ({ on_add_comment }) => {
               type="button"
               onClick={handle_cancel}
             >
-              Cancel
+              Cancelar
             </button>
           </div>
         </div>
