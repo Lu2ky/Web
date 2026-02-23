@@ -42,3 +42,21 @@
     padding: 0 1rem;
     white-space: nowrap;
 }
+
+@media (max-width: 450px) {
+    .navigatorContainer {
+        width: 100%;
+        min-width: unset;
+        justify-content: space-between;
+    }
+
+    .dateBoxCenterBox {
+        flex:1;
+        text-align: center;
+        padding: 0 0.5rem;
+    }
+
+    .dateBoxArrowBox {
+        padding: 0.5rem;
+    }
+}
