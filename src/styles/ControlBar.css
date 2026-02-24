@@ -56,8 +56,24 @@
     }
 }
 
+@media (max-width: 1012px) {
+    .ControlBar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .ControlBar .Left,
+    .ControlBar .Center,
+    .ControlBar .Right {
+        width: 100%;
+        gap:1rem;
+        justify-content: center;
+    }
+}
 /* Ajustes para mobile */
-@media (max-width: 767px) {
+@media (max-width: 768px) {
     .ControlBar {
         flex-direction: column;
         align-items: stretch;
