@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import '../../styles/addButton.css';
 
-export default function TaskEditModal({ 
-    isOpen, 
-    onClose, 
+export default function TaskEditModal({
+    isOpen,
+    onClose,
     onSave,
-    task = null, // Si es null, es para crear nueva tarea
+    task = null,
     title = "Editar Tarea",
     availableTags = []
 }) {
@@ -25,18 +26,19 @@ export default function TaskEditModal({
 
     const [tagLabel, setTagLabel] = useState('');
     const [tagType, setTagType] = useState('custom');
+    const [showTagDropdown, setShowTagDropdown] = useState(false);
+    const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
+    const tagInputRef = useRef(null);
     const [showCalendar, setShowCalendar] = useState(false);
     const [dateText, setDateText] = useState('');
     const [error, setError] = useState('');
 
-    // Convertir string de fecha a objeto Date para el calendario
     const stringToDate = (dateStr) => {
         if (!dateStr) return new Date();
         const [year, month, day] = dateStr.split('-').map(Number);
         return new Date(year, month - 1, day);
     };
 
-    // Formatear fecha como dd/mm/aaaa
     const formatDate = (date) => {
         if (!date) return '';
         const d = new Date(date);
@@ -46,7 +48,6 @@ export default function TaskEditModal({
         return `${day}/${month}/${year}`;
     };
 
-    // Parsear dd/mm/aaaa a Date (o null si inválida)
     const parseDDMMYYYY = (str) => {
         if (!str) return null;
         const m = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
@@ -59,14 +60,19 @@ export default function TaskEditModal({
         return d;
     };
 
-    // Sincronizar dateText con formData.dueDate
     useEffect(() => {
         if (formData.dueDate) {
             setDateText(formatDate(stringToDate(formData.dueDate)));
         }
     }, [formData.dueDate]);
 
-    // Reset tag input and ensure defaults when modal opens or task changes
+    useEffect(() => {
+        if (showTagDropdown && tagInputRef.current) {
+            const rect = tagInputRef.current.getBoundingClientRect();
+            setDropdownPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+        }
+    }, [showTagDropdown]);
+
     useEffect(() => {
         if (isOpen) {
             setTagLabel('');
@@ -120,6 +126,10 @@ export default function TaskEditModal({
         setShowCalendar(false);
     };
 
+    const filteredTags = availableTags.filter(t =>
+        t.label.toLowerCase().includes(tagLabel.toLowerCase())
+    );
+
     return (
         <div
             className="modalOverlay"
@@ -127,6 +137,7 @@ export default function TaskEditModal({
             aria-modal="true"
             onClick={() => {
                 setShowCalendar(false);
+                setShowTagDropdown(false);
                 onClose();
             }}
         >
@@ -144,7 +155,7 @@ export default function TaskEditModal({
                 </button>
 
                 {error && <p className="errorMessage">{error}</p>}
-                
+
                 <input
                     type="text"
                     name="name"
@@ -164,31 +175,22 @@ export default function TaskEditModal({
                         value={dateText}
                         onChange={(e) => {
                             let v = e.target.value;
-                            // Solo permitir dígitos
                             v = v.replace(/[^0-9]/g, '');
-                            // Insertar barras automáticamente
-                            if (v.length >= 2) {
-                                v = v.slice(0, 2) + '/' + v.slice(2);
-                            }
-                            if (v.length >= 5) {
-                                v = v.slice(0, 5) + '/' + v.slice(5);
-                            }
-                            // Limitar a máximo 10 caracteres
+                            if (v.length >= 2) v = v.slice(0, 2) + '/' + v.slice(2);
+                            if (v.length >= 5) v = v.slice(0, 5) + '/' + v.slice(5);
                             v = v.slice(0, 10);
                             setDateText(v);
                             const parsed = parseDDMMYYYY(v);
                             if (parsed) {
                                 const y = parsed.getFullYear();
-                                const m = String(parsed.getMonth() + 1).padStart(2, '0');
+                                const mo = String(parsed.getMonth() + 1).padStart(2, '0');
                                 const d = String(parsed.getDate()).padStart(2, '0');
-                                setFormData(prev => ({ ...prev, dueDate: `${y}-${m}-${d}` }));
+                                setFormData(prev => ({ ...prev, dueDate: `${y}-${mo}-${d}` }));
                             }
                         }}
                         onBlur={() => {
                             const parsed = parseDDMMYYYY(dateText);
-                            if (!parsed) {
-                                setDateText(formatDate(formData.dueDate));
-                            }
+                            if (!parsed) setDateText(formatDate(formData.dueDate));
                         }}
                     />
                     <button
@@ -200,7 +202,7 @@ export default function TaskEditModal({
                         📅
                     </button>
                 </div>
-                
+
                 {showCalendar && (
                     <div className="calendarWrapper">
                         <Calendar
@@ -251,43 +253,28 @@ export default function TaskEditModal({
                     )}
 
                     <div className="tagInputRow">
-                        <input
-                            type="text"
-                            placeholder="Etiqueta"
-                            value={tagLabel}
-                            onChange={(e) => setTagLabel(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    e.preventDefault();
-                                    handleAddTag();
-                                }
-                            }}
-                        />
-
-                        <select
-                            value={tagType}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === 'custom') {
-                                    setTagType('custom');
-                                    return;
-                                }
-                                // Try to find the selected tag in availableTags
-                                const found = availableTags.find(t => String(t.label) === String(val));
-                                if (found) {
-                                    setTagLabel(found.label);
-                                    setTagType(found.type || 'custom');
-                                } else {
-                                    // Fallback: treat as custom
-                                    setTagType('custom');
-                                }
-                            }}
-                        >
-                            <option value="custom">Personalizado</option>
-                            {availableTags.map(t => (
-                                <option key={t.id} value={t.label}>{t.label}</option>
-                            ))}
-                        </select>
+                        <div className="tagInputWrapper">
+                            <input
+                                ref={tagInputRef}
+                                type="text"
+                                placeholder="Etiqueta"
+                                value={tagLabel}
+                                onChange={(e) => {
+                                    setTagLabel(e.target.value);
+                                    setShowTagDropdown(true);
+                                }}
+                                onFocus={() => setShowTagDropdown(true)}
+                                onBlur={() => setTimeout(() => setShowTagDropdown(false), 200)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleAddTag();
+                                        setShowTagDropdown(false);
+                                    }
+                                    if (e.key === 'Escape') setShowTagDropdown(false);
+                                }}
+                            />
+                        </div>
 
                         <button
                             type="button"
@@ -319,6 +306,64 @@ export default function TaskEditModal({
                     </button>
                 </div>
             </div>
+
+            {showTagDropdown && filteredTags.length > 0 && createPortal(
+                <div
+                    className="tagDropdown"
+                    style={{
+                        top: dropdownPos.top,
+                        left: dropdownPos.left,
+                        width: dropdownPos.width
+                    }}
+                >
+                    <div className="tagDropdownList">
+                        {filteredTags.map(t => (
+                            <div
+                                key={t.id ?? t.label}
+                                className="tagDropdownItem"
+                                onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setTagLabel(t.label);
+                                    setTagType(t.type || 'custom');
+                                    setShowTagDropdown(false);
+                                }}
+                            >
+                                <span className="tagDropdownItemLabel">{t.label}</span>
+
+                                <div className="tagDropdownItemActions">
+                                    <button
+                                        className="tagActionBtn tagActionEdit"
+                                        title="Editar"
+                                        onMouseDown={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            setTagLabel(t.label);
+                                            setTagType(t.type || 'custom');
+                                            setShowTagDropdown(false);
+                                        }}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    </button>
+                                    <button
+                                        className="tagActionBtn tagActionDelete"
+                                        title="Eliminar de la tarea"
+                                        onMouseDown={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            handleRemoveTag(t);
+                                            setShowTagDropdown(false);
+                                        }}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 }
