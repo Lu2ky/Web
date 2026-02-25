@@ -15,6 +15,10 @@
     width:180px;
 }
 
+.drawerIdInput {
+    margin-bottom: 2rem;
+}
+
 /*Boton*/
 .idInput button {
     height:32px;
@@ -29,4 +33,10 @@
 
 .idInput button:hover {
     background-color: #522c5a;
+}
+
+@media (min-width: 900px) {
+    .drawerIdInput {
+        display:none;
+    }
 }
