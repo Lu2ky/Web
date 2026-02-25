@@ -1,12 +1,16 @@
 .ControlBar {
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: space-between;
-
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    overflow: visible;
     width: 100%; 
     box-sizing: border-box; 
-    padding: 0.8rem 2rem;
-
+    padding: 0.4rem 1.2rem;
+    min-height: 56px;
     background: linear-gradient(to right, #ffffff, #f9fafb);
     border-bottom: 2px solid transparent;
     background-image:
@@ -15,7 +19,7 @@
     background-origin: border-box;
     background-clip: padding-box, border-box;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* Agrupaciones */
@@ -24,7 +28,7 @@
 .ControlBar .Right {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem; /* SE PUEDE MEJORAR, ES PARA ESPACIAR LOS BOTONES */
 }
 
 /* Centrar el bloque del medio */
@@ -39,26 +43,25 @@
 }
 
 /* Responsive */
-@media (max-width: 900px) {
+@media (min-width: 900px) {
     .ControlBar {
         max-width: 100%;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: center;
     }
 
     .ControlBar .Left,
     .ControlBar .Center,
     .ControlBar .Right {
-        flex: 1 1 100%;
         justify-content: center;
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1012px) {
     .ControlBar {
-        max-width: 100%;
         flex-direction: column;
         align-items: stretch;
+        gap: 1rem;
         padding: 1rem;
     }
 
@@ -66,6 +69,24 @@
     .ControlBar .Center,
     .ControlBar .Right {
         width: 100%;
+        gap:1rem;
+        justify-content: center;
+    }
+}
+/* Ajustes para mobile */
+@media (max-width: 768px) {
+    .ControlBar {
+        flex-direction: column;
+        align-items: stretch;
+        gap:0.1rem;
+        padding: 0.1rem;
+    }
+
+    .ControlBar .Left,
+    .ControlBar .Center,
+    .ControlBar .Right {
+        width: 100%;
+        gap:1rem;
         justify-content: center;
     }
 }

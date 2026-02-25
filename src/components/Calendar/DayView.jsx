@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import "../styles/DayView.css";
-import { BlockClasses } from "./03.3-BlockClasses";
-import { BlockPersonal } from "./03.4-BlockPersonal";
+import "../../styles/DayView.css";
+import { BlockClasses } from "./BlockClasses";
+import { BlockPersonal } from "./BlockPersonal";
 
 function DayView({ events = [], personalEvents = [], onClassClick = () => {}, onDeletePersonal = () => {} }) {
     const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -142,7 +142,7 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                             },
                             start_time: event.start_time,
                             end_time: event.end_time,
-                            background_color: event.color || "#c4bebe",
+                            background_color: event.color || "#a59090",
                         };
 
                         return isClass ? (

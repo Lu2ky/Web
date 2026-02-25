@@ -1,0 +1,41 @@
+/* Botón Principal */
+
+.todo-filter-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: white;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #000000;
+    font-family: system-ui, -apple-system, sans-serif;
+    border: 1px solid #e5e7eb;
+    
+    /* Sin margen para el contexto de header */
+    margin: 0;
+    width: auto;
+}
+
+.todo-filter-icon {
+    font-size: 12px;
+    color: inherit;
+}
+
+/* Hover */
+.todo-filter-button:hover {
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
+}
+
+/* Estado activo */
+.todo-filter-button:active,
+.todo-filter-button:focus {
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    transform: scale(0.97);
+}

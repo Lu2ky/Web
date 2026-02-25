@@ -1,5 +1,7 @@
 import { useState } from "react";
-import "../styles/ThemeSelector.css";
+import "../../styles/ThemeSelector.css";
+
+// Temas disponibles, por Id, nombre y paleta según etiqueta de la materia (o tema)
 
 // Componente selector de temas
 export const ThemeSelector = ({ on_theme_change }) => {
@@ -12,12 +14,13 @@ export const ThemeSelector = ({ on_theme_change }) => {
 
   // Opciones de temas disponibles
   const THEME_OPTIONS = [
-    { id: "default", name: "MInion", color: "#ffd900" },
-    { id: "dark", name: "Oscuro", color: "#1f1f1f" },
-    { id: "light", name: "Claro", color: "#f5f5f5" },
-    { id: "nature", name: "Naturaleza", color: "#2d8659" },
-    { id: "sunset", name: "Atardecer", color: "#ff6b35" },
+    { id: "default", name: "Hola ", color: "#c2a501" },
+    { id: "dark", name: "Muy", color: "#1f1f1f" },
+    { id: "light", name: "Buen  ", color: "#f5f5f5" },
+    { id: "nature", name: "Dia", color: "#2d8659" },
+    { id: "sunset", name: "Amiguitos", color: "#ff6b35" },
   ];
+  const DEFAULT_THEME = "default"; // Tema por defecto
 
   // Alternar visibilidad del desplegable
   const toggle_dropdown = () => {

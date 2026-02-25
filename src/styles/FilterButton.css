@@ -13,14 +13,15 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 0.6rem 1.2rem;
+    padding: 0.7rem 1.2rem;
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 600;
     background: white;
-    border-radius: 0.6rem;
+    border-radius: 0.8rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     color: #000000;
+    line-height: 1;
 
     /* Borde degradado */
     border: 2px solid transparent;
@@ -41,6 +42,7 @@
     background: linear-gradient(135deg, #ff006e, #c026d3);
     color: white;
     box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
+    transform: translateY(-2px);
 }
 
 /* Estado activo */
@@ -113,5 +115,33 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/*RESPONSIVE EN MOBILE*/
+@media (max-width: 768px) {
+    .filterButton > * {
+        display: none;
+    }
+    .filterButton {
+        font-size: 0;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: 25%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .filterButton::before {
+        content: "\1F50D";
+        font-size: 1.5rem;
+        color: rgb(0, 0, 0);
+        line-height:1;
+        display: flex; /*ESO DEL TRANSFORM ES PQ NO SE QUERIA CENTRAR */
+        align-items: center;
+        justify-content: center;
+        transform: translateX(4.5px);
     }
 }

@@ -22,7 +22,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 14px 10px;
+    padding: 10px 10px 10px;
+}
+
+.todolist-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .todolist-title {
@@ -84,6 +90,17 @@
 .todolist-task-count {
     font-weight: 400;
     color: #9ca3af;
+}
+
+.todolist-active-filter-chip {
+    margin-left: 8px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 0.56rem;
+    font-weight: 600;
+    color: #6d28d9;
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
 }
 
 .todolist-tasks {
@@ -151,12 +168,14 @@
 .todolist-task-delete {
     background: none;
     border: none;
-    color: #9ca3af;
-    font-size: 13px;
+    color: #2e2e2e;
+    font-size: 25px;
     cursor: pointer;
     padding: 0;
     line-height: 1;
 }
+
+
 
 .todolist-task-tags {
     display: flex;
@@ -203,4 +222,84 @@
     background: #f0fdf4;
     color: #16a34a;
     border-color: #86efac;
+}
+
+.todolist-tag.active-filter {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    transform: translateY(-1px);
+}
+
+.todolist-empty-state {
+    margin: 10px 6px;
+    font-size: 0.72rem;
+    color: #6b7280;
+    text-align: center;
+}
+/*overlay para cerrar el drawer al hacer click fuera de él*/
+.todo-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 900;
+}
+
+
+.todo-drawer-toggle{
+    position:fixed;
+    right:1rem;
+    bottom:1rem;
+    z-index: 800;
+    padding:0.8rem 1.2rem;
+    border-radius:999px;
+    background:#e6007e;
+    color: white;
+    border:none;
+}
+
+/*Drawer para mobiles*/
+@media (max-width: 1023px){
+    .todolist-panel {
+        position:fixed;
+        left:0;
+        bottom:0;
+        width:100%;
+        height:70dvh;
+        border-radius: 16px 16px 0 0;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .todolist-panel.open {
+        transform: translateY(0);
+    }
+
+    .todolist-tasks{
+        overflow-y:auto;
+        flex:1;
+        padding: 20px;
+    }
+}
+
+/*restaurar vista normal*/
+@media (min-width: 1024px){
+    .todolist-panel {
+        position:relative;
+        height:100%;
+        transform:none;
+        box-shadow:none;
+        border-radius:12px;
+    }
+
+    .todo-drawer-toggle,
+    .todo-drawer-overlay {
+        display:none;
+    }
 }

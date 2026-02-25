@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 
 // Componente de tarjeta de actividad
+// Se usa export const porque se pueden exportar múltiples componentes de este archivo.
+
 export const BlockClasses = ({
-  subject_name,
-  professor_name,
-  classroom,
+  subject_name, //Materia
+  professor_name, //Profesor
+  classroom, 
   nrc,
-  etiqueta,
+  tag, //Etiqueta de tipo de clase (Teoría, Laboratorio, etc.)
   start_time,
   end_time,
-  background_color = "#560070",
+  background_color = "#ddc8b7", // Color por defecto 
   style = {},
   onClick = () => {},
 }) => {
