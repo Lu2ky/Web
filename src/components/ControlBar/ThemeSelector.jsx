@@ -14,11 +14,11 @@ export const ThemeSelector = ({ on_theme_change }) => {
 
   // Opciones de temas disponibles
   const THEME_OPTIONS = [
-    { id: "default", name: "Vamos", color: "#c2a501" },
-    { id: "dark", name: "Cerrando", color: "#1f1f1f" },
-    { id: "light", name: "El ", color: "#f5f5f5" },
-    { id: "nature", name: "Papoi", color: "#2d8659" },
-    { id: "sunset", name: "Pta", color: "#ff6b35" },
+    { id: "default", name: "Hola ", color: "#c2a501" },
+    { id: "dark", name: "Muy", color: "#1f1f1f" },
+    { id: "light", name: "Buen  ", color: "#f5f5f5" },
+    { id: "nature", name: "Dia", color: "#2d8659" },
+    { id: "sunset", name: "Amiguitos", color: "#ff6b35" },
   ];
   const DEFAULT_THEME = "default"; // Tema por defecto
 
