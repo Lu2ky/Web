@@ -1,8 +1,9 @@
 import {useState} from "react";
 import logo from "../../assets/logo.png";
 import "../../styles/Header.css";
+import Idinput from "../LogIn/IdInput";
 
-function Header() {
+function Header({userId, setUserId, onSubmit}) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	return (
 		<header>
@@ -10,7 +11,13 @@ function Header() {
 				<img src={logo} alt="Logo de UPB Planner" />
 				<h1>UPB Planner</h1>
 			</div>
-
+			<div className="headerCenter">
+				<Idinput
+					userId={userId}
+					setUserId={setUserId}
+					onSubmit={onSubmit}
+				/>
+			</div>
 			<button
 				className="menuButton"
 				onClick={() => setIsMenuOpen(true)}		/*PARA LO DEL MENU HAMBURGUESA*/
@@ -20,6 +27,13 @@ function Header() {
 			</button>
 			
 			<nav className={`drawer ${isMenuOpen ? "open" : ""}`}>
+				<div className="drawerIdInput">
+					<Idinput
+					userId={userId}
+					setUserId={setUserId}
+					onSubmit={onSubmit}
+				/>
+				</div>
 				<ul>
 					<li>
 						<a href="#">Horario</a>

@@ -1,34 +1,42 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color: #213547;
-  background-color: #ffffff;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  width: 100%;
+/*Reset universal del box model
+se usa para calcular tamaños en este caso width= contenido + padding+ border
+evita que las cosas se desborden*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-body {
+/*Altura total 
+en react se monta todo dentro de #root 
+definirle una altura a html y body evita comportamientos extraños en algunos navegadores
+y que los layouts no se expandan correctamente (flex y eso)
+tambien se limpian espacios fantasma por defecto*/
+html,
+body,
+#root {
+  height: 100%;
   margin: 0;
-  display: block;
-  min-width: 320px;
-  min-height: 100vh;
+  padding: 0;
 }
-/*html, body {
-    overflow-x: hidden;   No me acuerdo pq lo pues pero creo q era porq se me salia algo de la pantalla, pero parece que ya no es necesario
-}*/
+
+/*Tipografia global consistente
+tipografias colores y ayudas al renderizado*/
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: #f4f4f5;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/*Ambos son herencias de tipografias para que todo sea uniforme*/
+button {
+  font-family: inherit;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}

@@ -1,0 +1,32 @@
+/*Contenerdor del input de ID*/
+.idInput {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/*El input*/
+.idInput input {
+    height:32px;
+    padding: 0 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size:0.85rem;
+    width:180px;
+}
+
+/*Boton*/
+.idInput button {
+    height:32px;
+    padding:0 0.75rem;
+    border-radius: 6px;
+    border: none;
+    background-color: #111111;
+    color: white;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.idInput button:hover {
+    background-color: #522c5a;
+}

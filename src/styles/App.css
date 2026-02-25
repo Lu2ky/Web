@@ -1,14 +1,20 @@
-/**, *::before,
- *::after {
-    box-sizing: border-box;
+/*Height para que se use todo el alto del view sin depender del contenido interno
+con layout flexible
+overflow hidden evita el scroll en body*/
+.App {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
 }
-* {                                     Esto es para ver un outline y ver q componentes se andan saliendo y eso
-  outline: 1px solid red;
-}                                           A TODO LO DE ABAJO LE SAQUE EL OVERFLOW HIDDEN PQ DAÑABA EL RESPONSIVE*/
-#root {
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
+
+/*Ocupa todo el espacio disponible despues del header (flex1)
+con min los componente spueden hacer overflow interno y el scroll funciona bien*/
+.mainContent {
+    flex:1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .App {
@@ -27,69 +33,5 @@ header {
     flex-shrink: 0;
     background: white;
     border-bottom: 1px solid #e5e7eb;
-}
- /* Lo cambie a mobile first */
-.mainContent {
-    display: grid;
-    grid-template-columns: 1fr; /*Cambiado a una sola columna para mobile first*/
-    gap: 1.5rem;
-    padding: 1.5rem;
-    flex: 1;
-    width: 100%;
-    overflow: visible;
-}
-
-.ToDoSection {
-    background: #f9fafb;
-    border-radius: 0.8rem;
-    padding: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    overflow-y: auto;
-    min-height: 0;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    order: 2;
-}
-
-.ToDoSection::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-}
-
-.CalendarSection {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    box-sizing: border-box;
-    min-height: 0;
-    order: 1;
-    overflow-x: auto; 
-}
-
-.Calendar {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    overflow-x: visible;
-}
-
-@media (min-width: 1024px) {
-    .mainContent {
-        grid-template-columns: 0.85fr 2.15fr; /* Cambiado a dos columnas para pantallas más grandes */
-    }
-
-    .ToDoSection {
-        order: 1; /* Cambiado el orden para pantallas más grandes */
-    }
-    
-    .CalendarSection {
-        order: 2; /* Cambiado el orden para pantallas más grandes */
-    }
 }
 

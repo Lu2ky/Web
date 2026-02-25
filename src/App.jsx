@@ -2,7 +2,6 @@ import "./styles/App.css";
 import {useState, useEffect} from "react";
 import {useCallback} from "react";
 import ApiFetcher from "./services/OficialFetcher";
-import IdInput from "./components/LogIn/IdInput";
 import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
@@ -11,38 +10,6 @@ import ToDoList from "./components/TodoList/ToDoList";
 import {PopUpClasses} from "./components/Calendar/PopUpClasses";
 import {getAllActivities} from "./services/personalActivitiesService";
 // Prueba de test CI/CD
-// Paleta de colores
-//otro test
-const colorPalette = [
-	"#FF6B6B",
-	"#4ECDC4",
-	"#45B7D1",
-	"#96CEB4",
-	"#FFEAA7",
-	"#DFE6E9",
-	"#74B9FF",
-	"#A29BFE",
-	"#FD79A8",
-	"#FDCB6E",
-	"#6C5CE7",
-	"#00B894",
-	"#FF7675",
-	"#55EFC4",
-	"#81ECEC",
-	"#FAB1A0",
-	"#E17055",
-	"#00CEC9"
-];
-
-// Función para asignar color consistente basado en nombre de materia
-function getColorForSubject(subjectName) {
-	let hash = 0;
-	for (let i = 0; i < subjectName.length; i++) {
-		hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
-	}
-	return colorPalette[Math.abs(hash) % colorPalette.length];
-}
-
 // Transforma los datos de la API al formato que usa la app
 function normalizeApiData(apiData) {
 	const dayMap = {
@@ -146,18 +113,17 @@ function App() {
 
 	return (
 		<div className="App">
-			<Header />
-			<IdInput
+			<Header
 				userId={userId}
 				setUserId={setUserId}
 				onSubmit={setSubmittedId}
 			/>
-			<ControlBar
-				viewMode={viewMode}
-				setViewMode={setViewMode}
-				onActivitySaved={handleActivitySaved}
-			/>
 			<div className="mainContent">
+				<ControlBar
+					viewMode={viewMode}
+					setViewMode={setViewMode}
+					onActivitySaved={handleActivitySaved}
+				/>
 				<div className="ToDoSection">
 					<ToDoList />
 				</div>
@@ -165,7 +131,6 @@ function App() {
 					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
 					<Calendar
 						viewMode={viewMode}
-<<<<<<< Updated upstream
 						setViewMode={setViewMode}
 						onActivitySaved={handleActivitySaved}
 					/>
@@ -191,13 +156,7 @@ function App() {
 					<PopUpClasses
 						isOpen={showClassPopup}
 						onClose={handleClosePopup}
-						classData={selectedClass}
-=======
-						events={classEvents}
-						personalEvents={personalEvents}
-						onClassClick={handleClassClick}
-						onDeletePersonal={handleDeletePersonal}
->>>>>>> Stashed changes
+							classData={selectedClass}
 					/>
 				</div>
 			</div>

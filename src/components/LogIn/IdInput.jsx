@@ -1,3 +1,4 @@
+import "../../Styles/IdInput.css";
 function IdInput({ userId, setUserId, onSubmit }) {
   const handleSubmit = () => {
     console.log("ID enviado:", userId);
@@ -11,12 +12,6 @@ function IdInput({ userId, setUserId, onSubmit }) {
         placeholder="Ingresa tu ID"
         value={userId}
         onChange={(e) => setUserId(e.target.value)}
-        style={{
-          padding: "0.5rem",
-          borderRadius: "8px",
-          border: "1px solid #ccc",
-          marginRight: "0.5rem",
-        }}
       />
       <button onClick={handleSubmit}>Guardar</button>
     </div>
