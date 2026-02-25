@@ -7,7 +7,7 @@ export const BlockPersonal = ({
   classroom,
   start_time,
   end_time,
-  background_color = "#b855d5",
+  background_color = "#c99cd7",
   style = {},
   onDelete = () => {},
 }) => {
