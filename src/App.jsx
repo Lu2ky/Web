@@ -1,5 +1,5 @@
 import "./styles/App.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useCallback } from "react";
 import ApiFetcher from "./services/OficialFetcher";
 import IdInput from "./components/LogIn/IdInput";
@@ -10,39 +10,10 @@ import { deleteActivity } from "./services/personalActivitiesService";
 import ToDoList from "./components/TodoList/ToDoList";
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
 import { getAllActivities } from "./services/personalActivitiesService";
-// Prueba de test CI/CD
+import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
+import { getCategories } from "./services/categoriesService";
 
-// Paleta de colores
-//otro test, este es el bueno
-const colorPalette = [
-	"#FF6B6B",
-	"#4ECDC4",
-	"#45B7D1",
-	"#96CEB4",
-	"#FFEAA7",
-	"#DFE6E9",
-	"#74B9FF",
-	"#A29BFE",
-	"#FD79A8",
-	"#FDCB6E",
-	"#6C5CE7",
-	"#00B894",
-	"#FF7675",
-	"#55EFC4",
-	"#81ECEC",
-	"#FAB1A0",
-	"#E17055",
-	"#00CEC9"
-];
 
-// Función para asignar color consistente basado en nombre de materia
-function getColorForSubject(subjectName) {
-	let hash = 0;
-	for (let i = 0; i < subjectName.length; i++) {
-		hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
-	}
-	return colorPalette[Math.abs(hash) % colorPalette.length];
-}
 // Transforma los datos de la API al formato que usa la app
 function normalizeApiData(apiData) {
 	const dayMap = {
@@ -65,12 +36,12 @@ function normalizeApiData(apiData) {
 		start_time: item.times[0].slice(0, 5),
 		end_time: item.times[1].slice(0, 5),
 		day: dayMap[item.times[2]] || "Lunes",
-		etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
+		etiqueta: item.Tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
 		// Datos para PopUp
 		campus: item.Campus,
 		credits: item.Credits?.Float64 || 0,
 		academicPeriod: item.academicPeriod,
-		tagColour: item.tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
+		tagColour: item.Tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 		// Datos originales
 		apiData: item
 	}));
@@ -87,6 +58,8 @@ function App() {
 	const [selectedClass, setSelectedClass] = useState(null); // Datos de la clase seleccionada para el popup
 	const [userId, setUserId] = useState(""); // ID ingresado por el usuario para cargar su horario
 	const [submittedId, setSubmittedId] = useState(""); // ID que se ha enviado para cargar datos (se actualiza al enviar el formulario)
+	const [themeId, setThemeId] = useState("default");
+	const [tagColorMap, setTagColorMap] = useState({});
 
 	// Cargar actividades personales desde localStorage al iniciar la app
 	useEffect(() => {
@@ -95,6 +68,8 @@ function App() {
 	}, []);
 	// Los datos de la API se cargan a través del componente ApiFetcher, que llama a handleDataLoaded cuando los datos están listos
 	const handleDataLoaded = useCallback(data => {
+		console.log("Primer item de la API:", data[0]); 
+		console.log("Todas las claves:", Object.keys(data[0]));
 		const normalized = normalizeApiData(data);
 		setClassEvents(normalized);
 	}, []);
@@ -135,12 +110,46 @@ function App() {
 		const personalActivities = getAllActivities();
 		setPersonalEvents(personalActivities);
 	};
-	// Elomona actividad personal, recarga la lista de actividades personales para actualizar la vista
+	// Elimina actividad personal, recarga la lista de actividades personales para actualizar la vista
 	const handleDeletePersonal = id => {
 		deleteActivity(id);
 		const personalActivities = getAllActivities();
 		setPersonalEvents(personalActivities);
 	};
+
+	useEffect(() => {
+		getCategories().then((categories) => {
+			const theme = THEME_OPTIONS.find((t) => t.id === themeId) || THEME_OPTIONS[0];
+			const palette = theme?.colors || THEME_OPTIONS[0].colors;
+			const map = {};
+			categories.forEach((cat, index) => {
+				map[cat] = palette[index % palette.length];
+			});
+			console.log("Claves del mapa:", Object.keys(map));
+			console.log("Etiquetas de eventos:", classEvents.map(e => e.etiqueta));
+			setTagColorMap(map);
+		});
+	}, [themeId]);
+
+	//Callback que recibe el ThemeSelector cuando se cambia el tema, actualiza el estado del tema
+	const handleThemeChange = (newThemeId) => {
+		setThemeId(newThemeId);
+	};
+
+	//Obtener color por etiqueta
+	const getTagColor = (tag) => {
+		return tagColorMap[tag] || "#b1d4f0"; // Color por defecto si no se encuentra la etiqueta
+	};
+	//Obtener color de texto (blanco o negro) según el color de fondo para asegurar legibilidad
+	const getContrastColor = (hex) => {
+		if (!hex) return "#000000";
+		const r = parseInt(hex.substr(1, 2), 16);
+		const g = parseInt(hex.substr(3, 2), 16);
+		const b = parseInt(hex.substr(5, 2), 16);
+		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+		return luminance > 0.5 ? "#000000" : "#FFFFFF";
+	};
+
 
 	return (
 		<div className="App">
@@ -154,6 +163,7 @@ function App() {
 				viewMode={viewMode}
 				setViewMode={setViewMode}
 				onActivitySaved={handleActivitySaved}
+				onThemeChange={handleThemeChange}
 			/>
 			<div className="mainContent">
 				<div className="ToDoSection">
@@ -167,6 +177,8 @@ function App() {
 						personalEvents={personalEvents}
 						onClassClick={handleClassClick}
 						onDeletePersonal={handleDeletePersonal}
+						tagColorMap={tagColorMap}
+						getContrastColor={getContrastColor}
 					/>
 					{/* Popup para detalles de clases  */}
 					<PopUpClasses

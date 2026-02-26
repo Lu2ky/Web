@@ -10,7 +10,7 @@ export async function getCategories() {
         "Teoría", 
         "Pastoral", 
         "Deportiva", 
-        "Centro de Lenguas",
+        "Centro de lenguas",
         "Personal", 
         "Cultural", 
         "Laboratorio"

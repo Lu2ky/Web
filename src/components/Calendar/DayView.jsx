@@ -3,7 +3,7 @@ import "../../styles/DayView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
 
-function DayView({ events = [], personalEvents = [], onClassClick = () => {}, onDeletePersonal = () => {} }) {
+function DayView({ events = [], personalEvents = [], onClassClick = () => {}, onDeletePersonal = () => {}, tagColorMap = {}, getContrastColor = () => "#000000"}) {
     const hours = Array.from({ length: 24 }, (_, i) => i);
     const MINUTES_IN_HOUR = 60;
     const [hourPx, setHourPx] = useState(0);
@@ -142,7 +142,6 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                             },
                             start_time: event.start_time,
                             end_time: event.end_time,
-                            background_color: event.color || "#a59090",
                         };
 
                         return isClass ? (
@@ -153,7 +152,10 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                                 professor_name={event.professor_name || "No disponible"}
                                 classroom={event.classroom || "No disponible"}
                                 nrc={event.nrc}
+                                tag={event.etiqueta}
                                 onClick={() => onClassClick(event)}
+                                background_color={tagColorMap[event.etiqueta] || "#a2bbd8"}
+                                text_color={getContrastColor(tagColorMap[event.etiqueta])}
                             />
                         ) : (
                             <BlockPersonal
@@ -163,6 +165,8 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                                 subject_name={event.activity_name || event.subject_name}
                                 classroom={event.location || event.classroom}
                                 onDelete={() => onDeletePersonal(event.id)}
+                                background_color={tagColorMap["Personal"] || "#a59090"}
+                                text_color={getContrastColor(tagColorMap["Personal"])}
                             />
                         );
                     })}
