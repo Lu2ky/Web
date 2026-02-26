@@ -1,6 +1,6 @@
 /* Botón */
 
-.theme-selector-button {
+.themeSelectorButton {
   background:
     linear-gradient(white, white) padding-box,
     linear-gradient(135deg, #ff006e, #a100ff) border-box;
@@ -18,22 +18,22 @@
   height: 45px;
 }
 
-.theme-selector-button svg {
+.themeSelectorButton svg {
   font-size: 20px;
 }
 
-.theme-selector-button:hover {
+.themeSelectorButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 22px rgba(161, 0, 255, 0.35);
 }
 
-.theme-selector-button:active {
+.themeSelectorButton:active {
   transform: scale(0.96);
 }
 
 /* Overlay */
 
-.theme-modal-overlay {
+.themeModalOverlay {
   position: fixed;
   inset: 0;
   background: rgba(25, 0, 40, 0.45);
@@ -46,17 +46,17 @@
   transition: opacity 0.2s ease;
 }
 
-.theme-modal-overlay.hide {
+.themeModalOverlay.hide {
   opacity: 0;
 }
 
-.theme-modal-overlay.show {
+.themeModalOverlay.show {
   opacity: 1;
 }
 
 /* Modal */
 
-.theme-modal {
+.themeModal {
   width: 100%;
   max-width: 520px;
   max-height: 75vh;
@@ -87,7 +87,7 @@
 
 /* Titulo*/
 
-.theme-modal h2 {
+.themeModal h2 {
   font-size: 1.6rem;
   margin-bottom: 1.2rem;
   background: #040103;
@@ -100,7 +100,7 @@
 
 /* Grid */
 
-.theme-grid {
+.themeGrid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.9rem;
@@ -108,7 +108,7 @@
 
 /* Cards */
 
-.theme-card {
+.themeCard {
   background: #faf6ff;
   border-radius: 0.9rem;
   padding: 0.9rem;
@@ -117,17 +117,17 @@
   transition: all 0.25s ease;
 }
 
-.theme-card:hover {
+.themeCard:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 18px rgba(210, 19, 201, 0.15);
 }
 
-.theme-card.active {
+.themeCard.active {
   border: 2px solid #ff006e;
   background: #fff0f8;
 }
 
-.theme-title {
+.themeTitle {
   font-size: 0.95rem;
   font-weight: 600;
   margin-bottom: 0.6rem;
@@ -136,13 +136,13 @@
 
 /* Chips */
 
-.theme-preview {
+.themePreview {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
 }
 
-.subject-chip {
+.subjectChip {
   padding: 0.3rem 0.55rem;
   border-radius: 0.5rem;
   font-size: 0.7rem;
@@ -150,13 +150,13 @@
   transition: transform 0.2s ease;
 }
 
-.theme-card:hover .subject-chip {
+.themeCard:hover .subjectChip {
   transform: scale(1.05);
 }
 
 /* Boton de cerrar */
 
-.close-modal {
+.closeModal {
   margin: 2rem auto 0 auto;
   display: block;
   background:
@@ -171,7 +171,7 @@
   transition: all 0.25s ease;
 }
 
-.close-modal:hover {
+.closeModal:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(36, 1, 57, 0.3);
 }

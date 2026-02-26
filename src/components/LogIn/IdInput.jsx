@@ -18,7 +18,7 @@ function IdInput({ userId, setUserId, onSubmit }) {
           marginRight: "0.5rem",
         }}
       />
-      <button onClick={handleSubmit}>Guardar</button>
+      <button onClick={handleSubmit} type="button">Guardar</button>
     </div>
   );
 }

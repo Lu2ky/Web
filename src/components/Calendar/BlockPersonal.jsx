@@ -7,7 +7,8 @@ export const BlockPersonal = ({
   classroom,
   start_time,
   end_time,
-  background_color = "#b855d5",
+  background_color = "#c99cd7",
+  text_color = "#000000", 
   style = {},
   onDelete = () => {},
 }) => {
@@ -43,6 +44,8 @@ export const BlockPersonal = ({
       <button
         className="activity-delete-button"
         aria-label="Eliminar actividad"
+        title="Eliminar actividad"
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           onDelete(id);

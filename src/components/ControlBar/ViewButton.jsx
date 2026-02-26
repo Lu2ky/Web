@@ -16,6 +16,8 @@ function ViewButton({viewMode, setViewMode}) {
 					key={option}
 					className={index === selected ? "active" : ""}
 					onClick={() => setViewMode(option)}
+					title={`Vista ${option}`}
+					type="button"
 				>
 					{option}
 				</button>

@@ -63,6 +63,7 @@ export const CommentButton = ({ on_add_comment }) => {
         type="button"
         onClick={toggle_open}
         aria-expanded={is_open}
+        title="Agregar comentario"
       >
         <span className="add-comment-plus">+</span>
         <span className="add-comment-label">Agregar Comentario</span>

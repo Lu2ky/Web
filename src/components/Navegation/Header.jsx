@@ -15,6 +15,8 @@ function Header() {
 				className="menuButton"
 				onClick={() => setIsMenuOpen(true)}		/*PARA LO DEL MENU HAMBURGUESA*/
 				aria-label="Abrir menú"
+				title="Abrir menú"
+				type="button"
 			>
 				☰
 			</button>

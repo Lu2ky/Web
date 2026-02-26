@@ -7,13 +7,13 @@ export async function getCategories() {
     }
 
     const data = [
-        "Todo",
-        "Matemática",
-        "Física",
-        "Programación",
-        "Química",
-        "Historia",
-        "Personal"
+        "Teoría", 
+        "Pastoral", 
+        "Deportiva", 
+        "Centro de lenguas",
+        "Personal", 
+        "Cultural", 
+        "Laboratorio"
     ];
 
     cachedCategories = data;

@@ -12,6 +12,7 @@ export const BlockClasses = ({
   start_time,
   end_time,
   background_color = "#ddc8b7", // Color por defecto 
+  text_color = "#000000", // Color de texto por defecto
   style = {},
   onClick = () => {},
 }) => {
@@ -42,7 +43,7 @@ export const BlockClasses = ({
   return (
     <div
       className={"activity-card" + (is_mounted ? " enter" : "")}
-      style={{ ...style, backgroundColor: background_color, cursor: "pointer" }}
+      style={{ ...style, backgroundColor: background_color, color: text_color, cursor: "pointer" }}
       onClick={onClick}
     >
       <div className="activity-card-header">

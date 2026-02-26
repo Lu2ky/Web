@@ -44,7 +44,13 @@ export default function MessageConfirmation({
                 <div className="confirmacion-message-content">
                     {/* Botón de cierre */}
                     <div className="confirmacion-message-close-container">
-                        <button className="confirmacion-message-close-btn" onClick={onClose}>
+                        <button
+                            className="confirmacion-message-close-btn"
+                            onClick={onClose}
+                            title="Cerrar"
+                            aria-label="Cerrar"
+                            type="button"
+                        >
                             <CloseIcon />
                         </button>
                     </div>

@@ -42,7 +42,7 @@ function ToDoFilterModal({ isOpen, onClose, onApply, initialFilters = defaultFil
             <div className="modalContainer" onClick={e => e.stopPropagation()}>
                 <h2>Filtrar tareas</h2>
 
-                <button className="modalClose" onClick={onClose}>
+                <button className="modalClose" onClick={onClose} title="Cerrar" aria-label="Cerrar" type="button">
                     X
                 </button>
 

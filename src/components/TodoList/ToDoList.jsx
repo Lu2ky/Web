@@ -189,6 +189,9 @@ function ToDoList({ userId = "" }) {
             <button
                 className="todo-drawer-toggle"
                 onClick={() => setIsDrawerOpen(true)}
+                title={isDrawerOpen ? "Cerrar lista de tareas" : "Abrir lista de tareas"}
+                aria-label={isDrawerOpen ? "Cerrar lista de tareas" : "Abrir lista de tareas"}
+                type="button"
             >
             </button>
             {isDrawerOpen && (
@@ -223,7 +226,9 @@ function ToDoList({ userId = "" }) {
                                 <button
                                     className={`todolist-task-checkbox${task.completed ? " checked" : ""}`}
                                     onClick={() => toggleTask(task.id)}
-                                    aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
+                                    aria-label={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
+                                    title={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
+                                    type="button"
                                 />
                                 <span className="todolist-task-name">{task.name}</span>
                                 <EditButton onClick={() => editTask(task.id)} />

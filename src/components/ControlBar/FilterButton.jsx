@@ -11,7 +11,7 @@ function FilterButton({selectedTag, setSelectedTag}) {
 	useEffect(() => {
 		const loadCategories = async () => {
 			const data = await getCategories();
-			setCategories(data);
+			setCategories(["Todos", ...data]);
 		};
 		loadCategories();
 	}, []);
@@ -39,6 +39,8 @@ function FilterButton({selectedTag, setSelectedTag}) {
 				className="filterButton"
 				onClick={() => setIsOpen(!isOpen)}
 				aria-expanded={isOpen}
+				title="Filtrar actividades"
+				type="button"
 			>
 				<FaFilter className="filterIcon" />
 				Filtrar: {selectedTag}
@@ -51,6 +53,8 @@ function FilterButton({selectedTag, setSelectedTag}) {
 							<button
 								className={`filterOption ${selectedTag === category ? "selected" : ""}`}
 								onClick={() => handleSelect(category)}
+								title={`Filtrar por ${category}`}
+								type="button"
 							>
 								{category}
 							</button>
