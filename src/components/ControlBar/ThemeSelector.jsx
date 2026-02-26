@@ -85,6 +85,7 @@ export const ThemeSelector = ({ onThemeChange }) => {
                 className={`themeSelectorButton ${is_saved_anim ? "themeSaved" : ""}`}
                 onClick={toggle_modal}
                 aria-label="Selector de temas"
+                title="Selector de temas"
                 type="button"
             >
                 <IoColorPalette />
@@ -104,6 +105,8 @@ export const ThemeSelector = ({ onThemeChange }) => {
                                         className={`themeCard ${current_theme === theme.id ? "active" : ""}`}
                                         onClick={() => handle_theme_change(theme.id)}
                                         type="button"
+                                        title={`Seleccionar ${theme.name}`}
+                                        aria-label={`Seleccionar tema ${theme.name}`}
                                     >
                                         <h3 className="themeTitle">{theme.name}</h3>
                                         <div className="themePreview">
@@ -125,7 +128,7 @@ export const ThemeSelector = ({ onThemeChange }) => {
                                     </button>
                                 ))}
                             </div>
-                            <button className="closeModal" onClick={toggle_modal}>Cerrar</button>
+                            <button className="closeModal" onClick={toggle_modal} title="Cerrar" aria-label="Cerrar" type="button">Cerrar</button>
                         </div>
                     </div>
                 )
