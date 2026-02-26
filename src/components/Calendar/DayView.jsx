@@ -103,6 +103,9 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                 <button 
                     className="daySelectorArrow"
                     onClick={() => setDayOffset(dayOffset - 1)}
+                    title="Día anterior"
+                    aria-label="Día anterior"
+                    type="button"
                 >
                     ←
                 </button>
@@ -112,6 +115,9 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                 <button 
                     className="daySelectorArrow"
                     onClick={() => setDayOffset(dayOffset + 1)}
+                    title="Día siguiente"
+                    aria-label="Día siguiente"
+                    type="button"
                 >
                     →
                 </button>

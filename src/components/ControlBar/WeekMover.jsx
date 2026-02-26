@@ -48,6 +48,9 @@ function WeekMover() {
 			<button
 				className="dateBoxArrowBox"
 				onClick={() => setWeekOffset(weekOffset - 1)}
+				title="Semana anterior"
+				aria-label="Semana anterior"
+				type="button"
 			>
 				<span>←</span>
 			</button>
@@ -59,6 +62,9 @@ function WeekMover() {
 			<button
 				className="dateBoxArrowBox"
 				onClick={() => setWeekOffset(weekOffset + 1)}
+				title="Semana siguiente"
+				aria-label="Semana siguiente"
+				type="button"
 			>
 				<span>→</span>
 			</button>
