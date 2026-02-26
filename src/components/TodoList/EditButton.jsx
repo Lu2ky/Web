@@ -11,7 +11,7 @@ export default function EditButton({
 			className={`edit-button ${className}`.trim()}
 			onClick={onClick}
 			title={title}
-			aria-label="Edit task"
+			aria-label={title}
 			type="button"
 		>
 			<svg

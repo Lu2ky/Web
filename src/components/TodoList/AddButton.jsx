@@ -176,7 +176,13 @@ function AddButton({ onToDoSaved }) {
 
     return (
         <>
-            <button className="addButton" onClick={() => setIsOpen(true)}>
+            <button
+                className="addButton"
+                onClick={() => setIsOpen(true)}
+                title="Agregar tarea"
+                aria-label="Agregar tarea"
+                type="button"
+            >
             </button>
             {isOpen && (
                 <div
@@ -193,11 +199,16 @@ function AddButton({ onToDoSaved }) {
                     >
                         <h2>Recordatorio</h2>
 
-                        <button className="modalClose"
+                        <button
+                            className="modalClose"
                             onClick={() => {
                                 setShowCalendar(false);
                                 setIsOpen(false);
-                            }}>
+                            }}
+                            title="Cerrar"
+                            aria-label="Cerrar"
+                            type="button"
+                        >
                             X
                         </button>
 
@@ -242,6 +253,7 @@ function AddButton({ onToDoSaved }) {
                                 type="button"
                                 className="calendarToggle"
                                 aria-label="Abrir Calendario"
+                                title="Abrir Calendario"
                                 onClick={() => setShowCalendar(!showCalendar)}
                             >
                                 📅
@@ -293,6 +305,7 @@ function AddButton({ onToDoSaved }) {
                                                 className="tagChipRemove"
                                                 onClick={() => removeTag(t)}
                                                 aria-label={`Quitar ${t}`}
+                                                title={`Quitar ${t}`}
                                             >
                                                 ✕
                                             </button>

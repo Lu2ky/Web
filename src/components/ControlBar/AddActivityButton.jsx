@@ -105,7 +105,7 @@ function AddActivityButton({ onActivitySaved }) {
                     >
                         <h2>Nueva Actividad</h2>
 
-                        <button className="modalClose" onClick={() => setIsOpen(false)}>
+                        <button className="modalClose" onClick={() => setIsOpen(false)} title="Cerrar" aria-label="Cerrar" type="button">
                             X
                         </button>
                         {error && <p className="errorMessage">{error}</p>}

@@ -44,6 +44,8 @@ export const BlockPersonal = ({
       <button
         className="activity-delete-button"
         aria-label="Eliminar actividad"
+        title="Eliminar actividad"
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           onDelete(id);

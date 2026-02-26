@@ -150,6 +150,9 @@ export default function TaskEditModal({
                         setShowCalendar(false);
                         onClose();
                     }}
+                    title="Cerrar"
+                    aria-label="Cerrar"
+                    type="button"
                 >
                     X
                 </button>
@@ -280,6 +283,8 @@ export default function TaskEditModal({
                             type="button"
                             className="addTagButton"
                             onClick={handleAddTag}
+                            title="Agregar etiqueta"
+                            aria-label="Agregar etiqueta"
                         >
                             +
                         </button>

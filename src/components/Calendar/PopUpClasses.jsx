@@ -146,6 +146,8 @@ export const PopUpClasses = ({
                         className="delete-comment-button"
                         onClick={() => handle_delete_comment(comment.id)}
                         title="Eliminar comentario"
+                        aria-label="Eliminar comentario"
+                        type="button"
                       >
                         ✕
                       </button>
