@@ -10,5 +10,5 @@ RUN npm run build
 
 FROM alpine:3.23.3
 WORKDIR /app
-COPY --from=builder /app/dist .
-CMD ["serve", "-s", "dist", "-l", "5173"]
+COPY --from=builder /app/dist /usr/share/nginx/html
+CMD ["nginx", "-g" , "daemon off;"]
