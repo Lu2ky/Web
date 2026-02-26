@@ -11,7 +11,7 @@ function FilterButton({selectedTag, setSelectedTag}) {
 	useEffect(() => {
 		const loadCategories = async () => {
 			const data = await getCategories();
-			setCategories(data);
+			setCategories(["Todos", ...data]);
 		};
 		loadCategories();
 	}, []);

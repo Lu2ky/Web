@@ -19,7 +19,7 @@ export const THEME_OPTIONS = [
         {
             id: "palette03",
             name: "Sunrise Forest",
-            colors: ["#000000", "#1F3B1F", "#3F2B2F", "#01762e", "#F2B705", "#C79200", "#E6E6E6"]
+            colors: ["#7e5656", "#1F3B1F", "#3F2B2F", "#01762e", "#F2B705", "#C79200", "#E6E6E6"]
         },
         {
             id: "palette04",

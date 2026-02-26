@@ -69,7 +69,6 @@ function App() {
 	// Los datos de la API se cargan a través del componente ApiFetcher, que llama a handleDataLoaded cuando los datos están listos
 	const handleDataLoaded = useCallback(data => {
 		console.log("Primer item de la API:", data[0]); 
-		console.log("Todas las claves:", Object.keys(data[0]));
 		const normalized = normalizeApiData(data);
 		setClassEvents(normalized);
 	}, []);
@@ -125,8 +124,6 @@ function App() {
 			categories.forEach((cat, index) => {
 				map[cat] = palette[index % palette.length];
 			});
-			console.log("Claves del mapa:", Object.keys(map));
-			console.log("Etiquetas de eventos:", classEvents.map(e => e.etiqueta));
 			setTagColorMap(map);
 		});
 	}, [themeId]);

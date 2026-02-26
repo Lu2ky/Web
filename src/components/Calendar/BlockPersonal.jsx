@@ -8,7 +8,7 @@ export const BlockPersonal = ({
   start_time,
   end_time,
   background_color = "#c99cd7",
-  text_color = "#000000",
+  text_color = "#000000", 
   style = {},
   onDelete = () => {},
 }) => {
@@ -39,7 +39,7 @@ export const BlockPersonal = ({
   return (
     <div
       className={"activity-card" + (is_mounted ? " enter" : "")}
-      style={{ ...style, backgroundColor: background_color, color: text_color }}
+      style={{ ...style, backgroundColor: background_color }}
     >
       <button
         className="activity-delete-button"
