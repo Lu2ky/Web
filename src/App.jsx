@@ -3,7 +3,6 @@ import {useState, useEffect} from "react";
 import {useCallback} from "react";
 import ApiFetcher from "./services/OficialFetcher";
 import Header from "./components/Navegation/Header";
-import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
 import {deleteActivity} from "./services/personalActivitiesService";
 import ToDoList from "./components/TodoList/ToDoList";
@@ -119,14 +118,6 @@ function App() {
 				onSubmit={setSubmittedId}
 			/>
 			<div className="mainContent">
-				<ControlBar
-					viewMode={viewMode}
-					setViewMode={setViewMode}
-					onActivitySaved={handleActivitySaved}
-				/>
-				<div className="ToDoSection">
-					<ToDoList />
-				</div>
 				<div className="CalendarSection">
 					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
 					<Calendar

@@ -1,0 +1,99 @@
+/*Unificar alturas para evitar repeticion innecesaria*/
+:root{
+    --hours-height: 4rem;
+    --hours-column-width: 5rem;
+}
+
+/*Contenedor principal*/
+.calendarWrapper{
+    display:flex;
+    flex-direction: column;
+    height:100%;
+    width:100%;
+    background: white;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+}
+
+/*Header generico*/
+.calendarheaderRow {
+    display:grid;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+/*area del scroll*/
+.calendarScrollArea {
+    flex:1;
+    overflow-y:auto;
+    position:relative;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    padding-bottom: 80px;
+}
+
+.calendarScrollArea::-webkit-scrollbar {
+    display:none;
+}
+
+/*grid*/
+.calendarGrid {
+    display:grid;
+    position:relative;
+}
+
+/*Columna de horas*/
+.hoursColumn {
+    width: var(--hours-column-width);
+    border-right: 1px solid #e5e7eb;
+}
+
+/*Celda de hora*/
+.hourSlot {
+    height: var(--hours-height);
+    padding: 0.5rem;
+    font-size:0.75rem;
+    color: #6b7280;
+    border-bottom: 1px solid #f3f4f6;
+    display:flex;
+    align-items: flex-start;
+}
+
+/*fondo */
+.timelineColumn {
+    position:relative;
+}
+
+/*Linea para dividir horas*/
+.timeSlot {
+    height: var(--hours-height);
+    border-bottom: 1px solid #f3f4f6;
+}
+
+/*Capa de bloques*/
+.eventsLayer {
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    pointer-events: none;
+}
+
+.eventsLayer > * {
+    pointer-events: auto;
+    position:absolute;
+    z-index: 20;
+}
+
+.controlBarSticky {
+    position:sticky;
+    bottom:0;
+    display:flex;
+    justify-content: center;
+    padding: 1rem 0;
+    z-index: 20;
+    background: linear-gradient(to top,
+    rgba(255,255,255,1)70%,
+    rgba(255,255,255,0)
+    );
+}

@@ -45,6 +45,9 @@ function AddActivityButton({ onActivitySaved }) {
         if (startTotal >= endTotal) {
             return "La hora de inicio debe ser menor que la hora de fin.";
         }
+        if (!formData.day) {
+            return "Debes seleccionar un dia";
+        }
         return "";
     };
 

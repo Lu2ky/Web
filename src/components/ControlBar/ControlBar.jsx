@@ -1,5 +1,5 @@
 import "../../styles/ControlBar.css";
-import ViewButton from "./ViewButton";
+import ViewButton from "../ControlBar/ViewButton";
 
 function ControlBar({viewMode, setViewMode}) {
     /*const [selectedTag, setSelectedTag] = useState("Todo");*/

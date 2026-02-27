@@ -15,11 +15,11 @@
     border: none;
     background: transparent;
     color: #000000;
-    padding: 10px 20px;
+    padding: 10px 16px;
     cursor: pointer;
     font-weight: 500;
-    border-radius: 12px;
-    transition: color 0.3s ease;
+    border-radius: 10px;
+    transition: color 0.25s ease;
 }
 
 .segmented button.active{
@@ -31,8 +31,7 @@
     top: 4px;
     bottom: 4px;
     left: 4px;
-    width: calc(50% - 4px);
     background: linear-gradient(135deg, #ff006e, #c026d3);
-    border-radius: 12px;
+    border-radius: 10px;
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
