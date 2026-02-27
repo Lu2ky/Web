@@ -252,8 +252,9 @@ function AddButton({ onToDoSaved }) {
                             <button
                                 type="button"
                                 className="calendarToggle"
-                                aria-label="Abrir Calendario"
-                                title="Abrir Calendario"
+                                   data-tooltip="Abrir calendario"
+                                   aria-label="Abrir Calendario"
+                                   title="Abrir Calendario"
                                 onClick={() => setShowCalendar(!showCalendar)}
                             >
                                 📅

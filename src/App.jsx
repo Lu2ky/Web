@@ -40,7 +40,6 @@ function normalizeApiData(apiData) {
 		// Datos para PopUp
 		campus: item.Campus,
 		credits: item.Credits?.Float64 || 0,
-		academicPeriod: item.academicPeriod,
 		tagColour: item.Tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 		// Datos originales
 		apiData: item

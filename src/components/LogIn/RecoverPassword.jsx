@@ -1,5 +1,5 @@
 import Logo from '../../assets/logo.png';
-import '../../styles/RecoveryPassword.css';
+import '../../styles/RecoverPassword.css';
 import { MdEmail } from "react-icons/md"; //  npm install react-icons --save
 
 const RecoverPassword = () => {
