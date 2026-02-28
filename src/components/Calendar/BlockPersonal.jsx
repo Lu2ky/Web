@@ -39,7 +39,7 @@ export const BlockPersonal = ({
   return (
     <div
       className={"activity-card" + (is_mounted ? " enter" : "")}
-      style={{ ...style, backgroundColor: background_color }}
+      style={{ ...style, backgroundColor: background_color, color: text_color, cursor: "pointer"  }}
     >
       <button
         className="activity-delete-button"
