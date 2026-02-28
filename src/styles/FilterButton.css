@@ -2,7 +2,9 @@
 
 .filterContainer {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-family: system-ui, -apple-system, sans-serif;
 }
 
@@ -10,7 +12,7 @@
 /* Botón Principal */
 
 .filterButton {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 0.7rem 1.2rem;
@@ -21,7 +23,7 @@
     cursor: pointer;
     transition: all 0.25s ease;
     color: #000000;
-    line-height: 1;
+    line-height: 1.5rem;
 
     /* Borde degradado */
     border: 2px solid transparent;
@@ -49,11 +51,8 @@
 .filterButton:active,
 .filterButton:focus {
     outline: none;
-    background-image:
-        linear-gradient(white, white),
-        linear-gradient(135deg, #ff006e, #c026d3);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    background-image: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
     transform: scale(0.97);
 }
 
@@ -120,33 +119,38 @@
 
 /*RESPONSIVE EN MOBILE*/
 @media (max-width: 768px) {
-    .filterButton > * {
-        display: none;
-    }
-    .filterMenu {
-        left:-100px;
-    }
-    
-    .ControlBar .filterButton {
+    .filterButton {
         font-size: 0;
         width: 36px;
         height: 36px;
         padding: 0;
-        border-radius: 25%;
+        gap: 0;
+        border-radius: 0.6rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow:hidden;
+        overflow: visible;
     }
 
-    .filterButton::before {
-        content: "\1F50D";
-        font-size: 1.5rem;
-        color: rgb(0, 0, 0);
-        line-height:1;
-        display: flex; /*ESO DEL TRANSFORM ES PQ NO SE QUERIA CENTRAR */
-        align-items: center;
-        justify-content: center;
-        transform: translateX(4.5px);
+    .filterIcon {
+        font-size: 16px;
+        display: block;
+        line-height: 1;
+        margin: 0;
+    }
+
+    .filterMenu {
+        position: absolute;
+        bottom: 115%;
+        right: 0;
+        left: auto;
+        min-width: 150px;
+        max-width: 90vw;
+        border-radius: 0.8rem;
+    }
+
+    .filterOption {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
     }
 }
