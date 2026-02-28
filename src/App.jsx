@@ -1,18 +1,17 @@
 import "./styles/App.css";
-import { useState, useEffect, use } from "react";
-import { useCallback } from "react";
+import {useState, useEffect, use} from "react";
+import {useCallback} from "react";
 import ApiFetcher from "./services/OficialFetcher";
 import IdInput from "./components/LogIn/IdInput";
 import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
-import { deleteActivity } from "./services/personalActivitiesService";
+import {deleteActivity} from "./services/personalActivitiesService";
 import ToDoList from "./components/TodoList/ToDoList";
-import { PopUpClasses } from "./components/Calendar/PopUpClasses";
-import { getAllActivities } from "./services/personalActivitiesService";
-import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
-import { getCategories } from "./services/categoriesService";
-
+import {PopUpClasses} from "./components/Calendar/PopUpClasses";
+import {getAllActivities} from "./services/personalActivitiesService";
+import {THEME_OPTIONS} from "./components/ControlBar/ThemeOptions";
+import {getCategories} from "./services/categoriesService";
 
 // Transforma los datos de la API al formato que usa la app
 function normalizeApiData(apiData) {
@@ -36,12 +35,11 @@ function normalizeApiData(apiData) {
 		start_time: item.times[0].slice(0, 5),
 		end_time: item.times[1].slice(0, 5),
 		day: dayMap[item.times[2]] || "Lunes",
-		etiqueta: item.Tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
+		etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
 		// Datos para PopUp
-		campus: item.Campus,
-		credits: item.Credits?.Float64 || 0,
-		academicPeriod: item.academicPeriod,
-		tagColour: item.Tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
+		campus: item.campus,
+		credits: item.credits?.Float64 || 0,
+		tagColour: item.tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 		// Datos originales
 		apiData: item
 	}));
@@ -117,8 +115,9 @@ function App() {
 	};
 
 	useEffect(() => {
-		getCategories().then((categories) => {
-			const theme = THEME_OPTIONS.find((t) => t.id === themeId) || THEME_OPTIONS[0];
+		getCategories().then(categories => {
+			const theme =
+				THEME_OPTIONS.find(t => t.id === themeId) || THEME_OPTIONS[0];
 			const palette = theme?.colors || THEME_OPTIONS[0].colors;
 			const map = {};
 			categories.forEach((cat, index) => {
@@ -129,16 +128,16 @@ function App() {
 	}, [themeId]);
 
 	//Callback que recibe el ThemeSelector cuando se cambia el tema, actualiza el estado del tema
-	const handleThemeChange = (newThemeId) => {
+	const handleThemeChange = newThemeId => {
 		setThemeId(newThemeId);
 	};
 
 	//Obtener color por etiqueta
-	const getTagColor = (tag) => {
+	const getTagColor = tag => {
 		return tagColorMap[tag] || "#b1d4f0"; // Color por defecto si no se encuentra la etiqueta
 	};
 	//Obtener color de texto (blanco o negro) según el color de fondo para asegurar legibilidad
-	const getContrastColor = (hex) => {
+	const getContrastColor = hex => {
 		if (!hex) return "#000000";
 		const r = parseInt(hex.substr(1, 2), 16);
 		const g = parseInt(hex.substr(3, 2), 16);
@@ -146,7 +145,6 @@ function App() {
 		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 		return luminance > 0.5 ? "#000000" : "#FFFFFF";
 	};
-
 
 	return (
 		<div className="App">
