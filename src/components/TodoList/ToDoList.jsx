@@ -192,7 +192,9 @@ function ToDoList({ userId = "" }) {
                 title={isDrawerOpen ? "Cerrar lista de tareas" : "Abrir lista de tareas"}
                 aria-label={isDrawerOpen ? "Cerrar lista de tareas" : "Abrir lista de tareas"}
                 type="button"
+                style={{display: isDrawerOpen ? 'none' : undefined}}
             >
+                TO-DO
             </button>
             {isDrawerOpen && (
                 <div
@@ -286,5 +288,6 @@ function ToDoList({ userId = "" }) {
         </>
     );
 }
+
 
 export default ToDoList;

@@ -175,3 +175,14 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(36, 1, 57, 0.3);
 }
+
+@media(max-width: 768px) {
+  .themeSelectorButton {
+    width:36px;
+    height:36px;
+  }
+
+  .themeSelectorButton svg{
+    font-size:16px;
+  }
+}

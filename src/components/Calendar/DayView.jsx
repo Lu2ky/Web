@@ -85,7 +85,7 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                 eventToGroup[e.id] = groups.length - 1;
             }
         });
-        
+    
         const groupIndex = eventToGroup[event.id] || 0;
         const width = 100 / groups.length;
         const left = (groupIndex * width);

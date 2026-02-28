@@ -36,3 +36,14 @@
     border-radius: 12px;
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+@media (max-width: 768px) {
+    .segmented {
+        width: 140px;
+    }
+
+    .segmented button {
+        padding: 7px 10px;
+        font-size: 0.8rem;
+    }
+}

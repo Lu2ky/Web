@@ -51,6 +51,7 @@ function App() {
 		return window.innerWidth <= 425 ? "Diario" : "Semanal"; // Vista inicial basada en el ancho de la pantalla (mobile chiquito vs desktop)
 	};
 	const [viewMode, setViewMode] = useState(getInitialView()); // "Semanal" o "Diario"
+	const [weekOffset, setWeekOffset] = useState(0); // Offset para semana (0 = semana actual), NO MOVER NI QUITAR O SE CAE TODO
 	const [classEvents, setClassEvents] = useState([]); // Eventos de clases oficiales
 	const [personalEvents, setPersonalEvents] = useState([]); // Eventos personales (actividades guardadas)
 	const [showClassPopup, setShowClassPopup] = useState(false); // Para mostrar/ocultar el popup de detalles de clase
@@ -150,23 +151,18 @@ function App() {
 	return (
 		<div className="App">
 			<Header />
-			<IdInput
+			{/*<IdInput
 				userId={userId}
 				setUserId={setUserId}
 				onSubmit={setSubmittedId}
-			/>
-			<ControlBar
-				viewMode={viewMode}
-				setViewMode={setViewMode}
-				onActivitySaved={handleActivitySaved}
-				onThemeChange={handleThemeChange}
-			/>
+			/>*/}
 			<div className="mainContent">
 				<div className="ToDoSection">
 					<ToDoList userId={submittedId} />
 				</div>
 				<div className="CalendarSection">
 					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
+
 					<Calendar
 						viewMode={viewMode}
 						events={classEvents}
@@ -181,6 +177,14 @@ function App() {
 						isOpen={showClassPopup}
 						onClose={handleClosePopup}
 						classData={selectedClass}
+					/>
+					<ControlBar
+						viewMode={viewMode}
+						setViewMode={setViewMode}
+						weekOffset={weekOffset}
+						setWeekOffset={setWeekOffset}
+						onActivitySaved={handleActivitySaved}
+						onThemeChange={handleThemeChange}
 					/>
 				</div>
 			</div>

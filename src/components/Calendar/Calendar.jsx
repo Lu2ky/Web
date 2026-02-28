@@ -1,4 +1,3 @@
-
 import WeekView from "./WeekView";
 import DayView from "./DayView";
 
@@ -10,31 +9,26 @@ function Calendar({ viewMode, events = [], personalEvents = [], onClassClick = (
     // Se devuelve según la vista seleccionada, pasando los eventos, los eventos personales
     return (
         <div className="Calendar">
-            {isDayView ? (
-                <DayView
+                {isDayView ? (
+                    <DayView 
                     events={events}
                     personalEvents={personalEvents}
-                    onClassClick={onClassClick}
-                    onDeletePersonal={onDeletePersonal}
+                        onClassClick={onClassClick} 
+                        onDeletePersonal={onDeletePersonal}
                     tagColorMap={tagColorMap}
                     getContrastColor={getContrastColor}
-                />
-            ) : (
-                <WeekView
+                    />
+                ) : (
+                    <WeekView
                     events={events}
                     personalEvents={personalEvents}
-                    onClassClick={onClassClick}
-                    onDeletePersonal={onDeletePersonal}
+                        onClassClick={onClassClick}
+                        onDeletePersonal={onDeletePersonal}
                     tagColorMap={tagColorMap}
                     getContrastColor={getContrastColor}
-                />
-            )}
+                    />
+                )}
         </div>
     );
 }
-
-
-
 export default Calendar;
-
-
