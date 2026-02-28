@@ -12,10 +12,9 @@ function ControlBar({viewMode, setViewMode, onActivitySaved, onThemeChange}) {
     return (
         <div className="ControlBar">
             <div className="Left">
-                <ViewButton viewMode={viewMode} setViewMode={setViewMode} />
+            <ViewButton viewMode={viewMode} setViewMode={setViewMode} />
             </div>
             <div className="Center">
-                <WeekMover />
             </div>
             <div className="Right">
                 <AddButton onActivitySaved={onActivitySaved} />

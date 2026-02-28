@@ -14,11 +14,30 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
     "Sábado",
     "Domingo",
   ];
-
   const MINUTES_IN_HOUR = 60;
   const [hourPx, setHourPx] = useState(0);
+  const [weekOffset, setWeekOffset] = useState(0);
   const gridRef = useRef(null);
+  // Get week date range
+  const getWeekDateRange = () => {
+      const today = new Date();
+      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      // Calculate start of week (Monday)
+      const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Monday is day 1
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - daysFromMonday + (weekOffset * 7));
+      // Calculate end of week (Sunday)
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      // Format dates
+      const formatDate = (date) => {
+      const month = date.toLocaleDateString("es-ES", { month: "short" });
+      const day = date.getDate();
+      return `${month} ${day}`;
+      };
 
+      return `${formatDate(startOfWeek)} - ${formatDate(endOfWeek)}`;
+  };
   // Medir la altura real de una hora (cambia con media queries/responsive)
   useEffect(() => {
     const measure = () => {
@@ -50,8 +69,29 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
 
   return (
     <div className="weekViewWrapper">
-
-      
+      <div className="weekSelector">
+        <button
+          className="weekSelectorArrow"
+          onClick={() => setWeekOffset(weekOffset - 1)}
+          title="Semana anterior"
+          aria-label="Semana anterior"
+          type="button"
+        >
+          ←
+        </button>
+        <div className="weekSelectorText">
+          <p className="weekSelectorDate">{getWeekDateRange()}</p>
+        </div>
+          <button
+            className="weekSelectorArrow"
+            onClick={() => setWeekOffset(weekOffset + 1)}
+            title="Semana siguiente"
+            aria-label="Semana siguiente"
+            type="button"
+          >
+            →
+          </button>
+      </div>
       {/* Encabezados */}
       <div className="weekHeaderRow">
         <div className="hourHeaderCell">Horas</div>

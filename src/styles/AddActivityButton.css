@@ -197,20 +197,21 @@
 
 /* Responsive  para celulares */
 @media (max-width: 768px) {
-    .addButton {
+    .ControlBar .addButton {
         font-size: 0;
-        width: 44px;
-        height: 44px;
+        width: 36px;
+        height: 36px;
         padding: 0;
         border-radius: 25%;
-        display: flex;
+        display:flex;
         align-items: center;
         justify-content: center;
+        overflow:hidden;
     }
 
     .addButton::before {
         content: "+";
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         color: rgb(0, 0, 0);
     }
 

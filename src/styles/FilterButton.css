@@ -62,7 +62,7 @@
 
 .filterMenu {
     position: absolute;
-    top: 115%;
+    bottom: 115%;
     left: 0;
     min-width: 12rem;
     background: white;
@@ -71,7 +71,7 @@
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     list-style: none;
     margin: 0;
-    z-index: 20;
+    z-index: 100;
     animation: fadeIn 0.2s ease;
 }
 
@@ -123,15 +123,20 @@
     .filterButton > * {
         display: none;
     }
-    .filterButton {
+    .filterMenu {
+        left:-100px;
+    }
+    
+    .ControlBar .filterButton {
         font-size: 0;
-        width: 44px;
-        height: 44px;
+        width: 36px;
+        height: 36px;
         padding: 0;
         border-radius: 25%;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow:hidden;
     }
 
     .filterButton::before {
