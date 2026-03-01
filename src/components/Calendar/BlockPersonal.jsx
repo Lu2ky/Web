@@ -4,9 +4,12 @@ import React, { useEffect, useState } from "react";
 export const BlockPersonal = ({
   id,
   subject_name,
+  name,
   classroom,
+  tag,
   start_time,
   end_time,
+  times,
   background_color = "#c99cd7",
   text_color = "#000000", 
   style = {},
@@ -19,9 +22,18 @@ export const BlockPersonal = ({
     const id = window.setTimeout(() => set_is_mounted(true), 10);
     return () => window.clearTimeout(id);
   }, []);
+
+  const times_array = Array.isArray(times) ? times : [];
+  const has_times_with_id = times_array.length >= 5;
+  const has_basic_times = times_array.length >= 2;
+
+  const normalized_subject_name = subject_name || name || "Actividad personal";
+  const normalized_classroom = classroom || tag || "Personal";
+  const normalized_start_time = start_time || (has_times_with_id ? String(times_array[1]).slice(0, 5) : has_basic_times ? String(times_array[0]).slice(0, 5) : "");
+  const normalized_end_time = end_time || (has_times_with_id ? String(times_array[2]).slice(0, 5) : has_basic_times ? String(times_array[1]).slice(0, 5) : "");
+
   // Validar que los datos requeridos estén presentes
-  const is_valid_data = subject_name && classroom && 
-    start_time && end_time;
+  const is_valid_data = normalized_subject_name && normalized_start_time && normalized_end_time;
 
   if (!is_valid_data) {
     return (
@@ -33,7 +45,7 @@ export const BlockPersonal = ({
 
   // Formatear la hora en un rango legible
   const format_time_range = () => {
-    return `${start_time} - ${end_time}`;
+    return `${normalized_start_time} - ${normalized_end_time}`;
   };
 
   return (
@@ -56,13 +68,13 @@ export const BlockPersonal = ({
 
       <div className="activity-card-header">
         <div className="activity-card-left">
-          <h3 className="activity-card-title">{subject_name}</h3>
+          <h3 className="activity-card-title">{normalized_subject_name}</h3>
         </div>
         <div className="activity-card-time">{format_time_range()}</div>
       </div>
 
       <div className="activity-card-footer">
-        <span className="activity-card-classroom">{classroom}</span>
+        <span className="activity-card-classroom">{normalized_classroom}</span>
       </div>
     </div>
   );

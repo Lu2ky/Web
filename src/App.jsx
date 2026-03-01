@@ -13,6 +13,54 @@ import { getAllActivities } from "./services/personalActivitiesService";
 import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
 import { getCategories } from "./services/categoriesService";
 
+const dayByIndex = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+const toHHMM = (value) => {
+	if (typeof value !== "string") return "";
+	return value.length >= 5 ? value.slice(0, 5) : value;
+};
+
+const getDayFromDateString = (value) => {
+	if (typeof value !== "string" || value.trim() === "") return "";
+	const parsed = new Date(value);
+	if (Number.isNaN(parsed.getTime())) return "";
+	return dayByIndex[parsed.getDay()] || "";
+};
+
+const normalizePersonalEvent = (event, index) => {
+	const times = Array.isArray(event?.times) ? event.times : [];
+	const hasTimesWithId = times.length >= 5;
+	const hasTimesBasic = times.length >= 2;
+
+	const startFromTimes = hasTimesWithId ? times[1] : hasTimesBasic ? times[0] : "";
+	const endFromTimes = hasTimesWithId ? times[2] : hasTimesBasic ? times[1] : "";
+
+	const dayFromTimesDate = hasTimesWithId ? getDayFromDateString(times[3]) : "";
+	const dayFromTimesIndex = !hasTimesWithId && typeof times[2] === "number"
+		? ({ 1: "Lunes", 2: "Martes", 3: "Miércoles", 4: "Jueves", 5: "Viernes", 6: "Sábado", 7: "Domingo" }[times[2]] || "")
+		: "";
+
+	return {
+		id: event?.id ?? `personalActivity-${index}`,
+		subject_name: event?.subject_name || event?.activity_name || event?.name || "Actividad personal",
+		activity_name: event?.activity_name || event?.name || event?.subject_name || "Actividad personal",
+		professor_name: event?.professor_name || "Personal",
+		classroom: event?.classroom || event?.location || event?.tag || "Personal",
+		location: event?.location || event?.classroom || "Personal",
+		start_time: toHHMM(event?.start_time || event?.startHour || startFromTimes),
+		end_time: toHHMM(event?.end_time || event?.endHour || endFromTimes),
+		day: event?.day || dayFromTimesDate || dayFromTimesIndex || "Lunes",
+		tag: event?.tag || "Personal",
+	};
+};
+
+const normalizePersonalEvents = (eventsList) => {
+	if (!Array.isArray(eventsList)) return [];
+	return eventsList
+		.map((event, index) => normalizePersonalEvent(event, index))
+		.filter((event) => event.start_time && event.end_time && event.day);
+};
+
 
 // Transforma los datos de la API al formato que usa la app
 function normalizeApiData(apiData) {
@@ -65,7 +113,7 @@ function App() {
 
 	// Cargar actividades personales desde localStorage al iniciar la app
 	useEffect(() => {
-		const personalActivities = getAllActivities();
+		const personalActivities = normalizePersonalEvents(getAllActivities());
 		setPersonalEvents(personalActivities);
 	}, []);
 	// Los datos de la API se cargan a través del componente ApiFetcher, que llama a handleDataLoaded cuando los datos están listos
@@ -108,13 +156,13 @@ function App() {
 
 	const handleActivitySaved = () => {
 		// Recargar actividades personales despues de guardar una nueva actividad
-		const personalActivities = getAllActivities();
+		const personalActivities = normalizePersonalEvents(getAllActivities());
 		setPersonalEvents(personalActivities);
 	};
 	// Elimina actividad personal, recarga la lista de actividades personales para actualizar la vista
 	const handleDeletePersonal = id => {
 		deleteActivity(id);
-		const personalActivities = getAllActivities();
+		const personalActivities = normalizePersonalEvents(getAllActivities());
 		setPersonalEvents(personalActivities);
 	};
 

@@ -33,10 +33,34 @@ export default function TaskEditModal({
     const [dateText, setDateText] = useState('');
     const [error, setError] = useState('');
 
-    const stringToDate = (dateStr) => {
-        if (!dateStr) return new Date();
-        const [year, month, day] = dateStr.split('-').map(Number);
-        return new Date(year, month - 1, day);
+    const stringToDate = (dateValue) => {
+        if (!dateValue) return new Date();
+        if (dateValue instanceof Date) return dateValue;
+
+        const raw = String(dateValue).trim();
+        if (!raw) return new Date();
+
+        const yyyyMmDd = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (yyyyMmDd) {
+            const year = Number(yyyyMmDd[1]);
+            const month = Number(yyyyMmDd[2]) - 1;
+            const day = Number(yyyyMmDd[3]);
+            return new Date(year, month, day);
+        }
+
+        const dateTime = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+        if (dateTime) {
+            const year = Number(dateTime[1]);
+            const month = Number(dateTime[2]) - 1;
+            const day = Number(dateTime[3]);
+            const hour = Number(dateTime[4]);
+            const minute = Number(dateTime[5]);
+            const second = Number(dateTime[6] || 0);
+            return new Date(year, month, day, hour, minute, second);
+        }
+
+        const parsed = new Date(raw.replace(' ', 'T'));
+        return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
     };
 
     const formatDate = (date) => {
@@ -63,6 +87,8 @@ export default function TaskEditModal({
     useEffect(() => {
         if (formData.dueDate) {
             setDateText(formatDate(stringToDate(formData.dueDate)));
+        } else {
+            setDateText('');
         }
     }, [formData.dueDate]);
 
@@ -193,7 +219,7 @@ export default function TaskEditModal({
                         }}
                         onBlur={() => {
                             const parsed = parseDDMMYYYY(dateText);
-                            if (!parsed) setDateText(formatDate(formData.dueDate));
+                            if (!parsed) setDateText(formatDate(stringToDate(formData.dueDate)));
                         }}
                     />
                     <button

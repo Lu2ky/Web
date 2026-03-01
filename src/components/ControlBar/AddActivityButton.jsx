@@ -2,16 +2,17 @@ import { useState, useEffect } from "react";
 import "../../styles/AddActivityButton.css";
 import { saveActivity } from "../../services/personalActivitiesService";
 
+const INITIAL_FORM_DATA = {
+    title: "",
+    description: "",
+    day: "",
+    startHour: "",
+    endHour: ""
+};
+
 function AddActivityButton({ onActivitySaved }) {
     const [isOpen, setIsOpen] = useState(false);
-
-    const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        day: "",
-        startHour: "",
-        endHour: ""
-    });
+    const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
     const [error, setError] = useState("");
 
@@ -29,11 +30,27 @@ function AddActivityButton({ onActivitySaved }) {
             ...prev,
             [name]: value
         }));
+
+        if (error) {
+            setError("");
+        }
+    };
+
+    const closeModal = ({ clearForm } = { clearForm: false }) => {
+        setIsOpen(false);
+        setError("");
+
+        if (clearForm) {
+            setFormData(INITIAL_FORM_DATA);
+        }
     };
 
     const validateForm = () => {
         if (!formData.title.trim()) {
             return "El título es obligatorio.";
+        }
+        if (!formData.day) {
+            return "Debes seleccionar un día.";
         }
         if (!formData.startHour || !formData.endHour) {
             return "Debes seleccionar hora de inicio y fin.";
@@ -55,18 +72,15 @@ function AddActivityButton({ onActivitySaved }) {
             return;
         }
 
-        // Guardar en localStorage
-        saveActivity(formData);
+        try {
+            // Guardar en localStorage
+            saveActivity(formData);
+        } catch (saveError) {
+            setError("No se pudo guardar la actividad. Intenta nuevamente.");
+            return;
+        }
 
-        setIsOpen(false);
-        setFormData({
-            title: "",
-            description: "",
-            day: "",
-            startHour: "",
-            endHour: ""
-        });
-        setError("");
+        closeModal({ clearForm: true });
 
         // Notificar al padre que se guardó una actividad
         if (onActivitySaved) {
@@ -77,17 +91,17 @@ function AddActivityButton({ onActivitySaved }) {
     // Cerrar modal con tecla Esc
     useEffect(() => {
         const handleEsc = (e) => {
-            if (e.key === "Escape") {
-                setIsOpen(false);
+            if (e.key === "Escape" && isOpen) {
+                closeModal();
             }
         };
         document.addEventListener("keydown", handleEsc);
         return () => document.removeEventListener("keydown", handleEsc);
-    }, []);
+    }, [isOpen]);
 
     return (
         <>
-            <button className="addButton" onClick={() => setIsOpen(true)}>
+            <button className="addButton" onClick={() => setIsOpen(true)} type="button">
                 Agregar actividad
             </button>
 
@@ -97,7 +111,7 @@ function AddActivityButton({ onActivitySaved }) {
                     className="modalOverlay"
                     role="dialog"
                     aria-modal="true"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => closeModal()}
                 >
                     <div
                         className="modalContainer"
@@ -105,7 +119,7 @@ function AddActivityButton({ onActivitySaved }) {
                     >
                         <h2>Nueva Actividad</h2>
 
-                        <button className="modalClose" onClick={() => setIsOpen(false)} title="Cerrar" aria-label="Cerrar" type="button">
+                        <button className="modalClose" onClick={() => closeModal()} title="Cerrar" aria-label="Cerrar" type="button">
                             X
                         </button>
                         {error && <p className="errorMessage">{error}</p>}
@@ -180,7 +194,8 @@ function AddActivityButton({ onActivitySaved }) {
                         <div className="modalActions">
                             <button
                                 className="cancelButton"
-                                onClick={() => setIsOpen(false)}
+                                onClick={() => closeModal({ clearForm: true })}
+                                type="button"
                             >
                                 Cancelar
                             </button>
@@ -188,6 +203,7 @@ function AddActivityButton({ onActivitySaved }) {
                             <button
                                 className="saveButton"
                                 onClick={handleSave}
+                                type="button"
                             >
                                 Guardar
                             </button>
