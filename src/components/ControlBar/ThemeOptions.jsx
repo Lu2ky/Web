@@ -14,7 +14,7 @@ export const THEME_OPTIONS = [
         {
             id: "palette02",
             name: "Cyber Neón",
-            colors: ["#975ACF", "#201D30", "#ED7843", "#8EDF5F", "#5649B5", "#E2D2E0", "#dcd32b"]
+            colors: ["#975ACF", "#201D30", "#ED7843", "#8EDF5F", "#5649B5", "#E2D2E0", "#aaaaaa"]
         },
         {
             id: "palette03",
