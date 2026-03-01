@@ -58,8 +58,10 @@ function App() {
 	const [selectedClass, setSelectedClass] = useState(null); // Datos de la clase seleccionada para el popup
 	const [userId, setUserId] = useState(""); // ID ingresado por el usuario para cargar su horario
 	const [submittedId, setSubmittedId] = useState(""); // ID que se ha enviado para cargar datos (se actualiza al enviar el formulario)
-	const [themeId, setThemeId] = useState("default");
-	const [tagColorMap, setTagColorMap] = useState({});
+	const [themeId, setThemeId] = useState("default"); // ID del tema seleccionado, se pasa al ThemeSelector y se usa para cargar el mapa de colores de etiquetas
+	const [tagColorMap, setTagColorMap] = useState({}); // Mapa de colores para etiquetas, se carga desde las categorías obtenidas de la API
+	const [selectedTag, setSelectedTag] = useState("Todos"); // Etiqueta seleccionada para filtrar actividades en el calendario
+
 
 	// Cargar actividades personales desde localStorage al iniciar la app
 	useEffect(() => {
@@ -147,15 +149,23 @@ function App() {
 		return luminance > 0.5 ? "#000000" : "#FFFFFF";
 	};
 
+	//Calcular materias filtradas 
+	const filteredClassesEvents = selectedTag === "Todos" ? 
+		classEvents : 
+		classEvents.filter(event => event.tag === selectedTag);
+	const filteredPersonalEvents = 
+	selectedTag === "Todos" || selectedTag === "Personal" ?
+	personalEvents :
+	[];
 
 	return (
 		<div className="App">
 			<Header />
-			{/*<IdInput
+			<IdInput
 				userId={userId}
 				setUserId={setUserId}
 				onSubmit={setSubmittedId}
-			/>*/}
+			/>
 			<div className="mainContent">
 				<div className="ToDoSection">
 					<ToDoList userId={submittedId} />
@@ -165,8 +175,8 @@ function App() {
 
 					<Calendar
 						viewMode={viewMode}
-						events={classEvents}
-						personalEvents={personalEvents}
+						events={filteredClassesEvents}
+						personalEvents={filteredPersonalEvents}
 						onClassClick={handleClassClick}
 						onDeletePersonal={handleDeletePersonal}
 						tagColorMap={tagColorMap}
@@ -185,6 +195,8 @@ function App() {
 						setWeekOffset={setWeekOffset}
 						onActivitySaved={handleActivitySaved}
 						onThemeChange={handleThemeChange}
+						selectedTag={selectedTag}
+						setSelectedTag={setSelectedTag}
 					/>
 				</div>
 			</div>

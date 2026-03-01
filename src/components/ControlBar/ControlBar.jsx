@@ -6,8 +6,7 @@ import AddButton from "./AddActivityButton";
 import FilterButton from "./FilterButton";
 import ThemeSelect from "./ThemeSelector";
 
-function ControlBar({viewMode, setViewMode, onActivitySaved, onThemeChange}) {
-    const [selectedTag, setSelectedTag] = useState("Todo");
+function ControlBar({viewMode, setViewMode, onActivitySaved, onThemeChange, selectedTag, setSelectedTag}) {
 
     return (
         <div className="ControlBar">

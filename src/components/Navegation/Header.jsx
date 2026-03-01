@@ -1,4 +1,4 @@
-import {useState} from "react";
+import { useState } from "react";
 import logo from "../../assets/logo.png";
 import "../../styles/Header.css";
 
@@ -20,7 +20,7 @@ function Header() {
 			>
 				☰
 			</button>
-			
+
 			<nav className={`drawer ${isMenuOpen ? "open" : ""}`}>
 				<ul>
 					<li>
