@@ -9,11 +9,11 @@ export async function getCategories() {
     const data = [
         "Teoría", 
         "Laboratorio",
-        "Personal",
-        "Pastoral", 
+        "Cultural",
         "Deportiva", 
         "Centro de lenguas",
-        "Cultural"
+        "Pastoral", 
+        "Personal"
     ];
 
     cachedCategories = data;

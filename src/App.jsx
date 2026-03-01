@@ -1,17 +1,23 @@
 import "./styles/App.css";
+
+// Hooks de react 
 import { useState, useEffect, use } from "react";
 import { useCallback } from "react";
-import ApiFetcher from "./services/OficialFetcher";
-import IdInput from "./components/LogIn/IdInput";
+// Id de LogIn
+import { useParams } from "react-router-dom";
+// Componentes Primarios
 import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
-import { deleteActivity } from "./services/personalActivitiesService";
 import ToDoList from "./components/TodoList/ToDoList";
+// Componentes secundarios
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
-import { getAllActivities } from "./services/personalActivitiesService";
 import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
+// Servicios para interactuar con la API 
+import ApiFetcher from "./services/ApiFetcher";
 import { getCategories } from "./services/categoriesService";
+import { deleteActivity } from "./services/personalActivitiesService";
+import { getAllActivities } from "./services/personalActivitiesService";
 
 const dayByIndex = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
@@ -62,8 +68,15 @@ const normalizePersonalEvents = (eventsList) => {
 };
 
 
-// Transforma los datos de la API al formato que usa la app
+// Funciones para normalizar datos 
+
+//Normalizar Horario oficial
 function normalizeApiData(apiData) {
+
+	if (!Array.isArray(apiData)) {
+		console.error(" Datos de la API no son un array:", apiData);
+		return [];
+	}
 	const dayMap = {
 		// de número a día de la semana
 		1: "Lunes",
@@ -76,65 +89,77 @@ function normalizeApiData(apiData) {
 	};
 
 	return apiData.map((item, index) => ({
-		id: `materiaOficial-${item.NRC}-${index}`,
+		id: `materiaOficial-${item.nrc}-${index}`,
 		subject_name: item.subject_name,
 		professor_name: item.professor_name,
 		classroom: item.classroom,
-		nrc: item.NRC,
-		start_time: item.times[0].slice(0, 5),
+		NRC: item.NRC,
+		start_time: item.times[0].slice(0, 5), // recortar segundos
 		end_time: item.times[1].slice(0, 5),
 		day: dayMap[item.times[2]] || "Lunes",
-		etiqueta: item.Tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
+		etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
 		// Datos para PopUp
-		campus: item.Campus,
+		campus: item.campus,
 		credits: item.Credits?.Float64 || 0,
-		tagColour: item.Tag, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
+		//tagColour: item.tagColour, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 		// Datos originales
 		apiData: item
 	}));
 }
 
+const getInitialView = () => {
+	return window.innerWidth <= 425 ? "Diario" : "Semanal"; // Vista inicial basada en el ancho de la pantalla (mobile chiquito vs desktop)
+};
 function App() {
-	const getInitialView = () => {
-		return window.innerWidth <= 425 ? "Diario" : "Semanal"; // Vista inicial basada en el ancho de la pantalla (mobile chiquito vs desktop)
-	};
+
+	const { userId } = useParams(); // Obtener el ID del usuario desde la URL
 	const [viewMode, setViewMode] = useState(getInitialView()); // "Semanal" o "Diario"
 	const [weekOffset, setWeekOffset] = useState(0); // Offset para semana (0 = semana actual), NO MOVER NI QUITAR O SE CAE TODO
 	const [classEvents, setClassEvents] = useState([]); // Eventos de clases oficiales
 	const [personalEvents, setPersonalEvents] = useState([]); // Eventos personales (actividades guardadas)
 	const [showClassPopup, setShowClassPopup] = useState(false); // Para mostrar/ocultar el popup de detalles de clase
 	const [selectedClass, setSelectedClass] = useState(null); // Datos de la clase seleccionada para el popup
-	const [userId, setUserId] = useState(""); // ID ingresado por el usuario para cargar su horario
-	const [submittedId, setSubmittedId] = useState(""); // ID que se ha enviado para cargar datos (se actualiza al enviar el formulario)
 	const [themeId, setThemeId] = useState("default"); // ID del tema seleccionado, se pasa al ThemeSelector y se usa para cargar el mapa de colores de etiquetas
 	const [tagColorMap, setTagColorMap] = useState({}); // Mapa de colores para etiquetas, se carga desde las categorías obtenidas de la API
 	const [selectedTag, setSelectedTag] = useState("Todos"); // Etiqueta seleccionada para filtrar actividades en el calendario
-
 
 	// Cargar actividades personales desde localStorage al iniciar la app
 	useEffect(() => {
 		const personalActivities = normalizePersonalEvents(getAllActivities());
 		setPersonalEvents(personalActivities);
 	}, []);
+
 	// Los datos de la API se cargan a través del componente ApiFetcher, que llama a handleDataLoaded cuando los datos están listos
-	const handleDataLoaded = useCallback(data => {
-		console.log("API:", data[0]); // Verificar la estructura de los datos recibidos (Quitar)
+	{/*const handleDataLoaded = useCallback(data => {
+		console.log("Datos recibidos en App.jsx", data) // Verificar la estructura de los datos recibidos (Quitar)
 		const normalized = normalizeApiData(data);
+		setClassEvents(normalized);
+	}, []);*/}
+
+	const handleDataLoaded = useCallback((data) => {
+		console.log("Datos recibidos en App:", data);
+		if (!Array.isArray(data)) {
+			console.error("La API no devolvió un array:", data);
+			return;
+		}
+		const normalized = normalizeApiData(data);
+		console.log("Datos normalizados:", normalized);
 		setClassEvents(normalized);
 	}, []);
 
+
 	const handleClassClick = event => {
 		// Buscar todas las sesiones de esta clase (mismo NRC)
-		const allSessions = classEvents.filter(e => e.nrc === event.nrc);
+		const allSessions = classEvents.filter(e => e.NRC === event.NRC);
 
 		// Crear el objeto classData para PopUpClasses
 		const classData = {
 			subject_name: event.subject_name,
 			instructor_name: event.professor_name,
-			nrc: event.nrc,
+			nrc: event.NRC,
 			credits: event.credits,
 			campus: event.campus,
-			code: event.nrc,
+			code: event.NRC,
 			date_range: event.academicPeriod || "2026 semestre 1",
 			schedule: allSessions.map(session => ({
 				day: session.day,
@@ -198,28 +223,28 @@ function App() {
 	};
 
 	//Calcular materias filtradas 
-	const filteredClassesEvents = selectedTag === "Todos" ? 
-		classEvents : 
+	const filteredClassesEvents = selectedTag === "Todos" ?
+		classEvents :
 		classEvents.filter(event => event.tag === selectedTag);
-	const filteredPersonalEvents = 
-	selectedTag === "Todos" || selectedTag === "Personal" ?
-	personalEvents :
-	[];
+	const filteredPersonalEvents =
+		selectedTag === "Todos" || selectedTag === "Personal" ?
+			personalEvents :
+			[];
+	console.log(userId)
 
 	return (
+
 		<div className="App">
 			<Header />
-			<IdInput
-				userId={userId}
-				setUserId={setUserId}
-				onSubmit={setSubmittedId}
-			/>
 			<div className="mainContent">
 				<div className="ToDoSection">
-					<ToDoList userId={submittedId} />
+					<ToDoList userId={userId} />
 				</div>
 				<div className="CalendarSection">
-					<ApiFetcher onDataLoaded={handleDataLoaded} userId={submittedId} />
+					<ApiFetcher
+						url={`http://209.25.140.20:3380/api/official-schedule/${userId}`}
+						onDataLoaded={handleDataLoaded}
+					/>
 
 					<Calendar
 						viewMode={viewMode}
@@ -251,4 +276,6 @@ function App() {
 		</div>
 	);
 }
+
 export default App;
+

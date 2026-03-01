@@ -7,19 +7,10 @@ export function saveActivity(formData) {
   
   const newActivity = {
     id: `personalActivity-${Date.now()}`,
-    subject_name: formData.title,
-    activity_name: formData.title,
-    professor_name: formData.description || "Personal",
-    classroom: formData.location || "Personal",
-    location: formData.location || "Personal",
     start_time: formData.startHour,
     end_time: formData.endHour,
     day: formData.day,
     tag: "Personal",
-    credits: 0,
-    campus: "Personal",
-    academicPeriod: "Personal",
-    nrc: null,
   };
   
   activities.push(newActivity);

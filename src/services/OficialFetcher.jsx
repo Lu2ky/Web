@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 //Prueba local runner
 // Componente para cargar datos de la API y pasarlos al padre
 // onDataLoaded es una función que se llama con los datos cargados,
@@ -27,7 +27,7 @@ function ApiFetcher({ onDataLoaded, userId }) {
           `http://209.25.140.20:3380/api/official-schedule/${userId}`
         );
         const json = await response.json(); // Convierte respuesta en un json
-        if (!json.data || json.data.length === 0) {
+        if (!json || json.length === 0) {
           // Si no tiene datos:
           console.log("No hay datos"); // Mostrar mensaje en consola
           setApiData([]); // Limpiar datos
@@ -36,9 +36,9 @@ function ApiFetcher({ onDataLoaded, userId }) {
             onDataLoaded([]);
           }
         } else {
-          setApiData(json.data); // Si hay datos se almacenan en el estado
+          setApiData(json); // Si hay datos se almacenan en el estado
           if (onDataLoaded) {
-            onDataLoaded(json.data); // Enviar datos al padre
+            onDataLoaded(json); // Enviar datos al padre
           }
         }
       } catch (error) {
