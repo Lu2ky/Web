@@ -24,7 +24,7 @@ function OficialFetcher({ onDataLoaded, userId }) {
       try {
         const response = await fetch(
           // Hace la peticipin a la API con el ID del usuario
-          `${process.env.API_URL_OFICIAL_SCHEDULE}${userId}`
+          `${import.meta.env.VITE_API_URL_OFICIAL_SCHEDULE}${userId}`
         );
         const json = await response.json(); // Convierte respuesta en un json
         if (!json || json.length === 0) {
@@ -45,6 +45,7 @@ function OficialFetcher({ onDataLoaded, userId }) {
       } catch (error) {
         //Manejo de errores
         console.error("Error al cargar datos:", error); // Mostrar error en consola
+        console.log(`${import.meta.env.VITE_API_URL_OFICIAL_SCHEDULE}${userId}`);
         setApiData([]); // Limpiar datos en caso de error
         if (onDataLoaded) {
           // Notificar al padre que no hay datos
