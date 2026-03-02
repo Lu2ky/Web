@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import LoadingModal from "./loadingModal";
 //Prueba local runner
 // Componente para cargar datos de la API y pasarlos al padre
 // onDataLoaded es una función que se llama con los datos cargados,
@@ -18,13 +19,16 @@ function OficialFetcher({ onDataLoaded, userId }) {
       }
       return;
     }
+    
+    const baseUrl = import.meta.env.VITE_API_URL_OFICIAL_SCHEDULE; // URL base de la API
+
     const fetchData = async () => {
       // Función asincrona para cargar datos
       setLoading(true); // Activar estado de carga
       try {
         const response = await fetch(
           // Hace la peticipin a la API con el ID del usuario
-          `${import.meta.env.VITE_API_URL_OFICIAL_SCHEDULE}${userId}`
+          `${baseUrl}${userId}`
         );
         const json = await response.json(); // Convierte respuesta en un json
         if (!json || json.length === 0) {
@@ -44,8 +48,8 @@ function OficialFetcher({ onDataLoaded, userId }) {
         }
       } catch (error) {
         //Manejo de errores
+        console.log(`${baseUrl}${userId}`);
         console.error("Error al cargar datos:", error); // Mostrar error en consola
-        console.log(`${import.meta.env.VITE_API_URL_OFICIAL_SCHEDULE}${userId}`);
         setApiData([]); // Limpiar datos en caso de error
         if (onDataLoaded) {
           // Notificar al padre que no hay datos
@@ -61,7 +65,12 @@ function OficialFetcher({ onDataLoaded, userId }) {
 
   if (loading) {
     //Mientras se cargan los datos, muestra un mensaje de carga
-    return <p>Cargando materias...</p>;
+    return (
+      <LoadingModal
+        isOpen={loading}
+        title="Cargando horario oficial"
+      />
+    );
   }
 
   return null; // Porque no renderiza, solo envia datos al padre(App.jsx)
