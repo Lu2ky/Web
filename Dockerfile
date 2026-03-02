@@ -1,9 +1,9 @@
-FROM node:latest
-
-WORKDIR /webserver
-COPY . .
-RUN touch .env
+FROM node:25-alpine
+WORKDIR /app
+COPY package*.json ./
 RUN npm install
-RUN npm install -g serve
+COPY . .
 RUN npm run build
-CMD ["serve", "-s", "dist", "-l", "5173"]
+RUN npm install -g serve
+EXPOSE 80
+CMD ["serve", "-s", "dist", "-l", "80"]

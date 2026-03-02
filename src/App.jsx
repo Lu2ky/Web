@@ -192,8 +192,9 @@ function App() {
 	};
 
 	useEffect(() => {
-		getCategories().then((categories) => {
-			const theme = THEME_OPTIONS.find((t) => t.id === themeId) || THEME_OPTIONS[0];
+		getCategories().then(categories => {
+			const theme =
+				THEME_OPTIONS.find(t => t.id === themeId) || THEME_OPTIONS[0];
 			const palette = theme?.colors || THEME_OPTIONS[0].colors;
 			const map = {};
 			categories.forEach((cat, index) => {
@@ -204,16 +205,16 @@ function App() {
 	}, [themeId]);
 
 	//Callback que recibe el ThemeSelector cuando se cambia el tema, actualiza el estado del tema
-	const handleThemeChange = (newThemeId) => {
+	const handleThemeChange = newThemeId => {
 		setThemeId(newThemeId);
 	};
 
 	//Obtener color por etiqueta
-	const getTagColor = (tag) => {
+	const getTagColor = tag => {
 		return tagColorMap[tag] || "#b1d4f0"; // Color por defecto si no se encuentra la etiqueta
 	};
 	//Obtener color de texto (blanco o negro) según el color de fondo para asegurar legibilidad
-	const getContrastColor = (hex) => {
+	const getContrastColor = hex => {
 		if (!hex) return "#000000";
 		const r = parseInt(hex.substr(1, 2), 16);
 		const g = parseInt(hex.substr(3, 2), 16);

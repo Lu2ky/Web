@@ -1,6 +1,33 @@
-const REMINDERS_API_BASE = "http://209.25.140.20:3380/api/reminders-by-user";
+const REMINDERS_API_HOST = "http://209.25.140.25:9242/api";
+const REMINDERS_API_BASE = `${REMINDERS_API_HOST}/reminders-by-user`;
+const UPDATE_NAME_ENDPOINT = `${REMINDERS_API_HOST}/update-name-reminder`;
+const UPDATE_DESC_ENDPOINT = `${REMINDERS_API_HOST}/update-desc-reminder`;
+const UPDATE_DATE_ENDPOINT = `${REMINDERS_API_HOST}/update-date-reminder`;
+const UPDATE_PRIORITY_ENDPOINT = `${REMINDERS_API_HOST}/update-priority-reminder`;
 
 class ReminderService {
+	static async postUpdate(endpoint, payload, errorContext) {
+		console.log(`[ReminderService] POST ${endpoint}`, JSON.stringify(payload, null, 2));
+
+		const response = await fetch(endpoint, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(payload),
+		});
+
+		const responseText = await response.text();
+		console.log(`[ReminderService] Response ${response.status} from ${endpoint}:`, responseText);
+
+		if (!response.ok) {
+			const suffix = responseText ? ` - ${responseText}` : "";
+			throw new Error(`${errorContext}: ${response.status}${suffix}`);
+		}
+
+		return response;
+	}
+
 	static getNullableString(value) {
 		if (value == null) return "";
 		if (typeof value === "string") return value;
@@ -81,7 +108,17 @@ class ReminderService {
 			String(rawCompleted).toLowerCase() === "completed";
 
 		return {
-			id: reminder.id ?? reminder._id ?? reminder.reminder_id ?? `reminder-${index}`,
+			id:
+				reminder.N_idToDoList ??
+				reminder.idToDoList ??
+				reminder.P_idToDo ??
+				reminder.idToDo ??
+				reminder.N_idToDo ??
+				reminder.N_idRecordatorio ??
+				reminder.id ??
+				reminder._id ??
+				reminder.reminder_id ??
+				`reminder-${index}`,
 			name: this.getNullableString(
 				reminder.T_nombre ?? reminder.name ?? reminder.title ?? reminder.reminder ?? "Recordatorio"
 			),
@@ -124,6 +161,186 @@ class ReminderService {
 		return reminders
 			.map((reminder, index) => this.normalizeReminder(reminder, index))
 			.filter(reminder => !reminder.isDeleted);
+	}
+
+	static async updateName(reminderId, name) {
+		if (!reminderId) return;
+
+		const P_nombre = name;
+		const P_idToDo = reminderId;
+
+		return this.postUpdate(
+			UPDATE_NAME_ENDPOINT,
+			{
+				P_idToDo,
+				P_nombre,
+			},
+			"Error al actualizar nombre de recordatorio"
+		);
+	}
+
+	static async updateDescription(reminderId, description) {
+		if (!reminderId) return;
+
+		const P_descripcion = description;
+		const P_idToDo = reminderId;
+
+		return this.postUpdate(
+			UPDATE_DESC_ENDPOINT,
+			{
+				P_idToDo,
+				P_descripcion,
+			},
+			"Error al actualizar descripción de recordatorio"
+		);
+	}
+
+	// Converts any date string to "YYYY-MM-DD HH:mm:ss" — the format the backend expects.
+	static toDateTimeString(dateValue) {
+		if (!dateValue) return "";
+
+		const raw = String(dateValue).trim();
+
+		const fmt = (yr, mo, dy, hh, mm, ss) =>
+			`${yr}-${mo}-${dy} ${hh}:${mm}:${ss ?? "00"}`;
+
+		// Already "YYYY-MM-DD HH:mm:ss"
+		const already = raw.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+		if (already) return raw;
+
+		// "YYYY-MM-DD HH:mm" → add seconds
+		const yyyymmHHmm = raw.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/);
+		if (yyyymmHHmm) return `${raw}:00`;
+
+		// "DD-MM-YYYY HH:mm:ss" or "DD-MM-YYYY HH:mm" (old format)
+		const ddmmHHmm = raw.match(/^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})(?::(\d{2}))?$/);
+		if (ddmmHHmm) {
+			return fmt(
+				ddmmHHmm[3], ddmmHHmm[2], ddmmHHmm[1],
+				ddmmHHmm[4], ddmmHHmm[5], ddmmHHmm[6] ?? "00"
+			);
+		}
+
+		// "YYYY-MM-DDThh:mm:ss[Z]" (ISO format)
+		const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
+		if (iso) {
+			return fmt(
+				iso[1], iso[2], iso[3],
+				iso[4], iso[5], iso[6] ?? "00"
+			);
+		}
+
+		// "YYYY-MM-DD" only → midnight
+		const dateOnly = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+		if (dateOnly) return fmt(dateOnly[1], dateOnly[2], dateOnly[3], "00", "00", "00");
+
+		// Fallback: let JS parse
+		const d = new Date(raw.replace(" ", "T"));
+		if (!Number.isNaN(d.getTime())) {
+			const yr = d.getFullYear();
+			const mo = String(d.getMonth() + 1).padStart(2, "0");
+			const dy = String(d.getDate()).padStart(2, "0");
+			const hh = String(d.getHours()).padStart(2, "0");
+			const mm = String(d.getMinutes()).padStart(2, "0");
+			const ss = String(d.getSeconds()).padStart(2, "0");
+			return `${yr}-${mo}-${dy} ${hh}:${mm}:${ss}`;
+		}
+
+		console.warn("[ReminderService] toDateTimeString: unrecognized date format:", raw);
+		return raw;
+	}
+
+	static async updateDueDate(reminderId, dueDate) {
+		if (!reminderId) return;
+
+		const P_fecha = this.toDateTimeString(dueDate);
+		const P_idToDo = reminderId;
+
+		console.log(`[ReminderService] updateDueDate — raw: "${dueDate}" → P_fecha: "${P_fecha}"`);
+
+		return this.postUpdate(
+			UPDATE_DATE_ENDPOINT,
+			{
+				P_idToDo,
+				P_fecha,
+			},
+			"Error al actualizar fecha de recordatorio"
+		);
+	}
+
+	static async updatePriority(reminderId, priority) {
+		if (!reminderId) return;
+		const normalizedPriority = this.normalizePriority(priority);
+
+		const P_prioridad = normalizedPriority;
+		const P_idToDo = reminderId;
+
+		return this.postUpdate(
+			UPDATE_PRIORITY_ENDPOINT,
+			{
+				P_idToDo,
+				P_prioridad,
+			},
+			"Error al actualizar prioridad de recordatorio"
+		);
+	}
+
+	static async updateFromEdit(previousReminder, updatedReminder) {
+		console.log("[ReminderService] updateFromEdit called");
+		console.log("  previous:", JSON.stringify(previousReminder, null, 2));
+		console.log("  updated :", JSON.stringify(updatedReminder, null, 2));
+
+		if (!previousReminder?.id || !updatedReminder) {
+			console.warn("[ReminderService] updateFromEdit aborted — missing id or updatedReminder", { id: previousReminder?.id });
+			return;
+		}
+
+		// Warn if ID looks synthetic (generated fallback, not a real backend ID)
+		if (String(previousReminder.id).startsWith("reminder-")) {
+			console.warn("[ReminderService] ID looks synthetic (reminder-N), backend may reject it:", previousReminder.id);
+		}
+
+		const updates = [];
+
+		const namePrev = previousReminder.name ?? "";
+		const nameNext = updatedReminder.name ?? "";
+		console.log(`  name: "${namePrev}" → "${nameNext}" — changed: ${namePrev !== nameNext}`);
+		if (nameNext !== namePrev) {
+			updates.push(this.updateName(previousReminder.id, nameNext));
+		}
+
+		const descPrev = previousReminder.description ?? "";
+		const descNext = updatedReminder.description ?? "";
+		console.log(`  description: "${descPrev}" → "${descNext}" — changed: ${descPrev !== descNext}`);
+		if (descNext !== descPrev) {
+			updates.push(this.updateDescription(previousReminder.id, descNext));
+		}
+
+		// Normalise both sides to the same format before comparing so that
+		// "2026-03-02T14:30:00Z" (server) and "2026-03-02 14:30:00" (modal) don't
+		// falsely appear different when the user never changed the date.
+		const datePrev = this.toDateTimeString(previousReminder.dueDate ?? "");
+		const dateNext = this.toDateTimeString(updatedReminder.dueDate ?? "");
+		console.log(`  dueDate: "${datePrev}" → "${dateNext}" — changed: ${datePrev !== dateNext}`);
+		if (dateNext !== datePrev) {
+			updates.push(this.updateDueDate(previousReminder.id, updatedReminder.dueDate ?? ""));
+		}
+
+		const prevPriority = this.normalizePriority(previousReminder.priority ?? "");
+		const nextPriority = this.normalizePriority(updatedReminder.priority ?? "");
+		console.log(`  priority: "${prevPriority}" → "${nextPriority}" — changed: ${prevPriority !== nextPriority}`);
+		if (nextPriority !== prevPriority) {
+			updates.push(this.updatePriority(previousReminder.id, nextPriority));
+		}
+
+		if (updates.length === 0) {
+			console.log("[ReminderService] No fields changed — no API calls made");
+			return;
+		}
+
+		console.log(`[ReminderService] Sending ${updates.length} update(s)...`);
+		await Promise.all(updates);
+		console.log("[ReminderService] All updates done");
 	}
 }
 
