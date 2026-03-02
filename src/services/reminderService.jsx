@@ -1,4 +1,4 @@
-const REMINDERS_API_BASE = "http://209.25.140.20:3380/api/reminders-by-user";
+const REMINDERS_API_BASE = "http://209.25.140.25:9242/api/reminders-by-user";
 
 class ReminderService {
 	static getNullableString(value) {

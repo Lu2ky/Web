@@ -19,9 +19,10 @@ export default function TaskEditModal({
 
     const [formData, setFormData] = useState({
         name: task?.name || '',
+        description: task?.description || '',
         dueDate: task?.dueDate || '',
         tags: normalizeTags(task?.tags) || [],
-        priority: task?.priority || 'media'
+        priority: task?.priority || ''
     });
 
     const [tagLabel, setTagLabel] = useState('');
@@ -31,6 +32,7 @@ export default function TaskEditModal({
     const tagInputRef = useRef(null);
     const [showCalendar, setShowCalendar] = useState(false);
     const [dateText, setDateText] = useState('');
+    const [timeText, setTimeText] = useState('');
     const [error, setError] = useState('');
 
     const stringToDate = (dateValue) => {
@@ -84,11 +86,52 @@ export default function TaskEditModal({
         return d;
     };
 
+    const getDatePart = (dateValue) => {
+        if (!dateValue) return '';
+        if (typeof dateValue === 'string') {
+            const raw = dateValue.trim();
+            const dateOnly = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (dateOnly) return `${dateOnly[1]}-${dateOnly[2]}-${dateOnly[3]}`;
+
+            const dateTime = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::\d{2})?$/);
+            if (dateTime) return `${dateTime[1]}-${dateTime[2]}-${dateTime[3]}`;
+        }
+
+        const parsed = stringToDate(dateValue);
+        const year = parsed.getFullYear();
+        const month = String(parsed.getMonth() + 1).padStart(2, '0');
+        const day = String(parsed.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const getTimePart = (dateValue) => {
+        if (!dateValue) return '';
+        if (typeof dateValue === 'string') {
+            const raw = dateValue.trim();
+            const dateTime = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::\d{2})?$/);
+            if (dateTime) return `${dateTime[4]}:${dateTime[5]}`;
+        }
+
+        const parsed = stringToDate(dateValue);
+        if (Number.isNaN(parsed.getTime())) return '';
+        const hours = String(parsed.getHours()).padStart(2, '0');
+        const minutes = String(parsed.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    };
+
+    const buildDueDate = (datePart, timePart) => {
+        if (!datePart) return '';
+        if (!timePart) return datePart;
+        return `${datePart} ${timePart}:00`;
+    };
+
     useEffect(() => {
         if (formData.dueDate) {
             setDateText(formatDate(stringToDate(formData.dueDate)));
+            setTimeText(getTimePart(formData.dueDate));
         } else {
             setDateText('');
+            setTimeText('');
         }
     }, [formData.dueDate]);
 
@@ -105,9 +148,10 @@ export default function TaskEditModal({
             setTagType('custom');
             setFormData({
                 name: task?.name || '',
+                description: task?.description || '',
                 dueDate: task?.dueDate || '',
                 tags: normalizeTags(task?.tags) || [],
-                priority: task?.priority || 'media'
+                priority: task?.priority || ''
             });
         }
     }, [isOpen, task]);
@@ -148,7 +192,8 @@ export default function TaskEditModal({
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        setFormData(prev => ({ ...prev, dueDate: `${year}-${month}-${day}` }));
+        const selectedDate = `${year}-${month}-${day}`;
+        setFormData(prev => ({ ...prev, dueDate: buildDueDate(selectedDate, timeText) }));
         setShowCalendar(false);
     };
 
@@ -188,10 +233,17 @@ export default function TaskEditModal({
                 <input
                     type="text"
                     name="name"
-                    placeholder="Nombre de la tarea"
+                    placeholder="Nombre del recordatorio"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     required
+                />
+
+                <textarea
+                    name="description"
+                    placeholder="Descripción"
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 />
 
                 <h4>Fecha límite</h4>
@@ -214,7 +266,8 @@ export default function TaskEditModal({
                                 const y = parsed.getFullYear();
                                 const mo = String(parsed.getMonth() + 1).padStart(2, '0');
                                 const d = String(parsed.getDate()).padStart(2, '0');
-                                setFormData(prev => ({ ...prev, dueDate: `${y}-${mo}-${d}` }));
+                                const datePart = `${y}-${mo}-${d}`;
+                                setFormData(prev => ({ ...prev, dueDate: buildDueDate(datePart, timeText) }));
                             }
                         }}
                         onBlur={() => {
@@ -231,6 +284,20 @@ export default function TaskEditModal({
                         📅
                     </button>
                 </div>
+
+                <h4>Hora límite</h4>
+                <input
+                    type="time"
+                    value={timeText}
+                    onChange={(e) => {
+                        const nextTime = e.target.value;
+                        setTimeText(nextTime);
+                        const datePart = getDatePart(formData.dueDate);
+                        if (datePart) {
+                            setFormData(prev => ({ ...prev, dueDate: buildDueDate(datePart, nextTime) }));
+                        }
+                    }}
+                />
 
                 {showCalendar && (
                     <div className="calendarWrapper">

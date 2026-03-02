@@ -125,6 +125,7 @@ function ToDoList({ userId = "" }) {
                     ? { 
                         ...task, 
                         name: formData.name, 
+                        description: formData.description,
                         dueDate: formData.dueDate,
                         tags: formData.tags,
                         priority: formData.priority

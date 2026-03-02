@@ -28,7 +28,7 @@ function ToDoListTagFetcher({ onDataLoaded }) {
     useEffect(() => {
         const fetchTags = async () => {
             try {
-                const response = await fetch("http://209.25.140.20:3380/api/get-remainders");
+                const response = await fetch("http://209.25.140.25:9242/api/get-remainders");
                 const json = await response.json();
                 const rawData = Array.isArray(json?.data)
                     ? json.data
