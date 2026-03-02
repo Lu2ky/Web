@@ -14,80 +14,40 @@ import ToDoList from "./components/TodoList/ToDoList";
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
 import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
 // Servicios para interactuar con la API 
+// Calendario
+// Horario oficial 
 import OficialFetcher from "./services/OficialFetcher";
 import { getCategories } from "./services/categoriesService";
-import { deleteActivity } from "./services/personalActivitiesService";
-import { getAllActivities } from "./services/personalActivitiesService";
 
-const dayByIndex = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+// Actividades personales
+import PersonalFetcher from "./services/PersonalFetcher";
+//import { deleteActivity } from "./services/personalActivitiesService";
+//import { getAllActivities } from "./services/personalActivitiesService";
 
-const toHHMM = (value) => {
-	if (typeof value !== "string") return "";
-	return value.length >= 5 ? value.slice(0, 5) : value;
+
+// Funciones para normalizar datos de la API 
+
+// de número a día de la semana
+const dayMap = {
+	1: "Lunes",
+	2: "Martes",
+	3: "Miércoles",
+	4: "Jueves",
+	5: "Viernes",
+	6: "Sábado",
+	7: "Domingo"
 };
-
-const getDayFromDateString = (value) => {
-	if (typeof value !== "string" || value.trim() === "") return "";
-	const parsed = new Date(value);
-	if (Number.isNaN(parsed.getTime())) return "";
-	return dayByIndex[parsed.getDay()] || "";
-};
-
-const normalizePersonalEvent = (event, index) => {
-	const times = Array.isArray(event?.times) ? event.times : [];
-	const hasTimesWithId = times.length >= 5;
-	const hasTimesBasic = times.length >= 2;
-
-	const startFromTimes = hasTimesWithId ? times[1] : hasTimesBasic ? times[0] : "";
-	const endFromTimes = hasTimesWithId ? times[2] : hasTimesBasic ? times[1] : "";
-
-	const dayFromTimesDate = hasTimesWithId ? getDayFromDateString(times[3]) : "";
-	const dayFromTimesIndex = !hasTimesWithId && typeof times[2] === "number"
-		? ({ 1: "Lunes", 2: "Martes", 3: "Miércoles", 4: "Jueves", 5: "Viernes", 6: "Sábado", 7: "Domingo" }[times[2]] || "")
-		: "";
-
-	return {
-		id: event?.id ?? `personalActivity-${index}`,
-		subject_name: event?.subject_name || event?.activity_name || event?.name || "Actividad personal",
-		activity_name: event?.activity_name || event?.name || event?.subject_name || "Actividad personal",
-		professor_name: event?.professor_name || "Personal",
-		classroom: event?.classroom || event?.location || event?.tag || "Personal",
-		location: event?.location || event?.classroom || "Personal",
-		start_time: toHHMM(event?.start_time || event?.startHour || startFromTimes),
-		end_time: toHHMM(event?.end_time || event?.endHour || endFromTimes),
-		day: event?.day || dayFromTimesDate || dayFromTimesIndex || "Lunes",
-		tag: event?.tag || "Personal",
-	};
-};
-
-const normalizePersonalEvents = (eventsList) => {
-	if (!Array.isArray(eventsList)) return [];
-	return eventsList
-		.map((event, index) => normalizePersonalEvent(event, index))
-		.filter((event) => event.start_time && event.end_time && event.day);
-};
-
-
-// Funciones para normalizar datos 
 
 //Normalizar Horario oficial
+
 function normalizeApiData(apiData) {
 
 	if (!Array.isArray(apiData)) {
 		console.error(" Datos de la API no son un array:", apiData);
 		return [];
 	}
-	const dayMap = {
-		// de número a día de la semana
-		1: "Lunes",
-		2: "Martes",
-		3: "Miércoles",
-		4: "Jueves",
-		5: "Viernes",
-		6: "Sábado",
-		7: "Domingo"
-	};
 
+	// Normaliza cada item del array de la API a un formato consistente para el calendario
 	return apiData.map((item, index) => ({
 		id: `materiaOficial-${item.nrc}-${index}`,
 		subject_name: item.subject_name,
@@ -107,11 +67,46 @@ function normalizeApiData(apiData) {
 	}));
 }
 
+// Normalizar actividades personales 
+
+//Normaliza una actividad 
+const normalizePersonalEvent = (apiDataPersonal) => {
+	if (!Array.isArray(apiDataPersonal)) {
+		console.error("Datos de actividad personal no son un array:", apiDataPersonal);
+		return [];
+	}
+
+	return apiDataPersonal.map((item, index) => ({
+		id: `actividadPersonal-${item.id}`,
+		subject_name: item.subject_name,
+		description: item.description,
+		start_time: item.times[0].slice(0, 5), // recortar segundos
+		end_time: item.times[1].slice(0, 5),
+		day: dayMap[item.times[2]] || "Lunes",
+		etiqueta: item.tag || "Personal",
+		date_start: item.date_start,
+		date_end: item.date_end,
+		apiData: item 		// Datos originales
+	}));
+};
+
+// Normaliza una lista de actividades personales 
+const normalizePersonalEvents = (eventsList) => {
+	if (!Array.isArray(eventsList)) return [];
+	return eventsList
+		.map((event, index) => normalizePersonalEvent(event, index))
+		.filter((event) => event.start_time && event.end_time && event.day);
+};
+
+
+
+
+
 const getInitialView = () => {
 	return window.innerWidth <= 425 ? "Diario" : "Semanal"; // Vista inicial basada en el ancho de la pantalla (mobile chiquito vs desktop)
 };
 function App() {
-	
+
 	const { userId } = useParams(); // Obtener el ID del usuario desde la URL
 	const [viewMode, setViewMode] = useState(getInitialView()); // "Semanal" o "Diario"
 	const [weekOffset, setWeekOffset] = useState(0); // Offset para semana (0 = semana actual), NO MOVER NI QUITAR O SE CAE TODO
@@ -123,18 +118,7 @@ function App() {
 	const [tagColorMap, setTagColorMap] = useState({}); // Mapa de colores para etiquetas, se carga desde las categorías obtenidas de la API
 	const [selectedTag, setSelectedTag] = useState("Todos"); // Etiqueta seleccionada para filtrar actividades en el calendario
 
-	// Cargar actividades personales desde localStorage al iniciar la app
-	useEffect(() => {
-		const personalActivities = normalizePersonalEvents(getAllActivities());
-		setPersonalEvents(personalActivities);
-	}, []);
 
-	// Los datos de la API se cargan a través del componente ApiFetcher, que llama a handleDataLoaded cuando los datos están listos
-	{/*const handleDataLoaded = useCallback(data => {
-		console.log("Datos recibidos en App.jsx", data) // Verificar la estructura de los datos recibidos (Quitar)
-		const normalized = normalizeApiData(data);
-		setClassEvents(normalized);
-	}, []);*/}
 
 	const handleDataLoaded = useCallback((data) => {
 		console.log("Datos recibidos en App:", data);
