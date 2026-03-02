@@ -1,55 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "../../styles/ToDoList.css";
-import EditButton from "./EditButton";
 import ToDoFilterButton from "./ToDoFilterButton";
 import AddButton from "./AddButton";
 import TaskEditModal from "./TaskEditModal";
 import MessageConfirmation from "./MessageConfirmation";
 import ToDoFilterModal from "./ToDoFilterModal";
 import ToDoListTagFetcher from "../../services/ToDoListTagFetcher";
+import RemindCard from "./RemindCard";
+import ReminderService from "../../services/reminderService";
 
-const initialTasks = [
-    {
-        id: 1,
-        name: "Grade midterm exams",
-        completed: false,
-        tags: [
-            { label: "Mathematics", type: "subject" },
-            { label: "Grading", type: "category" },
-            { label: "high", type: "priority-high" },
-        ],
-    },
-    {
-        id: 2,
-        name: "Prepare lesson plan for next week",
-        completed: false,
-        tags: [
-            { label: "English", type: "subject" },
-            { label: "Planning", type: "category" },
-            { label: "medium", type: "priority-medium" },
-        ],
-    },
-    {
-        id: 3,
-        name: "Review homework submissions",
-        completed: true,
-        tags: [
-            { label: "Physics", type: "subject" },
-            { label: "Review", type: "category" },
-            { label: "low", type: "priority-low" },
-        ],
-    },
-    {
-        id: 4,
-        name: "Update course materials",
-        completed: false,
-        tags: [
-            { label: "Chemistry", type: "subject" },
-            { label: "Administrative", type: "category" },
-            { label: "medium", type: "priority-medium" },
-        ],
-    },
-];
+const initialTasks = [];
 
 const defaultFilters = {
     status: "all",
@@ -91,11 +51,24 @@ function ToDoList({ userId = "" }) {
     const [taskToDelete, setTaskToDelete] = useState(null);
     const [activeFilters, setActiveFilters] = useState(defaultFilters);
 
-    useEffect(() => {
+    const loadReminderTasks = useCallback(async () => {
         if (!userId) {
             setTasks(initialTasks);
+            return;
+        }
+
+        try {
+            const reminders = await ReminderService.getByUser(userId);
+            setTasks(reminders);
+        } catch (error) {
+            console.error("Error al cargar recordatorios:", error);
+            setTasks([]);
         }
     }, [userId]);
+
+    useEffect(() => {
+        loadReminderTasks();
+    }, [loadReminderTasks]);
 
     const [availableTags, setAvailableTags] = useState([]);
 
@@ -152,6 +125,7 @@ function ToDoList({ userId = "" }) {
                     ? { 
                         ...task, 
                         name: formData.name, 
+                        description: formData.description,
                         dueDate: formData.dueDate,
                         tags: formData.tags,
                         priority: formData.priority
@@ -192,7 +166,9 @@ function ToDoList({ userId = "" }) {
                 title={isDrawerOpen ? "Cerrar lista de tareas" : "Abrir lista de tareas"}
                 aria-label={isDrawerOpen ? "Cerrar lista de tareas" : "Abrir lista de tareas"}
                 type="button"
+                style={{display: isDrawerOpen ? 'none' : undefined}}
             >
+                TO-DO
             </button>
             {isDrawerOpen && (
                 <div
@@ -207,7 +183,7 @@ function ToDoList({ userId = "" }) {
                     <h2 className="todolist-title">To-Do List</h2>
                     <div className="todolist-header-actions">
                         <ToDoFilterButton onClick={() => setIsFilterModalOpen(true)} />
-                        <AddButton onToDoSaved={() => setTasks(initialTasks)} />
+                        <AddButton onToDoSaved={loadReminderTasks} />
                     </div>
                 </div>
 
@@ -217,44 +193,28 @@ function ToDoList({ userId = "" }) {
                 </div>
 
                 <div className="todolist-tasks">
-                    {filteredTasks.map((task) => (
-                        <div
-                            key={task.id}
-                            className={`todolist-task-card${task.completed ? " completed" : ""}`}
-                        >
-                            <div className="todolist-task-top">
-                                <button
-                                    className={`todolist-task-checkbox${task.completed ? " checked" : ""}`}
-                                    onClick={() => toggleTask(task.id)}
-                                    aria-label={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
-                                    title={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
-                                    type="button"
-                                />
-                                <span className="todolist-task-name">{task.name}</span>
-                                <EditButton onClick={() => editTask(task.id)} />
-
-                                <button
-                                    className="todolist-task-delete"
-                                    onClick={() => deleteTask(task.id)}
-                                    aria-label="Delete task"
-                                    title="Eliminar"
-                                >
-                                    ×
-                                </button>
-                            </div>
-
-                            <div className="todolist-task-tags">
-                                {(task.tags || []).map((tag, index) => (
-                                    <span key={index} className={`todolist-tag ${tag.type}`}>
-                                        {tag.label}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
+                    {filteredTasks.map((task) => {
+                        const priority = getTaskPriority(task);
+                        return (
+                            <RemindCard
+                                key={task.id}
+                                task={task}
+                                priority={priority}
+                                onToggle={toggleTask}
+                                onEdit={editTask}
+                                onDelete={deleteTask}
+                            />
+                        );
+                    })}
 
                     {filteredTasks.length === 0 && (
-                        <p className="todolist-empty-state">No hay tareas para los filtros seleccionados.</p>
+                        <div className="todolist-empty-state">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5">
+                                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <rect x="9" y="3" width="6" height="4" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            <p>{!userId ? "Ingresa un ID para cargar recordatorios." : "No hay tareas para los filtros seleccionados."}</p>
+                        </div>
                     )}
                 </div>
 
@@ -286,5 +246,6 @@ function ToDoList({ userId = "" }) {
         </>
     );
 }
+
 
 export default ToDoList;

@@ -1,0 +1,172 @@
+/* Reset global */
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor principal */
+.ContainerLogIn {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 6%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Overlay oscuro */
+.ContainerLogIn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 0;
+}
+
+/* Wrapper */
+.wrapperLogIn {
+    position: relative;
+    z-index: 2;
+    width: 420px;
+}
+
+/* Formulario */
+.wrapperLogIn form {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 55px 40px;
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+/* Borde Degradado */
+.wrapperLogIn form::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    background: linear-gradient(to bottom, #a855f7, #ff005c);
+}
+
+/* Logo */
+.logoLogIn {
+    width: 180px;
+    height: auto;
+    margin-bottom: 5px;
+}
+
+/* Titulos */
+.wrapperLogIn h1 {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #111;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Inputs */
+.inputBox {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.inputBox input {
+    width: 100%;
+    height: 50px;
+    padding: 0 50px 0 20px;
+    border-radius: 30px;
+    border: 1px solid #ddd;
+    background: #f3f3f3;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.inputBox input:focus {
+    border-color: #a855f7;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+    outline: none;
+}
+
+/* Iconos */
+.inputBox svg {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 15px;
+}
+
+/* Recordar / olvide */
+.rememberForgot {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+    margin-bottom: 25px;
+}
+
+.rememberForgot label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #555;
+}
+
+.rememberForgot a {
+    text-decoration: none;
+    color: #a855f7;
+    font-weight: 500;
+}
+
+.rememberForgot a:hover {
+    text-decoration: underline;
+}
+
+/* Botón */
+.btn {
+    width: 100%;
+    height: 50px;
+    border: none;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    background: linear-gradient(90deg, #a855f7, #ff005c);
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(168, 85, 247, 0.4);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}

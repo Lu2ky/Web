@@ -1,4 +1,3 @@
-
 import WeekView from "./WeekView";
 import DayView from "./DayView";
 
@@ -32,9 +31,4 @@ function Calendar({ viewMode, events = [], personalEvents = [], onClassClick = (
         </div>
     );
 }
-
-
-
 export default Calendar;
-
-

@@ -6,16 +6,14 @@ import AddButton from "./AddActivityButton";
 import FilterButton from "./FilterButton";
 import ThemeSelect from "./ThemeSelector";
 
-function ControlBar({viewMode, setViewMode, onActivitySaved, onThemeChange}) {
-    const [selectedTag, setSelectedTag] = useState("Todo");
+function ControlBar({viewMode, setViewMode, onActivitySaved, onThemeChange, selectedTag, setSelectedTag}) {
 
     return (
         <div className="ControlBar">
             <div className="Left">
-                <ViewButton viewMode={viewMode} setViewMode={setViewMode} />
+            <ViewButton viewMode={viewMode} setViewMode={setViewMode} />
             </div>
             <div className="Center">
-                <WeekMover />
             </div>
             <div className="Right">
                 <AddButton onActivitySaved={onActivitySaved} />

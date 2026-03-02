@@ -8,12 +8,12 @@ export async function getCategories() {
 
     const data = [
         "Teoría", 
-        "Pastoral", 
+        "Laboratorio",
+        "Cultural",
         "Deportiva", 
         "Centro de lenguas",
-        "Personal", 
-        "Cultural", 
-        "Laboratorio"
+        "Pastoral", 
+        "Personal"
     ];
 
     cachedCategories = data;

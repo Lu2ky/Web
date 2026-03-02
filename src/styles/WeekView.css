@@ -12,6 +12,53 @@
   overflow: visible;
 }
 
+/* Selector de semana */
+.weekSelector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-bottom: 2px solid transparent;
+    border-image: linear-gradient(135deg, #ff006e, #c026d3) 1;
+}
+
+.weekSelectorArrow {
+    padding: 0.5rem 0.8rem;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    border: none;
+    border-radius: 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(192, 38, 211, 0.2);
+}
+
+.weekSelectorArrow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(192, 38, 211, 0.35);
+}
+
+.weekSelectorArrow:active {
+    transform: translateY(0);
+}
+
+.weekSelectorText {
+    flex: 1;
+    text-align: center;
+}
+
+.weekSelectorDate {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    text-transform: capitalize;
+}
+
 /* Encabezados */
 .weekHeaderRow {
   display: flex;

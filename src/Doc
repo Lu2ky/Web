@@ -1,8 +1,9 @@
 
-import "./styles/App.css";
+{/*import "./styles/App.css";
 
 // Hooks de react 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, use } from "react";
+import { useCallback } from "react";
 // Id de LogIn
 import { useParams } from "react-router-dom";
 // Componentes Primarios
@@ -14,58 +15,10 @@ import ToDoList from "./components/TodoList/ToDoList";
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
 import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
 // Servicios para interactuar con la API 
-import OficialFetcher from "./services/OficialFetcher";
+import ApiFetcher from "./services/ApiFetcher";
 import { getCategories } from "./services/categoriesService";
 import { deleteActivity } from "./services/personalActivitiesService";
 import { getAllActivities } from "./services/personalActivitiesService";
-
-const dayByIndex = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-
-const toHHMM = (value) => {
-	if (typeof value !== "string") return "";
-	return value.length >= 5 ? value.slice(0, 5) : value;
-};
-
-const getDayFromDateString = (value) => {
-	if (typeof value !== "string" || value.trim() === "") return "";
-	const parsed = new Date(value);
-	if (Number.isNaN(parsed.getTime())) return "";
-	return dayByIndex[parsed.getDay()] || "";
-};
-
-const normalizePersonalEvent = (event, index) => {
-	const times = Array.isArray(event?.times) ? event.times : [];
-	const hasTimesWithId = times.length >= 5;
-	const hasTimesBasic = times.length >= 2;
-
-	const startFromTimes = hasTimesWithId ? times[1] : hasTimesBasic ? times[0] : "";
-	const endFromTimes = hasTimesWithId ? times[2] : hasTimesBasic ? times[1] : "";
-
-	const dayFromTimesDate = hasTimesWithId ? getDayFromDateString(times[3]) : "";
-	const dayFromTimesIndex = !hasTimesWithId && typeof times[2] === "number"
-		? ({ 1: "Lunes", 2: "Martes", 3: "Miércoles", 4: "Jueves", 5: "Viernes", 6: "Sábado", 7: "Domingo" }[times[2]] || "")
-		: "";
-
-	return {
-		id: event?.id ?? `personalActivity-${index}`,
-		subject_name: event?.subject_name || event?.activity_name || event?.name || "Actividad personal",
-		activity_name: event?.activity_name || event?.name || event?.subject_name || "Actividad personal",
-		professor_name: event?.professor_name || "Personal",
-		classroom: event?.classroom || event?.location || event?.tag || "Personal",
-		location: event?.location || event?.classroom || "Personal",
-		start_time: toHHMM(event?.start_time || event?.startHour || startFromTimes),
-		end_time: toHHMM(event?.end_time || event?.endHour || endFromTimes),
-		day: event?.day || dayFromTimesDate || dayFromTimesIndex || "Lunes",
-		tag: event?.tag || "Personal",
-	};
-};
-
-const normalizePersonalEvents = (eventsList) => {
-	if (!Array.isArray(eventsList)) return [];
-	return eventsList
-		.map((event, index) => normalizePersonalEvent(event, index))
-		.filter((event) => event.start_time && event.end_time && event.day);
-};
 
 
 // Funciones para normalizar datos 
@@ -111,7 +64,7 @@ const getInitialView = () => {
 	return window.innerWidth <= 425 ? "Diario" : "Semanal"; // Vista inicial basada en el ancho de la pantalla (mobile chiquito vs desktop)
 };
 function App() {
-	
+
 	const { userId } = useParams(); // Obtener el ID del usuario desde la URL
 	const [viewMode, setViewMode] = useState(getInitialView()); // "Semanal" o "Diario"
 	const [weekOffset, setWeekOffset] = useState(0); // Offset para semana (0 = semana actual), NO MOVER NI QUITAR O SE CAE TODO
@@ -125,7 +78,7 @@ function App() {
 
 	// Cargar actividades personales desde localStorage al iniciar la app
 	useEffect(() => {
-		const personalActivities = normalizePersonalEvents(getAllActivities());
+		const personalActivities = getAllActivities();
 		setPersonalEvents(personalActivities);
 	}, []);
 
@@ -135,7 +88,7 @@ function App() {
 		const normalized = normalizeApiData(data);
 		setClassEvents(normalized);
 	}, []);*/}
-
+{ /*
 	const handleDataLoaded = useCallback((data) => {
 		console.log("Datos recibidos en App:", data);
 		if (!Array.isArray(data)) {
@@ -181,20 +134,19 @@ function App() {
 
 	const handleActivitySaved = () => {
 		// Recargar actividades personales despues de guardar una nueva actividad
-		const personalActivities = normalizePersonalEvents(getAllActivities());
+		const personalActivities = getAllActivities();
 		setPersonalEvents(personalActivities);
 	};
 	// Elimina actividad personal, recarga la lista de actividades personales para actualizar la vista
 	const handleDeletePersonal = id => {
 		deleteActivity(id);
-		const personalActivities = normalizePersonalEvents(getAllActivities());
+		const personalActivities = getAllActivities();
 		setPersonalEvents(personalActivities);
 	};
 
 	useEffect(() => {
-		getCategories().then(categories => {
-			const theme =
-				THEME_OPTIONS.find(t => t.id === themeId) || THEME_OPTIONS[0];
+		getCategories().then((categories) => {
+			const theme = THEME_OPTIONS.find((t) => t.id === themeId) || THEME_OPTIONS[0];
 			const palette = theme?.colors || THEME_OPTIONS[0].colors;
 			const map = {};
 			categories.forEach((cat, index) => {
@@ -205,16 +157,16 @@ function App() {
 	}, [themeId]);
 
 	//Callback que recibe el ThemeSelector cuando se cambia el tema, actualiza el estado del tema
-	const handleThemeChange = newThemeId => {
+	const handleThemeChange = (newThemeId) => {
 		setThemeId(newThemeId);
 	};
 
 	//Obtener color por etiqueta
-	const getTagColor = tag => {
+	const getTagColor = (tag) => {
 		return tagColorMap[tag] || "#b1d4f0"; // Color por defecto si no se encuentra la etiqueta
 	};
 	//Obtener color de texto (blanco o negro) según el color de fondo para asegurar legibilidad
-	const getContrastColor = hex => {
+	const getContrastColor = (hex) => {
 		if (!hex) return "#000000";
 		const r = parseInt(hex.substr(1, 2), 16);
 		const g = parseInt(hex.substr(3, 2), 16);
@@ -242,8 +194,8 @@ function App() {
 					<ToDoList userId={userId} />
 				</div>
 				<div className="CalendarSection">
-					<OficialFetcher
-						userId={userId}
+					<ApiFetcher
+						url={`http://209.25.140.20:3380/api/official-schedule/${userId}`}
 						onDataLoaded={handleDataLoaded}
 					/>
 
@@ -257,7 +209,7 @@ function App() {
 						getContrastColor={getContrastColor}
 					/>
 					{/* Popup para detalles de clases  */}
-					<PopUpClasses
+					{/*<PopUpClasses
 						isOpen={showClassPopup}
 						onClose={handleClosePopup}
 						classData={selectedClass}
@@ -278,5 +230,4 @@ function App() {
 	);
 }
 
-export default App;
-
+export default App;*/}

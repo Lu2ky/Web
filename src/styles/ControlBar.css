@@ -4,7 +4,8 @@
     align-items: center;
     justify-content: space-between;
     position: sticky;
-    top: 0;
+    top:unset;
+    bottom: 0;
     z-index: 40;
     overflow: visible;
     width: 100%; 
@@ -18,8 +19,9 @@
         linear-gradient(90deg, #ff006e, #c026d3);
     background-origin: border-box;
     background-clip: padding-box, border-box;
-
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    border-top: 2px solid transparent;
+    border-bottom: none;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* Agrupaciones */
@@ -45,48 +47,65 @@
 /* Responsive */
 @media (min-width: 900px) {
     .ControlBar {
-        max-width: 100%;
-        flex-wrap: nowrap;
-        justify-content: center;
+        flex-direction:row;
+        flex-wrap:nowrap;
+        justify-content: space-between;
     }
 
-    .ControlBar .Left,
-    .ControlBar .Center,
-    .ControlBar .Right {
+    .ControlBar .Left {
+        justify-content: flex-start;
+    }
+
+    .ControlBar .Center {
         justify-content: center;
+        flex:1;
+    }
+
+    .ControlBar .Right {
+        justify-content: flex-end;
     }
 }
 
 @media (max-width: 1012px) {
     .ControlBar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-        padding: 1rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.3rem;
+        padding: 0.4rem 0.8rem;
     }
 
     .ControlBar .Left,
     .ControlBar .Center,
     .ControlBar .Right {
-        width: 100%;
-        gap:1rem;
+        width: auto;
+        gap:0.3rem;
         justify-content: center;
     }
 }
 /* Ajustes para mobile */
 @media (max-width: 768px) {
     .ControlBar {
-        flex-direction: column;
-        align-items: stretch;
-        gap:0.1rem;
-        padding: 0.1rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap:0.3rem;
+        padding: 0.4rem 0.8rem;
+        flex-wrap: nowrap;
     }
 
     .ControlBar .Left,
-    .ControlBar .Center,
-    .ControlBar .Right {
-        width: 100%;
-        gap:1rem;
+    .ControlBar .Center
+    {
+        width: auto;
+        gap:0.3rem;
         justify-content: center;
+    }
+
+    .ControlBar .right {
+        width:auto;
+        gap:0.3rem;
+        justify-content: flex-end;
+        padding-right: 0.4;
     }
 }
