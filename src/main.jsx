@@ -12,7 +12,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 		<Routes>
 			<Route path="/" element={<LogInForm />} />
 			<Route path="/RecoverPassword" element={<RecoverPassword />} />
-			<Route path="/app/:userId" element={<App />} />
+			<Route path="/App/:userId" element={<App />} />
 		</Routes>
 	</BrowserRouter>
 );

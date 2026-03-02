@@ -1,6 +1,8 @@
 import { useState } from "react";
 import logo from "../../assets/logo.png";
 import "../../styles/Header.css";
+import "../Account/DropdownAcount"
+import DropdownAcount from "../Account/DropdownAcount";
 
 function Header() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,32 +13,9 @@ function Header() {
 				<h1>UPB Planner</h1>
 			</div>
 
-			<button
-				className="menuButton"
-				onClick={() => setIsMenuOpen(true)}		/*PARA LO DEL MENU HAMBURGUESA*/
-				aria-label="Abrir menú"
-				title="Abrir menú"
-				type="button"
-			>
-				☰
-			</button>
-
-			<nav className={`drawer ${isMenuOpen ? "open" : ""}`}>
-				<ul>
-					<li>
-						<a href="#">Horario</a>
-					</li>
-					<li>
-						<a href="#">Cuenta</a>
-					</li>
-					<li>
-						<a href="#">Notificaciones</a>
-					</li>
-					<li>
-						<a href="#">Sobre la App</a>
-					</li>
-				</ul>
-			</nav>
+			<div className="headerRight">
+				<DropdownAcount />
+			</div>
 
 			{isMenuOpen && <div className="overlay" onClick={() => setIsMenuOpen(false)} />}
 		</header>

@@ -1,8 +1,8 @@
+
 import "./styles/App.css";
 
 // Hooks de react 
-import { useState, useEffect, use } from "react";
-import { useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 // Id de LogIn
 import { useParams } from "react-router-dom";
 // Componentes Primarios
@@ -14,7 +14,7 @@ import ToDoList from "./components/TodoList/ToDoList";
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
 import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
 // Servicios para interactuar con la API 
-import ApiFetcher from "./services/ApiFetcher";
+import OficialFetcher from "./services/OficialFetcher";
 import { getCategories } from "./services/categoriesService";
 import { deleteActivity } from "./services/personalActivitiesService";
 import { getAllActivities } from "./services/personalActivitiesService";
@@ -111,7 +111,7 @@ const getInitialView = () => {
 	return window.innerWidth <= 425 ? "Diario" : "Semanal"; // Vista inicial basada en el ancho de la pantalla (mobile chiquito vs desktop)
 };
 function App() {
-
+	
 	const { userId } = useParams(); // Obtener el ID del usuario desde la URL
 	const [viewMode, setViewMode] = useState(getInitialView()); // "Semanal" o "Diario"
 	const [weekOffset, setWeekOffset] = useState(0); // Offset para semana (0 = semana actual), NO MOVER NI QUITAR O SE CAE TODO
@@ -241,8 +241,8 @@ function App() {
 					<ToDoList userId={userId} />
 				</div>
 				<div className="CalendarSection">
-					<ApiFetcher
-						url={`http://209.25.140.20:3380/api/official-schedule/${userId}`}
+					<OficialFetcher
+						userId={userId}
 						onDataLoaded={handleDataLoaded}
 					/>
 
