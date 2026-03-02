@@ -24,7 +24,7 @@ function OficialFetcher({ onDataLoaded, userId }) {
       try {
         const response = await fetch(
           // Hace la peticipin a la API con el ID del usuario
-          `http://209.25.140.20:3380/api/official-schedule/${userId}`
+          `${process.env.API_URL_OFICIAL_SCHEDULE}${userId}`
         );
         const json = await response.json(); // Convierte respuesta en un json
         if (!json || json.length === 0) {
