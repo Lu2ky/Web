@@ -1,5 +1,5 @@
 import Logo from './assets/logo.png';
-import Image from './assets/imageRecover.jpg';
+import Image from './assets/ImageRecover.jpg';
 import './RecoverPassword.css';
 import { MdEmail } from "react-icons/md"; //  npm install react-icons --save
 import { useNavigate } from 'react-router-dom';
