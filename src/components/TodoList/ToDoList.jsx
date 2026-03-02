@@ -117,24 +117,36 @@ function ToDoList({ userId = "" }) {
         setIsEditModalOpen(true);
     };
 
-    const handleSave = (formData) => {
-        if (taskToEdit) {
-            // Editar tarea existente
-            setTasks(prev => prev.map(task => 
-                task.id === taskToEdit.id 
-                    ? { 
-                        ...task, 
-                        name: formData.name, 
-                        description: formData.description,
-                        dueDate: formData.dueDate,
-                        tags: formData.tags,
-                        priority: formData.priority
-                    }
-                    : task
-            ));
+    const handleSave = async (formData) => {
+        if (!taskToEdit) {
+            setIsEditModalOpen(false);
+            setTaskToEdit(null);
+            return;
         }
+
+        const updatedTask = {
+            ...taskToEdit,
+            name: formData.name,
+            description: formData.description,
+            dueDate: formData.dueDate,
+            tags: formData.tags,
+            priority: formData.priority
+        };
+
+        setTasks(prev =>
+            prev.map(task => (task.id === taskToEdit.id ? updatedTask : task))
+        );
+
         setIsEditModalOpen(false);
         setTaskToEdit(null);
+
+        try {
+            await ReminderService.updateFromEdit(taskToEdit, updatedTask);
+            await loadReminderTasks();
+        } catch (error) {
+            console.error("Error al actualizar recordatorio:", error);
+            await loadReminderTasks();
+        }
     };
 
     const handleDelete = () => {
