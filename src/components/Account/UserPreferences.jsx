@@ -14,6 +14,12 @@ export default function UserPreferences({ userId, onClose }) {
     const [newEmail, setNewEmail] = useState("");
     const [isSavingEmail, setIsSavingEmail] = useState(false);
 
+    // Reminder anticipation state
+    const [isEditingAnticipation, setIsEditingAnticipation] = useState(false);
+    const [anticipationHours, setAnticipationHours] = useState(0);
+    const [anticipationMinutes, setAnticipationMinutes] = useState(0);
+    const [isSavingAnticipation, setIsSavingAnticipation] = useState(false);
+
     // Load user data on component mount
     useEffect(() => {
         loadUserData();
@@ -33,6 +39,34 @@ export default function UserPreferences({ userId, onClose }) {
                 const userData = Array.isArray(data) ? data[0] : data;
                 setUserData(userData);
                 setNewEmail(userData.email || userData.correo || "");
+                
+                // Extract anticipation time from 'antelacionNotis' field (TIME format: HH:MM:SS)
+                let totalMinutes = 0;
+                const antelacionField = userData.antelacionNotis;
+                
+                if (antelacionField) {
+                    // If it's a TIME format string (HH:MM:SS)
+                    if (typeof antelacionField === 'string' && antelacionField.includes(':')) {
+                        const parts = antelacionField.split(':');
+                        const hours = parseInt(parts[0]) || 0;
+                        const minutes = parseInt(parts[1]) || 0;
+                        totalMinutes = hours * 60 + minutes;
+                    } 
+                    // If it's an object with hours and minutes properties
+                    else if (typeof antelacionField === 'object' && antelacionField !== null) {
+                        const hours = parseInt(antelacionField.hours || antelacionField.horas || 0) || 0;
+                        const minutes = parseInt(antelacionField.minutes || antelacionField.minutos || 0) || 0;
+                        totalMinutes = hours * 60 + minutes;
+                    }
+                    // If it's already a number (total minutes)
+                    else if (typeof antelacionField === 'number') {
+                        totalMinutes = antelacionField;
+                    }
+                }
+                
+                setAnticipationHours(Math.floor(totalMinutes / 60));
+                setAnticipationMinutes(totalMinutes % 60);
+                
                 setError("");
             } else {
                 setError("No se pudieron cargar los datos del usuario");
@@ -91,7 +125,7 @@ export default function UserPreferences({ userId, onClose }) {
         try {
             const result = await userService.updateUserEmail(userId, emailToSave);
 
-            if (result && (result.success || result.status === "success")) {
+            if (result && (result.success || result.status === "success" || result.ok === true)) {
                 setSuccess("Correo actualizado exitosamente");
                 setUserData({
                     ...userData,
@@ -106,10 +140,112 @@ export default function UserPreferences({ userId, onClose }) {
                 setError(result?.message || "Error al actualizar el correo");
             }
         } catch (err) {
-            setError("Error al actualizar el correo");
+            setError(err?.message || "Error al actualizar el correo");
             console.error(err);
         } finally {
             setIsSavingEmail(false);
+        }
+    };
+
+    const handleEditAnticipation = () => {
+        setIsEditingAnticipation(true);
+        setError("");
+        setSuccess("");
+    };
+
+    const handleCancelAnticipation = () => {
+        setIsEditingAnticipation(false);
+        
+        // Restore from userData
+        let totalMinutes = 0;
+        const antelacionField = userData?.antelacionNotis;
+        
+        if (antelacionField) {
+            if (typeof antelacionField === 'string' && antelacionField.includes(':')) {
+                const parts = antelacionField.split(':');
+                const hours = parseInt(parts[0]) || 0;
+                const minutes = parseInt(parts[1]) || 0;
+                totalMinutes = hours * 60 + minutes;
+            } else if (typeof antelacionField === 'object' && antelacionField !== null) {
+                const hours = parseInt(antelacionField.hours || antelacionField.horas || 0) || 0;
+                const minutes = parseInt(antelacionField.minutes || antelacionField.minutos || 0) || 0;
+                totalMinutes = hours * 60 + minutes;
+            } else if (typeof antelacionField === 'number') {
+                totalMinutes = antelacionField;
+            }
+        }
+        
+        setAnticipationHours(Math.floor(totalMinutes / 60));
+        setAnticipationMinutes(totalMinutes % 60);
+        setError("");
+    };
+
+    const handleSaveAnticipation = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+
+        const hours = parseInt(anticipationHours) || 0;
+        const minutes = parseInt(anticipationMinutes) || 0;
+        const totalMinutes = hours * 60 + minutes;
+
+        if (totalMinutes < 0) {
+            setError("El tiempo de anticipación no puede ser negativo");
+            return;
+        }
+
+        if (totalMinutes > 1440) {
+            setError("El tiempo de anticipación no puede ser mayor a 24 horas");
+            return;
+        }
+
+        // Get current total minutes from userData
+        let currentTotalMinutes = 0;
+        const antelacionField = userData?.antelacionNotis;
+        
+        if (antelacionField) {
+            if (typeof antelacionField === 'string' && antelacionField.includes(':')) {
+                const parts = antelacionField.split(':');
+                const h = parseInt(parts[0]) || 0;
+                const m = parseInt(parts[1]) || 0;
+                currentTotalMinutes = h * 60 + m;
+            } else if (typeof antelacionField === 'object' && antelacionField !== null) {
+                const h = parseInt(antelacionField.hours || antelacionField.horas || 0) || 0;
+                const m = parseInt(antelacionField.minutes || antelacionField.minutos || 0) || 0;
+                currentTotalMinutes = h * 60 + m;
+            } else if (typeof antelacionField === 'number') {
+                currentTotalMinutes = antelacionField;
+            }
+        }
+        
+        if (totalMinutes === currentTotalMinutes) {
+            setError("El nuevo tiempo debe ser diferente al actual");
+            return;
+        }
+
+        setIsSavingAnticipation(true);
+
+        try {
+            const result = await userService.updateReminderAnticipation(userId, totalMinutes);
+
+            if (result && (result.success || result.status === "success" || result.ok === true)) {
+                setSuccess("Tiempo de anticipación actualizado exitosamente");
+                setUserData({
+                    ...userData,
+                    antelacionNotis: totalMinutes
+                });
+                setIsEditingAnticipation(false);
+                
+                // Clear success message after 3 seconds
+                setTimeout(() => setSuccess(""), 3000);
+            } else {
+                setError(result?.message || "Error al actualizar el tiempo de anticipación");
+            }
+        } catch (err) {
+            setError(err?.message || "Error al actualizar el tiempo de anticipación");
+            console.error(err);
+        } finally {
+            setIsSavingAnticipation(false);
         }
     };
 
@@ -187,6 +323,88 @@ export default function UserPreferences({ userId, onClose }) {
                 <div className="pref-group">
                     <label className="pref-label">Notificaciones por Correo</label>
                     <p className="pref-description">Recibe actualizaciones importantes en tu correo electrónico</p>
+                </div>
+            </section>
+
+            {/* Reminder Anticipation Section */}
+            <section className="preferences-section">
+                <h3 className="preferences-section-title">Recordatorios</h3>
+                
+                <div className="pref-group">
+                    <label className="pref-label">Tiempo de Anticipación</label>
+                    <p className="pref-description">¿Con cuánto tiempo de anticipación quieres ser recordado antes de que venza una tarea? (máximo 24 horas)</p>
+                    
+                    {isEditingAnticipation ? (
+                        <form onSubmit={handleSaveAnticipation} className="anticipation-edit-form">
+                            <div className="anticipation-input-wrapper">
+                                <div className="time-input-group">
+                                    <label htmlFor="anticipation-hours" className="time-label">Horas</label>
+                                    <select
+                                        id="anticipation-hours"
+                                        value={anticipationHours}
+                                        onChange={(e) => setAnticipationHours(e.target.value)}
+                                        className="time-select"
+                                        disabled={isSavingAnticipation}
+                                    >
+                                        {[...Array(24)].map((_, i) => (
+                                            <option key={i} value={i}>{i}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="time-input-group">
+                                    <label htmlFor="anticipation-minutes" className="time-label">Minutos</label>
+                                    <select
+                                        id="anticipation-minutes"
+                                        value={anticipationMinutes}
+                                        onChange={(e) => setAnticipationMinutes(e.target.value)}
+                                        className="time-select"
+                                        disabled={isSavingAnticipation}
+                                    >
+                                        {[...Array(60)].map((_, i) => (
+                                            <option key={i} value={i}>{String(i).padStart(2, '0')}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="time-actions">
+                                    <button
+                                        type="submit"
+                                        className="email-action-btn email-save-btn"
+                                        disabled={isSavingAnticipation}
+                                        title="Guardar"
+                                    >
+                                        <FaCheck />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="email-action-btn email-cancel-btn"
+                                        onClick={handleCancelAnticipation}
+                                        disabled={isSavingAnticipation}
+                                        title="Cancelar"
+                                    >
+                                        <FaTimes />
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    ) : (
+                        <div className="anticipation-display-wrapper">
+                            <div className="pref-value">
+                                {anticipationHours > 0 && `${anticipationHours}h `}
+                                {anticipationMinutes > 0 && `${anticipationMinutes}m `}
+                                {anticipationHours === 0 && anticipationMinutes === 0 && "Sin recordatorio"}
+                            </div>
+                            <button
+                                className="email-edit-button"
+                                onClick={handleEditAnticipation}
+                                disabled={isSavingAnticipation}
+                                title="Editar tiempo de anticipación"
+                            >
+                                <FaEdit />
+                            </button>
+                        </div>
+                    )}
                 </div>
             </section>
         </div>

@@ -209,3 +209,70 @@
         font-size: 16px; /* Prevent auto-zoom on iOS */
     }
 }
+
+/* Anticipation Time Styles */
+.anticipation-edit-form {
+    width: 100%;
+}
+
+.anticipation-input-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.time-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 100px;
+}
+
+.time-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.time-select {
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #4a90e2;
+    border-radius: 4px;
+    font-family: inherit;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.time-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    border-color: #2563eb;
+}
+
+.time-select:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.time-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+.anticipation-display-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.anticipation-display-wrapper .pref-value {
+    flex: 1;
+}
