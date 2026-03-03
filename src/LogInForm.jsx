@@ -16,10 +16,19 @@ const LogInForm = () => {
     const [userId, setUserId] = useState('');
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        navigate(`/app/${userId}`); // Redirige a la página principal después de iniciar sesión
-    }
+        setError('');
+
+        const result = await LDAPservice(userId, password);
+
+        if (result && result.success) {
+            navigate(`/app/${userId}`);
+        } else {
+            setError("Usuario o contraseña incorrectos");
+        }
+    };
+
 
     return (
         <div className='ContainerLogIn'
