@@ -22,14 +22,40 @@ function formatApiDateTime(value) {
 
     if (match) {
       const [, year, month, day, hour = "00", minute = "00", second = "00"] = match;
-      return `${year}-${month}-${day} ${hour}-${minute}-${second}`;
+      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
     }
   }
 
   const parsedDate = value ? new Date(value) : new Date();
   const finalDate = Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
 
-  return `${finalDate.getFullYear()}-${pad(finalDate.getMonth() + 1)}-${pad(finalDate.getDate())} ${pad(finalDate.getHours())}-${pad(finalDate.getMinutes())}-${pad(finalDate.getSeconds())}`;
+  return `${finalDate.getFullYear()}-${pad(finalDate.getMonth() + 1)}-${pad(finalDate.getDate())} ${pad(finalDate.getHours())}:${pad(finalDate.getMinutes())}:${pad(finalDate.getSeconds())}`;
+}
+
+/**
+ * Formatea tiempo para API: asegura que sea HH:MM:SS con dos puntos
+ */
+function formatTimeWithColons(time) {
+  if (!time) return "";
+  
+  let formatted = String(time);
+  
+  // Si viene como "HH-MM", convertir a "HH:MM"
+  if (formatted.includes("-")) {
+    formatted = formatted.replace(/-/g, ":");
+  }
+  
+  // Si es "HH:MM", agregar :00 para segundos
+  const parts = formatted.split(":");
+  if (parts.length === 2) {
+    formatted = `${parts[0]}:${parts[1]}:00`;
+  }
+  // Si ya tiene segundos, devolverlo como está
+  else if (parts.length === 3) {
+    formatted = `${parts[0]}:${parts[1]}:${parts[2]}`;
+  }
+  
+  return formatted;
 }
 
 /**
@@ -178,14 +204,10 @@ export const addPersonalActivity = async (userId, activityData) => {
       description: activityData.description || "",
       date_start: formattedDateStart,
       date_end: formattedDateEnd,
-      start_hour: activityData.startHour,
-      end_hour: activityData.endHour,
+      start_hour: formatTimeWithColons(activityData.startHour),
+      end_hour: formatTimeWithColons(activityData.endHour),
       day: dayMap[activityData.day] || 1,
-      times: 
-        [
-          
-        ]
-      
+      times: []
     };
 
     console.log("Enviando actividad a la API:", payload);
@@ -274,26 +296,17 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
     const formattedDateStart = formatApiDateTime(updates.dateStart);
     const formattedDateEnd = formatApiDateTime(updates.dateEnd);
 
+    // Construir payload idéntico a addPersonalActivity, solo cambiar activityData por updates y agregar IdPersonalSchedule
     const payload = {
-      id_user: userId,
-      id_academic_per: null,
       id_course: activityId,
       subject_name: updates.title,
-      description: updates.description,
+      description: updates.description || "",
       date_start: formattedDateStart,
       date_end: formattedDateEnd,
-      start_hour: updates.startHour,
-      end_hour: updates.endHour,
+      start_hour: formatTimeWithColons(updates.startHour),
+      end_hour: formatTimeWithColons(updates.endHour),
       day: dayMap[updates.day] || 1,
-      times: [
-        [
-          activityId,
-          updates.startHour,
-          updates.endHour,
-          formattedDateStart,
-          formattedDateEnd
-        ]
-      ]
+      times: []
     };
 
     console.log("Actualizando actividad:", payload);

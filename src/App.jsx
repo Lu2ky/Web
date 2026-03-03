@@ -223,6 +223,14 @@ function App() {
 		]);
 	};
 
+	// Actualiza una actividad personal después de editarla
+	const handleActivityUpdate = (updatedActivity) => {
+		setPersonalEvents(prevEvents => prevEvents.map(ev => ev.id === updatedActivity.id ? { ...ev, ...updatedActivity } : ev));
+		if (selectedPersonal && selectedPersonal.id === updatedActivity.id) {
+			setSelectedPersonal(updatedActivity);
+		}
+	};
+
 	useEffect(() => {
 		getCategories().then(categories => {
 			const theme =
@@ -305,6 +313,7 @@ function App() {
 						isOpen={showPersonalPopup}
 						onClose={handleClosePersonalPopup}
 						personalData={selectedPersonal}
+						onUpdate={handleActivityUpdate}
 					/>
 					<MessageConfirmation
 						isOpen={showDeletePersonalConfirm}

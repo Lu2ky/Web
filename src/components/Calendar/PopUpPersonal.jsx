@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { CommentButton } from "./CommentButton";
 import "../../styles/PopUpClasses.css";
+import EditActivityModal from "./EditActivityModal";
 
 export const PopUpPersonal = ({
   isOpen = false,
   onClose = () => { },
   personalData = {},
+  onUpdate = () => {}
 }) => {
   const [is_open, set_is_open] = useState(isOpen);
   const [comments, set_comments] = useState([]);
@@ -46,6 +48,24 @@ export const PopUpPersonal = ({
     set_comments(comments.filter((comment) => comment.id !== comment_id));
   };
 
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const handleOpenEdit = () => {
+    setIsEditOpen(true);
+  };
+
+  const handleCloseEdit = () => {
+    setIsEditOpen(false);
+  };
+
+  const handleUpdated = (updatedActivity) => {
+    // Propagar al padre
+    onUpdate(updatedActivity);
+    // Cerrar modales
+    handleCloseEdit();
+    handle_close();
+  };
+
   if (!is_open) {
     return null;
   }
@@ -62,7 +82,47 @@ export const PopUpPersonal = ({
         <div className="popup-content">
           {/* Título y etiqueta */}
           <div className="subject-header">
-            <h1 className="subject-name">{data.name}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h1 className="subject-name">{data.name}</h1>
+              <button
+                onClick={handleOpenEdit}
+                title="Editar"
+                aria-label="Editar"
+                type="button"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 48 48"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M7 42H41"
+                    stroke="#333333"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M11 26.7199V34H18.3172L39 13.3081L31.6919 6L11 26.7199Z"
+                    stroke="#333333"
+                    strokeWidth="4"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
             <div className="subject-meta">
               <span className="subject-date">{data.tag}</span>
             </div>
@@ -147,6 +207,14 @@ export const PopUpPersonal = ({
           </button>
         </div>
       </div>
+      <EditActivityModal
+        isOpen={isEditOpen}
+        onClose={handleCloseEdit}
+        userId={data?.apiData?.id_user || data?.apiData?.ID_USER}
+        activity={data}
+        onUpdated={handleUpdated}
+      />
+
     </div>
   );
 };
