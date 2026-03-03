@@ -223,7 +223,7 @@ export const deletePersonalActivity = async (userId, activityId) => {
     const baseUrl = import.meta.env.VITE_API_DELETE_PERSONAL_ACTIVITY;
 
     const payload = {
-      IdPersonalScheudle: activityId
+      IdPersonalSchedule: activityId
     };
 
     console.log("Eliminando actividad:", payload);
@@ -235,7 +235,7 @@ export const deletePersonalActivity = async (userId, activityId) => {
       },
       body: JSON.stringify(payload)
     });
-          IdPersonalSchedule: activityId
+
     if (!response.ok) {
       throw new Error(`Error en la API: ${response.status} ${response.statusText}`);
     }
