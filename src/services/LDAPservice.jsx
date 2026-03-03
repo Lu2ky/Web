@@ -1,4 +1,4 @@
-const baseUrl = import.meta.env.VITE_API_URL_LDAP; // URL para validar usuario
+const baseUrl = import.meta.env.VITE_API_URL_LDPA; // URL para validar usuario
 const createUserUrl = import.meta.env.VITE_API_CREATE_USER; // URL para crear usuario
 
 /**
@@ -9,6 +9,14 @@ const createUserUrl = import.meta.env.VITE_API_CREATE_USER; // URL para crear us
  */
 async function LDAPservice(userId, password) {
     try {
+        console.log("[LDAPservice] Validating user:", userId);
+        console.log("[LDAPservice] URL:", baseUrl);
+        
+        if (!baseUrl) {
+            console.error("[LDAPservice] baseUrl is undefined - VITE_API_URL_LDPA not configured");
+            return null;
+        }
+        
         const response = await fetch(`${baseUrl}`, {
             method: "POST", 
             headers: {
@@ -21,6 +29,7 @@ async function LDAPservice(userId, password) {
         });
 
         if (!response.ok) {
+            console.error("[LDAPservice] HTTP Error:", response.status);
             throw new Error(`Error HTTP: ${response.status}`);
         }
 
