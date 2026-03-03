@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "env:generate": "node scripts/generate-env.js",
+    "dev": "npm run env:generate && vite",
+    "build": "npm run env:generate && vite build",
+    "build:docker": "NODE_ENV=docker node scripts/generate-env.js && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
