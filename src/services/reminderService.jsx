@@ -1,13 +1,15 @@
+import env from '../env.js';
+
 // Use environment variables so the base host can change without recompiling
-const REMINDERS_API_BASE = import.meta.env.VITE_API_URL_REMINDERS_USER; // should include trailing slash
-const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER;
-const DELETE_REMINDER_ENDPOINT = import.meta.env.VITE_API_DELETE_REMINDER;
-const UPDATE_NAME_ENDPOINT = import.meta.env.VITE_API_UPDATE_REMINDER;
-const UPDATE_DESC_ENDPOINT = import.meta.env.VITE_API_UPDATE_DESCRIPTION_REMINDER;
-const UPDATE_DATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_DATE_REMINDER;
-const UPDATE_PRIORITY_ENDPOINT = import.meta.env.VITE_API_UPDATE_PRIORITY_REMINDER;
-const UPDATE_STATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_STATE_REMINDER;
-const UPDATE_TAGS_ENDPOINT = import.meta.env.VITE_API_UPDATE_TAGS_REMINDER;
+const REMINDERS_API_BASE = env('VITE_API_URL_REMINDERS_USER'); // should include trailing slash
+const ADD_REMINDER_ENDPOINT = env('VITE_API_ADD_REMINDER');
+const DELETE_REMINDER_ENDPOINT = env('VITE_API_DELETE_REMINDER');
+const UPDATE_NAME_ENDPOINT = env('VITE_API_UPDATE_REMINDER');
+const UPDATE_DESC_ENDPOINT = env('VITE_API_UPDATE_DESCRIPTION_REMINDER');
+const UPDATE_DATE_ENDPOINT = env('VITE_API_UPDATE_DATE_REMINDER');
+const UPDATE_PRIORITY_ENDPOINT = env('VITE_API_UPDATE_PRIORITY_REMINDER');
+const UPDATE_STATE_ENDPOINT = env('VITE_API_UPDATE_STATE_REMINDER');
+const UPDATE_TAGS_ENDPOINT = env('VITE_API_UPDATE_TAGS_REMINDER');
 
 class ReminderService {
 	static async postUpdate(endpoint, payload, errorContext) {

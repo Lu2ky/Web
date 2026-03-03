@@ -1,12 +1,14 @@
 // Service helper for various tag-related endpoints
 
-const BASE_HOST = import.meta.env.VITE_API_URL_TAGS_USER
-    ? import.meta.env.VITE_API_URL_TAGS_USER.replace(/\/tags-by-user\/??$/, "")
+import env from '../env.js';
+
+const BASE_HOST = env('VITE_API_URL_TAGS_USER')
+    ? env('VITE_API_URL_TAGS_USER').replace(/\/tags-by-user\/??$/, "")
     : "";
 
 const TAGS_USER_AND_COURSE_URL = `${BASE_HOST}/tags-by-user-and-course/`;
-const TAGS_REMINDER_URL = import.meta.env.VITE_API_URL_TAGS_REMINDER;
-const DELETE_TAGS_REMINDER_URL = import.meta.env.VITE_API_DELETE_TAGS_REMINDER;
+const TAGS_REMINDER_URL = env('VITE_API_URL_TAGS_REMINDER');
+const DELETE_TAGS_REMINDER_URL = env('VITE_API_DELETE_TAGS_REMINDER');
 const DELETE_TAG_URL = `${BASE_HOST}/delete-tag`;
 
 function normalizeTag(tag) {

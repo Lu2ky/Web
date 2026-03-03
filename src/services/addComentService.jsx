@@ -1,4 +1,6 @@
-const ADD_COMMENT_ENDPOINT = import.meta.env.VITE_API_ADD_COMMENT;
+import env from '../env.js';
+
+const ADD_COMMENT_ENDPOINT = env('VITE_API_ADD_COMMENT');
 
 /**
  * Add a personal comment for a course/session.

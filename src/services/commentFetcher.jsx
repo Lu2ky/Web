@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import env from '../env.js';
 import LoadingModal from "./LoadingModal";
 
 // Componente para cargar comentarios de la API y pasarlos al padre
@@ -18,7 +19,7 @@ function CommentFetcher({ onDataLoaded, userId, courseId }) {
             return;
         }
 
-        const baseUrl = import.meta.env.VITE_API_URL_COMMENTS; // URL base de comentarios
+        const baseUrl = env('VITE_API_URL_COMMENTS'); // URL base de comentarios
 
         const fetchData = async () => {
             setLoading(true);

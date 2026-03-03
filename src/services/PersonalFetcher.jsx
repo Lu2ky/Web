@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import env from '../env.js';
 import LoadingModal from "./LoadingModal";
 
 // Mapa para convertir números de día a nombres de días
@@ -109,7 +110,7 @@ function PersonalFetcher({ onDataLoaded, userId }) {
       return;
     }
     
-    const baseUrl = import.meta.env.VITE_API_URL_PERSONAL_SCHEDULE; // URL base de la API
+    const baseUrl = env('VITE_API_URL_PERSONAL_SCHEDULE'); // URL base de la API
 
     const fetchData = async () => {
       // Función asincrona para cargar datos
@@ -179,7 +180,7 @@ function PersonalFetcher({ onDataLoaded, userId }) {
  */
 export const addPersonalActivity = async (userId, activityData) => {
   try {
-    const baseUrl = import.meta.env.VITE_API_ADD_PERSONAL_ACTIVITY;
+    const baseUrl = env('VITE_API_ADD_PERSONAL_ACTIVITY');
     
     // Obtener el día como número (1 = Lunes, 7 = Domingo)
     const dayMap = {
@@ -242,7 +243,7 @@ export const addPersonalActivity = async (userId, activityData) => {
  */
 export const deletePersonalActivity = async (userId, activityId) => {
   try {
-    const baseUrl = import.meta.env.VITE_API_DELETE_PERSONAL_ACTIVITY;
+    const baseUrl = env('VITE_API_DELETE_PERSONAL_ACTIVITY');
 
     const payload = {
       IdPersonalSchedule: activityId
@@ -281,7 +282,7 @@ export const deletePersonalActivity = async (userId, activityId) => {
  */
 export const updatePersonalActivity = async (userId, activityId, updates) => {
   try {
-    const baseUrl = import.meta.env.VITE_API_UPDATE_PERSONAL_ACTIVITY;
+    const baseUrl = env('VITE_API_UPDATE_PERSONAL_ACTIVITY');
 
     const dayMap = {
       "Lunes": 1,

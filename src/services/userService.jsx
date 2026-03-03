@@ -1,4 +1,6 @@
-const GET_USER_DATA_ENDPOINT = import.meta.env.VITE_API_GET_USER_DATA;
+import env from '../env.js';
+
+const GET_USER_DATA_ENDPOINT = env('VITE_API_GET_USER_DATA');
 
 /**
  * Get user data by user ID

@@ -1,49 +1,43 @@
 
 # ============================================
-# MULTI-STAGE BUILD: Generación de variables + Build
+# STAGE 1: Build estático (sin variables de entorno)
 # ============================================
+# Las variables VITE_* NO se necesitan aquí.
+# Se inyectan en RUNTIME mediante docker-entrypoint.sh
 
 FROM node:25-alpine AS builder
 
 WORKDIR /app
 
-# Copiar package.json e instalar dependencias
 COPY package*.json ./
 RUN npm install
 
-# Copiar código fuente
 COPY . .
 
-# Establecer ambiente como Docker
-ENV NODE_ENV=docker
-
-# Generar variables de entorno expandidas
-# Las variables se leen automáticamente del archivo env_file pasado por docker-compose
-RUN node scripts/generate-env.js
-
-# Build con variables generadas
-RUN npm run build
+# Build sin variables – el código usa env() helper que lee window.__ENV__
+RUN npm run build:ci
 
 # ============================================
-# STAGE 2: Servidor de producción
+# STAGE 2: Servidor de producción ligero
 # ============================================
 
 FROM node:25-alpine
 
 WORKDIR /app
 
-# Instalar serve para servir la aplicación
 RUN npm install -g serve
 
-# Copiar la carpeta dist del builder
+# Copiar solo el build estático
 COPY --from=builder /app/dist ./dist
 
-# Exponer puerto
+# Copiar el entrypoint que genera env-config.js en runtime
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 EXPOSE 80
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/index.html || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80 || exit 1
 
-# Comando para servir
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["serve", "-s", "dist", "-l", "80"]

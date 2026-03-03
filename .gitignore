@@ -23,8 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Variables de entorno
+# Variables de entorno (*.local ya cubierto arriba)
 .env
-.env.local
-.env.generated
 .env.docker
