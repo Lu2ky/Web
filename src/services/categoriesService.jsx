@@ -25,7 +25,7 @@ export async function getCategories() {
         // Fallback: devolver lista estática si falla la API
         const fallback = [
             "Teoría",
-            //"Laboratorio",
+            "Laboratorio",
             "Cultural",
             "Deportiva",
             "Centro de lenguas",
