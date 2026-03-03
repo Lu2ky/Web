@@ -1,10 +1,11 @@
 import { useState } from "react";
 import logo from "../../assets/logo.png";
 import "../../styles/Header.css";
-import "../Account/DropdownAcount"
+import "../Account/DropdownAcount";
 import DropdownAcount from "../Account/DropdownAcount";
+import NotificationBell from "../Account/NotificationBell";
 
-function Header() {
+function Header({ userId }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	return (
 		<header>
@@ -14,6 +15,7 @@ function Header() {
 			</div>
 
 			<div className="headerRight">
+				<NotificationBell userId={userId} />
 				<DropdownAcount />
 			</div>
 

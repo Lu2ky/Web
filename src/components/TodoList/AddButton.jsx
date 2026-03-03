@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"; // Manejar estados y efectos secundarios
 import "../../styles/addButton.css"; 
-import { saveToDo } from "../../services/todoService"; // Función para guardar actividad
+import { saveToDo } from "../../services/todoService"; // Función para guardar actividad (fallback local)
+import ReminderService from "../../services/reminderService";
 import Calendar from "react-calendar"; // npm install react-calendar para instalar
 import "react-calendar/dist/Calendar.css"; // Estilos para el calendario
 
@@ -19,7 +20,7 @@ const persistTags = (tags) => { // Función para guardar las etiquetas en localS
     localStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(tags)); // Guarda el array de etiquetas como una cadena JSON en localStorage
 };
 
-function AddButton({ onToDoSaved }) {
+function AddButton({ onToDoSaved, userId }) {
     const [isOpen, setIsOpen] = useState(false); // Controla si esta abierto el modal
     const [showCalendar, setShowCalendar] = useState(false); // Controla si se muestra el calendario para seleccionar fecha
 
@@ -132,19 +133,39 @@ function AddButton({ onToDoSaved }) {
         return "";
     };
 
-    //Guardar actividad en localStorage y cerrar el modal
-    const handleSave = () => {
+    //Guardar actividad en localStorage o API y cerrar el modal
+    const handleSave = async () => {
         const validationError = validateForm(); // validar datos del formulario
         if (validationError) { // si hay error, mostrar mensaje y no guardar 
             setError(validationError);
             return;
         }
 
-        // Guardar en localStorage
-        saveToDo({
-            ...formData,
-            endDay: formData.endDay.toISOString().split("T")[0] // Guardar solo la fecha en formato YYYY-MM-DD
-        });
+        // if we have a userId, send to backend; otherwise fallback to localStorage
+        if (userId) {
+            try {
+                await ReminderService.addReminder(
+                    userId,
+                    formData.title,
+                    formData.description,
+                    formData.endDay,
+                    formData.priority,
+                    formData.tag
+                );
+            } catch (err) {
+                console.error("Error al agregar recordatorio en servidor:", err);
+                // still continue to add locally so UI isn't blocked
+                saveToDo({
+                    ...formData,
+                    endDay: formData.endDay.toISOString().split("T")[0]
+                });
+            }
+        } else {
+            saveToDo({
+                ...formData,
+                endDay: formData.endDay.toISOString().split("T")[0]
+            });
+        }
 
         setIsOpen(false);
         setFormData({

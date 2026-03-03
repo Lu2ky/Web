@@ -1,79 +1,61 @@
 import { useEffect, useState } from "react";
 import LoadingModal from "./loadingModal";
 
-// Componente para cargar datos de la API y pasarlos al padre
-// onDataLoaded es una función que se llama con los datos cargados,
-// userId es el ID del usuario para cargar su horario
+// Componente para cargar comentarios de la API y pasarlos al padre
+// onDataLoaded se lanza cuando llegan los datos
+// userId y courseId se concatenan para formar la ruta de la API
 
-function commentService({ onDataLoaded, userId }) {
+function CommentFetcher({ onDataLoaded, userId, courseId }) {
     const [loading, setLoading] = useState(true); // Indica si la API está cargando
     const [apiData, setApiData] = useState([]); // Almacena los datos de la API
 
     useEffect(() => {
-        // Cargar datos cuando llegan datos
-        if (!userId) {
-            setLoading(false); // Detener carga si no hay ID
-            setApiData([]); // Limpiar datos
-            if (onDataLoaded) {
-                onDataLoaded([]); // Notificar que no hay datos
-            }
+        // Solo fetch cuando ambos identificadores estén disponibles
+        if (!userId || !courseId) {
+            setLoading(false);
+            setApiData([]);
+            if (onDataLoaded) onDataLoaded([]);
             return;
         }
 
-        const baseUrl = import.meta.env.VITE_API_URL_OFICIAL_SCHEDULE; // URL base de la API
+        const baseUrl = import.meta.env.VITE_API_URL_COMMENTS; // URL base de comentarios
 
         const fetchData = async () => {
-            // Función asincrona para cargar datos
-            setLoading(true); // Activar estado de carga
+            setLoading(true);
             try {
-                const response = await fetch(
-                    // Hace la peticipin a la API con el ID del usuario
-                    `${baseUrl}${userId}`
-                );
-                const json = await response.json(); // Convierte respuesta en un json
+                const response = await fetch(`${baseUrl}${userId}/${courseId}`);
+                const json = await response.json();
                 if (!json || json.length === 0) {
-                    // Si no tiene datos:
-                    console.log("No hay datos"); // Mostrar mensaje en consola
-                    setApiData([]); // Limpiar datos
-                    if (onDataLoaded) {
-                        // Notifica al padre que no hay datos
-                        onDataLoaded([]);
-                    }
+                    console.log("No hay comentarios");
+                    setApiData([]);
+                    if (onDataLoaded) onDataLoaded([]);
                 } else {
-                    console.log("Datos cargados:", json); // Mostrar datos en consola
-                    setApiData(json); // Si hay datos se almacenan en el estado
-                    if (onDataLoaded) {
-                        onDataLoaded(json); // Enviar datos al padre
-                    }
+                    console.log("Comentarios cargados:", json);
+                    setApiData(json);
+                    if (onDataLoaded) onDataLoaded(json);
                 }
             } catch (error) {
-                //Manejo de errores
-                console.log(`${baseUrl}${userId}`);
-                console.error("Error al cargar datos:", error); // Mostrar error en consola
-                setApiData([]); // Limpiar datos en caso de error
-                if (onDataLoaded) {
-                    // Notificar al padre que no hay datos
-                    onDataLoaded([]);
-                }
+                console.error("Error al cargar comentarios:", error);
+                setApiData([]);
+                if (onDataLoaded) onDataLoaded([]);
             } finally {
-                setLoading(false); // Desactivar estado de carga al acabar la petición
+                setLoading(false);
             }
         };
 
-        fetchData(); //Llama a fechData para iniciar la carga de datos
-    }, [onDataLoaded, userId]); // en caso de que cambie el ID o onDataLoaded
+        fetchData();
+    }, [onDataLoaded, userId, courseId]);
 
     if (loading) {
-        //Mientras se cargan los datos, muestra un mensaje de carga
         return (
             <LoadingModal
                 isOpen={loading}
-                title="Cargando comentarios materias oficiales"
+                title="Cargando comentarios"
             />
         );
     }
 
-    return null; // Porque no renderiza, solo envia datos al padre(App.jsx)
+    return null; // no renderiza contenido propio
 }
 
-export default commentService;
+export default CommentFetcher;

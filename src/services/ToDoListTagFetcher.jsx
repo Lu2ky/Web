@@ -21,14 +21,29 @@ function normalizeTag(tag, index) {
         };
     }
 
+    // Backend sends { id, nombre }
+    if (tag?.nombre) {
+        return {
+            id: tag.id || `tag-${index}`,
+            label: tag.nombre,
+            type: tag.type || "custom"
+        };
+    }
+
     return null;
 }
 
-function ToDoListTagFetcher({ onDataLoaded }) {
+function ToDoListTagFetcher({ onDataLoaded, userId }) {
     useEffect(() => {
         const fetchTags = async () => {
+            if (!userId) {
+                if (onDataLoaded) onDataLoaded([]);
+                return;
+            }
+
             try {
-                const response = await fetch("http://209.25.140.25:9242/api/get-tags");
+                const baseUrl = import.meta.env.VITE_API_URL_TAGS_USER;
+                const response = await fetch(`${baseUrl}${userId}`);
                 const json = await response.json();
                 const rawData = Array.isArray(json?.data)
                     ? json.data
@@ -49,7 +64,7 @@ function ToDoListTagFetcher({ onDataLoaded }) {
         };
 
         fetchTags();
-    }, [onDataLoaded]);
+    }, [onDataLoaded, userId]);
 
     return null;
 }

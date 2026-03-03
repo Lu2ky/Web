@@ -96,12 +96,31 @@ function ToDoList({ userId = "" }) {
         });
     }, [tasks, activeFilters]);
 
-    const toggleTask = (id) => {
+    const toggleTask = async (id) => {
+        const task = tasks.find(t => t.id === id);
+        if (!task) return;
+
+        const newCompletedState = !task.completed;
+
+        // Optimistically update UI
         setTasks((prev) =>
-            prev.map((task) =>
-                task.id === id ? { ...task, completed: !task.completed } : task
+            prev.map((t) =>
+                t.id === id ? { ...t, completed: newCompletedState } : t
             )
         );
+
+        // Update backend
+        try {
+            await ReminderService.updateState(id, newCompletedState);
+        } catch (error) {
+            console.error("Error al actualizar estado del recordatorio:", error);
+            // Revert on error
+            setTasks((prev) =>
+                prev.map((t) =>
+                    t.id === id ? { ...t, completed: !newCompletedState } : t
+                )
+            );
+        }
     };
 
     const deleteTask = (id) => {
@@ -149,7 +168,15 @@ function ToDoList({ userId = "" }) {
         }
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
+        if (userId && taskToDelete) {
+            try {
+                await ReminderService.deleteReminder(taskToDelete);
+            } catch (err) {
+                console.error("Error al eliminar recordatorio en servidor:", err);
+            }
+        }
+
         setTasks(prev => prev.filter(task => task.id !== taskToDelete));
         setIsDeleteModalOpen(false);
         setTaskToDelete(null);
@@ -189,13 +216,13 @@ function ToDoList({ userId = "" }) {
                 />
             )}
             <div className={`todolist-panel${isDrawerOpen ? " open" : ""}`}>
-                <ToDoListTagFetcher onDataLoaded={setAvailableTags} />
+                <ToDoListTagFetcher userId={userId} onDataLoaded={setAvailableTags} />
 
                 <div className="todolist-header">
                     <h2 className="todolist-title">To-Do List</h2>
                     <div className="todolist-header-actions">
                         <ToDoFilterButton onClick={() => setIsFilterModalOpen(true)} />
-                        <AddButton onToDoSaved={loadReminderTasks} />
+                        <AddButton userId={userId} onToDoSaved={loadReminderTasks} />
                     </div>
                 </div>
 

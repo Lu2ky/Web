@@ -1,14 +1,21 @@
 import { useState, useEffect } from "react";
 import { CommentButton } from "./CommentButton";
+import CommentFetcher from "../../services/CommentFetcher";
+import addComment from "../../services/addComentService";
+import updateComment from "../../services/updateComentService";
+import deleteComment from "../../services/removeComentService";
 import "../../styles/PopUpClasses.css";
 
 export const PopUpClasses = ({
   isOpen = false,
   onClose = () => { },
   classData = {},
+  userId = null,
 }) => {
   const [is_open, set_is_open] = useState(isOpen);
   const [comments, set_comments] = useState([]);
+
+  // cuando el popup se abre con una asignatura vaga, `CommentFetcher` rellenará los comentarios
 
   // Sincronizar el estado interno con el prop externo
   useEffect(() => {
@@ -32,25 +39,57 @@ export const PopUpClasses = ({
     onClose();
   };
 
-  const handle_add_comment = (comment_text) => {
+  const handle_add_comment = async (comment_text) => {
     const new_comment = {
       id: Date.now(),
       text: comment_text,
       timestamp: new Date().toLocaleString(),
     };
+
+    // optimistically add to UI
     set_comments([new_comment, ...comments]);
+
+    try {
+      // call backend
+      await addComment({
+        scheduleId: classData?.id,
+        userId,
+        courseId: classData?.id || classData?.nrc,
+        courseName: classData?.subject_name || "",
+        comment: comment_text,
+      });
+    } catch (err) {
+      console.error("Error añadiendo comentario:", err);
+    }
   };
 
-  const handle_delete_comment = (comment_id) => {
+  const handle_delete_comment = async (comment_id) => {
     set_comments(comments.filter((comment) => comment.id !== comment_id));
+    try {
+      await deleteComment(comment_id);
+    } catch (err) {
+      console.error("Error eliminando comentario:", err);
+    }
   };
 
   if (!is_open) {
     return null;
   }
 
+  // render fetcher sólo cuando el pop‑up está abierto y hay un id disponible
+  const shouldFetch = is_open && userId && (classData?.id || classData?.nrc);
+
   return (
-    <div className="popup-overlay" onClick={handle_close}>
+    <>
+      {shouldFetch && (
+        <CommentFetcher
+          userId={userId}
+          courseId={classData.id || classData.nrc}
+          onDataLoaded={set_comments}
+        />
+      )}
+
+      <div className="popup-overlay" onClick={handle_close}>
       <div className="popup-container" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="popup-header">
@@ -168,5 +207,6 @@ export const PopUpClasses = ({
         </div>
       </div>
     </div>
+    </>
   );
 };

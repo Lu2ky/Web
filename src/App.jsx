@@ -276,7 +276,7 @@ function App() {
 	return (
 
 		<div className="App">
-			<Header />
+			<Header userId={userId} />
 			<div className="mainContent">
 				<div className="ToDoSection">
 					<ToDoList userId={userId} />
@@ -307,6 +307,7 @@ function App() {
 						isOpen={showClassPopup}
 						onClose={handleClosePopup}
 						classData={selectedClass}
+						userId={userId}
 					/>
 					{/* Popup para detalles de actividades personales */}
 					<PopUpPersonal
