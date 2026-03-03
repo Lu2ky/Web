@@ -2,15 +2,15 @@ const baseUrl = import.meta.env.VITE_API_URL_LDPA;
 
 async function LDAPservice(userId, password) {
     try {
-        const response = await fetch(`${baseUrl}${userId}`, {
-            method: "POST", // Cambiar 
+        const response = await fetch(`${baseUrl}`, {
+            method: "POST", 
             headers: {
-                "Content-Type": "application/json", // Indica que envías JSON
+                "Content-Type": "application/json", // Indicar que envía JSON
             },
             body: JSON.stringify({
                 user: userId,
                 pass: password
-            }), // Convierte tu objeto a JSON
+            }), // Convierte el objeto a JSON
         });
 
         if (!response.ok) {
@@ -25,3 +25,5 @@ async function LDAPservice(userId, password) {
         return null;
     }
 }
+
+export default LDAPservice;

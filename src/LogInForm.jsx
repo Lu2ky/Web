@@ -1,6 +1,7 @@
 
 import { Link } from 'react-router-dom';
 import './LogInForm.css';
+import LDAPservice from './services/LDAPservice';
 
 //Imagenes y logos
 import Logo from './assets/logo.png';
@@ -14,6 +15,9 @@ import { useNavigate } from 'react-router-dom';
 
 const LogInForm = () => {
     const [userId, setUserId] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -49,7 +53,10 @@ const LogInForm = () => {
                     </div>
                     <div className="inputBox">
                         <input type="password"
-                            placeholder="Contraseña" required />
+                            placeholder="Contraseña"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required />
                         <FaLock />
                     </div>
                     <div className="rememberForgot">
