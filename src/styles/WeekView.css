@@ -223,6 +223,17 @@
   overflow: clip;
   background: #e0e7ff; /* color base, puedes personalizar */
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .activity-card-header {
@@ -254,6 +265,37 @@
   line-height: 1.2;
   text-align: left;
   margin: 0;
+  font-weight: 600;
+}
+
+.activity-card-description {
+  font-size: 0.68rem;
+  line-height: 1.3;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.activity-card-tag {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-label {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  font-size: 0.62rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .activity-card-professor,

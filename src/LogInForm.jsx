@@ -1,6 +1,8 @@
 
 import { Link } from 'react-router-dom';
 import './LogInForm.css';
+import LDAPservice from './services/LDAPservice';
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 //Imagenes y logos
 import Logo from './assets/logo.png';
@@ -14,12 +16,25 @@ import { useNavigate } from 'react-router-dom';
 
 const LogInForm = () => {
     const [userId, setUserId] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        navigate(`/app/${userId}`); // Redirige a la página principal después de iniciar sesión
-    }
+        setError('');
+
+        const result = await LDAPservice(userId, password);
+
+        if (result && result.success) {
+            navigate(`/app/${userId}`);
+        } else {
+            setError("Usuario o contraseña incorrectos");
+        }
+    };
+
 
     return (
         <div className='ContainerLogIn'
@@ -39,9 +54,18 @@ const LogInForm = () => {
                         <FaUser />
                     </div>
                     <div className="inputBox">
-                        <input type="password"
-                            placeholder="Contraseña" required />
+                        <input type={showPassword ? "text" : "password"}
+                            placeholder="Contraseña"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
                         <FaLock />
+                        <span className="togglePassword" onClick={() => setShowPassword(!showPassword)} // 👈 cambia el estado
+                            style={{ cursor: "pointer", marginLeft: "8px" }}
+                        >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </span>
                     </div>
                     <div className="rememberForgot">
                         <Link to="/RecoverPassword">Olvidé mi contraseña</Link>

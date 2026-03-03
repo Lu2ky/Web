@@ -6,7 +6,7 @@ import AddButton from "./AddActivityButton";
 import FilterButton from "./FilterButton";
 import ThemeSelect from "./ThemeSelector";
 
-function ControlBar({viewMode, setViewMode, onActivitySaved, onThemeChange, selectedTag, setSelectedTag}) {
+function ControlBar({viewMode, setViewMode, userId, onActivityAdd, onThemeChange, selectedTag, setSelectedTag}) {
 
     return (
         <div className="ControlBar">
@@ -16,7 +16,7 @@ function ControlBar({viewMode, setViewMode, onActivitySaved, onThemeChange, sele
             <div className="Center">
             </div>
             <div className="Right">
-                <AddButton onActivitySaved={onActivitySaved} />
+                <AddButton userId={userId} onActivityAdd={onActivityAdd} />
                 <FilterButton selectedTag={selectedTag} setSelectedTag={setSelectedTag} />
                 <ThemeSelect onThemeChange={onThemeChange} />
             </div>

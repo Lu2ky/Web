@@ -1,20 +1,22 @@
 import { useState, useEffect } from "react";
 import "../../styles/AddActivityButton.css";
-import { saveActivity } from "../../services/personalActivitiesService";
+import { addPersonalActivity } from "../../services/PersonalFetcher";
 
 const INITIAL_FORM_DATA = {
     title: "",
     description: "",
     day: "",
     startHour: "",
-    endHour: ""
+    endHour: "",
+    dateStart: "",
+    dateEnd: ""
 };
 
-function AddActivityButton({ onActivitySaved }) {
+function AddActivityButton({ userId, onActivityAdd }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     // Convierte hora militar a formato AM/PM para mostrar
     const formatHour = (hour, minutes = 0) => {
@@ -55,6 +57,12 @@ function AddActivityButton({ onActivitySaved }) {
         if (!formData.startHour || !formData.endHour) {
             return "Debes seleccionar hora de inicio y fin.";
         }
+        if (!formData.dateStart) {
+            return "Debes seleccionar la fecha de inicio.";
+        }
+        if (!formData.dateEnd) {
+            return "Debes seleccionar la fecha de fin.";
+        }
         const [startH, startM] = formData.startHour.split(":").map(Number);
         const [endH, endM] = formData.endHour.split(":").map(Number);
         const startTotal = startH * 60 + startM;
@@ -62,29 +70,76 @@ function AddActivityButton({ onActivitySaved }) {
         if (startTotal >= endTotal) {
             return "La hora de inicio debe ser menor que la hora de fin.";
         }
+        const dateStart = new Date(formData.dateStart);
+        const dateEnd = new Date(formData.dateEnd);
+        if (dateStart > dateEnd) {
+            return "La fecha de inicio debe ser menor que la fecha de fin.";
+        }
         return "";
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const validationError = validateForm();
         if (validationError) {
             setError(validationError);
             return;
         }
 
-        try {
-            // Guardar en localStorage
-            saveActivity(formData);
-        } catch (saveError) {
-            setError("No se pudo guardar la actividad. Intenta nuevamente.");
+        if (!userId) {
+            setError("Usuario no identificado. Por favor, recarga la página.");
             return;
         }
 
-        closeModal({ clearForm: true });
+        setLoading(true);
 
-        // Notificar al padre que se guardó una actividad
-        if (onActivitySaved) {
-            onActivitySaved();
+        try {
+            // Convertir fechas a ISO strings
+            const dateStartISO = new Date(formData.dateStart).toISOString();
+            const dateEndISO = new Date(formData.dateEnd).toISOString();
+
+            // Preparar datos para la API
+            const activityData = {
+                title: formData.title,
+                description: formData.description || "",
+                day: formData.day,
+                startHour: formData.startHour,
+                endHour: formData.endHour,
+                dateStart: dateStartISO,
+                dateEnd: dateEndISO
+            };
+
+            // Enviar a la API
+            const response = await addPersonalActivity(userId, activityData);
+            console.log("Actividad agregada exitosamente:", response);
+
+            // Crear objeto con el formato esperado por BlockPersonal y PopUpPersonal
+            const newActivity = {
+                id: response.id || `activity-${Date.now()}`,
+                name: formData.title,
+                description: formData.description || "",
+                tag: "Personal",
+                day: formData.day,
+                start_time: formData.startHour,
+                end_time: formData.endHour,
+                activity_name: formData.title,
+                subject_name: formData.title,
+                location: "",
+                classroom: "",
+                date_start: dateStartISO,
+                date_end: dateEndISO
+            };
+
+            // Notificar al padre con la nueva actividad
+            if (onActivityAdd) {
+                onActivityAdd(newActivity);
+            }
+
+            closeModal({ clearForm: true });
+        } catch (err) {
+            console.error("Error al guardar actividad:", err);
+            setError(`No se pudo guardar la actividad. ${err.message}`);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -191,6 +246,24 @@ function AddActivityButton({ onActivitySaved }) {
                             </p>
                         )}
 
+                        <label>Fecha de inicio</label>
+                        <input
+                            type="date"
+                            name="dateStart"
+                            value={formData.dateStart}
+                            onChange={handleChange}
+                            required
+                        />
+
+                        <label>Fecha de fin</label>
+                        <input
+                            type="date"
+                            name="dateEnd"
+                            value={formData.dateEnd}
+                            onChange={handleChange}
+                            required
+                        />
+
                         <div className="modalActions">
                             <button
                                 className="cancelButton"
@@ -204,8 +277,9 @@ function AddActivityButton({ onActivitySaved }) {
                                 className="saveButton"
                                 onClick={handleSave}
                                 type="button"
+                                disabled={loading}
                             >
-                                Guardar
+                                {loading ? "Guardando..." : "Guardar"}
                             </button>
                         </div>
                     </div>

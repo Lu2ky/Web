@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+{/*import { useEffect, useState } from "react";
 
 function ApiFetcher({ url, method = "GET", payload = null, onDataLoaded }) { // Componente para hacer peticiones a la API
     const [loading, setLoading] = useState(true); // Estado para controlar si se están cargando los datos
@@ -41,4 +41,4 @@ function ApiFetcher({ url, method = "GET", payload = null, onDataLoaded }) { // 
     return null;
 }
 
-export default ApiFetcher;
+export default ApiFetcher;*/}

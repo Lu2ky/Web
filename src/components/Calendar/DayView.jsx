@@ -3,7 +3,7 @@ import "../../styles/DayView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
 
-function DayView({ events = [], personalEvents = [], onClassClick = () => {}, onDeletePersonal = () => {}, tagColorMap = {}, getContrastColor = () => "#000000"}) {
+function DayView({ events = [], personalEvents = [], onClassClick = () => {}, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000"}) {
     const hours = Array.from({ length: 24 }, (_, i) => i);
     const MINUTES_IN_HOUR = 60;
     const [hourPx, setHourPx] = useState(0);
@@ -168,8 +168,10 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                                 key={event.id}
                                 {...commonProps}
                                 id={event.id}
-                                subject_name={event.activity_name || event.subject_name}
-                                classroom={event.location || event.classroom}
+                                name={event.name || event.activity_name}
+                                description={event.description}
+                                tag={event.tag}
+                                onClick={() => onPersonalClick(event)}
                                 onDelete={() => onDeletePersonal(event.id)}
                                 background_color={tagColorMap["Personal"] || "#a59090"}
                                 text_color={getContrastColor(tagColorMap["Personal"])}
