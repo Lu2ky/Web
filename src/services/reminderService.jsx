@@ -445,4 +445,5 @@ static async updateTags(reminderId, tags = []) {
 	);
 }}
 
+
 export default ReminderService;
