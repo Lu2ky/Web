@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import LoadingModal from "./loadingModal";
+import LoadingModal from "./LoadingModal";
 
 // Componente para cargar datos de la API y pasarlos al padre
 // onDataLoaded es una función que se llama con los datos cargados,

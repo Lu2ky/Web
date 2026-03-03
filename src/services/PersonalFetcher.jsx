@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import LoadingModal from "./loadingModal";
+import LoadingModal from "./LoadingModal";
 
 // Mapa para convertir números de día a nombres de días
 const dayMap = {
