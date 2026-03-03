@@ -121,6 +121,16 @@ body {
     font-size: 15px;
 }
 
+/* Ajuste específico para el ojito */
+.togglePassword {
+    position: absolute;
+    right: 45px; /* lo movemos a la izquierda del candado */
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 15px;
+}
+
 /* Recordar / olvide */
 .rememberForgot {
     width: 100%;

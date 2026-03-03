@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import './LogInForm.css';
 import LDAPservice from './services/LDAPservice';
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 //Imagenes y logos
 import Logo from './assets/logo.png';
@@ -16,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 const LogInForm = () => {
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
 
     const navigate = useNavigate();
@@ -52,12 +54,18 @@ const LogInForm = () => {
                         <FaUser />
                     </div>
                     <div className="inputBox">
-                        <input type="password"
+                        <input type={showPassword ? "text" : "password"}
                             placeholder="Contraseña"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            required />
+                            required
+                        />
                         <FaLock />
+                        <span className="togglePassword" onClick={() => setShowPassword(!showPassword)} // 👈 cambia el estado
+                            style={{ cursor: "pointer", marginLeft: "8px" }}
+                        >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </span>
                     </div>
                     <div className="rememberForgot">
                         <Link to="/RecoverPassword">Olvidé mi contraseña</Link>
