@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CommentButton } from "./CommentButton";
-import CommentFetcher from "../../services/CommentFetcher";
+import CommentFetcher from "../../services/commentFetcher";
 import addComment from "../../services/addComentService";
 import updateComment from "../../services/updateComentService";
 import deleteComment from "../../services/removeComentService";
