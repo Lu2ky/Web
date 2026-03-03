@@ -90,6 +90,8 @@ const normalizePersonalEvent = (apiDataPersonal) => {
 	}));
 };
 
+// HASTA AQUIII ESTA ARREGLADO
+
 // Normaliza una lista de actividades personales 
 const normalizePersonalEvents = (eventsList) => {
 	if (!Array.isArray(eventsList)) return [];
