@@ -17,6 +17,13 @@ header {
     gap: 1rem;
 }
 
+/* PARTE DERECHA (perfil, campana, etc.) */
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
 /* Logo */
 
 header img {

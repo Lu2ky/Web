@@ -12,6 +12,7 @@ export const PopUpPersonal = ({
   const [is_open, set_is_open] = useState(isOpen);
   const [comments, set_comments] = useState([]);
 
+
   // Sincronizar el estado interno con el prop externo
   useEffect(() => {
     set_is_open(isOpen);
@@ -65,6 +66,12 @@ export const PopUpPersonal = ({
     handleCloseEdit();
     handle_close();
   };
+
+  if (!is_open) {
+    return null;
+  }
+
+  // no cargamos comentarios desde el servidor para actividades personales
 
   if (!is_open) {
     return null;

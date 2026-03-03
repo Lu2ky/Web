@@ -410,7 +410,8 @@
     position: fixed;
     right: 1rem;
     bottom: 7rem;
-    z-index: 10;
+    /* ensure the drawer toggle floats above other layers (calendar events use z-index:20) */
+    z-index: 50;
     padding: 0.8rem 1.4rem;
     border-radius: 999px;
     background: linear-gradient(135deg, #ff006e, #c026d3);
@@ -431,6 +432,11 @@
 
 /* ========== RESPONSIVE: DRAWER MOBILE ========== */
 @media (max-width: 1023px) {
+    /* keep toggle above calendar events on mobile as well */
+    .todo-drawer-toggle {
+        z-index: 60; /* slightly higher than panel and event layers */
+    }
+
     .todolist-panel {
         position: fixed;
         left: 0;

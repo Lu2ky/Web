@@ -1,9 +1,13 @@
-const REMINDERS_API_HOST = "http://209.25.140.25:9242/api";
-const REMINDERS_API_BASE = `${REMINDERS_API_HOST}/reminders-by-user`;
-const UPDATE_NAME_ENDPOINT = `${REMINDERS_API_HOST}/update-name-reminder`;
-const UPDATE_DESC_ENDPOINT = `${REMINDERS_API_HOST}/update-desc-reminder`;
-const UPDATE_DATE_ENDPOINT = `${REMINDERS_API_HOST}/update-date-reminder`;
-const UPDATE_PRIORITY_ENDPOINT = `${REMINDERS_API_HOST}/update-priority-reminder`;
+// Use environment variables so the base host can change without recompiling
+const REMINDERS_API_BASE = import.meta.env.VITE_API_URL_REMINDERS_USER; // should include trailing slash
+const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER;
+const DELETE_REMINDER_ENDPOINT = import.meta.env.VITE_API_DELETE_REMINDER;
+const UPDATE_NAME_ENDPOINT = import.meta.env.VITE_API_UPDATE_REMINDER;
+const UPDATE_DESC_ENDPOINT = import.meta.env.VITE_API_UPDATE_DESCRIPTION_REMINDER;
+const UPDATE_DATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_DATE_REMINDER;
+const UPDATE_PRIORITY_ENDPOINT = import.meta.env.VITE_API_UPDATE_PRIORITY_REMINDER;
+const UPDATE_STATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_STATE_REMINDER;
+const UPDATE_TAGS_ENDPOINT = import.meta.env.VITE_API_UPDATE_TAGS_REMINDER;
 
 class ReminderService {
 	static async postUpdate(endpoint, payload, errorContext) {
@@ -99,7 +103,12 @@ class ReminderService {
 		}
 
 		const rawCompleted =
-			reminder.completed ?? reminder.done ?? reminder.isDone ?? reminder.status ?? reminder.B_completed;
+			reminder.completed ?? 
+			reminder.done ?? 
+			reminder.isDone ?? 
+			reminder.status ?? 
+			reminder.B_completed ??
+			reminder.B_estado;
 
 		const completed =
 			rawCompleted === true ||
@@ -138,7 +147,9 @@ class ReminderService {
 	static async getByUser(userId) {
 		if (!userId) return [];
 
-		const response = await fetch(`${REMINDERS_API_BASE}/${userId}`);
+		const url = `${REMINDERS_API_BASE}/${userId}`;
+		console.log("[ReminderService] getByUser URL:", url);
+		const response = await fetch(url);
 		if (!response.ok) {
 			throw new Error(`Error al cargar recordatorios: ${response.status}`);
 		}
@@ -198,6 +209,21 @@ class ReminderService {
 	// Converts any date string to "YYYY-MM-DD HH:mm:ss" — the format the backend expects.
 	static toDateTimeString(dateValue) {
 		if (!dateValue) return "";
+
+		// If it's already a Date object, format it directly
+		if (dateValue instanceof Date) {
+			if (Number.isNaN(dateValue.getTime())) {
+				console.warn("[ReminderService] toDateTimeString: invalid Date object");
+				return "";
+			}
+			const yr = dateValue.getFullYear();
+			const mo = String(dateValue.getMonth() + 1).padStart(2, "0");
+			const dy = String(dateValue.getDate()).padStart(2, "0");
+			const hh = String(dateValue.getHours()).padStart(2, "0");
+			const mm = String(dateValue.getMinutes()).padStart(2, "0");
+			const ss = String(dateValue.getSeconds()).padStart(2, "0");
+			return `${yr}-${mo}-${dy} ${hh}:${mm}:${ss}`;
+		}
 
 		const raw = String(dateValue).trim();
 
@@ -342,6 +368,82 @@ class ReminderService {
 		await Promise.all(updates);
 		console.log("[ReminderService] All updates done");
 	}
+
+/* Add a new reminder via POST */
+static async addReminder(userId, name, description, dueDate, priority, tags = []) {
+	if (!userId) return;
+	
+	const payload = {
+		P_usuario: userId,
+		P_nombre: name || "",
+		P_descripcion: description || "",
+		P_fecha: this.toDateTimeString(dueDate),
+		P_prioridad: priority || "",
+		P_tag1: "",
+		P_tag2: "",
+		P_tag3: "",
+		P_tag4: "",
+		P_tag5: ""
+	};
+	
+	// include up to 5 tags
+	if (Array.isArray(tags)) {
+		tags.slice(0, 5).forEach((t, ix) => {
+			payload[`P_tag${ix + 1}`] = t || "";
+		});
+	}
+
+	return this.postUpdate(
+		ADD_REMINDER_ENDPOINT,
+		payload,
+		"Error al agregar recordatorio"
+	);
 }
+
+/* Delete a reminder by id */
+static async deleteReminder(reminderId) {
+	if (!reminderId) return;
+	return this.postUpdate(
+		DELETE_REMINDER_ENDPOINT,
+		{ N_idRecordatorio: reminderId },
+		"Error al eliminar recordatorio"
+	);
+}
+
+/* Update state (completed/not completed) of a reminder */
+static async updateState(reminderId, state) {
+	if (!reminderId) return;
+	// Convert boolean to appropriate format (backend expects boolean or 0/1)
+	const stateValue = typeof state === 'boolean' ? state : Boolean(state);
+	return this.postUpdate(
+		UPDATE_STATE_ENDPOINT,
+		{ P_idToDo: reminderId, P_estado: stateValue },
+		"Error al actualizar estado de recordatorio"
+	);
+}
+
+/* Update tags for a reminder */
+static async updateTags(reminderId, tags = []) {
+	if (!reminderId) return;
+	const payload = { 
+		P_idToDo: reminderId,
+		P_tag1: "",
+		P_tag2: "",
+		P_tag3: "",
+		P_tag4: "",
+		P_tag5: ""
+	};
+	if (Array.isArray(tags)) {
+		tags.slice(0, 5).forEach((t, ix) => {
+			payload[`P_tag${ix + 1}`] = t || "";
+		});
+	}
+	return this.postUpdate(
+		UPDATE_TAGS_ENDPOINT,
+		payload,
+		"Error al actualizar etiquetas de recordatorio"
+	);
+}}
+
 
 export default ReminderService;

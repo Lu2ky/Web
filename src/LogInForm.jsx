@@ -26,12 +26,27 @@ const LogInForm = () => {
         e.preventDefault();
         setError('');
 
-        const result = await LDAPservice(userId, password);
+        if (!userId.trim() || !password.trim()) {
+            setError("Por favor ingresa usuario y contraseña");
+            return;
+        }
 
-        if (result && result.success) {
-            navigate(`/app/${userId}`);
+        console.log("[LogInForm] Attempting login for:", userId);
+        const result = await LDAPservice(userId, password);
+        console.log("[LogInForm] Login result:", result);
+
+        if (result) {
+            // Backend may return different success indicators
+            const isSuccess = result.success || result.status === 'success' || result.valid === true || Boolean(result.data);
+            
+            if (isSuccess) {
+                console.log("[LogInForm] Login successful, redirecting to /app/" + userId);
+                navigate(`/app/${userId}`);
+            } else {
+                setError(result.message || "Usuario o contraseña incorrectos");
+            }
         } else {
-            setError("Usuario o contraseña incorrectos");
+            setError("Error al conectar con el servidor");
         }
     };
 
