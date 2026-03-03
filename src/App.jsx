@@ -141,6 +141,7 @@ function App() {
 			?? event?.apiData?.ID_CURSO
 			?? event?.apiData?.id;
 		const apiScheduleId = event?.apiData?.N_idHorario
+			?? event?.apiData?.id_horario
 			?? event?.apiData?.id_schedule
 			?? event?.apiData?.idSchedule
 			?? event?.apiData?.ID_HORARIO

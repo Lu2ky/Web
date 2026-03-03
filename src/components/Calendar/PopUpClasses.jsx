@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CommentButton } from "./CommentButton";
-import CommentFetcher from "../../services/CommentFetcher";
+import fetchComments from "../../services/CommentFetcher";
 import addComment from "../../services/addComentService";
 import updateComment from "../../services/updateComentService";
 import deleteComment from "../../services/removeComentService";
@@ -14,19 +14,9 @@ export const PopUpClasses = ({
 }) => {
   const [is_open, set_is_open] = useState(isOpen);
   const [comments, set_comments] = useState([]);
-  const [fetchKey, setFetchKey] = useState(0); // bump to re-fetch comments
+  const [reloadKey, setReloadKey] = useState(0);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
-
-  // Normalizar comentarios que vienen del backend
-  const normalizeComments = (raw) => {
-    if (!Array.isArray(raw)) return [];
-    return raw.map(c => ({
-      id: c.N_idComentarios ?? c.id ?? c.ID ?? Date.now(),
-      text: c.T_comentario ?? c.text ?? c.comentario ?? "",
-      timestamp: c.Dt_fecha ?? c.timestamp ?? c.fecha ?? "",
-    }));
-  };
 
   // Sincronizar el estado interno con el prop externo
   useEffect(() => {
@@ -36,8 +26,64 @@ export const PopUpClasses = ({
   // Limpiar comentarios al cambiar de asignatura o al abrir
   useEffect(() => {
     set_comments([]);
-    setFetchKey(k => k + 1);
+    setReloadKey((k) => k + 1);
   }, [classData?.id, classData?.nrc]);
+
+  const commentCourseId = classData?.apiData?.N_idCurso
+    ?? classData?.apiData?.id_course
+    ?? classData?.apiData?.idCourse
+    ?? classData?.apiData?.ID_CURSO
+    ?? classData?.apiData?.id
+    ?? classData?.id
+    ?? classData?.nrc;
+
+  const commentScheduleId = classData?.apiData?.N_idHorario
+    ?? classData?.apiData?.id_horario
+    ?? classData?.apiData?.id_schedule
+    ?? classData?.apiData?.idSchedule
+    ?? classData?.apiData?.ID_HORARIO
+    ?? classData?.apiData?.schedule_id
+    ?? classData?.scheduleId
+    ?? null;
+
+  const commentUserId = userId
+    ?? classData?.apiData?.N_idUsuario
+    ?? classData?.apiData?.id_user
+    ?? classData?.apiData?.idUser
+    ?? classData?.apiData?.ID_USUARIO
+    ?? classData?.apiData?.ID_USER
+    ?? null;
+
+  useEffect(() => {
+    const shouldFetch = is_open && commentUserId && (commentCourseId || commentScheduleId);
+    if (!shouldFetch) {
+      set_comments([]);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadComments = async () => {
+      try {
+        const loaded = await fetchComments({
+          userId: commentUserId,
+          courseId: commentCourseId,
+          scheduleId: commentScheduleId,
+        });
+        if (!isCancelled) {
+          set_comments(loaded);
+        }
+      } catch (error) {
+        console.error("Error al cargar comentarios:", error);
+      }
+    };
+
+    loadComments();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [is_open, commentUserId, commentCourseId, commentScheduleId, reloadKey]);
 
   // Datos por defecto si no se proporcionan
   const data = {
@@ -64,33 +110,50 @@ export const PopUpClasses = ({
       ?? classData?.apiData?.id
       ?? classData?.id
       ?? classData?.nrc;
-    const scheduleId = classData?.apiData?.N_idHorario
-      ?? classData?.apiData?.id_schedule
-      ?? classData?.apiData?.idSchedule
-      ?? classData?.apiData?.ID_HORARIO
-      ?? classData?.apiData?.schedule_id
-      ?? classData?.scheduleId
-      ?? courseId;
+    const scheduleId = commentScheduleId ?? courseId;
 
     if (!courseId || !scheduleId) {
       throw new Error("Cannot add comment: missing courseId/scheduleId");
     }
 
-    if (!userId) {
+    if (!commentUserId) {
       throw new Error("Cannot add comment: userId is missing");
     }
 
     try {
       const result = await addComment({
         scheduleId,
-        userId,
+        userId: commentUserId,
         courseId,
         courseName: classData?.subject_name || "",
         comment: comment_text,
       });
-      console.debug("addComment result:", result);
-      // Re-fetch to get real IDs from backend
-      setFetchKey(k => k + 1);
+
+      const wait = (ms) => new Promise((resolve) => {
+        window.setTimeout(resolve, ms);
+      });
+
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          const loaded = await fetchComments({
+            userId: commentUserId,
+            courseId,
+            scheduleId,
+          });
+          set_comments(loaded);
+
+          const expected = String(comment_text).trim().toLowerCase();
+          const found = loaded.some((comment) => String(comment?.text ?? "").trim().toLowerCase() === expected);
+          if (found) break;
+        } catch (reloadError) {
+          console.error("Error recargando comentarios tras guardar:", reloadError);
+        }
+
+        await wait(300);
+      }
+
+      setReloadKey((k) => k + 1);
+
       return result;
     } catch (err) {
       console.error("Error añadiendo comentario:", err);
@@ -99,9 +162,10 @@ export const PopUpClasses = ({
   };
 
   const handle_delete_comment = async (comment_id) => {
-    set_comments(prev => prev.filter((comment) => comment.id !== comment_id));
+    set_comments((prev) => prev.filter((comment) => comment.id !== comment_id));
     try {
       await deleteComment(comment_id);
+      setReloadKey((k) => k + 1);
     } catch (err) {
       console.error("Error eliminando comentario:", err);
     }
@@ -115,11 +179,12 @@ export const PopUpClasses = ({
   const handle_save_edit = async (comment_id) => {
     const trimmed = editText.trim();
     if (!trimmed) return;
-    set_comments(prev => prev.map(c => c.id === comment_id ? { ...c, text: trimmed } : c));
+    set_comments((prev) => prev.map((c) => (c.id === comment_id ? { ...c, text: trimmed } : c)));
     setEditingId(null);
     setEditText("");
     try {
       await updateComment(comment_id, trimmed);
+      setReloadKey((k) => k + 1);
     } catch (err) {
       console.error("Error actualizando comentario:", err);
     }
@@ -134,28 +199,8 @@ export const PopUpClasses = ({
     return null;
   }
 
-  // render fetcher sólo cuando el pop‑up está abierto y hay un id disponible
-  const commentCourseId = classData?.apiData?.N_idCurso
-    ?? classData?.apiData?.id_course
-    ?? classData?.apiData?.idCourse
-    ?? classData?.apiData?.ID_CURSO
-    ?? classData?.apiData?.id
-    ?? classData?.id
-    ?? classData?.nrc;
-
-  const shouldFetch = is_open && userId && commentCourseId;
-
   return (
     <>
-      {shouldFetch && (
-        <CommentFetcher
-          key={fetchKey}
-          userId={userId}
-          courseId={commentCourseId}
-          onDataLoaded={(raw) => set_comments(normalizeComments(raw))}
-        />
-      )}
-
       <div className="popup-overlay" onClick={handle_close}>
       <div className="popup-container" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
