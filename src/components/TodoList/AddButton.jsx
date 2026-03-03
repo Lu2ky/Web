@@ -1,16 +1,9 @@
 import { useState, useEffect } from "react"; // Manejar estados y efectos secundarios
-<<<<<<< Updated upstream
 import "../../styles/addButton.css"; 
 import { saveToDo } from "../../services/todoService"; // Función para guardar actividad (fallback local)
 import ReminderService from "../../services/reminderService";
 import Calendar from "react-calendar"; // npm install react-calendar para instalar
 import "react-calendar/dist/Calendar.css"; // Estilos para el calendario
-=======
-import "../../styles/addButton.css";
-import { saveToDo } from "../../services/todoService"; // Función para guardar actividad (fallback local)
-import ReminderService from "../../services/reminderService";
-import TaskAddModal from "./TaskAddModal";
->>>>>>> Stashed changes
 
 
 const TAGS_STORAGE_KEY = "savedTags"; // Clave para guardar y recuperar etiquetas en localStorage
@@ -23,30 +16,47 @@ const getSavedTags = () => { // Función para obtener las etiquetas guardadas en
     }
 };
 
-function AddButton({ onToDoSaved, userId, availableTags = [] }) {
+const persistTags = (tags) => { // Función para guardar las etiquetas en localStorage
+    localStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(tags)); // Guarda el array de etiquetas como una cadena JSON en localStorage
+};
 
-<<<<<<< Updated upstream
 function AddButton({ onToDoSaved, userId }) {
-=======
->>>>>>> Stashed changes
     const [isOpen, setIsOpen] = useState(false); // Controla si esta abierto el modal
+    const [showCalendar, setShowCalendar] = useState(false); // Controla si se muestra el calendario para seleccionar fecha
+
+    const [formData, setFormData] = useState({ // Datos del formulario para nueva tarea 
+        title: "",
+        description: "",
+        endDay: new Date(),
+        priority: "",
+        tag: []
+    });
+
+    const [dateText, setDateText] = useState(""); // texto dd/mm/aaaa
+    const [error, setError] = useState(""); // guarda mensajes de validación 
+
+    // Etiquetas 
+    const [tagInput, setTagInput] = useState(""); // Usuario las escribe
     const [savedTags, setSavedTags] = useState(getSavedTags()); // Etiquetas disponibles para seleccionar
+    const [showSuggestions, setShowSuggestions] = useState(false); // Controla si se muestran las sugerencias de etiquetas
 
     useEffect(() => { // Cargar etiquetas guardadas al montar el componente
         setSavedTags(getSavedTags());
     }, []);
 
 
+    const filteredSuggestions = savedTags.filter( // Filtrar sugerencias mientras escribe
+        (type) =>
+            type.toLowerCase().includes(tagInput.toLowerCase()) &&
+            !formData.tag.includes(type) // no sugerir las que ya están seleccionadas
+    );
 
-    // Mapea y guarda la tarea creada desde el modal de añadir
-    const handleAddModalSave = async (modalForm) => {
-        const nombre = modalForm.name || "";
-        const descripcion = modalForm.description || "";
-        const fechaRaw = modalForm.dueDate || "";
-        const prioridad = modalForm.priority || "";
-        const tags = Array.isArray(modalForm.tags) ? modalForm.tags.map(t => t.label || String(t)) : [];
+    // Agregar etiqueta (Enter o clic en sugerencia)
+    const addTag = (tagName) => {
+        const cleaned = tagName.trim();
+        if (!cleaned) return;
+        if (formData.tag.includes(cleaned)) return; // ya existe
 
-<<<<<<< Updated upstream
         // Agregar al formulario
         setFormData((prev) => ({
             ...prev,
@@ -156,42 +166,30 @@ function AddButton({ onToDoSaved, userId }) {
                 endDay: formData.endDay.toISOString().split("T")[0]
             });
         }
-=======
-        console.log("[AddButton] Enviando recordatorio:", {
-            P_usuario: userId,
-            P_nombre: nombre,
-            P_descripcion: descripcion,
-            P_fecha: fechaRaw,
-            P_prioridad: prioridad,
-            tags,
-        });
->>>>>>> Stashed changes
 
-        try {
-            const result = await ReminderService.addReminder({
-                P_usuario: userId ?? "",
-                P_nombre: nombre,
-                P_descripcion: descripcion,
-                P_fecha: fechaRaw,
-                P_prioridad: prioridad,
-                tags,
-            });
-            console.log("[AddButton] Recordatorio agregado exitosamente:", result);
-        } catch (error) {
-            console.error("[AddButton] Error al agregar recordatorio en backend, guardando localmente:", error);
-            // Fallback: guardar en localStorage si el backend falla
-            const endDay = (fechaRaw && String(fechaRaw).slice(0, 10)) || new Date().toISOString().slice(0, 10);
-            saveToDo({ title: nombre, description: descripcion, endDay, priority: prioridad, tag: tags });
-        }
-
-        if (onToDoSaved) onToDoSaved();
         setIsOpen(false);
+        setFormData({
+            title: "",
+            description: "",
+            endDay: new Date(),
+            priority: "",
+            tag: []
+        });
+        setError("");
+
+        // Notificar al padre que se guardó una actividad
+        if (onToDoSaved) {
+            onToDoSaved();
+        }
     };
 
     // Cerrar modal con tecla Esc
     useEffect(() => {
         const handleEsc = (e) => {
-            if (e.key === "Escape") setIsOpen(false);
+            if (e.key === "Escape") { // Si se presiona la tecla Esc, cerrar el modal
+                setIsOpen(false);
+                setShowCalendar(false); // Cerrar el calendario si está abierto
+            }
         };
         document.addEventListener("keydown", handleEsc);
         return () => document.removeEventListener("keydown", handleEsc);
@@ -208,16 +206,192 @@ function AddButton({ onToDoSaved, userId }) {
             >
             </button>
             {isOpen && (
-                <TaskAddModal
-                    isOpen={isOpen}
-                    onClose={() => setIsOpen(false)}
-                    onSave={handleAddModalSave}
-                    availableTags={
-                        availableTags.length > 0
-                            ? availableTags
-                            : savedTags.map(s => ({ label: s, type: 'custom' }))
-                    }
-                />
+                <div
+                    className="modalOverlay"
+                    role="dialog"
+                    aria-modal="true"
+                    onClick={() => {
+                        setShowCalendar(false);
+                        setIsOpen(false)
+                    }}
+                >
+                    <div className="modalContainer"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2>Recordatorio</h2>
+
+                        <button
+                            className="modalClose"
+                            onClick={() => {
+                                setShowCalendar(false);
+                                setIsOpen(false);
+                            }}
+                            title="Cerrar"
+                            aria-label="Cerrar"
+                            type="button"
+                        >
+                            X
+                        </button>
+
+                        {error && <p className="errorMessage">{error}</p>}
+                        <input
+                            type="text"
+                            name="title"
+                            placeholder="Título"
+                            value={formData.title}
+                            onChange={handleChange}
+                            required
+                        />
+                        <textarea
+                            name="description"
+                            placeholder="Descripción"
+                            value={formData.description}
+                            onChange={handleChange}
+                        />
+                        <h4>Fecha límite</h4>
+
+                        <div className="dateInputContainer">
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="dd/mm/aaaa"
+                                value={dateText}
+                                onChange={(e) => {
+                                    const v = e.target.value;
+                                    setDateText(v);
+                                    const parsed = parseDDMMYYYY(v);
+                                    if (parsed) {
+                                        setFormData((prev) => ({ ...prev, endDay: parsed }));
+                                    }
+                                }}
+                                onBlur={() => {
+                                    // al salir del campo, si es inválida, vuelve a la última fecha válida
+                                    const parsed = parseDDMMYYYY(dateText);
+                                    if (!parsed) setDateText(formatDDMMYYYY(formData.endDay));
+                                }}
+                            />
+                            <button
+                                type="button"
+                                className="calendarToggle"
+                                   data-tooltip="Abrir calendario"
+                                   aria-label="Abrir Calendario"
+                                   title="Abrir Calendario"
+                                onClick={() => setShowCalendar(!showCalendar)}
+                            >
+                                📅
+                            </button>
+                        </div>
+                        {showCalendar && (
+                            <div className="calendarWrapper">
+                                <Calendar
+                                    onChange={(date) => {
+                                        setFormData((prev) => ({ ...prev, endDay: date }));
+                                        setShowCalendar(false);
+                                    }}
+                                    value={formData.endDay}
+                                    locale="es-ES"
+                                />
+                            </div>
+                        )}
+                        {/* ── Prioridad ── */}
+                        <h4>Prioridad</h4>
+                        <div className="priorityGroup">
+                            {["alta", "media", "baja"].map((level) => (
+                                <button
+                                    key={level}
+                                    type="button"
+                                    className={`priorityButton priority-${level} ${formData.priority === level ? "priorityActive" : ""
+                                        }`}
+                                    onClick={() =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            priority: prev.priority === level ? "" : level
+                                        }))
+                                    }
+                                >
+                                    {level.charAt(0).toUpperCase() + level.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+
+                        <h4>Etiquetas</h4>
+                        <div className="tagsSection" onClick={(e) => e.stopPropagation()}>
+                            {/* Chips de etiquetas seleccionadas */}
+                            {formData.tag.length > 0 && (
+                                <div className="tagChips">
+                                    {formData.tag.map((t) => (
+                                        <span key={t} className="tagChip">
+                                            {t}
+                                            <button
+                                                type="button"
+                                                className="tagChipRemove"
+                                                onClick={() => removeTag(t)}
+                                                aria-label={`Quitar ${t}`}
+                                                title={`Quitar ${t}`}
+                                            >
+                                                ✕
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Input + sugerencias */}
+                            <div className="tagInputWrapper">
+                                <input
+                                    type="text"
+                                    placeholder="Escribe una etiqueta..."
+                                    value={tagInput}
+                                    onChange={(e) => {
+                                        setTagInput(e.target.value);
+                                        setShowSuggestions(true);
+                                    }}
+                                    onFocus={() => setShowSuggestions(true)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            addTag(tagInput);
+                                        }
+                                    }}
+                                />
+
+                                {showSuggestions && tagInput && filteredSuggestions.length > 0 && (
+                                    <ul className="tagSuggestions">
+                                        {filteredSuggestions.map((s) => (
+                                            <li
+                                                key={s}
+                                                onMouseDown={(e) => {
+                                                    e.preventDefault();
+                                                    addTag(s);
+                                                }}
+                                            >
+                                                {s}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="modalActions">
+                            <button
+                                className="cancelButton"
+                                onClick={() => {
+                                    setShowCalendar(false);
+                                    setIsOpen(false);
+                                }}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button className="saveButton"
+                                onClick={handleSave}
+                            >
+                                Guardar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     );

@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 // Use environment variables so the base host can change without recompiling
 const REMINDERS_API_BASE = import.meta.env.VITE_API_URL_REMINDERS_USER; // should include trailing slash
 const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER;
@@ -9,17 +8,6 @@ const UPDATE_DATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_DATE_REMINDER;
 const UPDATE_PRIORITY_ENDPOINT = import.meta.env.VITE_API_UPDATE_PRIORITY_REMINDER;
 const UPDATE_STATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_STATE_REMINDER;
 const UPDATE_TAGS_ENDPOINT = import.meta.env.VITE_API_UPDATE_TAGS_REMINDER;
-=======
-const REMINDERS_API_HOST = "http://209.25.140.25:9242/api";
-const REMINDERS_API_BASE = `${REMINDERS_API_HOST}/reminders-by-user`;
-const UPDATE_NAME_ENDPOINT = `${REMINDERS_API_HOST}/update-name-reminder`;
-const UPDATE_DESC_ENDPOINT = `${REMINDERS_API_HOST}/update-desc-reminder`;
-const UPDATE_DATE_ENDPOINT = `${REMINDERS_API_HOST}/update-date-reminder`;
-const UPDATE_PRIORITY_ENDPOINT = `${REMINDERS_API_HOST}/update-priority-reminder`;
-const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER || `${REMINDERS_API_HOST}/add-reminder/`;
-const DELETE_TAGS_ENDPOINT = import.meta.env.VITE_API_DELETE_TAGS_REMINDER || `${REMINDERS_API_HOST}/delete-tags/`;
-const UPDATE_TAGS_ENDPOINT = import.meta.env.VITE_API_UPDATE_TAGS_REMINDER || `${REMINDERS_API_HOST}/update-tags/`;
->>>>>>> Stashed changes
 
 class ReminderService {
 	static async postUpdate(endpoint, payload, errorContext) {
@@ -323,43 +311,10 @@ class ReminderService {
 		);
 	}
 
-	static async addReminder({ P_usuario, P_nombre, P_descripcion, P_fecha, P_prioridad, tags = [] } = {}) {
-		const P_fecha_norm = this.toDateTimeString(P_fecha ?? "");
-
-		// Asegurar que P_usuario sea un valor válido (número si es posible, o string)
-		let userIdValue = P_usuario ?? "";
-		if (userIdValue && !isNaN(Number(userIdValue))) {
-			userIdValue = Number(userIdValue);
-		}
-
-		const payload = {
-			P_usuario: userIdValue,
-			P_nombre: P_nombre ?? "",
-			P_descripcion: P_descripcion ?? "",
-			P_fecha: P_fecha_norm,
-			P_prioridad: P_prioridad ?? "",
-			P_tag1: tags[0] ?? "",
-			P_tag2: tags[1] ?? "",
-			P_tag3: tags[2] ?? "",
-			P_tag4: tags[3] ?? "",
-			P_tag5: tags[4] ?? "",
-		};
-
-		console.log("[ReminderService] addReminder - Endpoint:", ADD_REMINDER_ENDPOINT);
-		console.log("[ReminderService] addReminder - Payload:", JSON.stringify(payload, null, 2));
-
-		return this.postUpdate(
-			ADD_REMINDER_ENDPOINT,
-			payload,
-			"Error al agregar recordatorio"
-		);
-	}
-
-	static async updateFromEdit(previousReminder, updatedReminder, userId = null) {
+	static async updateFromEdit(previousReminder, updatedReminder) {
 		console.log("[ReminderService] updateFromEdit called");
 		console.log("  previous:", JSON.stringify(previousReminder, null, 2));
 		console.log("  updated :", JSON.stringify(updatedReminder, null, 2));
-		console.log("  userId  :", userId);
 
 		if (!previousReminder?.id || !updatedReminder) {
 			console.warn("[ReminderService] updateFromEdit aborted — missing id or updatedReminder", { id: previousReminder?.id });
@@ -404,15 +359,7 @@ class ReminderService {
 			updates.push(this.updatePriority(previousReminder.id, nextPriority));
 		}
 
-		// Comparar tags
-		const prevTags = (previousReminder.tags || []).map(t => typeof t === 'string' ? t : t.label || '').filter(Boolean).sort().join(',');
-		const nextTags = (updatedReminder.tags || []).map(t => typeof t === 'string' ? t : t.label || '').filter(Boolean).sort().join(',');
-		console.log(`  tags: "${prevTags}" → "${nextTags}" — changed: ${prevTags !== nextTags}`);
-		if (nextTags !== prevTags && userId) {
-			updates.push(this.updateTags(previousReminder.id, userId, updatedReminder.tags || []));
-		}
-
-			if (updates.length === 0) {
+		if (updates.length === 0) {
 			console.log("[ReminderService] No fields changed — no API calls made");
 			return;
 		}
@@ -422,7 +369,6 @@ class ReminderService {
 		console.log("[ReminderService] All updates done");
 	}
 
-<<<<<<< Updated upstream
 /* Add a new reminder via POST */
 static async addReminder(userId, name, description, dueDate, priority, tags = []) {
 	if (!userId) return;
@@ -452,45 +398,6 @@ static async addReminder(userId, name, description, dueDate, priority, tags = []
 		payload,
 		"Error al agregar recordatorio"
 	);
-=======
-	// Actualizar etiquetas de un recordatorio
-	static async updateTags(reminderId, userId, tags = []) {
-		if (!reminderId) {
-			console.warn("[ReminderService] updateTags: reminderId is missing");
-			return;
-		}
-
-		const tagLabels = tags.map(t => (typeof t === 'string' ? t : t.label || '')).filter(Boolean);
-		console.log(`[ReminderService] updateTags for reminder ${reminderId}:`, tagLabels);
-
-		const payload = {
-			P_idToDo: reminderId,
-			P_usuario: userId ?? "",
-			P_tag1: tagLabels[0] ?? "",
-			P_tag2: tagLabels[1] ?? "",
-			P_tag3: tagLabels[2] ?? "",
-			P_tag4: tagLabels[3] ?? "",
-			P_tag5: tagLabels[4] ?? "",
-		};
-
-		return this.postUpdate(
-			UPDATE_TAGS_ENDPOINT,
-			payload,
-			"Error al actualizar etiquetas de recordatorio"
-		);
-	}
-
-	// Eliminar todas las etiquetas de un recordatorio
-	static async deleteTags(reminderId) {
-		if (!reminderId) return;
-
-		return this.postUpdate(
-			DELETE_TAGS_ENDPOINT,
-			{ P_idToDo: reminderId },
-			"Error al eliminar etiquetas de recordatorio"
-		);
-	}
->>>>>>> Stashed changes
 }
 
 /* Delete a reminder by id */
