@@ -75,8 +75,6 @@ const normalizePersonalEvent = (item) => {
 	return item;
 };
 
-// HASTA AQUIII ESTA ARREGLADO
-
 // Normaliza una lista de actividades personales 
 const normalizePersonalEvents = (eventsList) => {
 	if (!Array.isArray(eventsList)) return [];
@@ -121,7 +119,7 @@ function App() {
 	// Manejador para datos personales que vienen del PersonalFetcher (ya normalizados)
 	const handlePersonalDataLoaded = useCallback((data) => {
 		console.log("Datos personales recibidos del API en App:", data);
-		
+
 		if (!Array.isArray(data)) {
 			console.error("Los datos personales de la API no son un array:", data);
 			setPersonalEvents([]);
@@ -220,7 +218,7 @@ function App() {
 		}
 
 		// Actualizar el estado eliminando la actividad
-		setPersonalEvents(prevEvents => 
+		setPersonalEvents(prevEvents =>
 			prevEvents.filter(event => event.id !== id)
 		);
 		handleClosePersonalPopup();
@@ -279,13 +277,11 @@ function App() {
 	//Calcular materias filtradas 
 	const filteredClassesEvents = selectedTag === "Todos" ?
 		classEvents :
-		classEvents.filter(event => event.tag === selectedTag);
+		classEvents.filter(event => event.etiqueta === selectedTag);
 	const filteredPersonalEvents =
 		selectedTag === "Todos" || selectedTag === "Personal" ?
 			personalEvents :
 			[];
-	console.log(userId)
-
 	return (
 
 		<div className="App">
@@ -342,8 +338,8 @@ function App() {
 					<ControlBar
 						viewMode={viewMode}
 						setViewMode={setViewMode}
-					userId={userId}
-					onActivityAdd={handleActivityAdd}
+						userId={userId}
+						onActivityAdd={handleActivityAdd}
 						onThemeChange={handleThemeChange}
 						selectedTag={selectedTag}
 						setSelectedTag={setSelectedTag}
