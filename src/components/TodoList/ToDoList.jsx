@@ -222,7 +222,7 @@ function ToDoList({ userId = "" }) {
                     <h2 className="todolist-title">To-Do List</h2>
                     <div className="todolist-header-actions">
                         <ToDoFilterButton onClick={() => setIsFilterModalOpen(true)} />
-                        <AddButton userId={userId} onToDoSaved={loadReminderTasks} />
+                        <AddButton userId={userId} onToDoSaved={loadReminderTasks} availableTags={availableTags} />
                     </div>
                 </div>
 

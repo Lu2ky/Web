@@ -1,3 +1,5 @@
+import { getTagsByReminder } from './tagsService';
+
 // Use environment variables so the base host can change without recompiling
 const REMINDERS_API_BASE = import.meta.env.VITE_API_URL_REMINDERS_USER; // should include trailing slash
 const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER;
@@ -169,9 +171,31 @@ class ReminderService {
 								? [payload.data]
 								: [];
 
-		return reminders
+		const normalized = reminders
 			.map((reminder, index) => this.normalizeReminder(reminder, index))
 			.filter(reminder => !reminder.isDeleted);
+
+		// Fetch tags for each reminder in parallel and merge them
+		try {
+			const tagsResults = await Promise.all(
+				normalized.map(r => getTagsByReminder(userId, r.id).catch(() => []))
+			);
+			normalized.forEach((r, i) => {
+				const fetched = tagsResults[i] || [];
+				if (fetched.length > 0) {
+					const existing = r.tags.map(t => t.label);
+					fetched.forEach(label => {
+						if (!existing.includes(label)) {
+							r.tags.push({ label, type: 'custom' });
+						}
+					});
+				}
+			});
+		} catch (err) {
+			console.warn('[ReminderService] Could not fetch per-reminder tags:', err);
+		}
+
+		return normalized;
 	}
 
 	static async updateName(reminderId, name) {
@@ -357,6 +381,20 @@ class ReminderService {
 		console.log(`  priority: "${prevPriority}" → "${nextPriority}" — changed: ${prevPriority !== nextPriority}`);
 		if (nextPriority !== prevPriority) {
 			updates.push(this.updatePriority(previousReminder.id, nextPriority));
+		}
+
+		// ── Tags ──
+		const extractLabels = (tags) =>
+			(Array.isArray(tags) ? tags : []).map(t =>
+				typeof t === "string" ? t : (t?.label ?? t?.name ?? "")
+			).filter(Boolean).sort();
+
+		const prevLabels = extractLabels(previousReminder.tags);
+		const nextLabels = extractLabels(updatedReminder.tags);
+		const tagsChanged = prevLabels.join(",") !== nextLabels.join(",");
+		console.log(`  tags: [${prevLabels}] → [${nextLabels}] — changed: ${tagsChanged}`);
+		if (tagsChanged) {
+			updates.push(this.updateTags(previousReminder.id, nextLabels));
 		}
 
 		if (updates.length === 0) {

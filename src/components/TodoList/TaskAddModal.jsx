@@ -4,25 +4,19 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import '../../styles/addButton.css';
 
-export default function TaskEditModal({
+export default function TaskAddModal({
     isOpen,
     onClose,
     onSave,
-    task = null,
-    title = "Editar Tarea",
+    title = "Nueva Tarea",
     availableTags = []
 }) {
-    const normalizeTags = (tags) => {
-        if (!tags) return [];
-        return tags.map(t => (typeof t === 'string' ? { label: t, type: 'custom' } : t));
-    };
-
     const [formData, setFormData] = useState({
-        name: task?.name || '',
-        description: task?.description || '',
-        dueDate: task?.dueDate || '',
-        tags: normalizeTags(task?.tags) || [],
-        priority: task?.priority || ''
+        name: '',
+        description: '',
+        dueDate: '',
+        tags: [],
+        priority: ''
     });
 
     const [tagLabel, setTagLabel] = useState('');
@@ -147,14 +141,14 @@ export default function TaskEditModal({
             setTagLabel('');
             setTagType('custom');
             setFormData({
-                name: task?.name || '',
-                description: task?.description || '',
-                dueDate: task?.dueDate || '',
-                tags: normalizeTags(task?.tags) || [],
-                priority: task?.priority || ''
+                name: '',
+                description: '',
+                dueDate: '',
+                tags: [],
+                priority: ''
             });
         }
-    }, [isOpen, task]);
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -171,7 +165,10 @@ export default function TaskEditModal({
             finalTags = [...finalTags, { label: pending, type: tagType }];
         }
 
-        onSave({ ...formData, tags: finalTags });
+        const dataToSend = { ...formData, tags: finalTags };
+        console.log('[TaskAddModal] handleSave → dataToSend:', JSON.stringify(dataToSend, null, 2));
+        console.log('[TaskAddModal] tags count:', finalTags.length, 'tags:', finalTags);
+        onSave(dataToSend);
         setTagLabel('');
         onClose();
     };

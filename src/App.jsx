@@ -137,9 +137,21 @@ function App() {
 	const handleClassClick = event => {
 		// Buscar todas las sesiones de esta clase (mismo NRC)
 		const allSessions = classEvents.filter(e => e.NRC === event.NRC);
+		const apiCourseId = event?.apiData?.N_idCurso
+			?? event?.apiData?.id_course
+			?? event?.apiData?.idCourse
+			?? event?.apiData?.ID_CURSO
+			?? event?.apiData?.id;
+		const apiScheduleId = event?.apiData?.N_idHorario
+			?? event?.apiData?.id_schedule
+			?? event?.apiData?.idSchedule
+			?? event?.apiData?.ID_HORARIO
+			?? event?.apiData?.schedule_id;
 
 		// Crear el objeto classData para PopUpClasses
 		const classData = {
+			id: apiCourseId ?? event.NRC,
+			scheduleId: apiScheduleId,
 			subject_name: event.subject_name,
 			instructor_name: event.professor_name,
 			nrc: event.NRC,
@@ -153,7 +165,8 @@ function App() {
 				end_time: session.end_time,
 				classroom: session.classroom,
 				type: session.tag
-			}))
+			})),
+			apiData: event.apiData,
 		};
 
 		setSelectedClass(classData);
@@ -315,6 +328,7 @@ function App() {
 						onClose={handleClosePersonalPopup}
 						personalData={selectedPersonal}
 						onUpdate={handleActivityUpdate}
+						userId={userId}
 					/>
 					<MessageConfirmation
 						isOpen={showDeletePersonalConfirm}
