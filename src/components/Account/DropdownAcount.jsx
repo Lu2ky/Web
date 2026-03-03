@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import Modal from "./Modal"; 
+import Modal from "./Modal";
+import UserProfile from "./UserProfile";
+import UserPreferences from "./UserPreferences";
 import "./DropdownAcount.css";
 
 const OPTIONS = [
@@ -8,7 +10,7 @@ const OPTIONS = [
     { id: "close", label: "Cerrar Sesión"},
 ];
 
-export default function DropdownAcount() {
+export default function DropdownAcount({ userId }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeModal, setActiveModal] = useState(null);
     const dropdownRef = useRef(null);
@@ -70,16 +72,15 @@ export default function DropdownAcount() {
                 onClose={closeModal}
                 title="Mi Perfil"
             >
-                <p>Aquí va el contenido y cambio de contraseña</p>
-
+                <UserProfile userId={userId} onClose={closeModal} />
             </Modal>
 
             <Modal
                 isOpen={activeModal === "prefer"}
                 onClose={closeModal}
-                title="Configuración"
+                title="Preferencias"
             >
-                <p>Configuración de notis y correo</p>
+                <UserPreferences userId={userId} onClose={closeModal} />
             </Modal>
 
             <Modal
