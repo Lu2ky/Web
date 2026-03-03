@@ -3,7 +3,7 @@ import "../../styles/WeekView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
 
-function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, onDeletePersonal = () => {}, tagColorMap = {}, getContrastColor = () => "#000000" }) {
+function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000" }) {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const days = [
     "Lunes",
@@ -154,8 +154,10 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
                       key={event.id}
                       {...commonProps}
                       id={event.id}
-                      subject_name={event.activity_name || event.subject_name}
-                      classroom={event.location || event.classroom}
+                      name={event.name || event.activity_name}
+                      description={event.description}
+                      tag={event.tag}
+                      onClick={() => onPersonalClick(event)}
                       onDelete={() => onDeletePersonal(event.id)}
                       background_color={tagColorMap["Personal"] || "#a59090"}
                       text_color={getContrastColor(tagColorMap["Personal"])}

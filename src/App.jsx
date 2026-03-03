@@ -10,8 +10,10 @@ import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
 import ToDoList from "./components/TodoList/ToDoList";
+import MessageConfirmation from "./components/TodoList/MessageConfirmation";
 // Componentes secundarios
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
+import { PopUpPersonal } from "./components/Calendar/PopUpPersonal";
 import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
 // Servicios para interactuar con la API 
 // Calendario
@@ -20,9 +22,7 @@ import OficialFetcher from "./services/OficialFetcher";
 import { getCategories } from "./services/categoriesService";
 
 // Actividades personales
-import PersonalFetcher from "./services/PersonalFetcher";
-//import { deleteActivity } from "./services/personalActivitiesService";
-//import { getAllActivities } from "./services/personalActivitiesService";
+import PersonalFetcher, { deletePersonalActivity } from "./services/PersonalFetcher";
 
 
 // Funciones para normalizar datos de la API 
@@ -69,25 +69,10 @@ function normalizeApiData(apiData) {
 
 // Normalizar actividades personales 
 
-//Normaliza una actividad 
-const normalizePersonalEvent = (apiDataPersonal) => {
-	if (!Array.isArray(apiDataPersonal)) {
-		console.error("Datos de actividad personal no son un array:", apiDataPersonal);
-		return [];
-	}
-
-	return apiDataPersonal.map((item, index) => ({
-		id: `actividadPersonal-${item.id}`,
-		subject_name: item.subject_name,
-		description: item.description,
-		start_time: item.times[0].slice(0, 5), // recortar segundos
-		end_time: item.times[1].slice(0, 5),
-		day: dayMap[item.times[2]] || "Lunes",
-		etiqueta: item.tag || "Personal",
-		date_start: item.date_start,
-		date_end: item.date_end,
-		apiData: item 		// Datos originales
-	}));
+// Normaliza una actividad compatible con el formato de BlockPersonal
+const normalizePersonalEvent = (item) => {
+	// Los datos del API ya vienen normalizados del PersonalFetcher
+	return item;
 };
 
 // HASTA AQUIII ESTA ARREGLADO
@@ -96,7 +81,7 @@ const normalizePersonalEvent = (apiDataPersonal) => {
 const normalizePersonalEvents = (eventsList) => {
 	if (!Array.isArray(eventsList)) return [];
 	return eventsList
-		.map((event, index) => normalizePersonalEvent(event, index))
+		.map((event) => normalizePersonalEvent(event))
 		.filter((event) => event.start_time && event.end_time && event.day);
 };
 
@@ -116,6 +101,10 @@ function App() {
 	const [personalEvents, setPersonalEvents] = useState([]); // Eventos personales (actividades guardadas)
 	const [showClassPopup, setShowClassPopup] = useState(false); // Para mostrar/ocultar el popup de detalles de clase
 	const [selectedClass, setSelectedClass] = useState(null); // Datos de la clase seleccionada para el popup
+	const [showPersonalPopup, setShowPersonalPopup] = useState(false); // Para mostrar/ocultar el popup de detalles de actividad personal
+	const [selectedPersonal, setSelectedPersonal] = useState(null); // Datos de la actividad personal seleccionada
+	const [showDeletePersonalConfirm, setShowDeletePersonalConfirm] = useState(false); // Modal de confirmación para borrar actividad personal
+	const [pendingDeletePersonalId, setPendingDeletePersonalId] = useState(null); // ID de la actividad pendiente de eliminación
 	const [themeId, setThemeId] = useState("default"); // ID del tema seleccionado, se pasa al ThemeSelector y se usa para cargar el mapa de colores de etiquetas
 	const [tagColorMap, setTagColorMap] = useState({}); // Mapa de colores para etiquetas, se carga desde las categorías obtenidas de la API
 	const [selectedTag, setSelectedTag] = useState("Todos"); // Etiqueta seleccionada para filtrar actividades en el calendario
@@ -133,6 +122,21 @@ function App() {
 		setClassEvents(normalized);
 	}, []);
 
+	// Manejador para datos personales que vienen del PersonalFetcher (ya normalizados)
+	const handlePersonalDataLoaded = useCallback((data) => {
+		console.log("Datos personales recibidos del API en App:", data);
+		
+		if (!Array.isArray(data)) {
+			console.error("Los datos personales de la API no son un array:", data);
+			setPersonalEvents([]);
+			return;
+		}
+
+		// Normalizar datos del API
+		const normalizedApiData = normalizePersonalEvents(data);
+		console.log("Datos personales normalizados:", normalizedApiData);
+		setPersonalEvents(normalizedApiData);
+	}, []);
 
 	const handleClassClick = event => {
 		// Buscar todas las sesiones de esta clase (mismo NRC)
@@ -165,16 +169,62 @@ function App() {
 		setSelectedClass(null);
 	};
 
-	const handleActivitySaved = () => {
-		// Recargar actividades personales despues de guardar una nueva actividad
-		const personalActivities = normalizePersonalEvents(getAllActivities());
-		setPersonalEvents(personalActivities);
+	// Abre el popup de detalles de una actividad personal
+	const handlePersonalClick = (event) => {
+		setSelectedPersonal(event);
+		setShowPersonalPopup(true);
 	};
-	// Elimina actividad personal, recarga la lista de actividades personales para actualizar la vista
-	const handleDeletePersonal = id => {
-		deleteActivity(id);
-		const personalActivities = normalizePersonalEvents(getAllActivities());
-		setPersonalEvents(personalActivities);
+
+	// Cierra el popup de detalles de actividad personal
+	const handleClosePersonalPopup = () => {
+		setShowPersonalPopup(false);
+		setSelectedPersonal(null);
+	};
+
+	// Solicita confirmación para eliminar una actividad personal
+	const handleRequestDeletePersonal = (id) => {
+		setPendingDeletePersonalId(id);
+		setShowDeletePersonalConfirm(true);
+	};
+
+	// Cierra modal de confirmación de eliminación
+	const handleCloseDeletePersonalConfirm = () => {
+		setShowDeletePersonalConfirm(false);
+		setPendingDeletePersonalId(null);
+	};
+
+	// Elimina una actividad personal (confirmado por modal)
+	const handleConfirmDeletePersonal = async () => {
+		const id = pendingDeletePersonalId;
+		if (!id) {
+			handleCloseDeletePersonalConfirm();
+			return;
+		}
+
+		try {
+			// Intentar eliminar desde la API
+			await deletePersonalActivity(userId, id);
+			console.log("Actividad eliminada de la API");
+		} catch (error) {
+			console.error("Error al eliminar de la API:", error);
+			// Continuar incluso si falla la API (eliminar del estado local)
+		}
+
+		// Actualizar el estado eliminando la actividad
+		setPersonalEvents(prevEvents => 
+			prevEvents.filter(event => event.id !== id)
+		);
+		handleClosePersonalPopup();
+		handleCloseDeletePersonalConfirm();
+	};
+
+	// Agrega una nueva actividad personal creada desde AddActivityButton
+	const handleActivityAdd = (newActivity) => {
+		// Agregar la nueva actividad al estado
+		setPersonalEvents(prevEvents => [
+			...prevEvents,
+			newActivity
+		]);
 	};
 
 	useEffect(() => {
@@ -233,12 +283,18 @@ function App() {
 						onDataLoaded={handleDataLoaded}
 					/>
 
+					<PersonalFetcher
+						userId={userId}
+						onDataLoaded={handlePersonalDataLoaded}
+					/>
+
 					<Calendar
 						viewMode={viewMode}
 						events={filteredClassesEvents}
 						personalEvents={filteredPersonalEvents}
 						onClassClick={handleClassClick}
-						onDeletePersonal={handleDeletePersonal}
+						onDeletePersonal={handleRequestDeletePersonal}
+						onPersonalClick={handlePersonalClick}
 						tagColorMap={tagColorMap}
 						getContrastColor={getContrastColor}
 					/>
@@ -248,12 +304,26 @@ function App() {
 						onClose={handleClosePopup}
 						classData={selectedClass}
 					/>
+					{/* Popup para detalles de actividades personales */}
+					<PopUpPersonal
+						isOpen={showPersonalPopup}
+						onClose={handleClosePersonalPopup}
+						personalData={selectedPersonal}
+					/>
+					<MessageConfirmation
+						isOpen={showDeletePersonalConfirm}
+						onClose={handleCloseDeletePersonalConfirm}
+						onConfirm={handleConfirmDeletePersonal}
+						title="¿Eliminar actividad personal?"
+						description="Esta acción no se puede deshacer. La actividad se eliminará de tu horario."
+						confirmText="Sí, eliminar"
+						cancelText="Cancelar"
+					/>
 					<ControlBar
 						viewMode={viewMode}
 						setViewMode={setViewMode}
-						weekOffset={weekOffset}
-						setWeekOffset={setWeekOffset}
-						onActivitySaved={handleActivitySaved}
+					userId={userId}
+					onActivityAdd={handleActivityAdd}
 						onThemeChange={handleThemeChange}
 						selectedTag={selectedTag}
 						setSelectedTag={setSelectedTag}
