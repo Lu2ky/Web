@@ -9,7 +9,7 @@ import { useParams } from "react-router-dom";
 import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
-import ToDoList from "./components/TodoList/ToDoList";
+import ToDoList from "./components/TodoList/ToDoList"; 
 import MessageConfirmation from "./components/TodoList/MessageConfirmation";
 // Componentes secundarios
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";

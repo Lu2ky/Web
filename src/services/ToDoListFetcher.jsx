@@ -24,34 +24,67 @@ function normalizeTag(tag, index) {
     return null;
 }
 
-function ToDoListTagFetcher({ onDataLoaded }) {
+import { useEffect, useState } from "react";
+import LoadingModal from "./loadingModal";
+
+function ToDoListFetcher({ onDataLoaded, userId }) {
+    const [loading, setLoading] = useState(true);
+    const [apiData, setApiData] = useState([]);
+
     useEffect(() => {
-        const fetchTags = async () => {
+        if (!userId) {
+            setLoading(false);
+            setApiData([]);
+            if (onDataLoaded) onDataLoaded([]);
+            return;
+        }
+
+        const baseUrl = import.meta.env.VITE_API_URL_REMINDERS_USER;
+
+        const fetchData = async () => {
+            setLoading(true);
             try {
-                const response = await fetch("http://209.25.140.25:9242/api/get-remainders");
+                const response = await fetch(`${baseUrl}${userId}`);
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
                 const json = await response.json();
-                const rawData = Array.isArray(json?.data)
+
+                const data = Array.isArray(json?.data)
                     ? json.data
                     : Array.isArray(json)
-                    ? json
-                    : [];
-                const normalizedTags = rawData.map(normalizeTag).filter(Boolean);
+                        ? json
+                        : [];
 
-                if (onDataLoaded) {
-                    onDataLoaded(normalizedTags);
-                }
+                console.log("ToDo datos cargados:", data);
+
+                setApiData(data);
+                if (onDataLoaded) onDataLoaded(data);
+
             } catch (error) {
-                console.error("Error al cargar tags del To-Do:", error);
-                if (onDataLoaded) {
-                    onDataLoaded([]);
-                }
+                console.error("Error al cargar ToDo:", error);
+                setApiData([]);
+                if (onDataLoaded) onDataLoaded([]);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchTags();
-    }, [onDataLoaded]);
+        fetchData();
+    }, [userId, onDataLoaded]);
+
+    if (loading) {
+        return (
+            <LoadingModal
+                isOpen={loading}
+                title="Cargando tareas"
+            />
+        );
+    }
 
     return null;
 }
 
-export default ToDoListTagFetcher;
+export default ToDoListFetcher;
