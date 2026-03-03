@@ -67,7 +67,7 @@ function normalizeApiData(apiData) {
 	}));
 }
 
-// Normalizar actividades personales 
+// Normalizar actividades personales con la info de la API
 
 // Normaliza una actividad compatible con el formato de BlockPersonal
 const normalizePersonalEvent = (item) => {
@@ -84,10 +84,6 @@ const normalizePersonalEvents = (eventsList) => {
 		.map((event) => normalizePersonalEvent(event))
 		.filter((event) => event.start_time && event.end_time && event.day);
 };
-
-
-
-
 
 const getInitialView = () => {
 	return window.innerWidth <= 425 ? "Diario" : "Semanal"; // Vista inicial basada en el ancho de la pantalla (mobile chiquito vs desktop)
