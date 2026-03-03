@@ -160,7 +160,7 @@ function ToDoList({ userId = "" }) {
         setTaskToEdit(null);
 
         try {
-            await ReminderService.updateFromEdit(taskToEdit, updatedTask);
+            await ReminderService.updateFromEdit(taskToEdit, updatedTask, userId);
             await loadReminderTasks();
         } catch (error) {
             console.error("Error al actualizar recordatorio:", error);
@@ -216,13 +216,21 @@ function ToDoList({ userId = "" }) {
                 />
             )}
             <div className={`todolist-panel${isDrawerOpen ? " open" : ""}`}>
+<<<<<<< Updated upstream
                 <ToDoListTagFetcher userId={userId} onDataLoaded={setAvailableTags} />
+=======
+                <ToDoListTagFetcher onDataLoaded={setAvailableTags} userId={userId} />
+>>>>>>> Stashed changes
 
                 <div className="todolist-header">
                     <h2 className="todolist-title">To-Do List</h2>
                     <div className="todolist-header-actions">
                         <ToDoFilterButton onClick={() => setIsFilterModalOpen(true)} />
+<<<<<<< Updated upstream
                         <AddButton userId={userId} onToDoSaved={loadReminderTasks} />
+=======
+                        <AddButton onToDoSaved={loadReminderTasks} userId={userId} availableTags={availableTags} />
+>>>>>>> Stashed changes
                     </div>
                 </div>
 
