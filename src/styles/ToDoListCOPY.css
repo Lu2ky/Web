@@ -1,0 +1,471 @@
+/* ========== PANEL ========== */
+.todolist-panel {
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    font-family: system-ui, -apple-system, sans-serif;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.todolist-panel::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* ========== HEADER ========== */
+.todolist-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 2px solid transparent;
+    background-image:
+        linear-gradient(#fff, #fff),
+        linear-gradient(90deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
+.todolist-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.todolist-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.todolist-add-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(192, 38, 211, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.todolist-add-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(192, 38, 211, 0.4);
+}
+
+/* ========== FILTERS ========== */
+.todolist-filters-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: calc(100% - 28px);
+    margin: 0 14px 10px;
+    padding: 6px 0;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.todolist-filters-btn:hover {
+    border-color: #c026d3;
+    background: #fdf4ff;
+}
+
+.todolist-filters-icon {
+    font-size: 0.7rem;
+}
+
+/* ========== SECTION LABEL ========== */
+.todolist-section-label {
+    padding: 0 14px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.todolist-task-count {
+    font-weight: 400;
+    color: #9ca3af;
+}
+
+.todolist-active-filter-chip {
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.56rem;
+    font-weight: 600;
+    color: #c026d3;
+    background: #fdf4ff;
+    border: 1px solid #f0abfc;
+}
+
+/* ========== TASKS CONTAINER ========== */
+.todolist-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 10px 14px;
+    flex: 1;
+}
+
+/* ========== TASK CARD ========== */
+.todolist-task-card {
+    display: flex;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.todolist-task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    border-color: #d1d5db;
+}
+
+/* --- Priority accent bar --- */
+.todolist-card-accent {
+    width: 4px;
+    min-height: 100%;
+    flex-shrink: 0;
+    background: #e5e7eb;
+    transition: background 0.2s ease;
+}
+
+.todolist-task-card.priority-alta .todolist-card-accent {
+    background: linear-gradient(180deg, #ff006e, #ef4444);
+}
+
+.todolist-task-card.priority-media .todolist-card-accent {
+    background: linear-gradient(180deg, #f59e0b, #eab308);
+}
+
+.todolist-task-card.priority-baja .todolist-card-accent {
+    background: linear-gradient(180deg, #22c55e, #16a34a);
+}
+
+/* --- Card body --- */
+.todolist-card-body {
+    flex: 1;
+    padding: 10px 10px 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+/* --- Top row: checkbox + info --- */
+.todolist-task-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.todolist-task-checkbox {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 999px;
+    border: 2px solid #d1d5db;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-top: 1px;
+    transition: all 0.2s ease;
+}
+
+.todolist-task-checkbox:hover {
+    border-color: #c026d3;
+    box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.1);
+}
+
+.todolist-task-checkbox.checked {
+    background: #22c55e;
+    border-color: #22c55e;
+    box-shadow: 0 2px 6px rgba(34, 197, 94, 0.35);
+}
+
+.todolist-task-checkbox svg {
+    display: block;
+}
+
+/* --- Task info column --- */
+.todolist-task-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.todolist-task-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.35;
+    text-align: left;
+    word-break: break-word;
+}
+
+.todolist-task-card.completed .todolist-task-name {
+    text-decoration: line-through;
+    color: #9ca3af;
+}
+
+.todolist-task-card.completed {
+    opacity: 0.7;
+}
+
+.todolist-task-card.completed:hover {
+    opacity: 1;
+}
+
+.todolist-task-due {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-top: 1px;
+}
+
+.todolist-task-due svg {
+    flex-shrink: 0;
+}
+
+/* --- Actions row --- */
+.todolist-task-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+    align-self: flex-end;
+}
+
+.todolist-task-actions .edit-button {
+    padding: 4px;
+    border-radius: 0.4rem;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.todolist-task-actions .edit-button:hover {
+    background: #f3f4f6;
+    color: #c026d3;
+}
+
+.todolist-task-delete {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.todolist-task-delete:hover {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+/* ========== TAGS ========== */
+.todolist-task-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-left: 28px;
+}
+
+.todolist-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.58rem;
+    font-weight: 600;
+    border: 1px solid;
+    letter-spacing: 0.01em;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.todolist-tag:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.todolist-tag.subject {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #93c5fd;
+}
+
+.todolist-tag.category {
+    background: #f9fafb;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+.todolist-tag.custom {
+    background: #fdf4ff;
+    color: #a21caf;
+    border-color: #f0abfc;
+}
+
+.todolist-tag.priority-high {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+
+.todolist-tag.priority-medium {
+    background: #fefce8;
+    color: #a16207;
+    border-color: #fde047;
+}
+
+.todolist-tag.priority-low {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #86efac;
+}
+
+.todolist-tag.active-filter {
+    box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.12);
+    transform: translateY(-1px);
+}
+
+/* ========== EMPTY STATE ========== */
+.todolist-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 24px 6px;
+    text-align: center;
+}
+
+.todolist-empty-state p {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin: 0;
+}
+
+/* ========== OVERLAY & DRAWER ========== */
+.todo-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 30;
+    animation: todoFadeIn 0.25s ease;
+}
+
+@keyframes todoFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+
+.todo-drawer-toggle {
+    position: fixed;
+    right: 1rem;
+    bottom: 7rem;
+    z-index: 12;
+    padding: 0.8rem 1.4rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 16px rgba(192, 38, 211, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.todo-drawer-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(192, 38, 211, 0.5);
+}
+
+/* ========== RESPONSIVE: DRAWER MOBILE ========== */
+@media (max-width: 1023px) {
+    .todo-drawer-toggle {
+        z-index: 12;
+    }
+
+    .todolist-panel {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 70dvh;
+        border-radius: 1.2rem 1.2rem 0 0;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 41;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .todolist-panel.open {
+        transform: translateY(0);
+    }
+
+    .todolist-tasks {
+        overflow-y: auto;
+        flex: 1;
+        padding: 10px 16px 20px;
+    }
+}
+
+/* ========== RESPONSIVE: DESKTOP ========== */
+@media (min-width: 1024px) {
+    .todo-drawer-toggle,
+    .todo-drawer-overlay {
+        display: none;
+    }
+}

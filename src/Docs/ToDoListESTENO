@@ -1,0 +1,286 @@
+{/*}
+// Estados de react y css
+import { useEffect, useMemo, useState } from "react";
+import "../../styles/ToDoList.css";
+// Componentes 
+import ToDoFilterButton from "./ToDoFilterButton"; // Filtrado
+import AddButton from "./AddButton"; // Agregar 
+import TaskEditModal from "./TaskEditModal"; // Modal para editar tareas
+import MessageConfirmation from "./MessageConfirmation"; // Modal para confirmar acciones como eliminación
+import ToDoFilterModal from "./ToDoFilterModal"; // Modal para aplicar filtros
+import RemindCard from "./RemindCard"; // Tarjeta individual de cada tarea
+// Servicios
+import ToDoListTagFetcher from "../../services/ToDoListTagFetcher"; // Importar Info
+
+const initialTasks = []; // Estado inicial de tareas, se establece como un arreglo vacío
+
+// Filtros por defecto para la lista de tareas
+const defaultFilters = {
+    status: "all",
+    priority: "all",
+    tag: ""
+};
+
+// Función para normalizar prioridad del backend (QUITAR CUANDO SE ARREGLE TODO)
+const normalizePriority = value => {
+    const normalized = String(value || "").toLowerCase(); // Convierte el valor a string y lo normaliza a minúsculas para facilitar la comparación
+    if (normalized === "high" || normalized === "alta") return "Alta";
+    if (normalized === "medium" || normalized === "media") return "Media";
+    if (normalized === "low" || normalized === "baja") return "Baja";
+    return "";
+};
+
+// Calcula la prioridad de una tarea basándose en su propiedad de prioridad o en sus etiquetas (QUITAR CUANDO SE ARREGLE TODO)
+{/*const getTaskPriority = task => {
+    if (task.priority) {
+        return normalizePriority(task.priority);
+    }
+
+    const priorityTag = task.tags?.find(tag =>
+        ["priority-high", "priority-medium", "priority-low"].includes(tag.type)
+    );
+
+    if (!priorityTag) return "";
+    if (priorityTag.type === "priority-high") return "Alta";
+    if (priorityTag.type === "priority-medium") return "Media";
+    if (priorityTag.type === "priority-low") return "Baja";
+    return "";
+};*/}
+{/*}
+// Componente to do list
+function ToDoList({ userId = "" }) {
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false); // Estado para controlar si el panel lateral está abierto o cerrado
+    const [tasks, setTasks] = useState(initialTasks); // Estado para almacenar las tareas de recordatorios, inicialmente es un arreglo vacío
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Estado para controlar si el modal de edición está abierto o cerrado
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Estado para controlar si el modal de confirmación de eliminación está abierto o cerrado
+    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false); // Estado para controlar si el modal de filtros está abierto o cerrado
+    const [taskToEdit, setTaskToEdit] = useState(null); // Estado para almacenar la tarea que se va a editar, inicialmente es null
+    const [taskToDelete, setTaskToDelete] = useState(null); // Estado para almacenar la tarea que se va a eliminar, inicialmente es null
+    const [activeFilters, setActiveFilters] = useState(defaultFilters); // Estado para almacenar los filtros activos, inicialmente se establecen los filtros por defecto
+
+    {/*useEffect(() => {
+        loadReminderTasks();
+    }, [loadReminderTasks]);*/}
+
+    // CAMBIAR 
+    {/*
+    const [availableTags, setAvailableTags] = useState([]); // Estado para almacenar las etiquetas disponibles, inicialmente es un arreglo vacio
+
+    // Memoización es una técnica de optimización que permite almacenar el resultado de una función para evitar cálculos innecesarios en futuras ejecuciones con los mismos argumentos.
+    const filteredTasks = useMemo(() => { // Memoización de tareas filtradas para optimizar rendimiento, se recalcula solo cuando cambian las tareas o los filtros activos
+        return tasks.filter(task => { // Filtra las tareas basándose en los filtros activos
+            const statusMatches =
+                activeFilters.status === "all" ||
+                (activeFilters.status === "completed" && task.completed) ||
+                (activeFilters.status === "pending" && !task.completed);
+
+            const taskPriority = getTaskPriority(task);
+            const priorityMatches =
+                activeFilters.priority === "all" || taskPriority === activeFilters.priority;
+
+            const normalizedTagFilter = activeFilters.tag.trim().toLowerCase();
+            const tagMatches =
+                !normalizedTagFilter ||
+                task.tags?.some(tag =>
+                    String(tag.label || "")
+                        .toLowerCase()
+                        .includes(normalizedTagFilter)
+                );
+
+            return statusMatches && priorityMatches && tagMatches;
+        });
+    }, [tasks, activeFilters]); // Dependencias del useMemo, se recalcula cuando cambian las tareas o los filtros activos
+
+    // Función para cargar las tareas de recordatorios desde la API, se llama inicialmente y después de ciertas acciones como edición o eliminación
+    const toggleTask = async (id) => { // Función para alternar el estado de completado de una tarea, recibe el id de la tarea a modificar
+        const task = tasks.find(t => t.id === id); // Busca la tarea correspondiente al id proporcionado
+        if (!task) return; // Si no se encuentra la tarea, se detiene la ejecución de la función
+
+        const newCompletedState = !task.completed; // Calcula el nuevo estado de completado, se invierte el estado actual
+        // Actualiza el estado local para reflejar el cambio de inmediato en la interfaz de usuario
+        setTasks((prev) => 
+            prev.map((t) => // Mapea las tareas anteriores, si la tarea coincide con el id, se actualiza su estado de completado, de lo contrario se deja sin cambios
+                t.id === id ? { ...t, completed: newCompletedState } : t // Si el id coincide, se crea una nueva tarea con el mismo contenido pero con el estado de completado actualizado, si no coincide, se devuelve la tarea sin cambios
+            )
+        );
+
+        // CAMBIAR ESTO POR EL NUEVO SERVICIO 
+        try {
+            await ReminderService.updateState(id, newCompletedState);
+        } catch (error) {
+            console.error("Error al actualizar estado del recordatorio:", error);
+            // Revert on error
+            setTasks((prev) =>
+                prev.map((t) =>
+                    t.id === id ? { ...t, completed: !newCompletedState } : t
+                )
+            );
+        }
+    };
+
+    const deleteTask = (id) => {
+        setTaskToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const editTask = (id) => {
+        // Placeholder: abrir modal o formulario de edición.
+        // Actualmente solo hace log para integrarlo visualmente.
+        const task = tasks.find(t => t.id === id);
+        setTaskToEdit(task);
+        setIsEditModalOpen(true);
+    };
+// Función para manejar el guardado de una tarea editada o nueva, recibe los datos del formulario
+    const handleSave = async (formData) => {
+        if (!taskToEdit) {
+            setIsEditModalOpen(false);
+            setTaskToEdit(null);
+            return;
+        }
+
+        const updatedTask = {
+            ...taskToEdit,
+            name: formData.name,
+            description: formData.description,
+            dueDate: formData.dueDate,
+            tags: formData.tags,
+            priority: formData.priority
+        };
+
+        setTasks(prev =>
+            prev.map(task => (task.id === taskToEdit.id ? updatedTask : task))
+        );
+
+        setIsEditModalOpen(false);
+        setTaskToEdit(null);
+
+        try {
+            await ReminderService.updateFromEdit(taskToEdit, updatedTask); // CAMBIAR POR EL NUEVO UPDATE, ENVIARLE SOLO LO NECESARIO
+            await loadReminderTasks();
+        } catch (error) {
+            console.error("Error al actualizar recordatorio:", error);
+            await loadReminderTasks();
+        }
+    };
+
+    const handleDelete = async () => {
+        if (userId && taskToDelete) {
+            try {
+                await ReminderService.deleteReminder(taskToDelete); // CAMBIAR POR EL NUEVO DELATE
+            } catch (err) {
+                console.error("Error al eliminar recordatorio en servidor:", err);
+            }
+        }
+        // Actualiza el estado local para eliminar la tarea de la interfaz de usuario
+        setTasks(prev => prev.filter(task => task.id !== taskToDelete));
+        setIsDeleteModalOpen(false);
+        setTaskToDelete(null);
+    };
+    // Función para cerrar el modal de edición, se llama después de guardar o cancelar la edición
+    const handleCloseEditModal = () => {
+        setIsEditModalOpen(false);
+        setTaskToEdit(null);
+    };
+// Función para cerrar el modal de confirmación de eliminación, se llama después de confirmar o cancelar la eliminación
+    const handleCloseDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+        setTaskToDelete(null);
+    };
+    // Función para cargar las tareas de recordatorios desde la API, se llama inicialmente y después de ciertas acciones como edición o eliminación
+    const hasActiveFilters =
+        activeFilters.status !== "all" ||
+        activeFilters.priority !== "all" ||
+        activeFilters.tag.trim() !== "";
+
+    return (
+        <>
+            <button
+                className="todo-drawer-toggle"
+                onClick={() => setIsDrawerOpen(true)}
+                title={isDrawerOpen ? "Cerrar lista de tareas" : "Abrir lista de tareas"}
+                aria-label={isDrawerOpen ? "Cerrar lista de tareas" : "Abrir lista de tareas"}
+                type="button"
+                style={{ display: isDrawerOpen ? 'none' : undefined }}
+            >
+                TO-DO
+            </button>
+            {isDrawerOpen && (
+                <div
+                    className="todo-overlay"
+                    onClick={() => setIsDrawerOpen(false)}
+                />
+            )}
+            <div className={`todolist-panel${isDrawerOpen ? " open" : ""}`}>
+                <ToDoListTagFetcher userId={userId} onDataLoaded={setTasks} />
+
+                <div className="todolist-header">
+                    <h2 className="todolist-title">To-Do List</h2>
+                    <div className="todolist-header-actions">
+                        <ToDoFilterButton onClick={() => setIsFilterModalOpen(true)} />
+                        <AddButton userId={userId} onToDoSaved={loadReminderTasks} availableTags={availableTags} />
+                    </div>
+                </div>
+
+                <div className="todolist-section-label">
+                    TASKS <span className="todolist-task-count">({filteredTasks.length})</span>
+                    {hasActiveFilters && <span className="todolist-active-filter-chip">Filtrado</span>}
+                </div>
+
+                <div className="todolist-tasks">
+                    {filteredTasks.map((task) => {
+                        const priority = getTaskPriority(task);
+                        return (
+                            <RemindCard
+                                key={task.id}
+                                task={task}
+                                priority={priority}
+                                onToggle={toggleTask}
+                                onEdit={editTask}
+                                onDelete={deleteTask}
+                            />
+                        );
+                    })}
+
+                    {filteredTasks.length === 0 && (
+                        <div className="todolist-empty-state">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5">
+                                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" strokeLinecap="round" strokeLinejoin="round" />
+                                <rect x="9" y="3" width="6" height="4" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <p>{!userId ? "Ingresa un ID para cargar recordatorios." : "No hay tareas para los filtros seleccionados."}</p>
+                        </div>
+                    )}
+                </div>
+
+                <TaskEditModal
+                    isOpen={isEditModalOpen}
+                    onClose={handleCloseEditModal}
+                    onSave={handleSave}
+                    task={taskToEdit}
+                    title={taskToEdit ? "Editar Tarea" : "Nueva Tarea"}
+                    availableTags={availableTags}
+                />
+
+                <MessageConfirmation
+                    isOpen={isDeleteModalOpen}
+                    onClose={handleCloseDeleteModal}
+                    onConfirm={handleDelete}
+                    title="Eliminar Tarea"
+                    message="¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer."
+                />
+
+                <ToDoFilterModal
+                    isOpen={isFilterModalOpen}
+                    onClose={() => setIsFilterModalOpen(false)}
+                    onApply={setActiveFilters}
+                    initialFilters={activeFilters}
+                    availableTags={availableTags}
+                />
+            </div>
+        </>
+    );
+}
+
+
+
+export default ToDoList; */}

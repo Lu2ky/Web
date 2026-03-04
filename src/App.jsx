@@ -4,12 +4,46 @@ import {useCallback} from "react";
 import ApiFetcher from "./services/OficialFetcher";
 import Header from "./components/Navegation/Header";
 import Calendar from "./components/Calendar/Calendar";
+<<<<<<< Updated upstream
 import {deleteActivity} from "./services/personalActivitiesService";
 import ToDoList from "./components/TodoList/ToDoList";
 import {PopUpClasses} from "./components/Calendar/PopUpClasses";
 import {getAllActivities} from "./services/personalActivitiesService";
 // Prueba de test CI/CD
 // Transforma los datos de la API al formato que usa la app
+=======
+import ToDoList from "./components/TodoList/ToDoList"; 
+import MessageConfirmation from "./components/Calendar/MessageConfirmation.jsx";
+// Componentes secundarios
+import { PopUpClasses } from "./components/Calendar/PopUpClasses";
+import { PopUpPersonal } from "./components/Calendar/PopUpPersonal";
+import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
+// Servicios para interactuar con la API 
+// Calendario
+// Horario oficial 
+import OficialFetcher from "./services/OficialFetcher";
+import { getCategories } from "./services/categoriesService";
+
+// Actividades personales
+import PersonalFetcher, { deletePersonalActivity } from "./services/PersonalFetcher";
+
+
+// Funciones para normalizar datos de la API 
+
+// de número a día de la semana
+const dayMap = {
+	1: "Lunes",
+	2: "Martes",
+	3: "Miércoles",
+	4: "Jueves",
+	5: "Viernes",
+	6: "Sábado",
+	7: "Domingo"
+};
+
+//Normalizar Horario oficial
+
+>>>>>>> Stashed changes
 function normalizeApiData(apiData) {
 	const dayMap = {
 		// de número a día de la semana

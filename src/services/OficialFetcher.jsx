@@ -1,5 +1,14 @@
+<<<<<<< Updated upstream
 import React, {useEffect, useState} from "react";
 
+=======
+import { useEffect, useState } from "react";
+import LoadingModal from "./loadingModal";
+//import dotenv from "dotenv";
+
+//dotenv.config();
+//Prueba local runner
+>>>>>>> Stashed changes
 // Componente para cargar datos de la API y pasarlos al padre
 // onDataLoaded es una función que se llama con los datos cargados,
 // userId es el ID del usuario para cargar su horario

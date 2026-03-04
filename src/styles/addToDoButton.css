@@ -1,0 +1,227 @@
+/* ---- Overlay ---- */
+.todo-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: todoFadeIn 0.25s ease;
+    z-index: 200;
+}
+
+/* ---- Contenedor Modal ---- */
+.todo-modal-container {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    padding: 2.2rem;
+    border-radius: 1.2rem;
+    background: white;
+    border: 2px solid transparent;
+    background-image:
+        linear-gradient(white, white),
+        linear-gradient(135deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    animation: todoSlideUp 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.todo-modal-container h2 {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 0.3rem 0;
+}
+
+/* ---- Botón cerrar ---- */
+.todo-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.todo-modal-close:hover {
+    color: #ff006e;
+}
+
+/* ---- Inputs ---- */
+.todo-modal-container input,
+.todo-modal-container textarea,
+.todo-modal-container select {
+    padding: 0.75rem;
+    border-radius: 0.7rem;
+    border: 1px solid #e5e7eb;
+    font-size: 0.9rem;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.todo-modal-container input:focus,
+.todo-modal-container textarea:focus,
+.todo-modal-container select:focus {
+    background-color: white;
+    border-color: #c026d3;
+    box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.15);
+    outline: none;
+}
+
+.todo-modal-container textarea {
+    resize: none;
+    height: 80px;
+}
+
+.todo-modal-container label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    margin-top: 0.2rem;
+}
+
+/* ---- Tags header con controles +/- ---- */
+.todo-tags-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.2rem;
+}
+
+.todo-tags-header label {
+    margin: 0;
+}
+
+.todo-tags-controls {
+    display: flex;
+    gap: 4px;
+}
+
+.todo-tag-control-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid #c026d3;
+    background: white;
+    color: #c026d3;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.todo-tag-control-btn:hover {
+    background: #c026d3;
+    color: white;
+}
+
+/* ---- Error ---- */
+.todo-error-message {
+    color: #ff006e;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* ---- Preview hora ---- */
+.todo-hour-preview {
+    font-size: 0.82rem;
+    color: #6b7280;
+    margin: -0.3rem 0 0 0;
+}
+
+/* ---- Preview tags ---- */
+.todo-tags-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.todo-tag-chip {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 3px 12px;
+    border-radius: 16px;
+    background-color: #faf5ff;
+    color: #9333ea;
+    border: 1px solid #e9d5ff;
+}
+
+/* ---- Acciones ---- */
+.todo-modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.8rem;
+}
+
+.todo-cancel-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 0.8rem;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.todo-cancel-btn:hover {
+    background: #f3f4f6;
+}
+
+.todo-save-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 0.8rem;
+    border: none;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.todo-save-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.todo-save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ---- Animaciones ---- */
+@keyframes todoFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes todoSlideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

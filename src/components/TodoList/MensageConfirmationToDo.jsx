@@ -1,12 +1,12 @@
-import React from 'react';
-import '../styles/confirmacionMessage.css';
 
-export default function MessageConfirmation({ 
+import '../../styles/ConfirmMessage.css';
+
+export default function MessageConfirmationToDo({ 
     isOpen, 
     onClose, 
     onConfirm,
-    title = "¿Estás seguro de eliminar esto?",
-    description = "Esta acción no se puede deshacer. La actividad se borrará permanentemente de tu horario.",
+    title = "¿Estás seguro de eliminar este recordatorio?",
+    description = "Esta acción no se puede deshacer. El recordatorio se borrará permanentemente de tu to do list.",
     confirmText = "Sí, eliminar",
     cancelText = "No, mantener"
 }) {
@@ -44,7 +44,13 @@ export default function MessageConfirmation({
                 <div className="confirmacion-message-content">
                     {/* Botón de cierre */}
                     <div className="confirmacion-message-close-container">
-                        <button className="confirmacion-message-close-btn" onClick={onClose}>
+                        <button
+                            className="confirmacion-message-close-btn"
+                            onClick={onClose}
+                            title="Cerrar"
+                            aria-label="Cerrar"
+                            type="button"
+                        >
                             <CloseIcon />
                         </button>
                     </div>

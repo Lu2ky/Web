@@ -1,0 +1,174 @@
+/* ---- Overlay ---- */
+.filter-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: filterFadeIn 0.25s ease;
+    z-index: 200;
+}
+
+/* ---- Contenedor ---- */
+.filter-modal-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 1.8rem;
+    border-radius: 1.2rem;
+    background: white;
+    border: 2px solid transparent;
+    background-image:
+        linear-gradient(white, white),
+        linear-gradient(135deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: filterSlideUp 0.3s ease;
+    max-height: 80vh;
+}
+
+/* ---- Header ---- */
+.filter-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.filter-modal-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1f2937;
+}
+
+.filter-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.filter-modal-close:hover {
+    color: #ff006e;
+}
+
+/* ---- Cuerpo ---- */
+.filter-modal-body {
+    overflow-y: auto;
+    max-height: 300px;
+    padding-right: 4px;
+}
+
+.filter-modal-empty {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    padding: 20px 0;
+}
+
+/* ---- Grid de etiquetas ---- */
+.filter-tags-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* ---- Botón de etiqueta ---- */
+.filter-tag-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1.5px solid #e5e7eb;
+    background: #f9fafb;
+    color: #4b5563;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-tag-btn:hover {
+    border-color: #c026d3;
+    color: #c026d3;
+    background: #fdf4ff;
+}
+
+/* Etiqueta seleccionada */
+.filter-tag-btn--active {
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    border-color: transparent;
+}
+
+.filter-tag-btn--active:hover {
+    opacity: 0.9;
+    color: white;
+}
+
+/* ---- Contador ---- */
+.filter-modal-count {
+    font-size: 0.82rem;
+    color: #9333ea;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+}
+
+/* ---- Acciones ---- */
+.filter-modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.filter-clear-btn {
+    flex: 1;
+    padding: 0.7rem;
+    border-radius: 0.8rem;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-clear-btn:hover {
+    background: #f3f4f6;
+}
+
+.filter-apply-btn {
+    flex: 1;
+    padding: 0.7rem;
+    border-radius: 0.8rem;
+    border: none;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-apply-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* ---- Animaciones ---- */
+@keyframes filterFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes filterSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
