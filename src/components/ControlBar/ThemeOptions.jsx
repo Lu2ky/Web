@@ -12,9 +12,9 @@ export const THEME_OPTIONS = [
             colors: ["#2a1b3f", "#4B2E83", "#7a4fa3", "#7d2b9b", "#C77BB6", "#E7B3CF", "#F6E8C3"]
         },
         {
-            id: "palette02",
+            id: "palette02",                            
             name: "Cyber Neón",
-            colors: ["#975ACF", "#8EDF5F", "#201D30", "#ED7843", "#5649B5", "#E2D2E0", "#aaaaaa"]
+            colors: ["#975ACF", "#8EDF5F", "#201D30", "#aaaaaa", "#5649B5", "#E2D2E0", "#ff7d41"]
         },
         {
             id: "palette03",
