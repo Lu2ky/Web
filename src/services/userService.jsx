@@ -184,36 +184,76 @@ export async function updateReminderAnticipation(userId, minutes) {
         return { success: false, message };
     }
 
-    try {
-        const res = await fetch(UPDATE_REMINDER_ANTICIPATION_ENDPOINT, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                userId: userId,
-                idUsuario: userId,
-                anticipationMinutes: validatedMinutes,
-                minutosAnticipacion: validatedMinutes
-            }),
-        });
+    // Convert minutes to TIME format (HH:MM:SS) as expected by database
+    const hours = Math.floor(validatedMinutes / 60);
+    const mins = validatedMinutes % 60;
+    const timeFormat = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
 
-        const contentType = res.headers.get("content-type") || "";
-        const body = contentType.includes("application/json") ? await res.json() : await res.text();
-
-        if (!res.ok) {
-            const message = typeof body === "string" ? body : body?.message;
-            const error = `HTTP ${res.status}${message ? ` - ${message}` : ""}`;
-            console.error("Error updating reminder anticipation:", error);
-            return { success: false, message: error };
+    // Helper to read persisted value
+    const normalizeTime = (value) => {
+        if (!value) return null;
+        if (typeof value === 'string' && value.includes(':')) {
+            const parts = value.split(':');
+            const h = parseInt(parts[0]) || 0;
+            const m = parseInt(parts[1]) || 0;
+            return h * 60 + m;
         }
+        return parseInt(value) || 0;
+    };
 
-        return typeof body === "string" ? { success: true, message: body } : body;
-    } catch (error) {
-        const message = error?.message || String(error);
-        console.error("Error updating reminder anticipation:", message);
-        return { success: false, message };
+    const readPersistedAnticipation = async () => {
+        const refreshed = await getUserData(userId);
+        const normalized = Array.isArray(refreshed) ? refreshed[0] : refreshed;
+        return normalizeTime(normalized?.antelacionNotis || normalized?.anticipationMinutes || normalized?.minutosAnticipacion);
+    };
+
+    // Try different payload variants
+    const payloadVariants = [
+        { idUsuario: userId, antelacionNotis: timeFormat },
+        { userId: userId, antelacionNotis: timeFormat },
+        { idUsuario: userId, anticipationMinutes: validatedMinutes },
+        { userId: userId, anticipationMinutes: validatedMinutes },
+        { idUsuario: userId, minutosAnticipacion: validatedMinutes }
+    ];
+
+    const methods = ["PUT", "POST"];
+    let lastError = null;
+
+    for (const method of methods) {
+        for (const payload of payloadVariants) {
+            try {
+                const res = await fetch(UPDATE_REMINDER_ANTICIPATION_ENDPOINT, {
+                    method: method,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const contentType = res.headers.get("content-type") || "";
+                const body = contentType.includes("application/json") ? await res.json() : await res.text();
+
+                if (!res.ok) {
+                    const message = typeof body === "string" ? body : body?.message;
+                    lastError = `HTTP ${res.status}${message ? ` - ${message}` : ""}`;
+                    continue;
+                }
+
+                // Verify persistence
+                const persistedMinutes = await readPersistedAnticipation();
+                if (persistedMinutes === validatedMinutes) {
+                    return typeof body === "string" ? { success: true, message: body } : body;
+                }
+
+                lastError = `La API respondió éxito pero el valor no quedó persistido (esperado: ${validatedMinutes}, actual: ${persistedMinutes})`;
+            } catch (error) {
+                lastError = error?.message || String(error);
+            }
+        }
     }
+
+    console.error("Error updating reminder anticipation:", lastError);
+    return { success: false, message: lastError || "No se pudo actualizar el tiempo de anticipación" };
 }
 
 export default { getUserData, updateUserEmail, changePassword, updateReminderAnticipation };

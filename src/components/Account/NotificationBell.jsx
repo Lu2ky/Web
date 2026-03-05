@@ -7,7 +7,7 @@ export default function NotificationBell({ userId }) {
     const [notifications, setNotifications] = useState([]);
     const containerRef = useRef(null);
 
-    // load notifications when userId changes
+    // carga notis cada 10 segundos
     useEffect(() => {
         async function load() {
             if (!userId) {
@@ -22,7 +22,15 @@ export default function NotificationBell({ userId }) {
                 setNotifications([]);
             }
         }
+        
+        // Load immediately
         load();
+        
+        // Set up interval to reload every 10 seconds
+        const intervalId = setInterval(load, 10000);
+        
+        // Cleanup interval on unmount or when userId changes
+        return () => clearInterval(intervalId);
     }, [userId]);
 
     // close dropdown on outside click
@@ -36,20 +44,7 @@ export default function NotificationBell({ userId }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const toggle = async () => {
-        const wasOpen = isOpen;
-        setIsOpen((prev) => !prev);
-        
-        // Reload notifications when opening the dropdown
-        if (!wasOpen && userId) {
-            try {
-                const items = await NotificationService.getNotifications(userId);
-                setNotifications(Array.isArray(items) ? items : []);
-            } catch (err) {
-                console.error("Error recargando notificaciones:", err);
-            }
-        }
-    };
+    const toggle = () => setIsOpen((prev) => !prev);
 
     const unreadCount = notifications.filter(n => !n.read && !n.completed).length;
 
