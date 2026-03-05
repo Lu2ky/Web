@@ -36,7 +36,20 @@ export default function NotificationBell({ userId }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const toggle = () => setIsOpen((prev) => !prev);
+    const toggle = async () => {
+        const wasOpen = isOpen;
+        setIsOpen((prev) => !prev);
+        
+        // Reload notifications when opening the dropdown
+        if (!wasOpen && userId) {
+            try {
+                const items = await NotificationService.getNotifications(userId);
+                setNotifications(Array.isArray(items) ? items : []);
+            } catch (err) {
+                console.error("Error recargando notificaciones:", err);
+            }
+        }
+    };
 
     const unreadCount = notifications.filter(n => !n.read && !n.completed).length;
 
