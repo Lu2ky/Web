@@ -42,7 +42,8 @@ function getColorForSubject(subjectName) {
 		hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
 	}
 	return colorPalette[Math.abs(hash) % colorPalette.length];
-}
+} 
+
 // Transforma los datos de la API al formato que usa la app
 function normalizeApiData(apiData) {
 	const dayMap = {
@@ -65,7 +66,7 @@ function normalizeApiData(apiData) {
 		start_time: item.times[0].slice(0, 5),
 		end_time: item.times[1].slice(0, 5),
 		day: dayMap[item.times[2]] || "Lunes",
-		etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
+		etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) 
 		// Datos para PopUp
 		campus: item.Campus,
 		credits: item.Credits?.Float64 || 0,
