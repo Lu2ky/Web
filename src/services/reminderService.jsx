@@ -112,11 +112,14 @@ class ReminderService {
 			}
 		}
 
+		// Sólo leer campos explícitamente relacionados con el estado de completado.
+		// Se excluye reminder.status deliberadamente: ese campo suele contener
+		// códigos numéricos de tipo/estado (ej. 1 = activo) que no indican
+		// "completado" y provocan falsos positivos al comparar rawCompleted === 1.
 		const rawCompleted =
-			reminder.completed ?? 
-			reminder.done ?? 
-			reminder.isDone ?? 
-			reminder.status ?? 
+			reminder.completed ??
+			reminder.done ??
+			reminder.isDone ??
 			reminder.B_completed ??
 			reminder.B_estado;
 
