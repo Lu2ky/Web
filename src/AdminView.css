@@ -8,6 +8,11 @@
     overflow: hidden;
 }
 
+.adminView__Header {
+    flex-shrink: 0;
+    background: white;
+}
+
 .adminView__sidebar {
     display: flex;
     flex-direction: column;
