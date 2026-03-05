@@ -18,10 +18,10 @@ const defaultFilters = {
 };
 
 const normalizePriority = value => {
-    const normalized = String(value || "").toLowerCase();
-    if (normalized === "high" || normalized === "alta") return "alta";
-    if (normalized === "medium" || normalized === "media") return "media";
-    if (normalized === "low" || normalized === "baja") return "baja";
+    const normalized = String(value || "").trim().toLowerCase();
+    if (normalized === "1" || normalized === "high" || normalized === "alta") return "alta";
+    if (normalized === "2" || normalized === "medium" || normalized === "media") return "media";
+    if (normalized === "3" || normalized === "low" || normalized === "baja") return "baja";
     return "";
 };
 

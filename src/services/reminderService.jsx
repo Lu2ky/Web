@@ -60,11 +60,19 @@ class ReminderService {
 	}
 
 	static normalizePriority(value) {
-		const normalized = String(value ?? "").toLowerCase();
-		if (normalized === "high" || normalized === "alta") return "alta";
-		if (normalized === "medium" || normalized === "media") return "media";
-		if (normalized === "low" || normalized === "baja") return "baja";
+		const normalized = String(value ?? "").trim().toLowerCase();
+		if (normalized === "1" || normalized === "high" || normalized === "alta") return "alta";
+		if (normalized === "2" || normalized === "medium" || normalized === "media") return "media";
+		if (normalized === "3" || normalized === "low" || normalized === "baja") return "baja";
 		return "";
+	}
+
+	static priorityToNumber(value) {
+		const normalized = this.normalizePriority(value);
+		if (normalized === "alta") return 1;
+		if (normalized === "media") return 2;
+		if (normalized === "baja") return 3;
+		return null;
 	}
 
 	static normalizeReminder(reminder, index) {
@@ -320,9 +328,9 @@ class ReminderService {
 
 	static async updatePriority(reminderId, priority) {
 		if (!reminderId) return;
-		const normalizedPriority = this.normalizePriority(priority);
+		const priorityNumber = this.priorityToNumber(priority);
 
-		const P_prioridad = normalizedPriority;
+		const P_prioridad = priorityNumber;
 		const P_idToDo = reminderId;
 
 		return this.postUpdate(
@@ -410,18 +418,19 @@ class ReminderService {
 /* Add a new reminder via POST */
 static async addReminder(userId, name, description, dueDate, priority, tags = []) {
 	if (!userId) return;
+	const priorityNumber = this.priorityToNumber(priority);
 	
 	const payload = {
-		P_usuario: userId,
+		P_usuario: 7,
 		P_nombre: name || "",
 		P_descripcion: description || "",
 		P_fecha: this.toDateTimeString(dueDate),
-		P_prioridad: priority || "",
-		P_tag1: "",
-		P_tag2: "",
-		P_tag3: "",
-		P_tag4: "",
-		P_tag5: ""
+		P_prioridad: priorityNumber ?? 2,
+		P_tag1: null,
+		P_tag2: null,
+		P_tag3: null,
+		P_tag4: null,
+		P_tag5: null
 	};
 	
 	// include up to 5 tags
