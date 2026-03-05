@@ -1,8 +1,8 @@
-import ParametersButton from "./ParametersButton";
-import ImportButton from "./ImportButton";
-import PrivilegesButton from "./PrivilegesButton";
-import OverviewAdmin from "./OverviewAdmin";
-import "../../Styles/AdminView.css";
+import ParametersButton from "./components/Account/JSX ViewAdmin/ParametersButton";
+import ImportButton from "./components/Account/JSX ViewAdmin/ImportButton";
+import PrivilegesButton from "./components/Account/JSX ViewAdmin/PrivilegesButton";
+import OverviewAdmin from "./components/Account/JSX ViewAdmin/OverviewAdmin";
+import "./AdminView.css";
 
 function AdminView() {
     return (

@@ -1,5 +1,5 @@
 import { useState} from "react";
-import "../../styles/privilegesButton.css";
+import "../CSS ViewAdmin/PrivilegesButton.css";
 
 function PrivilegesButton() {
     const [isOpen, setIsOpen] = useState(false);
