@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import '../../styles/addButton.css';
+import { getTagsByUser } from '../../services/tagsService';
 
 export default function TaskEditModal({
     isOpen,
@@ -10,6 +11,7 @@ export default function TaskEditModal({
     onSave,
     task = null,
     title = "Editar Tarea",
+    userId,
     availableTags = []
 }) {
     const normalizeTags = (tags) => {
@@ -34,6 +36,7 @@ export default function TaskEditModal({
     const [dateText, setDateText] = useState('');
     const [timeText, setTimeText] = useState('');
     const [error, setError] = useState('');
+    const [fetchedTags, setFetchedTags] = useState([]);
 
     const stringToDate = (dateValue) => {
         if (!dateValue) return new Date();
@@ -153,8 +156,11 @@ export default function TaskEditModal({
                 tags: normalizeTags(task?.tags) || [],
                 priority: task?.priority || ''
             });
+            if (userId) {
+                getTagsByUser(userId).then(setFetchedTags).catch(() => setFetchedTags([]));
+            }
         }
-    }, [isOpen, task]);
+    }, [isOpen, task, userId]);
 
     if (!isOpen) return null;
 
@@ -206,7 +212,8 @@ export default function TaskEditModal({
         setShowCalendar(false);
     };
 
-    const filteredTags = availableTags.filter(t =>
+    const tagsSource = fetchedTags.length > 0 ? fetchedTags : availableTags;
+    const filteredTags = tagsSource.filter(t =>
         t.label.toLowerCase().includes(tagLabel.toLowerCase())
     );
 
