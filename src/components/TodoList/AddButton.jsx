@@ -2,6 +2,7 @@ import { useState } from "react";
 import "../../styles/addButton.css";
 import { saveToDo } from "../../services/todoService"; // fallback local
 import ReminderService from "../../services/reminderService";
+import { addNotification } from "../../services/notificationService";
 import { getUserData } from "../../services/userService";
 import TaskAddModal from "./TaskAddModal";
 
@@ -39,7 +40,21 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
                     userId;
                 console.log('[AddButton] idUsuario resolved:', idUsuario);
 
-                await ReminderService.addReminder(idUsuario, name, description, endDay, priority, tagLabels, userId);
+                await ReminderService.addReminder(idUsuario, name, description, endDay, priority, tagLabels, userId).then(async (result) => {
+                    const newId = result?.data?.InsertedId;
+                    if (newId) {
+                        try {
+                            await addNotification({
+                                todoId: newId,
+                                name,
+                                description,
+                                issueDate: new Date().toISOString(),
+                            });
+                        } catch (notifErr) {
+                            console.warn("[AddButton] Error al agregar notificación:", notifErr);
+                        }
+                    }
+                });
             } catch (err) {
                 console.error("Error al agregar recordatorio en servidor:", err);
                 saveToDo({ title: name, description, endDay: endDay.toISOString().split("T")[0], priority, tag: tagLabels });

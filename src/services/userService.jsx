@@ -92,10 +92,14 @@ export async function updateUserEmail(userId, newEmail) {
         currentTimeMute = "00:00:00";
     }
 
+    const currentPhone = currentUser?.cellphoneDisplay ? currentUser.cellphoneDisplay.trim() : null;
+    console.log("Current telefono:", currentPhone);
+
     const payload = {
         idUsuario: actualUserId,
         correo: newEmail.trim(),
-        tiempoMute: currentTimeMute
+        tiempoMute: currentTimeMute,
+        telefono: currentPhone
     };
 
     try {
@@ -223,10 +227,14 @@ export async function updateReminderAnticipation(userId, minutes) {
     const currentEmail = (currentUser?.correo || currentUser?.email || "").trim();
     console.log("Current email:", currentEmail);
 
+    const currentPhone = currentUser?.cellphoneDisplay ? currentUser.cellphoneDisplay.trim() : null;
+    console.log("Current telefono:", currentPhone);
+
     const payload = {
         idUsuario: actualUserId,
         correo: currentEmail,
-        tiempoMute: tiempoMute
+        tiempoMute: tiempoMute,
+        telefono: currentPhone
     };
 
     try {
