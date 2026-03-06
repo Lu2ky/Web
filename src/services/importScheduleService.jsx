@@ -61,24 +61,33 @@ function normalizeRows(rawRows) {
 }
 
 /**
- * Envía el horario parseado a la API.
+ * Envía el horario parseado a la API, fila por fila.
  * @param {Array} rawRows - Resultado de parseExcelFile (array de arrays).
  */
 export async function importSchedule(rawRows) {
-  const payload = normalizeRows(rawRows);
+  const rows = normalizeRows(rawRows);
 
-  console.log('Payload importar horario:', JSON.stringify(payload, null, 2));
+  console.log('Filas a importar:', rows.length);
 
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const results = [];
+  for (const row of rows) {
+    console.log('Enviando fila:', JSON.stringify(row, null, 2));
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Error ${response.status}: ${text}`);
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(row),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Error ${response.status} en fila (${row.nrc} - ${row.nombreCurso}): ${text}`);
+    }
+
+    const data = await response.json().catch(() => ({}));
+    results.push(data);
   }
 
-  return response.json().catch(() => ({}));
+  return results;
 }
+
