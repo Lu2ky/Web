@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import LoadingModal from "./loadingModal";
+import { getUserData } from "./userService";
 
 // Mapa para convertir números de día a nombres de días
 const dayMap = {
@@ -56,6 +57,18 @@ function formatTimeWithColons(time) {
   }
   
   return formatted;
+}
+
+async function resolveIdUsuario(userId) {
+  const userData = await getUserData(userId);
+  const rawUser = Array.isArray(userData) ? userData[0] : userData;
+  const idUsuario = rawUser?.idUsuario ?? rawUser?.N_idUsuario;
+
+  if (!idUsuario) {
+    throw new Error("No se pudo resolver idUsuario desde userService");
+  }
+
+  return idUsuario;
 }
 
 /**
@@ -196,11 +209,11 @@ export const addPersonalActivity = async (userId, activityData) => {
 
     const formattedDateStart = formatApiDateTime(activityData.dateStart);
     const formattedDateEnd = formatApiDateTime(activityData.dateEnd);
-    const activityId = activityData.id ?? activityData.id_course ?? -1;
+    const idUsuario = await resolveIdUsuario(userId);
 
     // Preparar los datos en el formato que espera la API
     const payload = {
-      id_user: userId, // Reemplazar con userId cuando esté disponible
+      id_user: idUsuario,
       id_academic_per: 1,
       subject_name: activityData.title,
       description: activityData.description || "",
@@ -296,10 +309,11 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
 
     const formattedDateStart = formatApiDateTime(updates.dateStart);
     const formattedDateEnd = formatApiDateTime(updates.dateEnd);
+    const idUsuario = await resolveIdUsuario(userId);
 
     // Construir payload idéntico a addPersonalActivity, solo cambiar activityData por updates y agregar IdPersonalSchedule
     const payload = {
-      id_user: userId,
+      id_user: idUsuario,
       id_course: activityId,
       subject_name: updates.title,
       description: updates.description || "",
@@ -335,3 +349,4 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
 };
 
 export default PersonalFetcher;
+
