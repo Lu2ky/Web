@@ -11,7 +11,7 @@ async function LDAPservice(userId, password) {
     try {
         console.log("[LDAPservice] Validating user:", userId);
         console.log("[LDAPservice] URL:", baseUrl);
-        
+        console.log(baseUrl)
         if (!baseUrl) {
             console.error("[LDAPservice] baseUrl is undefined - VITE_API_URL_LDPA not configured");
             return null;
