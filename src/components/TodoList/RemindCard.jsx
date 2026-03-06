@@ -90,11 +90,16 @@ function RemindCard({ task, priority = "", onToggle, onEdit, onDelete }) {
 
                 {task.tags && task.tags.length > 0 && (
                     <div className="remindcard-tags">
-                        {task.tags.map((tag, index) => (
-                            <span key={index} className={`remindcard-tag ${tag.type}`}>
-                                {tag.label}
-                            </span>
-                        ))}
+                        {task.tags.map((tag, index) => {
+                            const label = typeof tag === "string" ? tag : (tag?.label ?? tag?.name ?? "");
+                            const type = typeof tag === "string" ? "custom" : (tag?.type ?? "custom");
+                            if (!label) return null;
+                            return (
+                                <span key={`${label}-${index}`} className={`remindcard-tag ${type}`}>
+                                    {label}
+                                </span>
+                            );
+                        })}
                     </div>
                 )}
             </div>

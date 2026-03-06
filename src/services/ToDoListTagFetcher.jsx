@@ -51,9 +51,16 @@ function ToDoListTagFetcher({ onDataLoaded, userId }) {
                     ? json
                     : [];
                 const normalizedTags = rawData.map(normalizeTag).filter(Boolean);
+                // Deduplicate by id to prevent React key collisions
+                const seen = new Set();
+                const dedupedTags = normalizedTags.filter(t => {
+                    if (seen.has(t.id)) return false;
+                    seen.add(t.id);
+                    return true;
+                });
 
                 if (onDataLoaded) {
-                    onDataLoaded(normalizedTags);
+                    onDataLoaded(dedupedTags);
                 }
             } catch (error) {
                 console.error("Error al cargar tags del To-Do:", error);

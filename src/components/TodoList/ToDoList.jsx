@@ -263,6 +263,7 @@ function ToDoList({ userId = "" }) {
                     onSave={handleSave}
                     task={taskToEdit}
                     title={taskToEdit ? "Editar Tarea" : "Nueva Tarea"}
+                    userId={userId}
                     availableTags={availableTags}
                 />
 

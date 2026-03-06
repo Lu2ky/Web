@@ -395,10 +395,13 @@ class ReminderService {
 		}
 
 		// ── Tags ──
+		// Exclude synthetic priority tags (type: "priority-*") — they are derived
+		// from the priority field and must not be written back as real backend tags.
 		const extractLabels = (tags) =>
-			(Array.isArray(tags) ? tags : []).map(t =>
-				typeof t === "string" ? t : (t?.label ?? t?.name ?? "")
-			).filter(Boolean).sort();
+			(Array.isArray(tags) ? tags : [])
+				.filter(t => typeof t !== "string" ? !String(t?.type ?? "").startsWith("priority-") : true)
+				.map(t => typeof t === "string" ? t : (t?.label ?? t?.name ?? ""))
+				.filter(Boolean).sort();
 
 		const prevLabels = extractLabels(previousReminder.tags);
 		const nextLabels = extractLabels(updatedReminder.tags);
@@ -419,12 +422,13 @@ class ReminderService {
 	}
 
 /* Add a new reminder via POST */
-static async addReminder(userId, name, description, dueDate, priority, tags = []) {
+static async addReminder(userId, name, description, dueDate, priority, tags = [], codigoUsuario = null) {
 	if (!userId) return;
 	const priorityNumber = this.priorityToNumber(priority);
 	
 	const payload = {
-		P_usuario: 7,
+		P_usuario: userId,
+		P_codigo_usuario: codigoUsuario ?? null,
 		P_nombre: name || "",
 		P_descripcion: description || "",
 		P_fecha: this.toDateTimeString(dueDate),
@@ -436,10 +440,10 @@ static async addReminder(userId, name, description, dueDate, priority, tags = []
 		P_tag5: null
 	};
 	
-	// include up to 5 tags
+	// include up to 5 tags, null for empty slots
 	if (Array.isArray(tags)) {
 		tags.slice(0, 5).forEach((t, ix) => {
-			payload[`P_tag${ix + 1}`] = t || "";
+			payload[`P_tag${ix + 1}`] = t || null;
 		});
 	}
 
@@ -477,15 +481,15 @@ static async updateTags(reminderId, tags = []) {
 	if (!reminderId) return;
 	const payload = { 
 		P_idToDo: reminderId,
-		P_tag1: "",
-		P_tag2: "",
-		P_tag3: "",
-		P_tag4: "",
-		P_tag5: ""
+		P_tag1: null,
+		P_tag2: null,
+		P_tag3: null,
+		P_tag4: null,
+		P_tag5: null
 	};
 	if (Array.isArray(tags)) {
 		tags.slice(0, 5).forEach((t, ix) => {
-			payload[`P_tag${ix + 1}`] = t || "";
+			payload[`P_tag${ix + 1}`] = t || null;
 		});
 	}
 	return this.postUpdate(

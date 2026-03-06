@@ -2,6 +2,7 @@ import { useState } from "react";
 import "../../styles/addButton.css";
 import { saveToDo } from "../../services/todoService"; // fallback local
 import ReminderService from "../../services/reminderService";
+import { getUserData } from "../../services/userService";
 import TaskAddModal from "./TaskAddModal";
 
 function AddButton({ onToDoSaved, userId, availableTags = [] }) {
@@ -26,7 +27,19 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
 
         if (userId) {
             try {
-                await ReminderService.addReminder(userId, name, description, endDay, priority, tagLabels);
+                // Obtain the internal user ID from the API before adding the reminder
+                const userData = await getUserData(userId);
+                const rawUser = Array.isArray(userData) ? userData[0] : userData;
+                const idUsuario =
+                    rawUser?.N_idUsuario ??
+                    rawUser?.idUsuario ??
+                    rawUser?.id_user ??
+                    rawUser?.ID_USER ??
+                    rawUser?.id ??
+                    userId;
+                console.log('[AddButton] idUsuario resolved:', idUsuario);
+
+                await ReminderService.addReminder(idUsuario, name, description, endDay, priority, tagLabels, userId);
             } catch (err) {
                 console.error("Error al agregar recordatorio en servidor:", err);
                 saveToDo({ title: name, description, endDay: endDay.toISOString().split("T")[0], priority, tag: tagLabels });
@@ -53,6 +66,7 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
                 onSave={handleAddSave}
+                userId={userId}
                 availableTags={availableTags}
             />
         </>

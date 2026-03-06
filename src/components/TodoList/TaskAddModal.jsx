@@ -3,12 +3,14 @@ import { createPortal } from 'react-dom';
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import '../../styles/addButton.css';
+import { getTagsByUser } from '../../services/tagsService';
 
 export default function TaskAddModal({
     isOpen,
     onClose,
     onSave,
     title = "Nueva Tarea",
+    userId,
     availableTags = []
 }) {
     const [formData, setFormData] = useState({
@@ -28,6 +30,7 @@ export default function TaskAddModal({
     const [dateText, setDateText] = useState('');
     const [timeText, setTimeText] = useState('');
     const [error, setError] = useState('');
+    const [fetchedTags, setFetchedTags] = useState([]);
 
     const stringToDate = (dateValue) => {
         if (!dateValue) return new Date();
@@ -147,8 +150,11 @@ export default function TaskAddModal({
                 tags: [],
                 priority: ''
             });
+            if (userId) {
+                getTagsByUser(userId).then(setFetchedTags).catch(() => setFetchedTags([]));
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, userId]);
 
     if (!isOpen) return null;
 
@@ -203,7 +209,8 @@ export default function TaskAddModal({
         setShowCalendar(false);
     };
 
-    const filteredTags = availableTags.filter(t =>
+    const tagsSource = fetchedTags.length > 0 ? fetchedTags : availableTags;
+    const filteredTags = tagsSource.filter(t =>
         t.label.toLowerCase().includes(tagLabel.toLowerCase())
     );
 
