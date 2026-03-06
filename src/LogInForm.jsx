@@ -8,7 +8,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Logo from './assets/logo.png';
 import { FaUser } from "react-icons/fa"; //  npm install react-icons --save
 import { FaLock } from "react-icons/fa";
-import Image from './assets/ImageLogIn.jpg';
+import Image from './assets/ImageLogIn.jpeg';
 
 // Hook de react
 import { useState } from 'react';

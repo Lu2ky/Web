@@ -6,6 +6,7 @@ import LogInForm from "./LogInForm";
 import App from "./App"; 
 import RecoverPassword from "./RecoverPassword";
 import AdminView from "./AdminView";
+import RestorePassword from "./RestorePassword";
 
 import "./index.css";
 // Renderizado de la aplicación con rutas definidas, solo se puede una ruta a la vez 
@@ -20,6 +21,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 			<Route path="/RecoverPassword" element={<RecoverPassword />} />
 			<Route path="/App/:userId" element={<App />} />
 			<Route path="/AdminView" element={<AdminView />} />
+			<Route path="/RestorePassword" element={<RestorePassword />} />
+			 {/* Ruta para manejar cualquier ruta no definida, redirigiendo al login */}
+			<Route path="*" element={<LogInForm />} />
 		</Routes>
 	</BrowserRouter>
 );
