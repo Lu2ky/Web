@@ -1,6 +1,4 @@
-import env from '../env.js';
-
-const UPDATE_COMMENT_ENDPOINT = env('VITE_API_UPDATE_COMMENT');
+const UPDATE_COMMENT_ENDPOINT = import.meta.env.VITE_API_UPDATE_COMMENT;
 
 /**
  * Update an existing comment text.

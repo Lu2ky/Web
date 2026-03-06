@@ -1,5 +1,3 @@
-import env from '../env.js';
-
 // Use environment variables so the base host can change without recompiling
 const REMINDERS_TAGS_API_BASE = import.meta.env.VITE_API_URL_REMINDERS_TAGS_USER;
 const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER;

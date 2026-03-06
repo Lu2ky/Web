@@ -1,6 +1,4 @@
-import env from '../env.js';
-
-const ADD_COMMENT_ENDPOINT = env('VITE_API_ADD_COMMENT');
+const ADD_COMMENT_ENDPOINT = import.meta.env.VITE_API_ADD_COMMENT;
 
 const normalizeId = (value) => {
     if (value === null || value === undefined || value === "") return null;

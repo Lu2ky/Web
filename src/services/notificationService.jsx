@@ -4,11 +4,9 @@
 // sophisticated notification API, this file can be replaced or
 // augmented accordingly.
 
-import env from '../env.js';
-
-const NOTIFICATIONS_BASE = env('VITE_API_URL_NOTIFICATIONS') || "";
-const ADD_NOTIFICATION_ENDPOINT = env('VITE_API_ADD_NOTIFICATION');
-const ADD_EMAIL_ENDPOINT = env('VITE_API_ADD_EMAIL');
+const NOTIFICATIONS_BASE = import.meta.env.VITE_API_URL_NOTIFICATIONS || "";
+const ADD_NOTIFICATION_ENDPOINT = import.meta.env.VITE_API_ADD_NOTIFICATION;
+const ADD_EMAIL_ENDPOINT = import.meta.env.VITE_API_ADD_EMAIL;
 
 /**
  * Retrieve a list of notifications for the given user.

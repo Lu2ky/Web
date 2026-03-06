@@ -7,8 +7,8 @@ const BASE_HOST = TAGS_USER_URL
     : "";
 
 const TAGS_USER_AND_COURSE_URL = `${BASE_HOST}/tags-by-user-and-course/`;
-const TAGS_REMINDER_URL = env('VITE_API_URL_TAGS_REMINDER');
-const DELETE_TAGS_REMINDER_URL = env('VITE_API_DELETE_TAGS_REMINDER');
+const TAGS_REMINDER_URL = import.meta.env.VITE_API_URL_TAGS_REMINDER;
+const DELETE_TAGS_REMINDER_URL = import.meta.env.VITE_API_DELETE_TAGS_REMINDER;
 const DELETE_TAG_URL = `${BASE_HOST}/delete-tag`;
 
 function normalizeTag(tag) {

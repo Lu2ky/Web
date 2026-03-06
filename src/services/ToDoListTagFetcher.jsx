@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import env from '../env.js';
 
 function normalizeTag(tag, index) {
     if (typeof tag === "string") {
@@ -43,7 +42,7 @@ function ToDoListTagFetcher({ onDataLoaded, userId }) {
             }
 
             try {
-                const baseUrl = env('VITE_API_URL_TAGS_USER');
+                const baseUrl = import.meta.env.VITE_API_URL_TAGS_USER;
                 const response = await fetch(`${baseUrl}${userId}`);
                 const json = await response.json();
                 const rawData = Array.isArray(json?.data)
