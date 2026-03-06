@@ -198,7 +198,7 @@ export const addPersonalActivity = async (userId, activityData) => {
 
     // Preparar los datos en el formato que espera la API
     const payload = {
-      id_user: 7, // Reemplazar con userId cuando esté disponible
+      id_user: userId, // Reemplazar con userId cuando esté disponible
       id_academic_per: 1,
       subject_name: activityData.title,
       description: activityData.description || "",
@@ -207,7 +207,7 @@ export const addPersonalActivity = async (userId, activityData) => {
       start_hour: formatTimeWithColons(activityData.startHour),
       end_hour: formatTimeWithColons(activityData.endHour),
       day: dayMap[activityData.day] || 1,
-      times: []
+      times: [] //Llenar times
     };
 
     console.log("Enviando actividad a la API:", payload);
