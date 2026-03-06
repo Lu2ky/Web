@@ -265,4 +265,98 @@ export async function updateReminderAnticipation(userId, minutes) {
     }
 }
 
-export default { getUserData, updateUserEmail, changePassword, updateReminderAnticipation };
+/**
+ * Update user cellphone number
+ * @param {number|string} userId - ID of the user
+ * @param {string} cellphone - Cellphone number
+ * @returns {Promise<object|null>} Update result or null
+ */
+export async function updateUserCellphone(userId, cellphone) {
+    if (!userId || !cellphone) {
+        console.warn("updateUserCellphone: userId and cellphone are required");
+        return null;
+    }
+
+    if (!CONFIG_NOTIFICATION_ENDPOINT) {
+        const message = "Falta configurar VITE_API_UPDATE_USER_CELLPHONE para guardar el celular";
+        console.error(message);
+        return { success: false, message };
+    }
+
+    // Fetch current user data to get correo, tiempoMute and actual idUsuario from DB
+    const currentData = await getUserData(userId);
+    console.log("Current user data received:", currentData);
+    
+    const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
+    console.log("Current user object:", currentUser);
+    
+    if (!currentUser) {
+        console.error("No user data found for userId:", userId);
+        return { success: false, message: "No se encontraron datos del usuario" };
+    }
+    
+    // Use the actual idUsuario from the database, not the one passed as parameter
+    const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
+    console.log("Using actualUserId from DB:", actualUserId);
+    
+    const currentEmail = (currentUser?.correo || currentUser?.email || "").trim();
+    console.log("Current email:", currentEmail);
+    
+    // Get tiempoMute - try multiple field names
+    let currentTimeMute = currentUser?.antelacionNotis || 
+                         currentUser?.tiempoMute || 
+                         currentUser?.anticipationTime ||
+                         "00:00:00";
+    
+    console.log("Current tiempoMute:", currentTimeMute);
+    
+    // Validate tiempoMute format (should be HH:MM:SS)
+    if (typeof currentTimeMute !== 'string' || !currentTimeMute.includes(':')) {
+        console.warn("tiempoMute format invalid, using default");
+        currentTimeMute = "00:00:00";
+    }
+
+    const payload = {
+        idUsuario: actualUserId,
+        correo: currentEmail,
+        tiempoMute: currentTimeMute,
+        telefono: cellphone.trim()
+    };
+
+    try {
+        console.log("Updating cellphone with payload:", payload);
+        console.log("Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
+        
+        const res = await fetch(CONFIG_NOTIFICATION_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        console.log("Response status:", res.status);
+        const contentType = res.headers.get("content-type") || "";
+        const body = contentType.includes("application/json") ? await res.json() : await res.text();
+        console.log("Response body:", body);
+
+        // Check if backend returned success: false in the body (even with status 200)
+        if (typeof body === 'object' && body.success === false) {
+            console.error("Backend returned success: false -", body.message);
+            return { success: false, message: body.message || "El servidor rechazó la actualización" };
+        }
+
+        if (!res.ok) {
+            const message = typeof body === "string" ? body : body?.message;
+            console.error(`updateUserCellphone HTTP ${res.status}:`, message);
+            return { success: false, message: `HTTP ${res.status} - ${message}` };
+        }
+
+        return typeof body === "string" ? { success: true, message: body } : body;
+    } catch (error) {
+        console.error("Error updating user cellphone:", error);
+        return { success: false, message: error?.message || "No se pudo actualizar el celular" };
+    }
+}
+
+export default { getUserData, updateUserEmail, changePassword, updateReminderAnticipation, updateUserCellphone };
