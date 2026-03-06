@@ -1,15 +1,15 @@
 import env from '../env.js';
 
 // Use environment variables so the base host can change without recompiling
-const REMINDERS_API_BASE = env('VITE_API_URL_REMINDERS_USER'); // should include trailing slash
-const ADD_REMINDER_ENDPOINT = env('VITE_API_ADD_REMINDER');
-const DELETE_REMINDER_ENDPOINT = env('VITE_API_DELETE_REMINDER');
-const UPDATE_NAME_ENDPOINT = env('VITE_API_UPDATE_REMINDER');
-const UPDATE_DESC_ENDPOINT = env('VITE_API_UPDATE_DESCRIPTION_REMINDER');
-const UPDATE_DATE_ENDPOINT = env('VITE_API_UPDATE_DATE_REMINDER');
-const UPDATE_PRIORITY_ENDPOINT = env('VITE_API_UPDATE_PRIORITY_REMINDER');
-const UPDATE_STATE_ENDPOINT = env('VITE_API_UPDATE_STATE_REMINDER');
-const UPDATE_TAGS_ENDPOINT = env('VITE_API_UPDATE_TAGS_REMINDER');
+const REMINDERS_TAGS_API_BASE = import.meta.env.VITE_API_URL_REMINDERS_TAGS_USER;
+const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER;
+const DELETE_REMINDER_ENDPOINT = import.meta.env.VITE_API_DELETE_REMINDER;
+const UPDATE_NAME_ENDPOINT = import.meta.env.VITE_API_UPDATE_REMINDER;
+const UPDATE_DESC_ENDPOINT = import.meta.env.VITE_API_UPDATE_DESCRIPTION_REMINDER;
+const UPDATE_DATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_DATE_REMINDER;
+const UPDATE_PRIORITY_ENDPOINT = import.meta.env.VITE_API_UPDATE_PRIORITY_REMINDER;
+const UPDATE_STATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_STATE_REMINDER;
+const UPDATE_TAGS_ENDPOINT = import.meta.env.VITE_API_UPDATE_TAGS_REMINDER;
 
 class ReminderService {
 	static async postUpdate(endpoint, payload, errorContext) {
@@ -60,11 +60,19 @@ class ReminderService {
 	}
 
 	static normalizePriority(value) {
-		const normalized = String(value ?? "").toLowerCase();
-		if (normalized === "high" || normalized === "alta") return "alta";
-		if (normalized === "medium" || normalized === "media") return "media";
-		if (normalized === "low" || normalized === "baja") return "baja";
+		const normalized = String(value ?? "").trim().toLowerCase();
+		if (normalized === "1" || normalized === "high" || normalized === "alta") return "alta";
+		if (normalized === "2" || normalized === "medium" || normalized === "media") return "media";
+		if (normalized === "3" || normalized === "low" || normalized === "baja") return "baja";
 		return "";
+	}
+
+	static priorityToNumber(value) {
+		const normalized = this.normalizePriority(value);
+		if (normalized === "alta") return 1;
+		if (normalized === "media") return 2;
+		if (normalized === "baja") return 3;
+		return null;
 	}
 
 	static normalizeReminder(reminder, index) {
@@ -85,8 +93,9 @@ class ReminderService {
 				return { label: tag, type: "custom" };
 			}
 			return {
-				label: tag.label ?? tag.name ?? "",
+				label: tag.tag_nombre ?? tag.label ?? tag.name ?? "",
 				type: tag.type ?? "custom",
+				...(tag.tag_id != null ? { id: tag.tag_id } : {}),
 			};
 		});
 
@@ -98,19 +107,26 @@ class ReminderService {
 						? "priority-medium"
 						: "priority-low";
 
-			const hasPriorityTag = tags.some(tag => tag.type === priorityType);
+			// Avoid duplicates: skip if the API already sent a tag with this label
+			const hasPriorityTag = tags.some(
+				tag => tag.type === priorityType || tag.label?.toLowerCase() === priority
+			);
 			if (!hasPriorityTag) {
 				tags.push({ label: priority, type: priorityType });
 			}
 		}
 
+		// Sólo leer campos explícitamente relacionados con el estado de completado.
+		// Se excluye reminder.status deliberadamente: ese campo suele contener
+		// códigos numéricos de tipo/estado (ej. 1 = activo) que no indican
+		// "completado" y provocan falsos positivos al comparar rawCompleted === 1.
+		// B_estado is the canonical completed flag for this endpoint
 		const rawCompleted =
-			reminder.completed ?? 
-			reminder.done ?? 
-			reminder.isDone ?? 
-			reminder.status ?? 
+			reminder.B_estado ??
 			reminder.B_completed ??
-			reminder.B_estado;
+			reminder.completed ??
+			reminder.done ??
+			reminder.isDone;
 
 		const completed =
 			rawCompleted === true ||
@@ -130,6 +146,8 @@ class ReminderService {
 				reminder._id ??
 				reminder.reminder_id ??
 				`reminder-${index}`,
+			// N_idRecordatorio is the PK the delete endpoint expects
+			recordatorioId: reminder.N_idRecordatorio ?? null,
 			name: this.getNullableString(
 				reminder.T_nombre ?? reminder.name ?? reminder.title ?? reminder.reminder ?? "Recordatorio"
 			),
@@ -149,7 +167,7 @@ class ReminderService {
 	static async getByUser(userId) {
 		if (!userId) return [];
 
-		const url = `${REMINDERS_API_BASE}/${userId}`;
+		const url = `${REMINDERS_TAGS_API_BASE}/${userId}`;
 		console.log("[ReminderService] getByUser URL:", url);
 		const response = await fetch(url);
 		if (!response.ok) {
@@ -298,9 +316,9 @@ class ReminderService {
 
 	static async updatePriority(reminderId, priority) {
 		if (!reminderId) return;
-		const normalizedPriority = this.normalizePriority(priority);
+		const priorityNumber = this.priorityToNumber(priority);
 
-		const P_prioridad = normalizedPriority;
+		const P_prioridad = priorityNumber;
 		const P_idToDo = reminderId;
 
 		return this.postUpdate(
@@ -361,6 +379,23 @@ class ReminderService {
 			updates.push(this.updatePriority(previousReminder.id, nextPriority));
 		}
 
+		// ── Tags ──
+		// Exclude synthetic priority tags (type: "priority-*") — they are derived
+		// from the priority field and must not be written back as real backend tags.
+		const extractLabels = (tags) =>
+			(Array.isArray(tags) ? tags : [])
+				.filter(t => typeof t !== "string" ? !String(t?.type ?? "").startsWith("priority-") : true)
+				.map(t => typeof t === "string" ? t : (t?.label ?? t?.name ?? ""))
+				.filter(Boolean).sort();
+
+		const prevLabels = extractLabels(previousReminder.tags);
+		const nextLabels = extractLabels(updatedReminder.tags);
+		const tagsChanged = prevLabels.join(",") !== nextLabels.join(",");
+		console.log(`  tags: [${prevLabels}] → [${nextLabels}] — changed: ${tagsChanged}`);
+		if (tagsChanged) {
+			updates.push(this.updateTags(previousReminder.id, nextLabels));
+		}
+
 		if (updates.length === 0) {
 			console.log("[ReminderService] No fields changed — no API calls made");
 			return;
@@ -372,26 +407,28 @@ class ReminderService {
 	}
 
 /* Add a new reminder via POST */
-static async addReminder(userId, name, description, dueDate, priority, tags = []) {
+static async addReminder(userId, name, description, dueDate, priority, tags = [], codigoUsuario = null) {
 	if (!userId) return;
+	const priorityNumber = this.priorityToNumber(priority);
 	
 	const payload = {
 		P_usuario: userId,
+		P_codigo_usuario: codigoUsuario ?? null,
 		P_nombre: name || "",
 		P_descripcion: description || "",
 		P_fecha: this.toDateTimeString(dueDate),
-		P_prioridad: priority || "",
-		P_tag1: "",
-		P_tag2: "",
-		P_tag3: "",
-		P_tag4: "",
-		P_tag5: ""
+		P_prioridad: priorityNumber ?? 2,
+		P_tag1: null,
+		P_tag2: null,
+		P_tag3: null,
+		P_tag4: null,
+		P_tag5: null
 	};
 	
-	// include up to 5 tags
+	// include up to 5 tags, null for empty slots
 	if (Array.isArray(tags)) {
 		tags.slice(0, 5).forEach((t, ix) => {
-			payload[`P_tag${ix + 1}`] = t || "";
+			payload[`P_tag${ix + 1}`] = t || null;
 		});
 	}
 
@@ -426,26 +463,40 @@ static async updateState(reminderId, state) {
 
 /* Update tags for a reminder */
 static async updateTags(reminderId, tags = []) {
-	if (!reminderId) return;
+	console.log(`[ReminderService] updateTags called — reminderId: ${reminderId}, tags:`, tags);
+
+	if (!reminderId) {
+		console.warn("[ReminderService] updateTags aborted — no reminderId");
+		return;
+	}
+
 	const payload = { 
 		P_idToDo: reminderId,
-		P_tag1: "",
-		P_tag2: "",
-		P_tag3: "",
-		P_tag4: "",
-		P_tag5: ""
+		P_tag1: null,
+		P_tag2: null,
+		P_tag3: null,
+		P_tag4: null,
+		P_tag5: null
 	};
+
 	if (Array.isArray(tags)) {
 		tags.slice(0, 5).forEach((t, ix) => {
-			payload[`P_tag${ix + 1}`] = t || "";
+			payload[`P_tag${ix + 1}`] = t || null;
+			console.log(`[ReminderService] updateTags — P_tag${ix + 1}:`, t || null);
 		});
+	} else {
+		console.warn("[ReminderService] updateTags — tags is not an array:", tags);
 	}
+
+	console.log("[ReminderService] updateTags — final payload:", JSON.stringify(payload, null, 2));
+
 	return this.postUpdate(
 		UPDATE_TAGS_ENDPOINT,
 		payload,
 		"Error al actualizar etiquetas de recordatorio"
 	);
 }}
+
 
 
 export default ReminderService;

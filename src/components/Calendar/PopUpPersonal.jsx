@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { CommentButton } from "./CommentButton";
 import "../../styles/PopUpClasses.css";
 import EditActivityModal from "./EditActivityModal";
 
@@ -7,10 +6,10 @@ export const PopUpPersonal = ({
   isOpen = false,
   onClose = () => { },
   personalData = {},
-  onUpdate = () => {}
+  onUpdate = () => {},
+  userId = null,
 }) => {
   const [is_open, set_is_open] = useState(isOpen);
-  const [comments, set_comments] = useState([]);
 
 
   // Sincronizar el estado interno con el prop externo
@@ -36,18 +35,6 @@ export const PopUpPersonal = ({
     onClose();
   };
 
-  const handle_add_comment = (comment_text) => {
-    const new_comment = {
-      id: Date.now(),
-      text: comment_text,
-      timestamp: new Date().toLocaleString(),
-    };
-    set_comments([new_comment, ...comments]);
-  };
-
-  const handle_delete_comment = (comment_id) => {
-    set_comments(comments.filter((comment) => comment.id !== comment_id));
-  };
 
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -66,12 +53,6 @@ export const PopUpPersonal = ({
     handleCloseEdit();
     handle_close();
   };
-
-  if (!is_open) {
-    return null;
-  }
-
-  // no cargamos comentarios desde el servidor para actividades personales
 
   if (!is_open) {
     return null;
@@ -178,33 +159,6 @@ export const PopUpPersonal = ({
             </div>
           </div>
 
-          {/* Comentarios */}
-          <div className="info-section">
-            <h3 className="section-title">Comentarios y Observaciones</h3>
-            <CommentButton on_add_comment={handle_add_comment} />
-
-            {comments.length > 0 && (
-              <div className="comments-list">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="comment-item">
-                    <div className="comment-header">
-                      <span className="comment-timestamp">{comment.timestamp}</span>
-                      <button
-                        className="delete-comment-button"
-                        onClick={() => handle_delete_comment(comment.id)}
-                        title="Eliminar comentario"
-                        aria-label="Eliminar comentario"
-                        type="button"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <p className="comment-text">{comment.text}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Footer */}

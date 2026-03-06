@@ -18,10 +18,10 @@ const defaultFilters = {
 };
 
 const normalizePriority = value => {
-    const normalized = String(value || "").toLowerCase();
-    if (normalized === "high" || normalized === "alta") return "alta";
-    if (normalized === "medium" || normalized === "media") return "media";
-    if (normalized === "low" || normalized === "baja") return "baja";
+    const normalized = String(value || "").trim().toLowerCase();
+    if (normalized === "1" || normalized === "high" || normalized === "alta") return "alta";
+    if (normalized === "2" || normalized === "medium" || normalized === "media") return "media";
+    if (normalized === "3" || normalized === "low" || normalized === "baja") return "baja";
     return "";
 };
 
@@ -124,7 +124,8 @@ function ToDoList({ userId = "" }) {
     };
 
     const deleteTask = (id) => {
-        setTaskToDelete(id);
+        const task = tasks.find(t => t.id === id);
+        setTaskToDelete(task ?? { id });
         setIsDeleteModalOpen(true);
     };
 
@@ -170,14 +171,17 @@ function ToDoList({ userId = "" }) {
 
     const handleDelete = async () => {
         if (userId && taskToDelete) {
+            // Use N_idRecordatorio (recordatorioId) for the delete endpoint,
+            // which is different from the list ID stored in task.id.
+            const apiId = taskToDelete.recordatorioId ?? taskToDelete.id;
             try {
-                await ReminderService.deleteReminder(taskToDelete);
+                await ReminderService.deleteReminder(apiId);
             } catch (err) {
                 console.error("Error al eliminar recordatorio en servidor:", err);
             }
         }
 
-        setTasks(prev => prev.filter(task => task.id !== taskToDelete));
+        setTasks(prev => prev.filter(task => task.id !== taskToDelete?.id));
         setIsDeleteModalOpen(false);
         setTaskToDelete(null);
     };
@@ -222,7 +226,7 @@ function ToDoList({ userId = "" }) {
                     <h2 className="todolist-title">To-Do List</h2>
                     <div className="todolist-header-actions">
                         <ToDoFilterButton onClick={() => setIsFilterModalOpen(true)} />
-                        <AddButton userId={userId} onToDoSaved={loadReminderTasks} />
+                        <AddButton userId={userId} onToDoSaved={loadReminderTasks} availableTags={availableTags} />
                     </div>
                 </div>
 
@@ -263,6 +267,7 @@ function ToDoList({ userId = "" }) {
                     onSave={handleSave}
                     task={taskToEdit}
                     title={taskToEdit ? "Editar Tarea" : "Nueva Tarea"}
+                    userId={userId}
                     availableTags={availableTags}
                 />
 
@@ -271,7 +276,7 @@ function ToDoList({ userId = "" }) {
                     onClose={handleCloseDeleteModal}
                     onConfirm={handleDelete}
                     title="Eliminar Tarea"
-                    message="¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer."
+                    description="¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer."
                 />
 
                 <ToDoFilterModal
@@ -285,6 +290,7 @@ function ToDoList({ userId = "" }) {
         </>
     );
 }
+
 
 
 export default ToDoList;

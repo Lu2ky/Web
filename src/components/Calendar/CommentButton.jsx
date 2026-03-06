@@ -5,6 +5,7 @@ export const CommentButton = ({ on_add_comment }) => {
   const [is_open, set_is_open] = useState(false);
   const [is_closing, set_is_closing] = useState(false);
   const [comment_text, set_comment_text] = useState("");
+  const [is_saving, set_is_saving] = useState(false);
 
   const ANIM_DURATION = 150; // ms, debe coincidir con App.css
 
@@ -32,16 +33,24 @@ export const CommentButton = ({ on_add_comment }) => {
   };
 
   // Guardar comentario y notificar al padre
-  const handle_save = () => {
+  const handle_save = async () => {
     const text_to_send = comment_text.trim();
+    if (text_to_send === "" || is_saving) return;
 
-    close_with_anim(() => {
-      if (on_add_comment && text_to_send !== "") {
-        on_add_comment(text_to_send);
+    try {
+      set_is_saving(true);
+      if (on_add_comment) {
+        await Promise.resolve(on_add_comment(text_to_send));
       }
 
-      set_comment_text("");
-    });
+      close_with_anim(() => {
+        set_comment_text("");
+      });
+    } catch (error) {
+      console.error("No se pudo guardar el comentario:", error);
+    } finally {
+      set_is_saving(false);
+    }
   };
 
   // Cancelar edición
@@ -84,9 +93,9 @@ export const CommentButton = ({ on_add_comment }) => {
               className="add-comment-action-button save"
               type="button"
               onClick={handle_save}
-              disabled={comment_text.trim() === ""}
+              disabled={comment_text.trim() === "" || is_saving}
             >
-              Guardar
+              {is_saving ? "Guardando..." : "Guardar"}
             </button>
 
             <button

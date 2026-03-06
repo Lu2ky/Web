@@ -36,7 +36,7 @@ async function LDAPservice(userId, password) {
         }
 
         const result = await response.json(); // Respuesta del servidor
-        console.log("Usuario validado:", result);
+        console.log("[LDAPservice] Authentication result:", result); // GUARDAR LA KEY NO MOSTRARLA EN CONSOLA
         return result;
     } catch (error) {
         console.error("Error al validar usuario:", error);

@@ -16,7 +16,7 @@ function Header({ userId }) {
 
 			<div className="headerRight">
 				<NotificationBell userId={userId} />
-				<DropdownAcount />
+				<DropdownAcount userId={userId} />
 			</div>
 
 			{isMenuOpen && <div className="overlay" onClick={() => setIsMenuOpen(false)} />}

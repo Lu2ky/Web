@@ -70,8 +70,10 @@ function normalizePersonalData(apiData) {
   }
 
   return apiData.map((item) => {
-    const [startTime, endTime, dayNumber] = item.times || [];
-    
+    const startTime = item.start_hour || item.start_time;
+    const endTime = item.end_hour || item.end_time;
+    const dayNumber = item.day;
+
     return {
       id: item.id_course || item.id,
       name: item.subject_name,
@@ -199,7 +201,7 @@ export const addPersonalActivity = async (userId, activityData) => {
 
     // Preparar los datos en el formato que espera la API
     const payload = {
-      id_user: 7, // Reemplazar con userId cuando esté disponible
+      id_user: userId, // Reemplazar con userId cuando esté disponible
       id_academic_per: 1,
       subject_name: activityData.title,
       description: activityData.description || "",
@@ -207,8 +209,7 @@ export const addPersonalActivity = async (userId, activityData) => {
       date_end: formattedDateEnd,
       start_hour: formatTimeWithColons(activityData.startHour),
       end_hour: formatTimeWithColons(activityData.endHour),
-      day: dayMap[activityData.day] || 1,
-      times: []
+      day: dayMap[activityData.day] || 1
     };
 
     console.log("Enviando actividad a la API:", payload);
@@ -299,6 +300,7 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
 
     // Construir payload idéntico a addPersonalActivity, solo cambiar activityData por updates y agregar IdPersonalSchedule
     const payload = {
+      id_user: userId,
       id_course: activityId,
       subject_name: updates.title,
       description: updates.description || "",
@@ -306,8 +308,7 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
       date_end: formattedDateEnd,
       start_hour: formatTimeWithColons(updates.startHour),
       end_hour: formatTimeWithColons(updates.endHour),
-      day: dayMap[updates.day] || 1,
-      times: []
+      day: dayMap[updates.day] || 1
     };
 
     console.log("Actualizando actividad:", payload);

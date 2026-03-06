@@ -1,4 +1,3 @@
-
 import "./styles/App.css";
 
 // Hooks de react 
@@ -9,7 +8,7 @@ import { useParams } from "react-router-dom";
 import Header from "./components/Navegation/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
-import ToDoList from "./components/TodoList/ToDoList";
+import ToDoList from "./components/TodoList/ToDoList"; 
 import MessageConfirmation from "./components/TodoList/MessageConfirmation";
 // Componentes secundarios
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
@@ -75,8 +74,6 @@ const normalizePersonalEvent = (item) => {
 	return item;
 };
 
-// HASTA AQUIII ESTA ARREGLADO
-
 // Normaliza una lista de actividades personales 
 const normalizePersonalEvents = (eventsList) => {
 	if (!Array.isArray(eventsList)) return [];
@@ -121,7 +118,7 @@ function App() {
 	// Manejador para datos personales que vienen del PersonalFetcher (ya normalizados)
 	const handlePersonalDataLoaded = useCallback((data) => {
 		console.log("Datos personales recibidos del API en App:", data);
-		
+
 		if (!Array.isArray(data)) {
 			console.error("Los datos personales de la API no son un array:", data);
 			setPersonalEvents([]);
@@ -137,9 +134,22 @@ function App() {
 	const handleClassClick = event => {
 		// Buscar todas las sesiones de esta clase (mismo NRC)
 		const allSessions = classEvents.filter(e => e.NRC === event.NRC);
+		const apiCourseId = event?.apiData?.N_idCurso
+			?? event?.apiData?.id_course
+			?? event?.apiData?.idCourse
+			?? event?.apiData?.ID_CURSO
+			?? event?.apiData?.id;
+		const apiScheduleId = event?.apiData?.N_idHorario
+			?? event?.apiData?.id_horario
+			?? event?.apiData?.id_schedule
+			?? event?.apiData?.idSchedule
+			?? event?.apiData?.ID_HORARIO
+			?? event?.apiData?.schedule_id;
 
 		// Crear el objeto classData para PopUpClasses
 		const classData = {
+			id: apiCourseId ?? event.NRC,
+			scheduleId: apiScheduleId,
 			subject_name: event.subject_name,
 			instructor_name: event.professor_name,
 			nrc: event.NRC,
@@ -153,7 +163,8 @@ function App() {
 				end_time: session.end_time,
 				classroom: session.classroom,
 				type: session.tag
-			}))
+			})),
+			apiData: event.apiData,
 		};
 
 		setSelectedClass(classData);
@@ -207,7 +218,7 @@ function App() {
 		}
 
 		// Actualizar el estado eliminando la actividad
-		setPersonalEvents(prevEvents => 
+		setPersonalEvents(prevEvents =>
 			prevEvents.filter(event => event.id !== id)
 		);
 		handleClosePersonalPopup();
@@ -266,13 +277,11 @@ function App() {
 	//Calcular materias filtradas 
 	const filteredClassesEvents = selectedTag === "Todos" ?
 		classEvents :
-		classEvents.filter(event => event.tag === selectedTag);
+		classEvents.filter(event => event.etiqueta === selectedTag);
 	const filteredPersonalEvents =
 		selectedTag === "Todos" || selectedTag === "Personal" ?
 			personalEvents :
 			[];
-	console.log(userId)
-
 	return (
 
 		<div className="App">
@@ -315,6 +324,7 @@ function App() {
 						onClose={handleClosePersonalPopup}
 						personalData={selectedPersonal}
 						onUpdate={handleActivityUpdate}
+						userId={userId}
 					/>
 					<MessageConfirmation
 						isOpen={showDeletePersonalConfirm}
@@ -328,8 +338,8 @@ function App() {
 					<ControlBar
 						viewMode={viewMode}
 						setViewMode={setViewMode}
-					userId={userId}
-					onActivityAdd={handleActivityAdd}
+						userId={userId}
+						onActivityAdd={handleActivityAdd}
 						onThemeChange={handleThemeChange}
 						selectedTag={selectedTag}
 						setSelectedTag={setSelectedTag}

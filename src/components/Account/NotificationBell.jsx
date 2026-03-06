@@ -7,7 +7,7 @@ export default function NotificationBell({ userId }) {
     const [notifications, setNotifications] = useState([]);
     const containerRef = useRef(null);
 
-    // load notifications when userId changes
+    // carga notis cada 10 segundos
     useEffect(() => {
         async function load() {
             if (!userId) {
@@ -22,7 +22,15 @@ export default function NotificationBell({ userId }) {
                 setNotifications([]);
             }
         }
+        
+        // Load immediately
         load();
+        
+        // Set up interval to reload every 20 seconds
+        const intervalId = setInterval(load, 20000);
+        
+        // Cleanup interval on unmount or when userId changes
+        return () => clearInterval(intervalId);
     }, [userId]);
 
     // close dropdown on outside click

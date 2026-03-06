@@ -1,5 +1,5 @@
 import { useState} from "react";
-import "../../styles/privilegesButton.css";
+import "../CSS ViewAdmin/PrivilegesButton.css";
 
 function PrivilegesButton() {
     const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +22,7 @@ function PrivilegesButton() {
                     className="privilegesModalOverlay"
                     role="dialog"
                     aria-modal="true"
-                    onClick={() => closeModal()}
+                    onClick={() => setIsOpen(false)}
                 >
                     <div
                         className="privilegesModalContainer"

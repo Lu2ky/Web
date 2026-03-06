@@ -1,9 +1,9 @@
 // Service helper for various tag-related endpoints
 
-import env from '../env.js';
+const TAGS_USER_URL = import.meta.env.VITE_API_URL_TAGS_USER;
 
-const BASE_HOST = env('VITE_API_URL_TAGS_USER')
-    ? env('VITE_API_URL_TAGS_USER').replace(/\/tags-by-user\/??$/, "")
+const BASE_HOST = TAGS_USER_URL
+    ? TAGS_USER_URL.replace(/\/tags-by-user\/??$/, "")
     : "";
 
 const TAGS_USER_AND_COURSE_URL = `${BASE_HOST}/tags-by-user-and-course/`;
@@ -84,4 +84,30 @@ export async function deleteTagsForReminder(reminderId) {
         throw new Error(`deleteTagsForReminder failed: ${res.status} ${txt}`);
     }
     return res.json();
+}
+
+export async function getTagsByUser(userId) {
+    if (!userId || !TAGS_USER_URL) return [];
+    const res = await fetch(`${TAGS_USER_URL}${userId}`);
+    if (!res.ok) {
+        console.error("getTagsByUser failed", res.status);
+        return [];
+    }
+    const json = await res.json();
+    const rawData = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+    const normalized = rawData.map((tag, index) => {
+        if (!tag) return null;
+        if (typeof tag === "string") return { id: `tag-${index}`, label: tag, type: "custom" };
+        if (tag?.label) return { id: tag.id || `tag-${index}`, label: tag.label, type: tag.type || "custom" };
+        if (tag?.nombre) return { id: tag.id || `tag-${index}`, label: tag.nombre, type: tag.type || "custom" };
+        if (tag?.name) return { id: tag.id || `tag-${index}`, label: tag.name, type: tag.type || "custom" };
+        return null;
+    }).filter(Boolean);
+    // Deduplicate by id to prevent React key collisions
+    const seen = new Set();
+    return normalized.filter(t => {
+        if (seen.has(t.id)) return false;
+        seen.add(t.id);
+        return true;
+    });
 }

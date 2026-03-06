@@ -1,4 +1,4 @@
-import "../../Styles/OverviewAdmin.css";
+import "../CSS ViewAdmin/OverviewAdmin.css";
 
 export default function OverviewAdmin() {
   return (

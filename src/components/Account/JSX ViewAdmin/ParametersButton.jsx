@@ -1,5 +1,5 @@
 import { useState} from "react";
-import "../../styles/ParametersButton.css";
+import "../CSS ViewAdmin/ParametersButton.css";
 
 function ParametersButton() {
     const [isOpen, setIsOpen] = useState(false);

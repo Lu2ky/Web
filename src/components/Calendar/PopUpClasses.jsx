@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CommentButton } from "./CommentButton";
-import CommentFetcher from "../../services/commentFetcher";
+import fetchComments from "../../services/CommentFetcher";
 import addComment from "../../services/addComentService";
 import updateComment from "../../services/updateComentService";
 import deleteComment from "../../services/removeComentService";
@@ -14,13 +14,76 @@ export const PopUpClasses = ({
 }) => {
   const [is_open, set_is_open] = useState(isOpen);
   const [comments, set_comments] = useState([]);
-
-  // cuando el popup se abre con una asignatura vaga, `CommentFetcher` rellenará los comentarios
+  const [reloadKey, setReloadKey] = useState(0);
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
 
   // Sincronizar el estado interno con el prop externo
   useEffect(() => {
     set_is_open(isOpen);
   }, [isOpen]);
+
+  // Limpiar comentarios al cambiar de asignatura o al abrir
+  useEffect(() => {
+    set_comments([]);
+    setReloadKey((k) => k + 1);
+  }, [classData?.id, classData?.nrc]);
+
+  const commentCourseId = classData?.apiData?.N_idCurso
+    ?? classData?.apiData?.id_course
+    ?? classData?.apiData?.idCourse
+    ?? classData?.apiData?.ID_CURSO
+    ?? classData?.apiData?.id
+    ?? classData?.id
+    ?? classData?.nrc;
+
+  const commentScheduleId = classData?.apiData?.N_idHorario
+    ?? classData?.apiData?.id_horario
+    ?? classData?.apiData?.id_schedule
+    ?? classData?.apiData?.idSchedule
+    ?? classData?.apiData?.ID_HORARIO
+    ?? classData?.apiData?.schedule_id
+    ?? classData?.scheduleId
+    ?? null;
+
+  const commentUserId = userId
+    ?? classData?.apiData?.N_idUsuario
+    ?? classData?.apiData?.id_user
+    ?? classData?.apiData?.idUser
+    ?? classData?.apiData?.ID_USUARIO
+    ?? classData?.apiData?.ID_USER
+    ?? null;
+
+  useEffect(() => {
+    const shouldFetch = is_open && commentUserId && (commentCourseId || commentScheduleId);
+    if (!shouldFetch) {
+      set_comments([]);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadComments = async () => {
+      try {
+        const loaded = await fetchComments({
+          userId: commentUserId,
+          courseId: commentCourseId,
+          scheduleId: commentScheduleId,
+        });
+        if (!isCancelled) {
+          set_comments(loaded);
+        }
+      } catch (error) {
+        console.error("Error al cargar comentarios:", error);
+      }
+    };
+
+    loadComments();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [is_open, commentUserId, commentCourseId, commentScheduleId, reloadKey]);
 
   // Datos por defecto si no se proporcionan
   const data = {
@@ -40,55 +103,104 @@ export const PopUpClasses = ({
   };
 
   const handle_add_comment = async (comment_text) => {
-    const new_comment = {
-      id: Date.now(),
-      text: comment_text,
-      timestamp: new Date().toLocaleString(),
-    };
+    const courseId = classData?.apiData?.N_idCurso
+      ?? classData?.apiData?.id_course
+      ?? classData?.apiData?.idCourse
+      ?? classData?.apiData?.ID_CURSO
+      ?? classData?.apiData?.id
+      ?? classData?.id
+      ?? classData?.nrc;
+    const scheduleId = commentScheduleId ?? courseId;
 
-    // optimistically add to UI
-    set_comments([new_comment, ...comments]);
+    if (!courseId || !scheduleId) {
+      throw new Error("Cannot add comment: missing courseId/scheduleId");
+    }
+
+    if (!commentUserId) {
+      throw new Error("Cannot add comment: userId is missing");
+    }
 
     try {
-      // call backend
-      await addComment({
-        scheduleId: classData?.id,
-        userId,
-        courseId: classData?.id || classData?.nrc,
+      const result = await addComment({
+        scheduleId,
+        userId: commentUserId,
+        courseId,
         courseName: classData?.subject_name || "",
         comment: comment_text,
       });
+
+      const wait = (ms) => new Promise((resolve) => {
+        window.setTimeout(resolve, ms);
+      });
+
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          const loaded = await fetchComments({
+            userId: commentUserId,
+            courseId,
+            scheduleId,
+          });
+          set_comments(loaded);
+
+          const expected = String(comment_text).trim().toLowerCase();
+          const found = loaded.some((comment) => String(comment?.text ?? "").trim().toLowerCase() === expected);
+          if (found) break;
+        } catch (reloadError) {
+          console.error("Error recargando comentarios tras guardar:", reloadError);
+        }
+
+        await wait(300);
+      }
+
+      setReloadKey((k) => k + 1);
+
+      return result;
     } catch (err) {
       console.error("Error añadiendo comentario:", err);
+      throw err;
     }
   };
 
   const handle_delete_comment = async (comment_id) => {
-    set_comments(comments.filter((comment) => comment.id !== comment_id));
+    set_comments((prev) => prev.filter((comment) => comment.id !== comment_id));
     try {
       await deleteComment(comment_id);
+      setReloadKey((k) => k + 1);
     } catch (err) {
       console.error("Error eliminando comentario:", err);
     }
+  };
+
+  const handle_start_edit = (comment) => {
+    setEditingId(comment.id);
+    setEditText(comment.text);
+  };
+
+  const handle_save_edit = async (comment_id) => {
+    const trimmed = editText.trim();
+    if (!trimmed) return;
+    set_comments((prev) => prev.map((c) => (c.id === comment_id ? { ...c, text: trimmed } : c)));
+    setEditingId(null);
+    setEditText("");
+    try {
+      await updateComment(comment_id, trimmed);
+      setReloadKey((k) => k + 1);
+    } catch (err) {
+      console.error("Error actualizando comentario:", err);
+    }
+  };
+
+  const handle_cancel_edit = () => {
+    setEditingId(null);
+    setEditText("");
   };
 
   if (!is_open) {
     return null;
   }
 
-  // render fetcher sólo cuando el pop‑up está abierto y hay un id disponible
-  const shouldFetch = is_open && userId && (classData?.id || classData?.nrc);
-
   return (
     <>
-      {shouldFetch && (
-        <CommentFetcher
-          userId={userId}
-          courseId={classData.id || classData.nrc}
-          onDataLoaded={set_comments}
-        />
-      )}
-
       <div className="popup-overlay" onClick={handle_close}>
       <div className="popup-container" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
@@ -181,17 +293,56 @@ export const PopUpClasses = ({
                   <div key={comment.id} className="comment-item">
                     <div className="comment-header">
                       <span className="comment-timestamp">{comment.timestamp}</span>
-                      <button
-                        className="delete-comment-button"
-                        onClick={() => handle_delete_comment(comment.id)}
-                        title="Eliminar comentario"
-                        aria-label="Eliminar comentario"
-                        type="button"
-                      >
-                        ✕
-                      </button>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <button
+                          className="delete-comment-button"
+                          onClick={() => handle_start_edit(comment)}
+                          title="Editar comentario"
+                          aria-label="Editar comentario"
+                          type="button"
+                        >
+                          ✎
+                        </button>
+                        <button
+                          className="delete-comment-button"
+                          onClick={() => handle_delete_comment(comment.id)}
+                          title="Eliminar comentario"
+                          aria-label="Eliminar comentario"
+                          type="button"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
-                    <p className="comment-text">{comment.text}</p>
+                    {editingId === comment.id ? (
+                      <div className="comment-edit-area">
+                        <textarea
+                          className="add-comment-textarea"
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          rows={2}
+                        />
+                        <div className="add-comment-actions">
+                          <button
+                            className="add-comment-action-button save"
+                            type="button"
+                            onClick={() => handle_save_edit(comment.id)}
+                            disabled={!editText.trim()}
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            className="add-comment-action-button cancel"
+                            type="button"
+                            onClick={handle_cancel_edit}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="comment-text">{comment.text}</p>
+                    )}
                   </div>
                 ))}
               </div>

@@ -2,6 +2,12 @@ import env from '../env.js';
 
 const ADD_COMMENT_ENDPOINT = env('VITE_API_ADD_COMMENT');
 
+const normalizeId = (value) => {
+    if (value === null || value === undefined || value === "") return null;
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : value;
+};
+
 /**
  * Add a personal comment for a course/session.
  * @param {object} params
@@ -12,24 +18,46 @@ const ADD_COMMENT_ENDPOINT = env('VITE_API_ADD_COMMENT');
  * @param {string} params.comment - T_comentario
  */
 export default async function addComment({ scheduleId, userId, courseId, courseName, comment }) {
-    const payload = {
-        N_idHorario: scheduleId,
-        N_idUsuario: userId,
-        N_idCurso: courseId,
-        Curso: courseName,
-        T_comentario: comment,
-    };
+    const safeScheduleId = normalizeId(scheduleId);
+    const safeUserId = normalizeId(userId);
+    const safeCourseId = normalizeId(courseId);
+    const safeComment = String(comment ?? "").trim();
 
-    const res = await fetch(ADD_COMMENT_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`addComment failed: ${res.status} ${text}`);
+    if (!safeScheduleId || !safeUserId || !safeCourseId || !safeComment) {
+        throw new Error(`addComment invalid payload: scheduleId=${safeScheduleId}, userId=${safeUserId}, courseId=${safeCourseId}, commentLen=${safeComment.length}`);
     }
 
-    return res.json();
+    const payload = {
+        N_idHorario: safeScheduleId,
+        N_idUsuario: safeUserId,
+        N_idCurso: safeCourseId,
+        Curso: courseName,
+        T_comentario: safeComment,
+    };
+
+    if (!ADD_COMMENT_ENDPOINT) {
+        throw new Error("ADD_COMMENT_ENDPOINT is not configured (env missing)");
+    }
+
+    try {
+        // debug: help trace failing requests in the browser/server logs
+        console.debug("addComment POST", ADD_COMMENT_ENDPOINT, payload);
+
+        const res = await fetch(ADD_COMMENT_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`addComment failed: ${res.status} ${text}`);
+        }
+
+        const json = await res.json();
+        return json;
+    } catch (err) {
+        console.error("addComment error:", err);
+        throw err;
+    }
 }
