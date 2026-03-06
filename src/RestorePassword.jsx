@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { MdEmail } from "react-icons/md";
 
 import Logo from './assets/logo.png';
 import Image from './assets/ImagePassword.jpeg';
