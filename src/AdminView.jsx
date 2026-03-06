@@ -1,29 +1,64 @@
+import { useState, useCallback } from "react";
 import Header from "./components/Navegation/Header";
-import ParametersButton from "./components/Account/JSX ViewAdmin/ParametersButton";
-import ImportButton from "./components/Account/JSX ViewAdmin/ImportButton";
-import PrivilegesButton from "./components/Account/JSX ViewAdmin/PrivilegesButton";
-import OverviewAdmin from "./components/Account/JSX ViewAdmin/OverviewAdmin";
+import DropArea from "./components/Account/JSX ViewAdmin/DropArea";
+import ModalArchivo from "./components/Account/JSX ViewAdmin/ModalArchivo";
+import { parseExcelFile } from "./components/Account/JSX ViewAdmin/exelParce";
 import "./AdminView.css";
 
 function AdminView() {
-    return (
-        <div className="adminViewContainer">
-            <div className="adminView__header">
-                <Header />
-            </div>
-            <div className="adminView">
-                <div className="adminView__sidebar">
-                    <ParametersButton />
-                    <ImportButton />
-                    <PrivilegesButton />
-                </div>
+  const [fileName, setFileName] = useState('');
+  const [parsedJson, setParsedJson] = useState(null);
+  const [parseError, setParseError] = useState('');
 
-                <div className="adminView__overview">
-                    <OverviewAdmin />
-                </div>
+  const handleFiles = useCallback(async (files) => {
+    if (!files?.length) return;
+    const [first] = files;
+    setFileName(first?.name || '');
+    setParseError('');
+    setParsedJson(null);
+
+    try {
+      const parsed = await parseExcelFile(first);
+      setParsedJson(parsed);
+      console.log('Archivo parseado:', parsed);
+    } catch (error) {
+      console.error('Error al parsear archivo:', error);
+      setParseError(error?.message || 'No se pudo procesar el archivo.');
+    }
+  }, []);
+
+  return (
+    <div className="adminViewContainer">
+      <div className="adminView__header">
+        <Header />
+      </div>
+      <div className="adminView">
+
+        <div className="adminView__overview">
+          <div className="page">
+            <div className="card">
+              <ModalArchivo
+                label="Subir Archivo"
+                accept=".xlsx"
+                onFiles={handleFiles}
+              />
+
+              <DropArea
+                title="Cargar archivo de horarios (.xlsx)"
+                subtitle="Arrastra el archivo oficial de planeación académica para actualizar el sistema global."
+                accept=".xlsx"
+                onFiles={handleFiles}
+                fileName={fileName}
+              />
+
+              {parseError ? <p style={{ color: 'red' }}>{parseError}</p> : null}
+              {parsedJson ? <pre>{JSON.stringify(parsedJson, null, 2)}</pre> : null}
             </div>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 export default AdminView;

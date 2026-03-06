@@ -1,0 +1,42 @@
+.upload-button {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 48px;
+  border: none;
+  border-radius: 18px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #fff;
+  background: linear-gradient(120deg, #ff4f73 0%, #ff5db1 45%, #8a3bf3 100%);
+  box-shadow: 0 16px 40px rgba(138, 59, 243, 0.25);
+  cursor: pointer;
+  transition: transform 200ms ease, box-shadow 220ms ease;
+}
+
+.cta:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 22px 52px rgba(138, 59, 243, 0.32);
+}
+
+.cta:active {
+  transform: translateY(0px) scale(0.995);
+}
+
+.hidden-input {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .cta {
+    width: 100%;
+  }
+}

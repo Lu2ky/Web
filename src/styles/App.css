@@ -33,6 +33,55 @@ header {
     box-sizing: border-box;
     overflow: visible;
 }
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.card {
+  width: min(1120px, 95vw);
+  position: relative;
+  padding: 48px 40px 56px;
+  background: linear-gradient(180deg, #fdfdff 0%, #f7f7fb 100%) padding-box,
+    linear-gradient(135deg, #ff4f73 0%, #8a3bf3 100%) border-box;
+  border: 2px solid transparent;
+  border-radius: 32px;
+  box-shadow: 0 40px 120px rgba(105, 24, 140, 0.16);
+  overflow: hidden;
+  animation: fade-in 600ms ease;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border-radius: 24px;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 79, 115, 0.08), transparent 45%),
+    radial-gradient(circle at 80% 20%, rgba(138, 59, 243, 0.1), transparent 40%),
+    radial-gradient(circle at 40% 75%, rgba(15, 156, 102, 0.08), transparent 42%);
+  pointer-events: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+@media (max-width: 720px) {
+  .card {
+    padding: 32px 24px 40px;
+  }
+}
+
 
 .ToDoSection {
     background: #f9fafb;
