@@ -1,10 +1,9 @@
 const GET_USER_DATA_ENDPOINT = import.meta.env.VITE_API_GET_USER_DATA;
-const UPDATE_USER_EMAIL_ENDPOINTS = [
-    import.meta.env.VITE_API_UPDATE_USER_EMAIL,
-    import.meta.env.VITE_API_UPDATE_EMAIL,
-].filter(Boolean);
-const UPDATE_REMINDER_ANTICIPATION_ENDPOINT = import.meta.env.VITE_API_UPDATE_REMINDER_ANTICIPATION;
+const CONFIG_NOTIFICATION_ENDPOINT = import.meta.env.VITE_API_UPDATE_USER_EMAIL || import.meta.env.VITE_API_UPDATE_REMINDER_ANTICIPATION;
 const CHANGE_PASSWORD_ENDPOINT = import.meta.env.VITE_API_CHANGE_PASSWORD;
+
+// Log endpoints for debugging
+console.log("Config Notification Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
 
 /**
  * Get user data by user ID
@@ -57,66 +56,82 @@ export async function updateUserEmail(userId, newEmail) {
         return null;
     }
 
-    if (!UPDATE_USER_EMAIL_ENDPOINTS.length) {
-        const message = "Falta configurar VITE_API_UPDATE_USER_EMAIL (o VITE_API_UPDATE_EMAIL) para guardar el correo del perfil";
-        console.warn(message);
+    if (!CONFIG_NOTIFICATION_ENDPOINT) {
+        const message = "Falta configurar VITE_API_UPDATE_USER_EMAIL para guardar el correo del perfil";
+        console.error(message);
         return { success: false, message };
     }
 
-    const payloadVariants = [
-        { idUsuario: userId, correo: newEmail },
-        { userId: userId, email: newEmail },
-        { idUsuario: userId, email: newEmail, correo: newEmail },
-    ];
-
-    const endpointAttempts = UPDATE_USER_EMAIL_ENDPOINTS.flatMap((endpoint) =>
-        ["PUT", "POST"].map((method) => ({ endpoint, method }))
-    );
-
-    let lastError = null;
-
-    const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
-
-    const readPersistedEmail = async () => {
-        const refreshed = await getUserData(userId);
-        const normalized = Array.isArray(refreshed) ? refreshed[0] : refreshed;
-        return normalizeEmail(normalized?.correo || normalized?.email);
-    };
-
-    for (const attempt of endpointAttempts) {
-        for (const payload of payloadVariants) {
-            try {
-                const res = await fetch(attempt.endpoint, {
-                    method: attempt.method,
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(payload),
-                });
-
-                const contentType = res.headers.get("content-type") || "";
-                const body = contentType.includes("application/json") ? await res.json() : await res.text();
-
-                if (!res.ok) {
-                    const message = typeof body === "string" ? body : body?.message;
-                    lastError = `HTTP ${res.status}${message ? ` - ${message}` : ""}`;
-                    continue;
-                }
-
-                const persistedEmail = await readPersistedEmail();
-                if (persistedEmail === normalizeEmail(newEmail)) {
-                    return typeof body === "string" ? { success: true, message: body } : body;
-                }
-
-                lastError = "La API respondió éxito pero el correo no quedó persistido en la base de datos";
-            } catch (error) {
-                lastError = error?.message || String(error);
-            }
-        }
+    // Fetch current user data to get tiempoMute and actual idUsuario from DB
+    const currentData = await getUserData(userId);
+    console.log("Current user data received:", currentData);
+    
+    const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
+    console.log("Current user object:", currentUser);
+    
+    if (!currentUser) {
+        console.error("No user data found for userId:", userId);
+        return { success: false, message: "No se encontraron datos del usuario" };
+    }
+    
+    // Use the actual idUsuario from the database, not the one passed as parameter
+    const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
+    console.log("Using actualUserId from DB:", actualUserId);
+    
+    // Get tiempoMute - try multiple field names
+    let currentTimeMute = currentUser?.antelacionNotis || 
+                         currentUser?.tiempoMute || 
+                         currentUser?.anticipationTime ||
+                         "00:00:00";
+    
+    console.log("Current tiempoMute:", currentTimeMute);
+    
+    // Validate tiempoMute format (should be HH:MM:SS)
+    if (typeof currentTimeMute !== 'string' || !currentTimeMute.includes(':')) {
+        console.warn("tiempoMute format invalid, using default");
+        currentTimeMute = "00:00:00";
     }
 
-    console.error("Error updating user email:", lastError);
-    return { success: false, message: lastError || "No se pudo actualizar el correo" };
+    const payload = {
+        idUsuario: actualUserId,
+        correo: newEmail.trim(),
+        tiempoMute: currentTimeMute
+    };
+
+    try {
+        console.log("Updating email with payload:", payload);
+        console.log("Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
+        
+        const res = await fetch(CONFIG_NOTIFICATION_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        console.log("Response status:", res.status);
+        const contentType = res.headers.get("content-type") || "";
+        const body = contentType.includes("application/json") ? await res.json() : await res.text();
+        console.log("Response body:", body);
+
+        // Check if backend returned success: false in the body (even with status 200)
+        if (typeof body === 'object' && body.success === false) {
+            console.error("Backend returned success: false -", body.message);
+            return { success: false, message: body.message || "El servidor rechazó la actualización" };
+        }
+
+        if (!res.ok) {
+            const message = typeof body === "string" ? body : body?.message;
+            console.error(`updateUserEmail HTTP ${res.status}:`, message);
+            return { success: false, message: `HTTP ${res.status} - ${message}` };
+        }
+
+        return typeof body === "string" ? { success: true, message: body } : body;
+    } catch (error) {
+        console.error("Error updating user email:", error);
+        return { success: false, message: error?.message || "No se pudo actualizar el correo" };
+    }
 }
 
 /**
@@ -178,82 +193,76 @@ export async function updateReminderAnticipation(userId, minutes) {
     // Validate max 24 hours (1440 minutes)
     const validatedMinutes = Math.min(Math.max(0, parseInt(minutes)), 1440);
 
-    if (!UPDATE_REMINDER_ANTICIPATION_ENDPOINT) {
+    if (!CONFIG_NOTIFICATION_ENDPOINT) {
         const message = "Falta configurar VITE_API_UPDATE_REMINDER_ANTICIPATION para guardar el tiempo de anticipación";
-        console.warn(message);
+        console.error(message);
         return { success: false, message };
     }
 
-    // Convert minutes to TIME format (HH:MM:SS) as expected by database
+    // Convert minutes to TIME format (HH:MM:SS) as expected by backend
     const hours = Math.floor(validatedMinutes / 60);
     const mins = validatedMinutes % 60;
-    const timeFormat = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
+    const tiempoMute = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
 
-    // Helper to read persisted value
-    const normalizeTime = (value) => {
-        if (!value) return null;
-        if (typeof value === 'string' && value.includes(':')) {
-            const parts = value.split(':');
-            const h = parseInt(parts[0]) || 0;
-            const m = parseInt(parts[1]) || 0;
-            return h * 60 + m;
-        }
-        return parseInt(value) || 0;
-    };
-
-    const readPersistedAnticipation = async () => {
-        const refreshed = await getUserData(userId);
-        const normalized = Array.isArray(refreshed) ? refreshed[0] : refreshed;
-        return normalizeTime(normalized?.antelacionNotis || normalized?.anticipationMinutes || normalized?.minutosAnticipacion);
-    };
-
-    // Try different payload variants
-    const payloadVariants = [
-        { idUsuario: userId, antelacionNotis: timeFormat },
-        { userId: userId, antelacionNotis: timeFormat },
-        { idUsuario: userId, anticipationMinutes: validatedMinutes },
-        { userId: userId, anticipationMinutes: validatedMinutes },
-        { idUsuario: userId, minutosAnticipacion: validatedMinutes }
-    ];
-
-    const methods = ["PUT", "POST"];
-    let lastError = null;
-
-    for (const method of methods) {
-        for (const payload of payloadVariants) {
-            try {
-                const res = await fetch(UPDATE_REMINDER_ANTICIPATION_ENDPOINT, {
-                    method: method,
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(payload),
-                });
-
-                const contentType = res.headers.get("content-type") || "";
-                const body = contentType.includes("application/json") ? await res.json() : await res.text();
-
-                if (!res.ok) {
-                    const message = typeof body === "string" ? body : body?.message;
-                    lastError = `HTTP ${res.status}${message ? ` - ${message}` : ""}`;
-                    continue;
-                }
-
-                // Verify persistence
-                const persistedMinutes = await readPersistedAnticipation();
-                if (persistedMinutes === validatedMinutes) {
-                    return typeof body === "string" ? { success: true, message: body } : body;
-                }
-
-                lastError = `La API respondió éxito pero el valor no quedó persistido (esperado: ${validatedMinutes}, actual: ${persistedMinutes})`;
-            } catch (error) {
-                lastError = error?.message || String(error);
-            }
-        }
+    // Fetch current user data to get correo and actual idUsuario from DB
+    const currentData = await getUserData(userId);
+    console.log("Current user data received:", currentData);
+    
+    const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
+    console.log("Current user object:", currentUser);
+    
+    if (!currentUser) {
+        console.error("No user data found for userId:", userId);
+        return { success: false, message: "No se encontraron datos del usuario" };
     }
+    
+    // Use the actual idUsuario from the database, not the one passed as parameter
+    const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
+    console.log("Using actualUserId from DB:", actualUserId);
+    
+    const currentEmail = (currentUser?.correo || currentUser?.email || "").trim();
+    console.log("Current email:", currentEmail);
 
-    console.error("Error updating reminder anticipation:", lastError);
-    return { success: false, message: lastError || "No se pudo actualizar el tiempo de anticipación" };
+    const payload = {
+        idUsuario: actualUserId,
+        correo: currentEmail,
+        tiempoMute: tiempoMute
+    };
+
+    try {
+        console.log("Updating reminder anticipation with payload:", payload);
+        console.log("Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
+        
+        const res = await fetch(CONFIG_NOTIFICATION_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        console.log("Response status:", res.status);
+        const contentType = res.headers.get("content-type") || "";
+        const body = contentType.includes("application/json") ? await res.json() : await res.text();
+        console.log("Response body:", body);
+
+        // Check if backend returned success: false in the body (even with status 200)
+        if (typeof body === 'object' && body.success === false) {
+            console.error("Backend returned success: false -", body.message);
+            return { success: false, message: body.message || "El servidor rechazó la actualización" };
+        }
+
+        if (!res.ok) {
+            const message = typeof body === "string" ? body : body?.message;
+            console.error(`updateReminderAnticipation HTTP ${res.status}:`, message);
+            return { success: false, message: `HTTP ${res.status} - ${message}` };
+        }
+
+        return typeof body === "string" ? { success: true, message: body } : body;
+    } catch (error) {
+        console.error("Error updating reminder anticipation:", error);
+        return { success: false, message: error?.message || "No se pudo actualizar el tiempo de anticipación" };
+    }
 }
 
 export default { getUserData, updateUserEmail, changePassword, updateReminderAnticipation };

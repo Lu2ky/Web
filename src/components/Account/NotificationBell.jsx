@@ -26,8 +26,8 @@ export default function NotificationBell({ userId }) {
         // Load immediately
         load();
         
-        // Set up interval to reload every 10 seconds
-        const intervalId = setInterval(load, 10000);
+        // Set up interval to reload every 20 seconds
+        const intervalId = setInterval(load, 20000);
         
         // Cleanup interval on unmount or when userId changes
         return () => clearInterval(intervalId);
