@@ -1,3 +1,5 @@
+import env from '../env.js';
+
 let cachedCategories = null; // Declaración de caché para categorías
 
 export async function getCategories() {
@@ -7,7 +9,7 @@ export async function getCategories() {
     }
 
     try { // Llama a la API 
-        const baseUrl = import.meta.env.VITE_API_URL_COURSE_TYPES;
+        const baseUrl = env('VITE_API_URL_COURSE_TYPES');
         const response = await fetch(baseUrl);
 
         if (!response.ok) {

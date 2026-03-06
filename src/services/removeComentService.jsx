@@ -1,4 +1,6 @@
-const DELETE_COMMENT_ENDPOINT = import.meta.env.VITE_API_DELETE_COMMENT;
+import env from '../env.js';
+
+const DELETE_COMMENT_ENDPOINT = env('VITE_API_DELETE_COMMENT');
 
 /**
  * Delete a comment by its ID.

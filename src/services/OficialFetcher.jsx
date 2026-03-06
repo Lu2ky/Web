@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import LoadingModal from "./loadingModal";
+import env from '../env.js';
+import LoadingModal from "./LoadingModal";
 //Prueba local runner
 // Componente para cargar datos de la API y pasarlos al padre
 // onDataLoaded es una función que se llama con los datos cargados,
@@ -20,7 +21,7 @@ function OficialFetcher({ onDataLoaded, userId }) {
       return;
     }
     
-    const baseUrl = import.meta.env.VITE_API_URL_OFICIAL_SCHEDULE; // URL base de la API
+    const baseUrl = env('VITE_API_URL_OFICIAL_SCHEDULE'); // URL base de la API
 
     const fetchData = async () => {
       // Función asincrona para cargar datos

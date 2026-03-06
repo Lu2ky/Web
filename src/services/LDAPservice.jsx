@@ -1,5 +1,7 @@
-const baseUrl = import.meta.env.VITE_API_URL_LDPA; // URL para validar usuario
-const createUserUrl = import.meta.env.VITE_API_CREATE_USER; // URL para crear usuario
+import env from '../env.js';
+
+const baseUrl = env('VITE_API_URL_LDAP'); // URL para validar usuario
+const createUserUrl = env('VITE_API_CREATE_USER'); // URL para crear usuario
 
 /**
  * Validate user credentials via LDAP
