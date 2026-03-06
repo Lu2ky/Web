@@ -349,6 +349,58 @@
     flex: 1;
 }
 
+/* Número de celular */
+.cellphone-display-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cellphone-display-wrapper .pref-value {
+    flex: 1;
+}
+
+.cellphone-edit-form {
+    width: 100%;
+}
+
+.cellphone-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.cellphone-input {
+    flex: 1;
+    padding: 11px 14px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    color: #1f2937 !important;
+    border: 2px solid #e040a0 !important;
+    border-radius: 0.75rem !important;
+    font-family: inherit !important;
+    background: white !important;
+    transition: all 0.2s ease !important;
+}
+
+.cellphone-input::placeholder {
+    color: #d1d5db;
+    font-weight: 400;
+}
+
+.cellphone-input:focus {
+    outline: none !important;
+    border-color: #c820c5 !important;
+    box-shadow: 0 0 0 3px rgba(244, 7, 128, 0.08) !important;
+}
+
+.cellphone-input:disabled {
+    background-color: #f9fafb !important;
+    color: #9ca3af !important;
+    border-color: #f3f4f6 !important;
+    cursor: not-allowed !important;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .user-preferences {
@@ -396,5 +448,14 @@
     .pref-value {
         font-size: 13px;
         padding: 9px 12px;
+    }
+
+    .cellphone-input-wrapper {
+        flex-wrap: wrap;
+    }
+
+    .cellphone-input {
+        min-width: 0;
+        font-size: 16px !important; /* Previene auto-zoom en iOS */
     }
 }
