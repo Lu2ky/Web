@@ -1,26 +1,37 @@
 import { useMemo, useState } from "react";
 import "../../styles/TimeSelectorModal.css";
 
+// Modal para seleccionar duración de tiempo (horas y minutos)
+// Permite al usuario elegir tiempos predefinidos o configurar manualmente
+
+// Valor por defecto para el estado de tiempo
 const DEFAULT_TIME = {
     hours: 0,
     minutes: 0
 };
 
+// Componente TimeSelectorModal
+// Props:
+//   onSave: Callback ejecutado al guardar el tiempo seleccionado
 function TimeSelectorModal({ onSave }) {
+    // Estados
     const [isOpen, setIsOpen] = useState(false);
     const [timeData, setTimeData] = useState(DEFAULT_TIME);
     const [selectedPreset, setSelectedPreset] = useState(null);
 
+    // Calcula el total de minutos a partir de horas y minutos
     const totalMinutes = useMemo(() => {
         return Number(timeData.hours) * 60 + Number(timeData.minutes);
     }, [timeData.hours, timeData.minutes]);
 
+    // Maneja cambios en el campo de horas
     const handleHoursChange = (event) => {
         const value = Number(event.target.value || 0);
         setTimeData((prev) => ({ ...prev, hours: Math.max(0, value) }));
         setSelectedPreset(null);
     };
 
+    // Maneja cambios en el campo de minutos (máximo 59)
     const handleMinutesChange = (event) => {
         const value = Number(event.target.value || 0);
         const boundedMinutes = Math.min(59, Math.max(0, value));
@@ -28,12 +39,14 @@ function TimeSelectorModal({ onSave }) {
         setSelectedPreset(null);
     };
 
+    // Presets de tiempo predefinido
     const PRESETS = [
         { minutes: 480, label: "8 h" },
         { minutes: 1440, label: "1 día" },
         { minutes: 10080, label: "1 semana" }
     ];
 
+    // Aplica un preset de tiempo predefinido
     const applyPreset = (minutes) => {
         if (minutes === "off") {
             setTimeData({ hours: 0, minutes: 0 });
@@ -47,12 +60,12 @@ function TimeSelectorModal({ onSave }) {
         setSelectedPreset(minutes);
     };
 
-
-
+    // Cierra el modal
     const handleClose = () => {
         setIsOpen(false);
     };
 
+    // Ejecuta el callback onSave con los datos de tiempo y cierra el modal
     const handleSave = () => {
         if (onSave) {
             onSave({ ...timeData, totalMinutes });
@@ -62,6 +75,7 @@ function TimeSelectorModal({ onSave }) {
 
     return (
         <>
+            {/* Botón para abrir el modal selector de tiempo */}
             <button
                 className="timeSelectorButton"
                 onClick={() => setIsOpen(true)}
@@ -76,6 +90,7 @@ function TimeSelectorModal({ onSave }) {
                 </svg>
             </button>
 
+            {/* Modal para seleccionar el tiempo */}
             {isOpen && (
                 <div
                     className="timeModalOverlay"
@@ -86,6 +101,7 @@ function TimeSelectorModal({ onSave }) {
                     <div className="timeModalContainer" onClick={(event) => event.stopPropagation()}>
                         <h2>Seleccionar tiempo</h2>
 
+                        {/* Botón para cerrar el modal */}
                         <button
                             className="timeModalClose"
                             onClick={handleClose}
@@ -96,6 +112,7 @@ function TimeSelectorModal({ onSave }) {
                             X
                         </button>
 
+                        {/* Sección de presets predefinidos */}
                         <div className="presetBlock">
                             <label className="presetLabel">Duración predefinida</label>
                             <div className="presetChips">
@@ -115,8 +132,7 @@ function TimeSelectorModal({ onSave }) {
 
                         {/* no programmatic limit configured */}
 
-                        
-
+                        {/* Botones de acción: Cancelar y Guardar */}
                         <div className="timeModalActions">
                             <button className="timeCancelButton" onClick={handleClose} type="button">
                                 Cancelar
