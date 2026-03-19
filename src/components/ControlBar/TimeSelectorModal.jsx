@@ -6,8 +6,7 @@ const DEFAULT_TIME = {
     minutes: 0
 };
 
-// limitValue: valor fijado desde programación (no editable por usuario)
-function TimeSelectorModal({ onSave, limitValue }) {
+function TimeSelectorModal({ onSave }) {
     const [isOpen, setIsOpen] = useState(false);
     const [timeData, setTimeData] = useState(DEFAULT_TIME);
     const [selectedPreset, setSelectedPreset] = useState(null);
@@ -32,8 +31,7 @@ function TimeSelectorModal({ onSave, limitValue }) {
     const PRESETS = [
         { minutes: 480, label: "8 h" },
         { minutes: 1440, label: "1 día" },
-        { minutes: 10080, label: "1 semana" },
-        { minutes: "off", label: "Hasta desactivar" }
+        { minutes: 10080, label: "1 semana" }
     ];
 
     const applyPreset = (minutes) => {
@@ -115,9 +113,7 @@ function TimeSelectorModal({ onSave, limitValue }) {
                         </div>
                         
 
-                        {limitValue ? (
-                            <p className="timeLimitDisplay">Límite (configurado por programación): {limitValue}</p>
-                        ) : null}
+                        {/* no programmatic limit configured */}
 
                         
 
@@ -127,19 +123,7 @@ function TimeSelectorModal({ onSave, limitValue }) {
                             </button>
                             <button
                                 className="timeSaveButton"
-                                onClick={() => {
-                                    const payload = { ...timeData };
-                                    // Si el preset es 'off', marcar como desactivado
-                                    if (selectedPreset === "off") {
-                                        payload.disabled = true;
-                                        payload.totalMinutes = null;
-                                    } else {
-                                        payload.totalMinutes = totalMinutes;
-                                    }
-                                    if (limitValue !== undefined) payload.limit = limitValue;
-                                    if (onSave) onSave(payload);
-                                    handleClose();
-                                }}
+                                onClick={handleSave}
                                 type="button"
                             >
                                 Guardar
