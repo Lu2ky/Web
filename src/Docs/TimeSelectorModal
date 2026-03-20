@@ -1,3 +1,4 @@
+{ /*
 import { useMemo, useState } from "react";
 import "../../styles/TimeSelectorModal.css";
 
@@ -75,7 +76,7 @@ function TimeSelectorModal({ onSave }) {
 
     return (
         <>
-            {/* Botón para abrir el modal selector de tiempo */}
+            {/* Botón para abrir el modal selector de tiempo */} {/*
             <button
                 className="timeSelectorButton"
                 onClick={() => setIsOpen(true)}
@@ -90,7 +91,7 @@ function TimeSelectorModal({ onSave }) {
                 </svg>
             </button>
 
-            {/* Modal para seleccionar el tiempo */}
+            {/* Modal para seleccionar el tiempo */} {/*
             {isOpen && (
                 <div
                     className="timeModalOverlay"
@@ -101,7 +102,7 @@ function TimeSelectorModal({ onSave }) {
                     <div className="timeModalContainer" onClick={(event) => event.stopPropagation()}>
                         <h2>Seleccionar tiempo</h2>
 
-                        {/* Botón para cerrar el modal */}
+                        {/* Botón para cerrar el modal */} {/*}
                         <button
                             className="timeModalClose"
                             onClick={handleClose}
@@ -112,7 +113,7 @@ function TimeSelectorModal({ onSave }) {
                             X
                         </button>
 
-                        {/* Sección de presets predefinidos */}
+                        {/* Sección de presets predefinidos */}{/*}
                         <div className="presetBlock">
                             <label className="presetLabel">Duración predefinida</label>
                             <div className="presetChips">
@@ -132,7 +133,7 @@ function TimeSelectorModal({ onSave }) {
 
                         {/* no programmatic limit configured */}
 
-                        {/* Botones de acción: Cancelar y Guardar */}
+                        {/* Botones de acción: Cancelar y Guardar */} {/*}
                         <div className="timeModalActions">
                             <button className="timeCancelButton" onClick={handleClose} type="button">
                                 Cancelar
@@ -152,4 +153,4 @@ function TimeSelectorModal({ onSave }) {
     );
 }
 
-export default TimeSelectorModal;
+export default TimeSelectorModal;*/}
