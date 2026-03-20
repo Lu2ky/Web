@@ -430,23 +430,11 @@ static async addReminder(userId, name, description, dueDate, priority, tags = []
 		});
 	}
 
-	// Use own fetch (instead of postUpdate) to capture the response body with the new reminder's ID
-	console.log(`[ReminderService] POST ${ADD_REMINDER_ENDPOINT}`, JSON.stringify(payload, null, 2));
-	const response = await fetch(ADD_REMINDER_ENDPOINT, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(payload),
-	});
-	const responseText = await response.text();
-	console.log(`[ReminderService] Response ${response.status} from ${ADD_REMINDER_ENDPOINT}:`, responseText);
-	if (!response.ok) {
-		throw new Error(`Error al agregar recordatorio: ${response.status}${responseText ? ` - ${responseText}` : ""}`);
-	}
-	try {
-		return JSON.parse(responseText);
-	} catch {
-		return null;
-	}
+	return this.postUpdate(
+		ADD_REMINDER_ENDPOINT,
+		payload,
+		"Error al agregar recordatorio"
+	);
 }
 
 /* Delete a reminder by id */

@@ -211,9 +211,8 @@ function App() {
 		try {
 			// Intentar eliminar desde la API
 			await deletePersonalActivity(userId, id);
-			console.log("Actividad eliminada de la API");
 		} catch (error) {
-			console.error("Error al eliminar de la API:", error);
+			console.error("❌ Error al eliminar de la API:", error);
 			// Continuar incluso si falla la API (eliminar del estado local)
 		}
 
@@ -324,6 +323,7 @@ function App() {
 						onClose={handleClosePersonalPopup}
 						personalData={selectedPersonal}
 						onUpdate={handleActivityUpdate}
+						onDelete={handleRequestDeletePersonal}
 						userId={userId}
 					/>
 					<MessageConfirmation
