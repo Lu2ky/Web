@@ -1,0 +1,8 @@
+﻿Diagnostico de rutas backend para persistencia real
+Fecha: 2026-03-19 19:46:43
+
+http://209.25.140.25:9242/api/course-types/ => GET ERROR: La operación sobrepasó el tiempo de espera.
+http://209.25.140.25:9242/api/change-password/ => GET ERROR: Error en el servidor remoto: (404) No se encontró.
+http://209.25.140.25:9242/api/auth/validate-user => GET ERROR: Error en el servidor remoto: (404) No se encontró.
+http://209.25.140.20:3380/api/course-types/ => GET ERROR: La operación sobrepasó el tiempo de espera.
+http://209.25.140.20:3380/api/change-password/ => GET ERROR: La operación sobrepasó el tiempo de espera.

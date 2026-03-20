@@ -1,0 +1,10 @@
+﻿
+> horarios-estudiantes@0.0.0 test:e2e:run
+> playwright test tests/e2e/user-profile-change-password.e2e.spec.js --reporter=list --workers=1
+
+
+Running 1 test using 1 worker
+
+  Ô£ô  1 [chromium] ÔÇ║ tests\e2e\user-profile-change-password.e2e.spec.js:4:5 ÔÇ║ E2E Mi perfil - cambio de contrasena ÔÇ║ usuario cambia contrasena correctamente desde Mi Perfil (1.0s)
+
+  1 passed (3.0s)
