@@ -14,20 +14,15 @@ export default function DuplicateButton({
 			type="button"
 		>
 			<svg
-				width="48"
-				height="48"
-				viewBox="0 0 48 48"
+				width="24"  
+				height="24" 
+				viewBox="0 0 24 24" 
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"
 				aria-hidden="true"
 			>
-				<path
-					d="M12 8H32C34.2091 8 36 9.79086 36 12V32M16 16H36C38.2091 16 40 17.7909 40 20V40C40 42.2091 38.2091 44 36 44H16C13.7909 44 12 42.2091 12 40V20C12 17.7909 13.7909 16 16 16Z"
-					stroke="#333333"
-					strokeWidth="4"
-					strokeLinecap="round"
-					strokeLinejoin="round"
-				/>
+				<rect x="9" y="9" width="13" height="13" rx="1" stroke="#333333" strokeWidth="2"/>
+				<path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
 			</svg>
 		</button>
 	);

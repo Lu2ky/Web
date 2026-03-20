@@ -2,7 +2,7 @@ import EditButton from "./EditButton";
 import DuplicateButton from "./DuplicateButton";
 import "../../styles/Reminder.css";
 
-function RemindCard({ task, priority = "", onToggle, onEdit, onDelete }) {
+function RemindCard({ task, priority = "", onToggle, onEdit, onDelete, onDuplicate = () => {} }) {
     const priorityClass = priority ? `remindcard-priority-${priority}` : "";
     const title = task?.name || "Recordatorio";
     const description = task?.description || "";
