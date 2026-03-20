@@ -401,6 +401,120 @@
     cursor: not-allowed !important;
 }
 
+/* Mute Notifications */
+.mute-toggle-btn {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, #f6047b 0%, #c820c5 100%);
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(244, 7, 128, 0.15);
+}
+
+.mute-toggle-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(244, 7, 128, 0.25);
+}
+
+.mute-toggle-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+}
+
+.mute-toggle-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Mute Status Badge */
+.mute-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, rgba(244, 7, 128, 0.05) 0%, rgba(200, 32, 197, 0.05) 100%);
+    border: 1px solid rgba(244, 7, 128, 0.2);
+    border-radius: 0.75rem;
+    margin-bottom: 10px;
+}
+
+.mute-status-indicator {
+    font-size: 12px;
+    color: #f6047b;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}
+
+.mute-status-content {
+    flex: 1;
+}
+
+.mute-status-text {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.mute-status-until {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* Mute Edit Form */
+.mute-edit-form {
+    width: 100%;
+}
+
+.mute-preset-section {
+    margin-bottom: 16px;
+}
+
+.mute-preset-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Chips predefinidos */
+.time-chip {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #9ca3af;
+    background-color: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.time-chip:hover {
+    border-color: #f6047b;
+    color: #f6047b;
+    background-color: #fdf2f8;
+}
+
+.time-chip.active {
+    background: linear-gradient(135deg, #f6047b 0%, #c820c5 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(244, 7, 128, 0.2);
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .user-preferences {
@@ -457,5 +571,22 @@
     .cellphone-input {
         min-width: 0;
         font-size: 16px !important; /* Previene auto-zoom en iOS */
+    }
+
+    .mute-status-badge {
+        flex-wrap: wrap;
+    }
+
+    .mute-toggle-btn {
+        font-size: 15px;
+    }
+
+    .mute-preset-chips {
+        justify-content: space-between;
+    }
+
+    .time-chip {
+        flex: 1;
+        min-width: calc(33.333% - 6px);
     }
 }
