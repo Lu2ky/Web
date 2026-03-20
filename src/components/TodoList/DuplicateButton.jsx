@@ -1,13 +1,13 @@
-import "../../styles/EditButton.css";
+import "../../styles/DuplicateButton.css";
 
-export default function EditButton({
-	onClick  = () => {},
-	title = "Editar",
+export default function DuplicateButton({
+	onClick = () => {},
+	title = "Duplicar",
 	className = ""
 }) {
 	return (
 		<button
-			className={`edit-button ${className}`.trim()}
+			className={`duplicate-button ${className}`.trim()}
 			onClick={onClick}
 			title={title}
 			aria-label={title}
@@ -22,16 +22,10 @@ export default function EditButton({
 				aria-hidden="true"
 			>
 				<path
-					d="M7 42H41"
+					d="M12 8H32C34.2091 8 36 9.79086 36 12V32M16 16H36C38.2091 16 40 17.7909 40 20V40C40 42.2091 38.2091 44 36 44H16C13.7909 44 12 42.2091 12 40V20C12 17.7909 13.7909 16 16 16Z"
 					stroke="#333333"
 					strokeWidth="4"
 					strokeLinecap="round"
-					strokeLinejoin="round"
-				/>
-				<path
-					d="M11 26.7199V34H18.3172L39 13.3081L31.6919 6L11 26.7199Z"
-					stroke="#333333"
-					strokeWidth="4"
 					strokeLinejoin="round"
 				/>
 			</svg>

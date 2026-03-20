@@ -1,4 +1,5 @@
 import EditButton from "./EditButton";
+import DuplicateButton from "./DuplicateButton";
 import "../../styles/Reminder.css";
 
 function RemindCard({ task, priority = "", onToggle, onEdit, onDelete }) {
@@ -74,6 +75,7 @@ function RemindCard({ task, priority = "", onToggle, onEdit, onDelete }) {
 
                 <div className="remindcard-actions">
                     <EditButton onClick={() => onEdit(task.id)} />
+                    <DuplicateButton onClick={() => onDuplicate(task.id)} />
                     <button
                         className="remindcard-delete"
                         onClick={() => onDelete(task.id)}
