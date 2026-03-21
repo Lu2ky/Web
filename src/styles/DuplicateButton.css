@@ -1,0 +1,22 @@
+
+.duplicate-button {
+    background: none;
+    border: none;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    margin-right: 6px;
+    cursor: pointer;
+}
+
+.duplicate-button svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+}
+
+.duplicate-button:hover {
+    color: #111827;
+}

@@ -1,19 +1,23 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
 import UserProfile from "./UserProfile";
 import UserPreferences from "./UserPreferences";
 import "./DropdownAcount.css";
+import { clearAuthSession } from "../../services/authSession";
 
 const OPTIONS = [
     { id: "acount", label: "Mi Perfil" },
     { id: "prefer", label: "Preferencias" },
-    { id: "close", label: "Cerrar Sesión"},
+    { id: "close", label: "Cerrar Sesión" },
 ];
 
 export default function DropdownAcount({ userId }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeModal, setActiveModal] = useState(null);
     const dropdownRef = useRef(null);
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -30,6 +34,14 @@ export default function DropdownAcount({ userId }) {
     const handleOptionClick = (optionId) => {
         setActiveModal(optionId);
         setIsDropdownOpen(false);
+    };
+
+    const handleLogout = () => {
+        // Limpiar sesión del usuario para bloquear rutas protegidas.
+        clearAuthSession();
+
+        // Rediriges al login
+        navigate("/");
     };
 
     const closeModal = () => setActiveModal(null);
@@ -89,7 +101,12 @@ export default function DropdownAcount({ userId }) {
                 title="Cerrar Sesión"
             >
                 <p>¿Estás seguro de que deseas cerrar sesión?</p>
-                <button className="modal-confirm-btn">Sí, cerrar sesión</button>
+                <button
+                    className="modal-confirm-btn"
+                    onClick={handleLogout}
+                >
+                    Sí, cerrar sesión
+                </button>
             </Modal>
         </div>
     );

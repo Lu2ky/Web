@@ -61,6 +61,11 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
     eventsByDay[event.day].push(event);
   });
 
+  // Debug: mostrar agrupación
+  personalEvents.forEach(ev => {
+    console.log(`  - Evento "${ev.name}" en día: "${ev.day}" (type: ${typeof ev.day})`);
+  });
+
   const formatHour = (hour) => {
     const period = hour < 12 ? "AM" : "PM";
     const displayHour = hour % 12 || 12;

@@ -7,6 +7,7 @@ export const PopUpPersonal = ({
   onClose = () => { },
   personalData = {},
   onUpdate = () => {},
+  onDelete = () => {},
   userId = null,
 }) => {
   const [is_open, set_is_open] = useState(isOpen);
@@ -52,6 +53,15 @@ export const PopUpPersonal = ({
     // Cerrar modales
     handleCloseEdit();
     handle_close();
+  };
+
+  const handleDeleteClick = () => {
+    if (personalData?.id) {
+      onDelete(personalData.id);
+      handle_close();
+    } else {
+      console.error("❌ No hay ID disponible para eliminar. personalData:", personalData);
+    }
   };
 
   if (!is_open) {
@@ -109,6 +119,28 @@ export const PopUpPersonal = ({
                     strokeLinejoin="round"
                   />
                 </svg>
+              </button>
+              <button
+                onClick={handleDeleteClick}
+                title="Eliminar actividad"
+                aria-label="Eliminar actividad"
+                type="button"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ff6b6b',
+                  fontSize: '20px',
+                  transition: 'transform 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.transform = 'scale(1.15)'}
+                onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+              >
+                ✕
               </button>
             </div>
             <div className="subject-meta">

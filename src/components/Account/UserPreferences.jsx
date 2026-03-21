@@ -25,10 +25,43 @@ export default function UserPreferences({ userId, onClose }) {
     const [newCellphone, setNewCellphone] = useState("");
     const [isSavingCellphone, setIsSavingCellphone] = useState(false);
 
+    // Mute notifications state
+    const [isEditingMute, setIsEditingMute] = useState(false);
+    const [muteInfo, setMuteInfo] = useState(null);
+    const [isSavingMute, setIsSavingMute] = useState(false);
+    const [selectedMutePreset, setSelectedMutePreset] = useState(null);
+
+    // Presets de silenciado
+    const MUTE_PRESETS = [
+        { minutes: 480, label: "8 h" },
+        { minutes: 1440, label: "1 día" },
+        { minutes: 10080, label: "1 semana" }
+    ];
+
     // Load user data on component mount
     useEffect(() => {
         loadUserData();
+        loadMuteInfo();
     }, [userId]);
+
+    const loadMuteInfo = () => {
+        try {
+            const stored = localStorage.getItem("notificationsMute");
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                // Check if still active
+                if (parsed.muteUntil && Date.now() < parsed.muteUntil) {
+                    setMuteInfo(parsed);
+                } else {
+                    // Expired, clean up
+                    localStorage.removeItem("notificationsMute");
+                    setMuteInfo(null);
+                }
+            }
+        } catch (err) {
+            console.error("Error loading mute info:", err);
+        }
+    };
 
     const loadUserData = async () => {
         if (!userId) {
@@ -255,13 +288,6 @@ export default function UserPreferences({ userId, onClose }) {
         }
     };
 
-    // Validate cellphone format (basic validation)
-    // const isValidCellphone = (cellphone) => {
-    //     // Allow digits, spaces, hyphens, parentheses, plus sign
-    //     const cellphoneRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
-    //     return cellphoneRegex.test(cellphone.replace(/\s/g, ''));
-    // };
-
     const handleEditCellphone = () => {
         setIsEditingCellphone(true);
         setError("");
@@ -317,6 +343,76 @@ export default function UserPreferences({ userId, onClose }) {
         } finally {
             setIsSavingCellphone(false);
         }
+    };
+
+    // Mute notifications handlers
+    const handleEditMute = () => {
+        setIsEditingMute(true);
+        setSelectedMutePreset(null);
+        setError("");
+        setSuccess("");
+    };
+
+    const handleCancelMute = () => {
+        setIsEditingMute(false);
+        setSelectedMutePreset(null);
+        setError("");
+    };
+
+    const applyMutePreset = (minutes) => {
+        setSelectedMutePreset(minutes);
+    };
+
+    const handleSaveMute = (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+
+        if (selectedMutePreset === null) {
+            setError("Por favor selecciona una duración");
+            return;
+        }
+
+        const totalMinutes = selectedMutePreset;
+
+        setIsSavingMute(true);
+
+        try {
+            const now = Date.now();
+            const muteUntil = now + totalMinutes * 60 * 1000;
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+
+            const payload = {
+                enabled: true,
+                hours,
+                minutes,
+                totalMinutes,
+                muteUntil,
+                createdAt: now,
+                userId,
+            };
+
+            localStorage.setItem("notificationsMute", JSON.stringify(payload));
+            setMuteInfo(payload);
+            setSuccess("Notificaciones silenciadas correctamente");
+            setIsEditingMute(false);
+            setSelectedMutePreset(null);
+
+            setTimeout(() => setSuccess(""), 3000);
+        } catch (err) {
+            setError("Error al silenciar notificaciones");
+            console.error(err);
+        } finally {
+            setIsSavingMute(false);
+        }
+    };
+
+    const handleUnmute = () => {
+        localStorage.removeItem("notificationsMute");
+        setMuteInfo(null);
+        setSuccess("Notificaciones reactivadas");
+        setTimeout(() => setSuccess(""), 3000);
     };
 
     if (loading) {
@@ -393,6 +489,80 @@ export default function UserPreferences({ userId, onClose }) {
                 <div className="pref-group">
                     <label className="pref-label">Notificaciones por Correo</label>
                     <p className="pref-description">Recibe actualizaciones importantes en tu correo electrónico</p>
+                </div>
+
+                {/* Mute Notifications Section */}
+                <div className="pref-group">
+                    <label className="pref-label">Silenciar Notificaciones</label>
+                    
+                    {muteInfo?.enabled && muteInfo?.muteUntil ? (
+                        <div className="mute-status-badge">
+                            <span className="mute-status-indicator">●</span>
+                            <div className="mute-status-content">
+                                <p className="mute-status-text">Silenciadas</p>
+                                <p className="mute-status-until">
+                                    Hasta {new Date(muteInfo.muteUntil).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                className="email-action-btn email-cancel-btn"
+                                onClick={handleUnmute}
+                                title="Reactivar notificaciones"
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+                    ) : null}
+
+                    {!isEditingMute && (!muteInfo?.enabled || !muteInfo?.muteUntil) ? (
+                        <button
+                            type="button"
+                            className="mute-toggle-btn"
+                            onClick={handleEditMute}
+                            disabled={isSavingMute}
+                        >
+                            Silenciar Notificaciones
+                        </button>
+                    ) : isEditingMute ? (
+                        <form onSubmit={handleSaveMute} className="mute-edit-form">
+                            <div className="mute-preset-section">
+                                <label className="pref-label">Duración predefinida</label>
+                                <div className="mute-preset-chips">
+                                    {MUTE_PRESETS.map((preset) => (
+                                        <button
+                                            key={preset.minutes}
+                                            type="button"
+                                            className={`time-chip ${selectedMutePreset === preset.minutes ? "active" : ""}`}
+                                            onClick={() => applyMutePreset(preset.minutes)}
+                                        >
+                                            {preset.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="time-actions">
+                                <button
+                                    type="submit"
+                                    className="email-action-btn email-save-btn"
+                                    disabled={isSavingMute || selectedMutePreset === null}
+                                    title="Guardar"
+                                >
+                                    <FaCheck />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="email-action-btn email-cancel-btn"
+                                    onClick={handleCancelMute}
+                                    disabled={isSavingMute}
+                                    title="Cancelar"
+                                >
+                                    <FaTimes />
+                                </button>
+                            </div>
+                        </form>
+                    ) : null}
                 </div>
             </section>
 

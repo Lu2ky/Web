@@ -32,6 +32,29 @@ class ReminderService {
 		return response;
 	}
 
+	/* Duplicar recordatorio */
+	static async duplicateReminder(userId, taskToDuplicate, codigoUsuario = null) {
+		if (!userId || !taskToDuplicate) return null;
+
+		// extraer solo las etiquetas relevantes (ignorando tags sintéticos de prioridad)
+		const tagLabels = Array.isArray(taskToDuplicate.tags)
+			? taskToDuplicate.tags
+				.map(t => typeof t === 'string' ? t : t.label || "")
+				.filter(Boolean)
+			: [];
+
+		return this.addReminder(
+			userId,
+			`${taskToDuplicate.name} (copia)`,
+			taskToDuplicate.description,
+			taskToDuplicate.dueDate,
+			taskToDuplicate.priority,
+			tagLabels,
+			codigoUsuario
+		);
+	}
+
+
 	static getNullableString(value) {
 		if (value == null) return "";
 		if (typeof value === "string") return value;
@@ -404,108 +427,97 @@ class ReminderService {
 		console.log("[ReminderService] All updates done");
 	}
 
-/* Add a new reminder via POST */
-static async addReminder(userId, name, description, dueDate, priority, tags = [], codigoUsuario = null) {
-	if (!userId) return;
-	const priorityNumber = this.priorityToNumber(priority);
-	
-	const payload = {
-		P_usuario: userId,
-		P_codigo_usuario: codigoUsuario ?? null,
-		P_nombre: name || "",
-		P_descripcion: description || "",
-		P_fecha: this.toDateTimeString(dueDate),
-		P_prioridad: priorityNumber ?? 2,
-		P_tag1: null,
-		P_tag2: null,
-		P_tag3: null,
-		P_tag4: null,
-		P_tag5: null
-	};
-	
-	// include up to 5 tags, null for empty slots
-	if (Array.isArray(tags)) {
-		tags.slice(0, 5).forEach((t, ix) => {
-			payload[`P_tag${ix + 1}`] = t || null;
-		});
+	/* Add a new reminder via POST */
+	static async addReminder(userId, name, description, dueDate, priority, tags = [], codigoUsuario = null) {
+		if (!userId) return;
+		const priorityNumber = this.priorityToNumber(priority);
+
+		const payload = {
+			P_usuario: userId,
+			P_codigo_usuario: codigoUsuario ?? null,
+			P_nombre: name || "",
+			P_descripcion: description || "",
+			P_fecha: this.toDateTimeString(dueDate),
+			P_prioridad: priorityNumber ?? 2,
+			P_tag1: null,
+			P_tag2: null,
+			P_tag3: null,
+			P_tag4: null,
+			P_tag5: null
+		};
+
+		// include up to 5 tags, null for empty slots
+		if (Array.isArray(tags)) {
+			tags.slice(0, 5).forEach((t, ix) => {
+				payload[`P_tag${ix + 1}`] = t || null;
+			});
+		}
+
+		return this.postUpdate(
+			ADD_REMINDER_ENDPOINT,
+			payload,
+			"Error al agregar recordatorio"
+		);
 	}
 
-	// Use own fetch (instead of postUpdate) to capture the response body with the new reminder's ID
-	console.log(`[ReminderService] POST ${ADD_REMINDER_ENDPOINT}`, JSON.stringify(payload, null, 2));
-	const response = await fetch(ADD_REMINDER_ENDPOINT, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(payload),
-	});
-	const responseText = await response.text();
-	console.log(`[ReminderService] Response ${response.status} from ${ADD_REMINDER_ENDPOINT}:`, responseText);
-	if (!response.ok) {
-		throw new Error(`Error al agregar recordatorio: ${response.status}${responseText ? ` - ${responseText}` : ""}`);
+	/* Delete a reminder by id */
+	static async deleteReminder(reminderId) {
+		if (!reminderId) return;
+		return this.postUpdate(
+			DELETE_REMINDER_ENDPOINT,
+			{ N_idRecordatorio: reminderId },
+			"Error al eliminar recordatorio"
+		);
 	}
-	try {
-		return JSON.parse(responseText);
-	} catch {
-		return null;
+
+	/* Update state (completed/not completed) of a reminder */
+	static async updateState(reminderId, state) {
+		if (!reminderId) return;
+		// Convert boolean to appropriate format (backend expects boolean or 0/1)
+		const stateValue = typeof state === 'boolean' ? state : Boolean(state);
+		return this.postUpdate(
+			UPDATE_STATE_ENDPOINT,
+			{ P_idToDo: reminderId, P_estado: stateValue },
+			"Error al actualizar estado de recordatorio"
+		);
+	}
+
+	/* Update tags for a reminder */
+	static async updateTags(reminderId, tags = []) {
+		console.log(`[ReminderService] updateTags called — reminderId: ${reminderId}, tags:`, tags);
+
+		if (!reminderId) {
+			console.warn("[ReminderService] updateTags aborted — no reminderId");
+			return;
+		}
+
+		const payload = {
+			P_idToDo: reminderId,
+			P_tag1: null,
+			P_tag2: null,
+			P_tag3: null,
+			P_tag4: null,
+			P_tag5: null
+		};
+
+		if (Array.isArray(tags)) {
+			tags.slice(0, 5).forEach((t, ix) => {
+				payload[`P_tag${ix + 1}`] = t || null;
+				console.log(`[ReminderService] updateTags — P_tag${ix + 1}:`, t || null);
+			});
+		} else {
+			console.warn("[ReminderService] updateTags — tags is not an array:", tags);
+		}
+
+		console.log("[ReminderService] updateTags — final payload:", JSON.stringify(payload, null, 2));
+
+		return this.postUpdate(
+			UPDATE_TAGS_ENDPOINT,
+			payload,
+			"Error al actualizar etiquetas de recordatorio"
+		);
 	}
 }
-
-/* Delete a reminder by id */
-static async deleteReminder(reminderId) {
-	if (!reminderId) return;
-	return this.postUpdate(
-		DELETE_REMINDER_ENDPOINT,
-		{ N_idRecordatorio: reminderId },
-		"Error al eliminar recordatorio"
-	);
-}
-
-/* Update state (completed/not completed) of a reminder */
-static async updateState(reminderId, state) {
-	if (!reminderId) return;
-	// Convert boolean to appropriate format (backend expects boolean or 0/1)
-	const stateValue = typeof state === 'boolean' ? state : Boolean(state);
-	return this.postUpdate(
-		UPDATE_STATE_ENDPOINT,
-		{ P_idToDo: reminderId, P_estado: stateValue },
-		"Error al actualizar estado de recordatorio"
-	);
-}
-
-/* Update tags for a reminder */
-static async updateTags(reminderId, tags = []) {
-	console.log(`[ReminderService] updateTags called — reminderId: ${reminderId}, tags:`, tags);
-
-	if (!reminderId) {
-		console.warn("[ReminderService] updateTags aborted — no reminderId");
-		return;
-	}
-
-	const payload = { 
-		P_idToDo: reminderId,
-		P_tag1: null,
-		P_tag2: null,
-		P_tag3: null,
-		P_tag4: null,
-		P_tag5: null
-	};
-
-	if (Array.isArray(tags)) {
-		tags.slice(0, 5).forEach((t, ix) => {
-			payload[`P_tag${ix + 1}`] = t || null;
-			console.log(`[ReminderService] updateTags — P_tag${ix + 1}:`, t || null);
-		});
-	} else {
-		console.warn("[ReminderService] updateTags — tags is not an array:", tags);
-	}
-
-	console.log("[ReminderService] updateTags — final payload:", JSON.stringify(payload, null, 2));
-
-	return this.postUpdate(
-		UPDATE_TAGS_ENDPOINT,
-		payload,
-		"Error al actualizar etiquetas de recordatorio"
-	);
-}}
 
 
 

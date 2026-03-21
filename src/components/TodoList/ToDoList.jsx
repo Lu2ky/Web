@@ -8,6 +8,8 @@ import ToDoFilterModal from "./ToDoFilterModal";
 import ToDoListTagFetcher from "../../services/ToDoListTagFetcher";
 import RemindCard from "./RemindCard";
 import ReminderService from "../../services/reminderService";
+import { getUserData } from "../../services/userService";
+import TaskAddModal from "./TaskAddModal"; // Import del modal para duplicar
 
 const initialTasks = [];
 
@@ -50,6 +52,10 @@ function ToDoList({ userId = "" }) {
     const [taskToEdit, setTaskToEdit] = useState(null);
     const [taskToDelete, setTaskToDelete] = useState(null);
     const [activeFilters, setActiveFilters] = useState(defaultFilters);
+    
+    // Estados para manejar la duplicación de recordatorios
+    const [taskToDuplicate, setTaskToDuplicate] = useState(null);
+    const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
 
     const loadReminderTasks = useCallback(async () => {
         if (!userId) {
@@ -130,11 +136,73 @@ function ToDoList({ userId = "" }) {
     };
 
     const editTask = (id) => {
-        // Placeholder: abrir modal o formulario de edición.
-        // Actualmente solo hace log para integrarlo visualmente.
         const task = tasks.find(t => t.id === id);
         setTaskToEdit(task);
         setIsEditModalOpen(true);
+    };
+
+    // Función para manejar la duplicación de recordatorios
+    // Recibe el ID de la tarea a duplicar, busca la tarea completa y abre el modal
+    const handleDuplicate = (id) => {
+        const task = tasks.find(t => t.id === id);
+        setTaskToDuplicate(task);
+        setIsDuplicateModalOpen(true);
+    };
+
+    // Función para guardar la tarea duplicada
+    // Crea un nuevo recordatorio con los datos proporcionados desde el modal de duplicado
+    const handleSaveDuplicate = async (formData) => {
+        if (!userId) {
+            setIsDuplicateModalOpen(false);
+            setTaskToDuplicate(null);
+            return;
+        }
+
+        try {
+            const userData = await getUserData(userId);
+            const rawUser = Array.isArray(userData) ? userData[0] : userData;
+            const idUsuario =
+                rawUser?.N_idUsuario ??
+                rawUser?.idUsuario ??
+                rawUser?.id_user ??
+                rawUser?.ID_USER ??
+                rawUser?.id ??
+                userId;
+
+            const tagLabels = (Array.isArray(formData?.tags) ? formData.tags : [])
+                .filter((tag) =>
+                    typeof tag === "string" ? true : !String(tag?.type ?? "").startsWith("priority-")
+                )
+                .map((tag) => (typeof tag === "string" ? tag : tag?.label || ""))
+                .filter(Boolean);
+
+            // Igual que el alta normal: id interno en P_usuario y código externo en P_codigo_usuario
+            await ReminderService.addReminder(
+                idUsuario,
+                formData.name,
+                formData.description,
+                formData.dueDate,
+                formData.priority,
+                tagLabels,
+                userId
+            );
+
+            // Cerrar modal y limpiar estado
+            setIsDuplicateModalOpen(false);
+            setTaskToDuplicate(null);
+            
+            // Recargar la lista de recordatorios para mostrar el nuevo
+            await loadReminderTasks();
+        } catch (error) {
+            console.error("Error al duplicar recordatorio:", error);
+            await loadReminderTasks();
+        }
+    };
+
+    // Función para cerrar el modal de duplicado y limpiar el estado
+    const handleCloseDuplicateModal = () => {
+        setIsDuplicateModalOpen(false);
+        setTaskToDuplicate(null);
     };
 
     const handleSave = async (formData) => {
@@ -171,8 +239,6 @@ function ToDoList({ userId = "" }) {
 
     const handleDelete = async () => {
         if (userId && taskToDelete) {
-            // Use N_idRecordatorio (recordatorioId) for the delete endpoint,
-            // which is different from the list ID stored in task.id.
             const apiId = taskToDelete.recordatorioId ?? taskToDelete.id;
             try {
                 await ReminderService.deleteReminder(apiId);
@@ -209,14 +275,14 @@ function ToDoList({ userId = "" }) {
                 title={isDrawerOpen ? "Cerrar lista de tareas" : "Abrir lista de tareas"}
                 aria-label={isDrawerOpen ? "Cerrar lista de tareas" : "Abrir lista de tareas"}
                 type="button"
-                style={{display: isDrawerOpen ? 'none' : undefined}}
+                style={{ display: isDrawerOpen ? 'none' : undefined }}
             >
                 TO-DO
             </button>
             {isDrawerOpen && (
                 <div
-                className="todo-overlay"
-                onClick={() => setIsDrawerOpen(false)}
+                    className="todo-overlay"
+                    onClick={() => setIsDrawerOpen(false)}
                 />
             )}
             <div className={`todolist-panel${isDrawerOpen ? " open" : ""}`}>
@@ -246,6 +312,7 @@ function ToDoList({ userId = "" }) {
                                 onToggle={toggleTask}
                                 onEdit={editTask}
                                 onDelete={deleteTask}
+                                onDuplicate={handleDuplicate} //Pasar función para duplicar
                             />
                         );
                     })}
@@ -253,13 +320,25 @@ function ToDoList({ userId = "" }) {
                     {filteredTasks.length === 0 && (
                         <div className="todolist-empty-state">
                             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5">
-                                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <rect x="9" y="3" width="6" height="4" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" strokeLinecap="round" strokeLinejoin="round" />
+                                <rect x="9" y="3" width="6" height="4" rx="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                             <p>{!userId ? "Ingresa un ID para cargar recordatorios." : "No hay tareas para los filtros seleccionados."}</p>
                         </div>
                     )}
                 </div>
+
+                {/*  Modal para duplicar recordatorios */}
+                {/* Reutiliza TaskAddModal pero con datos precargados de la tarea a duplicar */}
+                <TaskAddModal
+                    isOpen={isDuplicateModalOpen}
+                    onClose={handleCloseDuplicateModal}
+                    onSave={handleSaveDuplicate}
+                    task={taskToDuplicate}
+                    title={taskToDuplicate ? "Duplicar Tarea" : "Nueva Tarea"}
+                    userId={userId}
+                    availableTags={availableTags}
+                />
 
                 <TaskEditModal
                     isOpen={isEditModalOpen}
@@ -290,7 +369,5 @@ function ToDoList({ userId = "" }) {
         </>
     );
 }
-
-
 
 export default ToDoList;

@@ -7,6 +7,10 @@ import App from "./App";
 import RecoverPassword from "./RecoverPassword";
 import AdminView from "./AdminView";
 import RestorePassword from "./RestorePassword";
+import TokenPassword from "./TokenPassword";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import PublicOnlyRoute from "./routes/PublicOnlyRoute";
+import { ROLE_ADMIN_UPB_PLANNER, ROLE_USUARIOS } from "./services/authSession";
 
 import "./index.css";
 // Renderizado de la aplicación con rutas definidas, solo se puede una ruta a la vez 
@@ -17,12 +21,24 @@ import "./index.css";
 ReactDOM.createRoot(document.getElementById("root")).render( 
 	<BrowserRouter>
 		<Routes>
-			<Route path="/" element={<LogInForm />} />
+			{/* PublicOnlyRoute: solo permite entrar si NO hay sesión activa */}
+			<Route element={<PublicOnlyRoute />}>
+				{/* Pública para usuarios no autenticados */}
+				<Route path="/" element={<LogInForm />} />
+			</Route>
+			{/* Públicas: recuperación y restauración de contraseña */}
 			<Route path="/RecoverPassword" element={<RecoverPassword />} />
-			<Route path="/App/:userId" element={<App />} />
-			<Route path="/AdminView" element={<AdminView />} />
+			{/* Protegida solo para Usuarios: sesión + userId URL debe coincidir */}
+			<Route element={<ProtectedRoute requireMatchingUser={true} allowedRoles={[ROLE_USUARIOS]} />}>
+				<Route path="/App/:userId" element={<App />} />
+			</Route>
+			{/* Protegida solo para admin_upb_planner */}
+			<Route element={<ProtectedRoute allowedRoles={[ROLE_ADMIN_UPB_PLANNER]} />}>
+				<Route path="/AdminView" element={<AdminView />} />
+			</Route>
 			<Route path="/RestorePassword" element={<RestorePassword />} />
-			 {/* Ruta para manejar cualquier ruta no definida, redirigiendo al login */}
+			<Route path="/TokenPassword" element={<TokenPassword />} />
+			{/* Fallback: cualquier ruta no definida va al login */}
 			<Route path="*" element={<LogInForm />} />
 		</Routes>
 	</BrowserRouter>

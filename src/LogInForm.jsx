@@ -13,6 +13,11 @@ import Image from './assets/ImageLogIn.jpeg';
 // Hook de react
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+    createAuthSession,
+    ROLE_ADMIN_UPB_PLANNER,
+    ROLE_USUARIOS
+} from './services/authSession';
 
 const LogInForm = () => {
     const [userId, setUserId] = useState('');
@@ -31,17 +36,33 @@ const LogInForm = () => {
             return;
         }
 
-        console.log("[LogInForm] Attempting login for:", userId);
         const result = await LDAPservice(userId, password);
-        console.log("[LogInForm] Login result:", result);
 
         if (result) {
             // Backend may return different success indicators
             const isSuccess = result.success || result.status === 'success' || result.valid === true || Boolean(result.data);
             
             if (isSuccess) {
-                console.log("[LogInForm] Login successful, redirecting to /app/" + userId);
-                navigate(`/app/${userId}`);
+                const token = result?.token ?? result?.accessToken ?? result?.key ?? "";
+                const roles = Array.isArray(result?.role)
+                    ? result.role
+                    : Array.isArray(result?.roles)
+                        ? result.roles
+                        : [];
+
+                createAuthSession({ userId, token, roles });
+
+                if (roles.includes(ROLE_ADMIN_UPB_PLANNER)) {
+                    navigate("/AdminView");
+                    return;
+                }
+
+                if (roles.includes(ROLE_USUARIOS)) {
+                        navigate(`/app/${userId}`);
+                    return;
+                }
+
+                setError("Tu usuario no tiene permisos para acceder a la aplicación");
             } else {
                 setError(result.message || "Usuario o contraseña incorrectos");
             }
