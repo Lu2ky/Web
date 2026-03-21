@@ -8,6 +8,7 @@ import ToDoFilterModal from "./ToDoFilterModal";
 import ToDoListTagFetcher from "../../services/ToDoListTagFetcher";
 import RemindCard from "./RemindCard";
 import ReminderService from "../../services/reminderService";
+import { getUserData } from "../../services/userService";
 import TaskAddModal from "./TaskAddModal"; // Import del modal para duplicar
 
 const initialTasks = [];
@@ -151,22 +152,38 @@ function ToDoList({ userId = "" }) {
     // Función para guardar la tarea duplicada
     // Crea un nuevo recordatorio con los datos proporcionados desde el modal de duplicado
     const handleSaveDuplicate = async (formData) => {
-        if (!taskToDuplicate || !userId) {
+        if (!userId) {
             setIsDuplicateModalOpen(false);
             setTaskToDuplicate(null);
             return;
         }
 
         try {
-            // Llamar directamente al servicio con el userId
+            const userData = await getUserData(userId);
+            const rawUser = Array.isArray(userData) ? userData[0] : userData;
+            const idUsuario =
+                rawUser?.N_idUsuario ??
+                rawUser?.idUsuario ??
+                rawUser?.id_user ??
+                rawUser?.ID_USER ??
+                rawUser?.id ??
+                userId;
+
+            const tagLabels = (Array.isArray(formData?.tags) ? formData.tags : [])
+                .filter((tag) =>
+                    typeof tag === "string" ? true : !String(tag?.type ?? "").startsWith("priority-")
+                )
+                .map((tag) => (typeof tag === "string" ? tag : tag?.label || ""))
+                .filter(Boolean);
+
+            // Igual que el alta normal: id interno en P_usuario y código externo en P_codigo_usuario
             await ReminderService.addReminder(
-                userId,
+                idUsuario,
                 formData.name,
                 formData.description,
                 formData.dueDate,
                 formData.priority,
-                // Extraer etiquetas del formulario y filtrar
-                formData.tags.map(t => typeof t === 'string' ? t : t.label || "").filter(Boolean),
+                tagLabels,
                 userId
             );
 

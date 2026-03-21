@@ -180,7 +180,7 @@ export default function TaskAddModal({
 
     if (!isOpen) return null;
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!formData.name.trim()) {
             setError('El nombre es obligatorio');
             return;
@@ -196,9 +196,14 @@ export default function TaskAddModal({
         const dataToSend = { ...formData, tags: finalTags };
         console.log('[TaskAddModal] handleSave → dataToSend:', JSON.stringify(dataToSend, null, 2));
         console.log('[TaskAddModal] tags count:', finalTags.length, 'tags:', finalTags);
-        onSave(dataToSend);
-        setTagLabel('');
-        onClose();
+        try {
+            await onSave(dataToSend);
+            setTagLabel('');
+            setError('');
+        } catch (saveError) {
+            console.error('[TaskAddModal] Error al guardar:', saveError);
+            setError('No se pudo guardar el recordatorio. Intenta nuevamente.');
+        }
     };
 
     const handleAddTag = () => {
