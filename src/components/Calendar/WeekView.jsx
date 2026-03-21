@@ -3,30 +3,7 @@ import "../../styles/WeekView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
 
-const parseLocalDate = (value) => {
-  if (!value) return null;
-  const datePart = String(value).split("T")[0];
-  const [year, month, day] = datePart.split("-").map(Number);
-  if (!year || !month || !day) return null;
-  return new Date(year, month - 1, day);
-};
-
-const isDateWithinRange = (targetDate, startDateRaw, endDateRaw) => {
-  const startDate = parseLocalDate(startDateRaw);
-  const endDate = parseLocalDate(endDateRaw);
-
-  if (!startDate || !endDate) return true;
-
-  const target = new Date(targetDate);
-  target.setHours(0, 0, 0, 0);
-
-  startDate.setHours(0, 0, 0, 0);
-  endDate.setHours(23, 59, 59, 999);
-
-  return target >= startDate && target <= endDate;
-};
-
-function WeekView({ events = [], personalEvents = [], selectedWeekStart, onClassClick = () => { }, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000" }) {
+function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000" }) {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const days = [
     "Lunes",
@@ -39,7 +16,28 @@ function WeekView({ events = [], personalEvents = [], selectedWeekStart, onClass
   ];
   const MINUTES_IN_HOUR = 60;
   const [hourPx, setHourPx] = useState(0);
+  const [weekOffset, setWeekOffset] = useState(0);
   const gridRef = useRef(null);
+  // Get week date range
+  const getWeekDateRange = () => {
+      const today = new Date();
+      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      // Calculate start of week (Monday)
+      const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Monday is day 1
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - daysFromMonday + (weekOffset * 7));
+      // Calculate end of week (Sunday)
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      // Format dates
+      const formatDate = (date) => {
+      const month = date.toLocaleDateString("es-ES", { month: "short" });
+      const day = date.getDate();
+      return `${month} ${day}`;
+      };
+
+      return `${formatDate(startOfWeek)} - ${formatDate(endOfWeek)}`;
+  };
   // Medir la altura real de una hora (cambia con media queries/responsive)
   useEffect(() => {
     const measure = () => {
@@ -56,31 +54,11 @@ function WeekView({ events = [], personalEvents = [], selectedWeekStart, onClass
     return hour * 60 + min;
   };
 
-  const monday = selectedWeekStart ? new Date(selectedWeekStart) : new Date();
-
-  const getDateForDay = (dayIndex) => {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + dayIndex);
-    date.setHours(0, 0, 0, 0);
-    return date;
-  };
-
+  // Agrupar eventos por día
   const eventsByDay = {};
-
-  events.forEach((event) => {
+  [...events, ...personalEvents].forEach((event) => {
     if (!eventsByDay[event.day]) eventsByDay[event.day] = [];
     eventsByDay[event.day].push(event);
-  });
-
-  days.forEach((day, dayIndex) => {
-    const targetDate = getDateForDay(dayIndex);
-    const validPersonalEvents = personalEvents.filter((event) => {
-      if (event.day !== day) return false;
-      return isDateWithinRange(targetDate, event.date_start, event.date_end);
-    });
-
-    if (!eventsByDay[day]) eventsByDay[day] = [];
-    eventsByDay[day].push(...validPersonalEvents);
   });
 
   // Debug: mostrar agrupación
@@ -96,6 +74,29 @@ function WeekView({ events = [], personalEvents = [], selectedWeekStart, onClass
 
   return (
     <div className="weekViewWrapper">
+      <div className="weekSelector">
+        <button
+          className="weekSelectorArrow"
+          onClick={() => setWeekOffset(weekOffset - 1)}
+          title="Semana anterior"
+          aria-label="Semana anterior"
+          type="button"
+        >
+          ←
+        </button>
+        <div className="weekSelectorText">
+          <p className="weekSelectorDate">{getWeekDateRange()}</p>
+        </div>
+          <button
+            className="weekSelectorArrow"
+            onClick={() => setWeekOffset(weekOffset + 1)}
+            title="Semana siguiente"
+            aria-label="Semana siguiente"
+            type="button"
+          >
+            →
+          </button>
+      </div>
       {/* Encabezados */}
       <div className="weekHeaderRow">
         <div className="hourHeaderCell">Horas</div>

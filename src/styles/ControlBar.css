@@ -218,3 +218,91 @@
         max-width: 90vw;
     }
 }
+
+/* Animaciones elegantes y suaves */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
+    }
+    to {
+        box-shadow: 0 8px 24px rgba(192, 38, 211, 0.5);
+    }
+}
+
+/* Animación suave del menú */
+.academicPeriodMenu {
+    animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: bottom right;
+}
+
+/* Animación suave del botón al pasar el mouse */
+.academicPeriodButton {
+    position: relative;
+    overflow: hidden;
+}
+
+.academicPeriodButton::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    pointer-events: none;
+}
+
+.academicPeriodButton:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Animación ripple en opciones */
+.academicPeriodOption {
+    position: relative;
+    overflow: hidden;
+}
+
+.academicPeriodOption::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 0, 110, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+    pointer-events: none;
+}
+
+.academicPeriodOption:active::before {
+    width: 300px;
+    height: 300px;
+}
