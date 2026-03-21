@@ -1,13 +1,35 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import "../../styles/DayView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
 
-function DayView({ events = [], personalEvents = [], onClassClick = () => {}, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000"}) {
+const parseLocalDate = (value) => {
+    if (!value) return null;
+    const datePart = String(value).split("T")[0];
+    const [year, month, day] = datePart.split("-").map(Number);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
+};
+
+const isDateWithinRange = (targetDate, startDateRaw, endDateRaw) => {
+    const startDate = parseLocalDate(startDateRaw);
+    const endDate = parseLocalDate(endDateRaw);
+
+    if (!startDate || !endDate) return true;
+
+    const target = new Date(targetDate);
+    target.setHours(0, 0, 0, 0);
+
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    return target >= startDate && target <= endDate;
+};
+
+function DayView({ events = [], personalEvents = [], dayOffset = 0, setDayOffset = () => {}, selectedDate, onClassClick = () => {}, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000"}) {
     const hours = Array.from({ length: 24 }, (_, i) => i);
     const MINUTES_IN_HOUR = 60;
     const [hourPx, setHourPx] = useState(0);
-    const [dayOffset, setDayOffset] = useState(0);
     const bodyRef = useRef(null);
 
     // Días de la semana
@@ -15,20 +37,16 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
 
     // Obtener día actual + offset
     const getSelectedDay = () => {
-        const today = new Date();
-        const selectedDate = new Date(today);
-        selectedDate.setDate(today.getDate() + dayOffset);
-        return days[selectedDate.getDay()];
+        const targetDate = selectedDate ? new Date(selectedDate) : new Date();
+        return days[targetDate.getDay()];
     };
 
     const selectedDay = getSelectedDay();
 
     // Obtener fecha formateada
     const getFormattedDate = () => {
-        const today = new Date();
-        const selectedDate = new Date(today);
-        selectedDate.setDate(today.getDate() + dayOffset);
-        return selectedDate.toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+        const targetDate = selectedDate ? new Date(selectedDate) : new Date();
+        return targetDate.toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
     };
 
     useEffect(() => {
@@ -94,7 +112,13 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
     };
 
     // Filtrar eventos solo del día seleccionado
-    const dayEvents = [...events, ...personalEvents].filter(e => e.day === selectedDay);
+    const dayEvents = [
+        ...events.filter((event) => event.day === selectedDay),
+        ...personalEvents.filter((event) => {
+            if (event.day !== selectedDay) return false;
+            return isDateWithinRange(selectedDate || new Date(), event.date_start, event.date_end);
+        }),
+    ];
 
     return (
         <div className="dayViewContainer">

@@ -19,6 +19,7 @@ import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
 // Horario oficial 
 import OficialFetcher from "./services/OficialFetcher";
 import { getCategories } from "./services/categoriesService";
+import { fetchAcademicPeriods } from "./services/academicPeriodsService";
 
 // Actividades personales
 import PersonalFetcher, { deletePersonalActivity } from "./services/PersonalFetcher";
@@ -35,6 +36,41 @@ const dayMap = {
 	5: "Viernes",
 	6: "Sábado",
 	7: "Domingo"
+};
+
+const resolveAcademicPeriod = (item) => {
+	const candidates = [
+		item?.nombre,
+		item?.academicPeriod,
+		item?.academic_period,
+		item?.periodoAcademico,
+		item?.periodo_academico,
+		item?.period,
+		item?.id_academic_per,
+	];
+
+	for (const candidate of candidates) {
+		if (typeof candidate === "string" && candidate.trim()) {
+			return candidate.trim();
+		}
+
+		if (typeof candidate === "number") {
+			return String(candidate);
+		}
+	}
+
+	return "Sin periodo";
+};
+
+const normalizePeriodKey = (value) => String(value || "").trim().toLowerCase();
+
+const getStartOfWeek = (baseDate = new Date()) => {
+	const date = new Date(baseDate);
+	const day = date.getDay();
+	const diff = day === 0 ? 6 : day - 1;
+	date.setDate(date.getDate() - diff);
+	date.setHours(0, 0, 0, 0);
+	return date;
 };
 
 //Normalizar Horario oficial
@@ -60,6 +96,7 @@ function normalizeApiData(apiData) {
 		// Datos para PopUp
 		campus: item.campus,
 		credits: item.Credits?.Float64 || 0,
+		academicPeriod: resolveAcademicPeriod(item),
 		//tagColour: item.tagColour, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 		// Datos originales
 		apiData: item
@@ -90,8 +127,11 @@ function App() {
 	const { userId } = useParams(); // Obtener el ID del usuario desde la URL
 	const [viewMode, setViewMode] = useState(getInitialView()); // "Semanal" o "Diario"
 	const [weekOffset, setWeekOffset] = useState(0); // Offset para semana (0 = semana actual), NO MOVER NI QUITAR O SE CAE TODO
+	const [dayOffset, setDayOffset] = useState(0); // Offset para dia (0 = hoy)
 	const [classEvents, setClassEvents] = useState([]); // Eventos de clases oficiales
 	const [personalEvents, setPersonalEvents] = useState([]); // Eventos personales (actividades guardadas)
+	const [academicPeriods, setAcademicPeriods] = useState([]);
+	const [selectedAcademicPeriod, setSelectedAcademicPeriod] = useState("Todos");
 	const [showClassPopup, setShowClassPopup] = useState(false); // Para mostrar/ocultar el popup de detalles de clase
 	const [selectedClass, setSelectedClass] = useState(null); // Datos de la clase seleccionada para el popup
 	const [showPersonalPopup, setShowPersonalPopup] = useState(false); // Para mostrar/ocultar el popup de detalles de actividad personal
@@ -113,6 +153,14 @@ function App() {
 		const normalized = normalizeApiData(data);
 		console.log("Datos normalizados:", normalized);
 		setClassEvents(normalized);
+
+		const periodsFromSchedule = [...new Set(normalized.map((event) => event.academicPeriod).filter(Boolean))];
+		if (periodsFromSchedule.length > 0) {
+			setAcademicPeriods((prevPeriods) => {
+				const merged = [...new Set(["Todos", ...prevPeriods, ...periodsFromSchedule])];
+				return merged;
+			});
+		}
 	}, []);
 
 	// Manejador para datos personales que vienen del PersonalFetcher (ya normalizados)
@@ -254,6 +302,35 @@ function App() {
 		});
 	}, [themeId]);
 
+	useEffect(() => {
+		const loadAcademicPeriods = async () => {
+			try {
+				const periods = await fetchAcademicPeriods();
+				if (periods.length > 0) {
+					setAcademicPeriods((prevPeriods) => [...new Set(["Todos", ...prevPeriods, ...periods])]);
+				}
+			} catch (error) {
+				console.error("Error cargando periodos académicos:", error);
+			}
+		};
+
+		loadAcademicPeriods();
+	}, []);
+
+	useEffect(() => {
+		if (!selectedAcademicPeriod && academicPeriods.length > 0) {
+			setSelectedAcademicPeriod("Todos");
+		}
+
+		if (
+			selectedAcademicPeriod &&
+			academicPeriods.length > 0 &&
+			!academicPeriods.includes(selectedAcademicPeriod)
+		) {
+			setSelectedAcademicPeriod("Todos");
+		}
+	}, [academicPeriods, selectedAcademicPeriod]);
+
 	//Callback que recibe el ThemeSelector cuando se cambia el tema, actualiza el estado del tema
 	const handleThemeChange = newThemeId => {
 		setThemeId(newThemeId);
@@ -273,14 +350,31 @@ function App() {
 		return luminance > 0.5 ? "#000000" : "#FFFFFF";
 	};
 
-	//Calcular materias filtradas 
-	const filteredClassesEvents = selectedTag === "Todos" ?
-		classEvents :
-		classEvents.filter(event => event.etiqueta === selectedTag);
+	//Calcular materias filtradas
+	const selectedPeriodKey = normalizePeriodKey(selectedAcademicPeriod);
+
+	const filteredByPeriod = selectedPeriodKey
+		? selectedPeriodKey === "todos"
+			? classEvents
+			: classEvents.filter((event) => normalizePeriodKey(event.academicPeriod) === selectedPeriodKey)
+		: classEvents;
+
+	const filteredClassesEvents = selectedTag === "Todos"
+		? filteredByPeriod
+		: filteredByPeriod.filter(event => event.etiqueta === selectedTag);
 	const filteredPersonalEvents =
 		selectedTag === "Todos" || selectedTag === "Personal" ?
 			personalEvents :
 			[];
+
+	const selectedDate = new Date();
+	selectedDate.setDate(selectedDate.getDate() + dayOffset);
+	selectedDate.setHours(0, 0, 0, 0);
+
+	const selectedWeekStart = getStartOfWeek();
+	selectedWeekStart.setDate(selectedWeekStart.getDate() + weekOffset * 7);
+	selectedWeekStart.setHours(0, 0, 0, 0);
+
 	return (
 
 		<div className="App">
@@ -304,6 +398,10 @@ function App() {
 						viewMode={viewMode}
 						events={filteredClassesEvents}
 						personalEvents={filteredPersonalEvents}
+						dayOffset={dayOffset}
+						setDayOffset={setDayOffset}
+						selectedDate={selectedDate}
+						selectedWeekStart={selectedWeekStart}
 						onClassClick={handleClassClick}
 						onDeletePersonal={handleRequestDeletePersonal}
 						onPersonalClick={handlePersonalClick}
@@ -343,6 +441,11 @@ function App() {
 						onThemeChange={handleThemeChange}
 						selectedTag={selectedTag}
 						setSelectedTag={setSelectedTag}
+						weekOffset={weekOffset}
+						setWeekOffset={setWeekOffset}
+						academicPeriods={academicPeriods}
+						selectedAcademicPeriod={selectedAcademicPeriod}
+						onAcademicPeriodChange={setSelectedAcademicPeriod}
 					/>
 				</div>
 			</div>

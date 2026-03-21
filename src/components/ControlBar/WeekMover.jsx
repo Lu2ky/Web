@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 import "../../styles/WeekMover.css";
 
 function GetStartOfWeek(date) {
@@ -34,8 +34,7 @@ function FormatWeekRange(startDate, endDate) {
 	})}`;
 }
 
-function WeekMover() {
-	const [weekOffset, setWeekOffset] = useState(0);
+function WeekMover({ weekOffset = 0, onWeekOffsetChange = () => {} }) {
 	const today = new Date();
 	const startOfWeek = GetStartOfWeek(today);
 	const displayStart = new Date(startOfWeek);
@@ -47,7 +46,7 @@ function WeekMover() {
 		<div className="navigatorContainer">
 			<button
 				className="dateBoxArrowBox"
-				onClick={() => setWeekOffset(weekOffset - 1)}
+				onClick={() => onWeekOffsetChange(weekOffset - 1)}
 				title="Semana anterior"
 				aria-label="Semana anterior"
 				type="button"
@@ -61,7 +60,7 @@ function WeekMover() {
 
 			<button
 				className="dateBoxArrowBox"
-				onClick={() => setWeekOffset(weekOffset + 1)}
+				onClick={() => onWeekOffsetChange(weekOffset + 1)}
 				title="Semana siguiente"
 				aria-label="Semana siguiente"
 				type="button"
