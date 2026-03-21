@@ -1,95 +1,103 @@
-import fs from "node:fs";
-import path from "node:path";
 import { test, expect } from "@playwright/test";
 
-function parseDotEnv(fileContent) {
-    const result = {};
-    const lines = fileContent.split(/\r?\n/);
+async function login(page, userId, password, expectSuccess = true) {
+    await page.goto("/");
+    await page.getByPlaceholder("Id Usuario").fill(userId);
+    await page.getByPlaceholder("Contraseña").fill(password);
+    await page.getByRole("checkbox").check();
+    await page.getByRole("button", { name: "Iniciar Sesión" }).click();
 
-    for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith("#")) continue;
-        const eqIndex = trimmed.indexOf("=");
-        if (eqIndex === -1) continue;
-        const key = trimmed.slice(0, eqIndex).trim();
-        const value = trimmed.slice(eqIndex + 1).trim();
-        result[key] = value;
+    const dashboardHeading = page.getByRole("heading", { name: "UPB Planner" });
+
+    if (expectSuccess) {
+        await expect(dashboardHeading).toBeVisible({ timeout: 20000 });
+        return;
     }
 
-    return result;
+    let loggedIn = true;
+    try {
+        await expect(dashboardHeading).toBeVisible({ timeout: 8000 });
+    } catch {
+        loggedIn = false;
+    }
+
+    expect(loggedIn, "La contraseña anterior todavía inicia sesión; no hay evidencia de persistencia").toBeFalsy();
+    await expect(page.getByRole("heading", { name: "Iniciar Sesión" })).toBeVisible();
 }
 
-function readRealEndpoints() {
-    const envPath = path.resolve(process.cwd(), ".env");
-    const envFile = fs.readFileSync(envPath, "utf8");
-    const envMap = parseDotEnv(envFile);
-
-    return {
-        changePassword: envMap.VITE_API_CHANGE_PASSWORD,
-        ldapValidate: envMap.VITE_API_URL_LDPA,
-        createUser: envMap.VITE_API_CREATE_USER,
-    };
+async function logout(page) {
+    await page.locator(".dropdown-image-button").click();
+    await page.getByRole("button", { name: "Cerrar Sesión" }).click();
+    await page.getByRole("button", { name: "Sí, cerrar sesión" }).click();
+    await expect(page.getByRole("heading", { name: "Iniciar Sesión" })).toBeVisible();
 }
 
-test.describe("E2E real - persistencia cambio de contrasena", () => {
-    test("cambia contrasena y valida persistencia real en backend", async ({ page, request }) => {
-        const endpoints = readRealEndpoints();
+async function openPasswordModal(page) {
+    await page.locator(".dropdown-image-button").click();
+    await page.getByRole("button", { name: "Mi Perfil" }).click();
+    await expect(page.getByRole("heading", { name: "Mi Perfil" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cambiar Contraseña" })).toBeVisible();
+}
 
-        if (!endpoints.changePassword) {
-            throw new Error("Faltan endpoints en .env para ejecutar persistencia real");
-        }
+async function changePassword(page, currentPassword, newPassword) {
+    const responsePromise = page.waitForResponse(
+        (response) =>
+            response.url().includes("/change-password") && response.request().method() === "PUT"
+    );
 
-        const userId = process.env.E2E_REAL_USER_ID;
-        const originalPassword = process.env.E2E_REAL_CURRENT_PASSWORD;
-        const newPassword = process.env.E2E_REAL_NEW_PASSWORD;
+    await page.getByLabel("Contraseña Actual").fill(currentPassword);
+    await page.getByLabel(/^Nueva Contraseña$/).fill(newPassword);
+    await page.getByLabel(/^Confirmar Nueva Contraseña$/).fill(newPassword);
+    await page.getByRole("button", { name: "Cambiar Contraseña" }).click();
 
-        if (!userId || !originalPassword || !newPassword) {
-            throw new Error(
-                "Define E2E_REAL_USER_ID, E2E_REAL_CURRENT_PASSWORD y E2E_REAL_NEW_PASSWORD para validar persistencia real"
-            );
-        }
+    const response = await responsePromise;
+    const body = await response.text();
+    expect(response.ok(), `Cambio de contraseña falló: HTTP ${response.status()} ${body}`).toBeTruthy();
 
-        await page.goto(`/App/${userId}`);
+    const feedback = page.locator(".alert.alert-success, .alert.alert-error").first();
+    await feedback.waitFor({ state: "visible", timeout: 20000 });
+    const message = (await feedback.textContent()) || "";
+    expect(
+        /exitosamente|éxito|correctamente/i.test(message),
+        `Cambio no confirmado en UI. Mensaje: ${message}`
+    ).toBeTruthy();
+}
 
-        await expect(page.getByRole("heading", { name: "UPB Planner" })).toBeVisible();
-        await page.locator(".dropdown-image-button").click();
-        await page.getByRole("button", { name: "Mi Perfil" }).click();
+test("E2E real - persistencia completa de cambio de contrasena con reversión", async ({ page }) => {
+    const userId = process.env.E2E_REAL_USER_ID;
+    const originalPassword = process.env.E2E_REAL_CURRENT_PASSWORD;
+    const temporaryPassword = process.env.E2E_REAL_NEW_PASSWORD;
 
-        await expect(page.getByRole("heading", { name: "Mi Perfil" })).toBeVisible();
-        await expect(page.getByRole("heading", { name: "Cambiar Contraseña" })).toBeVisible();
-
-        const responsePromise = page.waitForResponse(
-            (response) =>
-                response.url().includes("/change-password") && response.request().method() === "PUT"
+    if (!userId || !originalPassword || !temporaryPassword) {
+        throw new Error(
+            "Define E2E_REAL_USER_ID, E2E_REAL_CURRENT_PASSWORD y E2E_REAL_NEW_PASSWORD para validar persistencia real"
         );
+    }
 
-        await page.getByLabel("Contraseña Actual").fill(originalPassword);
-        await page.getByLabel(/^Nueva Contraseña$/).fill(newPassword);
-        await page.getByLabel(/^Confirmar Nueva Contraseña$/).fill(newPassword);
-        await page.getByRole("button", { name: "Cambiar Contraseña" }).click();
+    if (originalPassword === temporaryPassword) {
+        throw new Error("E2E_REAL_NEW_PASSWORD debe ser diferente a E2E_REAL_CURRENT_PASSWORD");
+    }
 
-        const changePasswordResponse = await responsePromise;
-        const changePasswordBody = await changePasswordResponse.text();
-        expect(
-            changePasswordResponse.ok(),
-            `Cambio inicial falló: HTTP ${changePasswordResponse.status()} ${changePasswordBody}`
-        ).toBeTruthy();
+    let reverted = false;
 
-        await expect(page.getByText("Contraseña cambiada exitosamente")).toBeVisible();
+    try {
+        await login(page, userId, originalPassword, true);
+        await openPasswordModal(page);
+        await changePassword(page, originalPassword, temporaryPassword);
 
-        const revertResponse = await request.put(endpoints.changePassword, {
-            data: {
-                userId,
-                currentPassword: newPassword,
-                newPassword: originalPassword,
-            },
-            timeout: 20000,
-        });
+        await logout(page);
+        await login(page, userId, originalPassword, false);
+        await login(page, userId, temporaryPassword, true);
 
-        const revertBody = await revertResponse.text();
-        expect(
-            revertResponse.ok(),
-            `Reversión falló: HTTP ${revertResponse.status()} ${revertBody}`
-        ).toBeTruthy();
-    });
+        await openPasswordModal(page);
+        await changePassword(page, temporaryPassword, originalPassword);
+        reverted = true;
+
+        await logout(page);
+        await login(page, userId, originalPassword, true);
+    } finally {
+        if (!reverted) {
+            await page.goto("/");
+        }
+    }
 });
