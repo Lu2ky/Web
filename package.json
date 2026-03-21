@@ -14,6 +14,7 @@
     "test:e2e:run": "playwright test tests/e2e/user-profile-change-password.e2e.spec.js",
     "test:e2e:real": "playwright test -c playwright.real.config.js tests/e2e/user-profile-change-password.real-persistence.e2e.spec.js",
     "test:e2e:security": "playwright test tests/e2e/user-profile-change-password.security.e2e.spec.js",
+    "test:password:local": "node scripts/run-local-password-validation.mjs",
     "test:perf:password": "artillery run tests/performance/change-password.artillery.yml",
     "test:perf:password:report": "node -e \"console.log('Artillery report fue deprecado; revisa tests/evidencia/mi-perfil-cambio-contrasena-rendimiento.txt y .json')\""
   },

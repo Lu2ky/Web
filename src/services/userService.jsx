@@ -156,29 +156,56 @@ export async function changePassword(userId, currentPassword, newPassword) {
         return null;
     }
 
-    try {
-        const res = await fetch(CHANGE_PASSWORD_ENDPOINT, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                userId: userId,
-                currentPassword: currentPassword,
-                newPassword: newPassword
-            }),
-        });
+    const payload = {
+        userId: userId,
+        currentPassword: currentPassword,
+        newPassword: newPassword
+    };
 
-        if (!res.ok) {
-            console.error(`changePassword failed: ${res.status}`);
-            return null;
+    const normalizedEndpoint = CHANGE_PASSWORD_ENDPOINT.trim();
+    const endpointCandidates = Array.from(new Set([
+        normalizedEndpoint,
+        normalizedEndpoint.endsWith("/") ? normalizedEndpoint.slice(0, -1) : `${normalizedEndpoint}/`
+    ]));
+    const methodCandidates = ["PUT", "POST"];
+
+    try {
+        for (const endpoint of endpointCandidates) {
+            for (const method of methodCandidates) {
+                const res = await fetch(endpoint, {
+                    method,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const contentType = res.headers.get("content-type") || "";
+                const body = contentType.includes("application/json") ? await res.json() : await res.text();
+
+                if (res.ok) {
+                    return typeof body === "string" ? { success: true, message: body } : body;
+                }
+
+                if (res.status === 404 || res.status === 405) {
+                    continue;
+                }
+
+                console.error(`changePassword failed: ${res.status} (${method} ${endpoint})`, body);
+                return typeof body === "string"
+                    ? { success: false, message: `HTTP ${res.status} - ${body}` }
+                    : (body || { success: false, message: `HTTP ${res.status}` });
+            }
         }
 
-        const json = await res.json();
-        return json;
+        console.error("changePassword failed: endpoint not found", endpointCandidates);
+        return {
+            success: false,
+            message: "No se encontro endpoint de cambio de contrasena (404/405 en variantes conocidas)."
+        };
     } catch (error) {
         console.error("Error changing password:", error);
-        return null;
+        return { success: false, message: error?.message || "No se pudo cambiar la contrasena" };
     }
 }
 
