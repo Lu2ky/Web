@@ -36,9 +36,7 @@ const LogInForm = () => {
             return;
         }
 
-        console.log("[LogInForm] Attempting login for:", userId);
         const result = await LDAPservice(userId, password);
-        console.log("[LogInForm] Login result:", result);
 
         if (result) {
             // Backend may return different success indicators
@@ -55,13 +53,11 @@ const LogInForm = () => {
                 createAuthSession({ userId, token, roles });
 
                 if (roles.includes(ROLE_ADMIN_UPB_PLANNER)) {
-                    console.log("[LogInForm] Login admin successful, redirecting to /AdminView");
                     navigate("/AdminView");
                     return;
                 }
 
                 if (roles.includes(ROLE_USUARIOS)) {
-                    console.log("[LogInForm] Login user successful, redirecting to /app/" + userId);
                     navigate(`/app/${userId}`);
                     return;
                 }

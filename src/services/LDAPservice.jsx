@@ -9,11 +9,8 @@ const createUserUrl = import.meta.env.VITE_API_CREATE_USER; // URL para crear us
  */
 async function LDAPservice(userId, password) {
     try {
-        console.log("[LDAPservice] Validating user:", userId);
-        console.log("[LDAPservice] URL:", baseUrl);
-        
         if (!baseUrl) {
-            console.error("[LDAPservice] baseUrl is undefined - VITE_API_URL_LDPA not configured");
+            console.error("LDAP endpoint no configurado");
             return null;
         }
         
@@ -29,12 +26,10 @@ async function LDAPservice(userId, password) {
         });
 
         if (!response.ok) {
-            console.error("[LDAPservice] HTTP Error:", response.status);
             throw new Error(`Error HTTP: ${response.status}`);
         }
 
         const result = await response.json(); // Respuesta del servidor
-        console.log("[LDAPservice] Authentication result:", result); // GUARDAR LA KEY NO MOSTRARLA EN CONSOLA
         return result;
     } catch (error) {
         console.error("Error al validar usuario:", error);
@@ -71,7 +66,6 @@ export async function createUser(userId, password) {
         }
 
         const result = await response.json();
-        console.log("Usuario creado:", result);
         return result;
     } catch (error) {
         console.error("Error al crear usuario:", error);
