@@ -14,7 +14,7 @@ const RecoverPassword = () => {
                 <form action="" >
                     <img src={Logo} alt="Logo" className="logoRecover" />
                     <h1>Recuperar Contraseña</h1>
-                    <h2 className='subtitle'>Por favor ingresa tu id institucional vinculado a tu cuenta, sin los ceros.</h2>
+                    <h2 className='subtitle'>Por favor ingresa tu id institucional vinculado a tu cuenta, sin los ceros. </h2>
                     <div className="input-box">
                         <input type="text"
                             placeholder="ID Institucional" required />

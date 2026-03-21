@@ -4,6 +4,7 @@ import Modal from "./Modal";
 import UserProfile from "./UserProfile";
 import UserPreferences from "./UserPreferences";
 import "./DropdownAcount.css";
+import { clearAuthSession } from "../../services/authSession";
 
 const OPTIONS = [
     { id: "acount", label: "Mi Perfil" },
@@ -36,8 +37,8 @@ export default function DropdownAcount({ userId }) {
     };
 
     const handleLogout = () => {
-        // Aquí limpias la sesión (ejemplo: borrar token)
-        localStorage.removeItem("token");
+        // Limpiar sesión del usuario para bloquear rutas protegidas.
+        clearAuthSession();
 
         // Rediriges al login
         navigate("/");
