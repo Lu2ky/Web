@@ -263,12 +263,33 @@ function PersonalFetcher({ onDataLoaded, userId }) {
     const fetchData = async () => {
       // Función asincrona para cargar datos
       setLoading(true); // Activar estado de carga
+      const url = `${baseUrl}${userId}`;
       try {
-        const response = await fetch(
-          // Hace la petición a la API con el ID del usuario
-          `${baseUrl}${userId}`
-        );
-        const json = await response.json(); // Convierte respuesta en un json
+        const response = await fetch(url);
+        
+        // Verificar si la respuesta fue exitosa
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Error HTTP ${response.status} al cargar datos personales:`, errorText);
+          setApiData([]);
+          if (onDataLoaded) {
+            onDataLoaded([]);
+          }
+          return;
+        }
+        
+        let json;
+        try {
+          json = await response.json();
+        } catch (parseError) {
+          console.error("Error al parsear JSON de respuesta:", parseError);
+          console.error("Respuesta recibida:", await response.text());
+          setApiData([]);
+          if (onDataLoaded) {
+            onDataLoaded([]);
+          }
+          return;
+        }
         
         if (!json || json.length === 0) {
           // Si no tiene datos:
@@ -292,7 +313,7 @@ function PersonalFetcher({ onDataLoaded, userId }) {
         }
       } catch (error) {
         //Manejo de errores
-        console.log(`${baseUrl}${userId}`);
+        console.log(`URL solicitada: ${url}`);
         console.error("Error al cargar datos personales:", error); // Mostrar error en consola
         setApiData([]); // Limpiar datos en caso de error
         if (onDataLoaded) {
@@ -381,19 +402,34 @@ export const addPersonalActivity = async (userId, activityData) => {
     });
 
     if (!response.ok) {
-      let errorDetails = "Sin detalles";
+      // Read body once - it can only be read once per response
+      const bodyText = await response.text();
+      let errorDetails = bodyText;
+      
       try {
-        const errorData = await response.json();
+        // Try to parse as JSON for better error details
+        const errorData = JSON.parse(bodyText);
         errorDetails = JSON.stringify(errorData);
-      } catch (e) {
-        errorDetails = await response.text();
+      } catch (parseError) {
+        // If not JSON, use the raw text (e.g., HTML error page)
+        errorDetails = bodyText || `HTTP ${response.status}`;
       }
-      console.error("❌ Error 400 - Detalles completos:", errorDetails);
+      
+      console.error("❌ Error " + response.status + " - Detalles completos:", errorDetails);
       console.error("❌ Payload enviado:", JSON.stringify(payload, null, 2));
       throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorDetails}`);
     }
 
-    const data = await response.json();
+    // Parse the successful response
+    const bodyText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(bodyText);
+    } catch (parseError) {
+      console.error("Error al parsear respuesta JSON:", parseError);
+      console.error("Respuesta recibida:", bodyText);
+      throw new Error(`Error al parsear respuesta: ${parseError.message}`);
+    }
     // respuesta recibida (log emoji removed)
     
     return data;
@@ -430,13 +466,30 @@ export const deletePersonalActivity = async (userId, activityId) => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Error de eliminación (no ok):", errorText);
-      throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorText}`);
+      const bodyText = await response.text();
+      let errorDetails = bodyText;
+      
+      try {
+        const errorData = JSON.parse(bodyText);
+        errorDetails = JSON.stringify(errorData);
+      } catch (parseError) {
+        errorDetails = bodyText || `HTTP ${response.status}`;
+      }
+      
+      console.error("❌ Error de eliminación " + response.status + ":", errorDetails);
+      throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorDetails}`);
     }
 
-    const data = await response.json();
-    // respuesta de eliminación recibida (log emoji removed)
+    // Parse the successful response
+    const bodyText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(bodyText);
+    } catch (parseError) {
+      console.error("Error al parsear respuesta JSON:", parseError);
+      console.error("Respuesta recibida:", bodyText);
+      throw new Error(`Error al parsear respuesta: ${parseError.message}`);
+    }
     
     return data;
   } catch (error) {
@@ -470,7 +523,7 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
     const formattedDateEnd = formatApiDateTime(updates.dateEnd);
     const idUsuario = await resolveIdUsuario(userId);
 
-    // Construir payload idéntico a addPersonalActivity, solo cambiar activityData por updates y agregar IdPersonalSchedule
+    // Construir payload idéntico a addPersonalActivity, solo cambiar activityData por updates
     const payload = {
       id_user: idUsuario,
       id_course: activityId,
@@ -494,10 +547,30 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
     });
 
     if (!response.ok) {
-      throw new Error(`Error en la API: ${response.status} ${response.statusText}`);
+      const bodyText = await response.text();
+      let errorDetails = bodyText;
+      
+      try {
+        const errorData = JSON.parse(bodyText);
+        errorDetails = JSON.stringify(errorData);
+      } catch (parseError) {
+        errorDetails = bodyText || `HTTP ${response.status}`;
+      }
+      
+      console.error("❌ Error al actualizar " + response.status + ":", errorDetails);
+      throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorDetails}`);
     }
 
-    const data = await response.json();
+    // Parse the successful response
+    const bodyText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(bodyText);
+    } catch (parseError) {
+      console.error("Error al parsear respuesta JSON:", parseError);
+      console.error("Respuesta recibida:", bodyText);
+      throw new Error(`Error al parsear respuesta: ${parseError.message}`);
+    }
     console.log("Actividad actualizada:", data);
     
     return data;
