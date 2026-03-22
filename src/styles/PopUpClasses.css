@@ -430,11 +430,13 @@
 /* Estilos personalizados para CommentButton dentro del popup */
 .info-section .add-comment-container {
   margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .add-comment-button {
-  width: 80%;
-  margin: 0 auto;
+  width: 100%;
   padding: 12px;
   background: linear-gradient(135deg, #ff006e, #c026d3);
   color: white;
@@ -448,11 +450,70 @@
   justify-content: center;
   gap: 8px;
   font-size: 14px;
-  }
+}
+
+.add-comment-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.add-comment-label {
+  letter-spacing: 0.2px;
+}
 
 .add-comment-button:hover {
   box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
   transform: translateY(-2px);
+}
+
+.add-comment-button:focus-visible,
+.add-comment-action-button:focus-visible,
+.delete-comment-button:focus-visible {
+  outline: 2px solid #c026d3;
+  outline-offset: 2px;
+}
+
+.add-comment-dropdown {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.8rem;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.add-comment-dropdown.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.add-comment-dropdown.hide {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.add-comment-textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  border: 1px solid #d1d5db;
+  border-radius: 0.7rem;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.45;
+  color: #1f2937;
+  background-color: #fff;
+  box-sizing: border-box;
 }
 
 .add-comment-textarea:focus {
@@ -465,6 +526,7 @@
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .add-comment-action-button {
@@ -503,6 +565,17 @@
   border-color: #d1d5db;
 }
 
+.comment-header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.comment-edit-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 @media (max-width: 600px) {
   .add-comment-button {
     font-size: 12px;
@@ -510,5 +583,9 @@
 
   .add-comment-textarea {
     font-size: 12px;
+  }
+
+  .add-comment-action-button {
+    width: 100%;
   }
 }
