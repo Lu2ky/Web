@@ -47,23 +47,34 @@ function normalizeApiData(apiData) {
 	}
 
 	// Normaliza cada item del array de la API a un formato consistente para el calendario
-	return apiData.map((item, index) => ({
-		id: `materiaOficial-${item.nrc}-${index}`,
-		subject_name: item.subject_name,
-		professor_name: item.professor_name,
-		classroom: item.classroom,
-		NRC: item.NRC,
-		start_time: item.times[0].slice(0, 5), // recortar segundos
-		end_time: item.times[1].slice(0, 5),
-		day: dayMap[item.times[2]] || "Lunes",
-		etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
-		// Datos para PopUp
-		campus: item.campus,
-		credits: item.Credits?.Float64 || 0,
-		//tagColour: item.tagColour, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
-		// Datos originales
-		apiData: item
-	}));
+	return apiData.map((item, index) => {
+		// Extraer período académico de múltiples posibles claves
+		const academicPeriod = item.academicPeriod 
+			?? item.academic_period 
+			?? item.periodoAcademico 
+			?? item.periodo_academico
+			?? item.period
+			?? "Desconocido";
+		
+		return {
+			id: `materiaOficial-${item.nrc}-${index}`,
+			subject_name: item.subject_name,
+			professor_name: item.professor_name,
+			classroom: item.classroom,
+			NRC: item.NRC,
+			start_time: item.times[0].slice(0, 5), // recortar segundos
+			end_time: item.times[1].slice(0, 5),
+			day: dayMap[item.times[2]] || "Lunes",
+			etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
+			academicPeriod: academicPeriod, // Período académico de la materia
+			// Datos para PopUp
+			campus: item.campus,
+			credits: item.Credits?.Float64 || 0,
+			//tagColour: item.tagColour, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
+			// Datos originales
+			apiData: item
+		};
+	});
 }
 
 // Normalizar actividades personales con la info de la API
@@ -282,14 +293,22 @@ function App() {
 		return luminance > 0.5 ? "#000000" : "#FFFFFF";
 	};
 
-	//Calcular materias filtradas 
-	const filteredClassesEvents = selectedTag === "Todos" ?
-		classEvents :
-		classEvents.filter(event => event.etiqueta === selectedTag);
-	const filteredPersonalEvents =
-		selectedTag === "Todos" || selectedTag === "Personal" ?
-			personalEvents :
-			[];
+	//Calcular materias filtradas por PERÍODO y ETIQUETA
+	const filteredClassesEvents = classEvents.filter(event => {
+		// Filtro por período académico
+		const periodMatch = !selectedAcademicPeriod || event.academicPeriod === selectedAcademicPeriod.nombre;
+		
+		// Filtro por etiqueta
+		const tagMatch = selectedTag === "Todos" || event.etiqueta === selectedTag;
+		
+		return periodMatch && tagMatch;
+	});
+	
+	const filteredPersonalEvents = personalEvents.filter(event => {
+		// Las actividades personales no tienen período académico asignado por defecto
+		// Solo filtrar por etiqueta si no están en "Personal"
+		return selectedTag === "Todos" || selectedTag === "Personal";
+	});
 	return (
 
 		<div className="App">
