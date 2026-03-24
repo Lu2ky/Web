@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "../../styles/WeekView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
@@ -15,7 +15,8 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
     "Domingo",
   ];
   const MINUTES_IN_HOUR = 60;
-  const [hourPx, setHourPx] = useState(0);
+  const HOUR_HEIGHT = 64; // 4rem = 64px
+  const [hourPx, setHourPx] = useState(64); // Inicializar con 64px en lugar de 0
   const [weekOffset, setWeekOffset] = useState(0);
   const gridRef = useRef(null);
   // Obtener rango de fechas de la semana
@@ -39,14 +40,30 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
       return `${formatDate(startOfWeek)} - ${formatDate(endOfWeek)}`;
   };
   // Medir la altura real de una hora (cambia con media queries/responsive)
-  useEffect(() => {
+  useLayoutEffect(() => {
     const measure = () => {
       const cell = gridRef.current?.querySelector(".dayCell");
-      if (cell) setHourPx(cell.getBoundingClientRect().height);
+      if (cell) {
+        const height = cell.getBoundingClientRect().height;
+        if (height > 40) {
+          setHourPx(height);
+        } else {
+          setHourPx(HOUR_HEIGHT);
+        }
+      } else {
+        setHourPx(HOUR_HEIGHT);
+      }
     };
     measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    const timer = setTimeout(measure, 0);
+    const handleResize = () => {
+      measure();
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const timeToMinutes = (time) => {
@@ -59,11 +76,6 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
   [...events, ...personalEvents].forEach((event) => {
     if (!eventsByDay[event.day]) eventsByDay[event.day] = [];
     eventsByDay[event.day].push(event);
-  });
-
-  // Depuración: mostrar agrupación
-  personalEvents.forEach(ev => {
-    console.log(`  - Evento "${ev.name}" en día: "${ev.day}" (type: ${typeof ev.day})`);
   });
 
   const formatHour = (hour) => {
@@ -125,7 +137,8 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
                 {(eventsByDay[day] || []).map((event) => {
                   const startMinutes = timeToMinutes(event.start_time);
                   const endMinutes = timeToMinutes(event.end_time);
-                  const pxPerMinute = hourPx ? hourPx / MINUTES_IN_HOUR : 0;
+                  const effectiveHourPx = hourPx > 0 ? hourPx : HOUR_HEIGHT;
+                  const pxPerMinute = effectiveHourPx / MINUTES_IN_HOUR;
                   const top = startMinutes * pxPerMinute;
                   const height = (endMinutes - startMinutes) * pxPerMinute;
                   const isClass = events.some((e) => e.id === event.id);

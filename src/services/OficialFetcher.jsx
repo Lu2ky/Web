@@ -5,14 +5,16 @@ import LoadingModal from "./LoadingModal";
 // Componente OficialFetcher
 // ============================================================================
 // Carga el horario oficial de un usuario desde la API en background.
+// Filtra por período académico si se especifica.
 // Usa LoadingModal mientras se cargan los datos, luego notifica al padre
 // mediante la función onDataLoaded sin renderizar elemento visual.
 //
 // Propiedades:
 //   - onDataLoaded: Función que recibe los datos cargados
 //   - userId: ID del usuario para obtener su horario oficial
+//   - academicPeriod: { id, nombre } del período académico a filtrar, null = todos
 // ============================================================================
-function OficialFetcher({ onDataLoaded, userId }) {
+function OficialFetcher({ onDataLoaded, userId, academicPeriod }) {
   const [loading, setLoading] = useState(true); // Indica si la API está cargando
   const [apiData, setApiData] = useState([]); // Almacena los datos de la API
 
@@ -33,10 +35,14 @@ function OficialFetcher({ onDataLoaded, userId }) {
       // Función asincrona para cargar datos
       setLoading(true); // Activar estado de carga
       try {
-        const response = await fetch(
-          // Hace la peticipin a la API con el ID del usuario
-          `${baseUrl}${userId}`
-        );
+        // Construir URL con parámetros: userId y opcionalmente periodId
+        let url = `${baseUrl}${userId}`;
+        if (academicPeriod && academicPeriod.id) {
+          url += `?academicPeriod=${encodeURIComponent(academicPeriod.id)}`;
+        }
+        
+        console.log("Fetching official schedule:", url);
+        const response = await fetch(url);
         const json = await response.json(); // Convierte respuesta en un json
         if (!json || json.length === 0) {
           // Si no tiene datos:
@@ -55,7 +61,6 @@ function OficialFetcher({ onDataLoaded, userId }) {
         }
       } catch (error) {
         //Manejo de errores
-        console.log(`${baseUrl}${userId}`);
         console.error("Error al cargar datos:", error); // Mostrar error en consola
         setApiData([]); // Limpiar datos en caso de error
         if (onDataLoaded) {
@@ -68,7 +73,7 @@ function OficialFetcher({ onDataLoaded, userId }) {
     };
 
     fetchData(); //Llama a fechData para iniciar la carga de datos
-  }, [onDataLoaded, userId]); // en caso de que cambie el ID o onDataLoaded
+  }, [onDataLoaded, userId, academicPeriod]); // Re-fetch si cambia el período, ID o onDataLoaded
 
   if (loading) {
     //Mientras se cargan los datos, muestra un mensaje de carga

@@ -2,7 +2,8 @@
 // Componente AcademicPeriodSelect
 // ============================================================================
 // Dropdown de selección de períodos académicos.
-// Carga períodos desde API y notifica cambios al padre mediante una función.
+// Carga períodos desde API (con ID y nombre) y notifica cambios al padre
+// mediante onPeriodChange, pasando el objeto completo { id, nombre }.
 // Cierra dropdown al hacer click fuera (click-outside pattern).
 // ============================================================================
 
@@ -10,8 +11,8 @@ import { useState, useEffect, useRef } from "react";
 import { fetchAcademicPeriods } from "../../services/academicPeriodsService";
 
 function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
-    const [periods, setPeriods] = useState([]);
-    const [selectedPeriod, setSelectedPeriod] = useState("Todos");
+    const [periods, setPeriods] = useState([]); // Array de { id, nombre }
+    const [selectedPeriod, setSelectedPeriod] = useState(null); // { id, nombre } o null para "Todos"
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
 
@@ -20,14 +21,11 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
         const loadPeriods = async () => {
             try {
                 const fetchedPeriods = await fetchAcademicPeriods();
-                if (fetchedPeriods.length > 0) {
-                    setPeriods(["Todos", ...fetchedPeriods]);
-                } else {
-                    setPeriods(["Todos"]);
-                }
+                setPeriods(fetchedPeriods);
+                // No establecer período inicial (por defecto "Todos")
             } catch (error) {
                 console.error("Error cargando períodos:", error);
-                setPeriods(["Todos"]);
+                setPeriods([]);
             }
         };
         loadPeriods();
@@ -46,11 +44,12 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
 
     const handleSelectPeriod = (period) => {
         setSelectedPeriod(period);
+        // Pasar el período seleccionado (o null para "Todos") al padre
         onPeriodChange(period);
         setIsOpen(false);
     };
 
-    const displayText = selectedPeriod === "Todos" ? "Todos los períodos" : selectedPeriod;
+    const displayText = selectedPeriod ? selectedPeriod.nombre : "Todos los períodos";
 
     return (
         <div className="academicPeriodSelectWrapper" ref={wrapperRef}>
@@ -66,14 +65,24 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
 
             {isOpen && (
                 <div className="academicPeriodMenu">
+                    {/* Opción "Todos" */}
+                    <button
+                        className={`academicPeriodOption ${selectedPeriod === null ? "selected" : ""}`}
+                        onClick={() => handleSelectPeriod(null)}
+                        type="button"
+                    >
+                        Todos los períodos
+                    </button>
+                    
+                    {/* Períodos cargados desde API */}
                     {periods.map((period) => (
                         <button
-                            key={period}
-                            className={`academicPeriodOption ${selectedPeriod === period ? "selected" : ""}`}
+                            key={period.id}
+                            className={`academicPeriodOption ${selectedPeriod?.id === period.id ? "selected" : ""}`}
                             onClick={() => handleSelectPeriod(period)}
                             type="button"
                         >
-                            {period === "Todos" ? "Todos los períodos" : period}
+                            {period.nombre}
                         </button>
                     ))}
                 </div>

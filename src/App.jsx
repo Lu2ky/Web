@@ -101,6 +101,7 @@ function App() {
 	const [themeId, setThemeId] = useState("default"); // ID del tema seleccionado, se pasa al ThemeSelector y se usa para cargar el mapa de colores de etiquetas
 	const [tagColorMap, setTagColorMap] = useState({}); // Mapa de colores para etiquetas, se carga desde las categorías obtenidas de la API
 	const [selectedTag, setSelectedTag] = useState("Todos"); // Etiqueta seleccionada para filtrar actividades en el calendario
+	const [selectedAcademicPeriod, setSelectedAcademicPeriod] = useState(null); // { id, nombre } del período académico seleccionado, null = "Todos"
 
 
 
@@ -259,6 +260,14 @@ function App() {
 		setThemeId(newThemeId);
 	};
 
+	// Manejador para cambio de período académico
+	// Recibe { id, nombre } del período o null para "Todos"
+	const handlePeriodChange = (periodObj) => {
+		console.log("Período académico seleccionado:", periodObj);
+		setSelectedAcademicPeriod(periodObj);
+		// Los fetchers se re-ejecutarán automáticamente cuando cambien sus dependencias
+	};
+
 	//Obtener color por etiqueta
 	const getTagColor = tag => {
 		return tagColorMap[tag] || "#b1d4f0"; // Color por defecto si no se encuentra la etiqueta
@@ -293,11 +302,13 @@ function App() {
 					<OficialFetcher
 						userId={userId}
 						onDataLoaded={handleDataLoaded}
+						academicPeriod={selectedAcademicPeriod}
 					/>
 
 					<PersonalFetcher
 						userId={userId}
 						onDataLoaded={handlePersonalDataLoaded}
+						academicPeriod={selectedAcademicPeriod}
 					/>
 
 					<Calendar
@@ -342,6 +353,7 @@ function App() {
 						userId={userId}
 						onActivityAdd={handleActivityAdd}
 						onThemeChange={handleThemeChange}
+						onPeriodChange={handlePeriodChange}
 						selectedTag={selectedTag}
 						setSelectedTag={setSelectedTag}
 

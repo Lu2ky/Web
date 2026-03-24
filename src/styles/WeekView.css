@@ -237,8 +237,27 @@
 }
 
 .activity-card-header {
+  display: flex;
   gap: 6px;
   align-items: flex-start;
+  justify-content: space-between;
+  min-height: 0;
+  width: 100%;
+}
+
+.activity-card-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activity-card-time {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 0.68rem;
 }
 
 .activity-delete-button {

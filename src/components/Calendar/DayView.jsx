@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "../../styles/DayView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
@@ -6,8 +6,9 @@ import { BlockPersonal } from "./BlockPersonal";
 function DayView({ events = [], personalEvents = [], onClassClick = () => {}, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000"}) {
     const hours = Array.from({ length: 24 }, (_, i) => i);
     const MINUTES_IN_HOUR = 60;
-    const [hourPx, setHourPx] = useState(0);
+    const [hourPx, setHourPx] = useState(64); // Inicializar con 4rem = 64px
     const [dayOffset, setDayOffset] = useState(0);
+    const HOUR_HEIGHT = 64; // 4rem = 64px exactamente
     const bodyRef = useRef(null);
 
     // Días de la semana
@@ -31,14 +32,33 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
         return selectedDate.toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
     };
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const measure = () => {
             const cell = bodyRef.current?.querySelector(".dayCell-day");
-            if (cell) setHourPx(cell.getBoundingClientRect().height);
+            if (cell) {
+                const height = cell.getBoundingClientRect().height;
+                // Si la altura medida es cercana a 4rem (64px), usarla; si no, usar fallback
+                if (height > 40) {
+                    setHourPx(height);
+                } else {
+                    setHourPx(HOUR_HEIGHT);
+                }
+            } else {
+                setHourPx(HOUR_HEIGHT);
+            }
         };
+        // Medir inmediatamente
         measure();
-        window.addEventListener("resize", measure);
-        return () => window.removeEventListener("resize", measure);
+        const timer = setTimeout(measure, 0);
+        
+        const handleResize = () => {
+            measure();
+        };
+        window.addEventListener("resize", handleResize);
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener("resize", handleResize);
+        };
     }, []);
 
     const timeToMinutes = (time) => {
@@ -132,7 +152,9 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                     {dayEvents.map((event) => {
                         const startMinutes = timeToMinutes(event.start_time);
                         const endMinutes = timeToMinutes(event.end_time);
-                        const pxPerMinute = hourPx ? hourPx / MINUTES_IN_HOUR : 0;
+                        // Usar HOUR_HEIGHT si hourPx aún no se ha medido
+                        const effectiveHourPx = hourPx > 0 ? hourPx : HOUR_HEIGHT;
+                        const pxPerMinute = effectiveHourPx / MINUTES_IN_HOUR;
                         const top = startMinutes * pxPerMinute;
                         const height = (endMinutes - startMinutes) * pxPerMinute;
                         const { width, left } = getEventDimensions(event, dayEvents);
@@ -143,8 +165,9 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                                 position: "absolute",
                                 top: `${top}px`,
                                 height: `${height}px`,
-                                left: `calc(5rem + ${left}%)`,
+                                left: `${left}%`,
                                 width: `${width}%`,
+                                minWidth: "60px",
                             },
                             start_time: event.start_time,
                             end_time: event.end_time,
