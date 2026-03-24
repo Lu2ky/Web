@@ -11,7 +11,51 @@
 
 const GET_USER_DATA_ENDPOINT = import.meta.env.VITE_API_GET_USER_DATA;
 const CONFIG_NOTIFICATION_ENDPOINT = import.meta.env.VITE_API_UPDATE_USER_EMAIL || import.meta.env.VITE_API_UPDATE_REMINDER_ANTICIPATION;
-const CHANGE_PASSWORD_ENDPOINT = import.meta.env.VITE_API_CHANGE_PASSWORD;
+const CHANGE_PASSWORD_ENDPOINT = import.meta.env.VITE_API_CHANGE_PASSWORD || import.meta.env.VITE_API_PASSWORD_CHANGE;
+
+function buildPasswordEndpointCandidates(rawEndpoint) {
+    const normalized = String(rawEndpoint || "").trim();
+    if (!normalized) return [];
+
+    const variants = new Set();
+    variants.add(normalized);
+    variants.add(normalized.endsWith("/") ? normalized.slice(0, -1) : `${normalized}/`);
+
+    // Compatibilidad con ruta legacy usada en pruebas y entornos antiguos.
+    if (/\/api\/change-password\/?$/i.test(normalized)) {
+        const modern = normalized.replace(/\/api\/change-password\/?$/i, "/api/auth/changepassword");
+        variants.add(modern);
+        variants.add(modern.endsWith("/") ? modern.slice(0, -1) : `${modern}/`);
+    }
+
+    return Array.from(variants);
+}
+
+function validatePasswordComplexity(password) {
+    const value = String(password || "");
+
+    if (value.length < 8) {
+        return "La contraseña debe tener al menos 8 caracteres";
+    }
+
+    if (!/[a-z]/.test(value)) {
+        return "La contraseña debe incluir al menos una letra minúscula";
+    }
+
+    if (!/[A-Z]/.test(value)) {
+        return "La contraseña debe incluir al menos una letra mayúscula";
+    }
+
+    if (!/\d/.test(value)) {
+        return "La contraseña debe incluir al menos un número";
+    }
+
+    if (!/[^A-Za-z0-9\s]/.test(value)) {
+        return "La contraseña debe incluir al menos un símbolo";
+    }
+
+    return null;
+}
 
 // Registrar endpoints para depuración
 console.log("Config Notification Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
@@ -163,22 +207,25 @@ export async function changePassword(userId, currentPassword, newPassword) {
     }
 
     if (!CHANGE_PASSWORD_ENDPOINT) {
-        console.warn("VITE_API_CHANGE_PASSWORD not configured");
+        console.warn("VITE_API_CHANGE_PASSWORD / VITE_API_PASSWORD_CHANGE not configured");
         return null;
     }
 
+    const policyError = validatePasswordComplexity(newPassword);
+    if (policyError) {
+        return {
+            success: false,
+            message: policyError
+        };
+    }
+
     const payload = {
-        userId: userId,
-        currentPassword: currentPassword,
-        newPassword: newPassword
+        user: String(userId),
+        pass: String(newPassword)
     };
 
-    const normalizedEndpoint = CHANGE_PASSWORD_ENDPOINT.trim();
-    const endpointCandidates = Array.from(new Set([
-        normalizedEndpoint,
-        normalizedEndpoint.endsWith("/") ? normalizedEndpoint.slice(0, -1) : `${normalizedEndpoint}/`
-    ]));
-    const methodCandidates = ["PUT", "POST"];
+    const endpointCandidates = buildPasswordEndpointCandidates(CHANGE_PASSWORD_ENDPOINT);
+    const methodCandidates = ["POST", "PUT"];
 
     try {
         for (const endpoint of endpointCandidates) {
@@ -203,9 +250,14 @@ export async function changePassword(userId, currentPassword, newPassword) {
                 }
 
                 console.error(`changePassword failed: ${res.status} (${method} ${endpoint})`, body);
-                return typeof body === "string"
-                    ? { success: false, message: `HTTP ${res.status} - ${body}` }
-                    : (body || { success: false, message: `HTTP ${res.status}` });
+                if (typeof body === "string") {
+                    return { success: false, message: `HTTP ${res.status} - ${body}` };
+                }
+
+                return {
+                    success: false,
+                    message: body?.message || body?.error || `HTTP ${res.status}`
+                };
             }
         }
 

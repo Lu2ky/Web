@@ -26,7 +26,7 @@ export default defineConfig({
             VITE_API_URL_REMINDERS_TAGS_USER: "/api/reminders",
             VITE_API_URL_NOTIFICATIONS: "/api/notifications/",
             VITE_API_GET_USER_DATA: "/api/get-user/",
-            VITE_API_CHANGE_PASSWORD: "/api/change-password",
+            VITE_API_CHANGE_PASSWORD: "/api/auth/changepassword",
             VITE_API_URL_TAGS_USER: "/api/tags-by-user/",
         },
     },

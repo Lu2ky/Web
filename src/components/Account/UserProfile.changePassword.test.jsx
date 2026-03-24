@@ -36,12 +36,12 @@ describe("UserProfile - cambio de contrasena", () => {
 
         await completarFormularioContrasena(user, {
             current: "Actual123",
-            newPassword: "Nueva123",
-            confirm: "Nueva123",
+            newPassword: "Nueva#123",
+            confirm: "Nueva#123",
         });
 
         await waitFor(() => {
-            expect(userService.changePassword).toHaveBeenCalledWith(123, "Actual123", "Nueva123");
+            expect(userService.changePassword).toHaveBeenCalledWith(123, "Actual123", "Nueva#123");
         });
 
         expect(await screen.findByText(/Contrase.a cambiada exitosamente/i)).toBeInTheDocument();
@@ -58,8 +58,8 @@ describe("UserProfile - cambio de contrasena", () => {
 
         await completarFormularioContrasena(user, {
             current: "Actual123",
-            newPassword: "Nueva123",
-            confirm: "Distinta123",
+            newPassword: "Nueva#123",
+            confirm: "Distinta#123",
         });
 
         expect(userService.changePassword).not.toHaveBeenCalled();
@@ -79,7 +79,7 @@ describe("UserProfile - cambio de contrasena", () => {
         });
 
         expect(userService.changePassword).not.toHaveBeenCalled();
-        expect(screen.getByText(/La nueva contrase.a debe tener al menos 6 caracteres/i)).toBeInTheDocument();
+        expect(screen.getByText(/La contrase.a debe tener al menos 8 caracteres/i)).toBeInTheDocument();
     });
 
     it("muestra validacion cuando la nueva contrasena es igual a la actual", async () => {
@@ -89,9 +89,9 @@ describe("UserProfile - cambio de contrasena", () => {
         await screen.findByRole("button", { name: /Cambiar Contrase.a/i });
 
         await completarFormularioContrasena(user, {
-            current: "Misma123",
-            newPassword: "Misma123",
-            confirm: "Misma123",
+            current: "Misma#123",
+            newPassword: "Misma#123",
+            confirm: "Misma#123",
         });
 
         expect(userService.changePassword).not.toHaveBeenCalled();
@@ -108,8 +108,8 @@ describe("UserProfile - cambio de contrasena", () => {
 
         await completarFormularioContrasena(user, {
             current: "Actual123",
-            newPassword: "Nueva123",
-            confirm: "Nueva123",
+            newPassword: "Nueva#123",
+            confirm: "Nueva#123",
         });
 
         await waitFor(() => {
