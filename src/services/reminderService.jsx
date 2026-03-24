@@ -1,4 +1,12 @@
-// Use environment variables so the base host can change without recompiling
+// ============================================================================
+// Servicio de Recordatorios (Reminders)
+// ============================================================================
+// Gestiona operaciones CRUD para recordatorios/tareas pendientes.
+// Proporciona normalización de datos desde múltiples formatos de API,
+// validación de estados, conversión de fechas y sincronización con API.
+// ============================================================================
+
+// Variables de entorno para endpoints API (cargadas dinámicamente)
 const REMINDERS_TAGS_API_BASE = import.meta.env.VITE_API_URL_REMINDERS_TAGS_USER;
 const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER;
 const DELETE_REMINDER_ENDPOINT = import.meta.env.VITE_API_DELETE_REMINDER;
@@ -32,7 +40,7 @@ class ReminderService {
 		return response;
 	}
 
-	/* Duplicar recordatorio */
+	// Crea una copia de un recordatorio existente con nombre modificado
 	static async duplicateReminder(userId, taskToDuplicate, codigoUsuario = null) {
 		if (!userId || !taskToDuplicate) return null;
 
@@ -55,6 +63,7 @@ class ReminderService {
 	}
 
 
+	// Extrae string seguro de valores nulos o estructuras complejas de API
 	static getNullableString(value) {
 		if (value == null) return "";
 		if (typeof value === "string") return value;
@@ -66,6 +75,7 @@ class ReminderService {
 		return String(value);
 	}
 
+	// Convierte valor a booleano desde múltiples formatos (bool, número, string, objeto)
 	static getBoolean(value) {
 		if (typeof value === "boolean") return value;
 		if (typeof value === "number") return value === 1;
@@ -80,6 +90,8 @@ class ReminderService {
 		return false;
 	}
 
+	// Normaliza prioridad a formato estándar (alta, media, baja)
+	// Acepta números, texto en español e inglés
 	static normalizePriority(value) {
 		const normalized = String(value ?? "").trim().toLowerCase();
 		if (normalized === "1" || normalized === "high" || normalized === "alta") return "alta";
@@ -96,6 +108,8 @@ class ReminderService {
 		return null;
 	}
 
+	// Normaliza un recordatorio desde formato API al formato estándar interno
+	// Maneja múltiples variantes de nombres de campo de diferentes endpoints
 	static normalizeReminder(reminder, index) {
 		const priority = this.normalizePriority(
 			this.getNullableString(
@@ -128,7 +142,7 @@ class ReminderService {
 						? "priority-medium"
 						: "priority-low";
 
-			// Avoid duplicates: skip if the API already sent a tag with this label
+			// Evitar duplicados: omitir si la API ya envió una etiqueta con esta etiqueta
 			const hasPriorityTag = tags.some(
 				tag => tag.type === priorityType || tag.label?.toLowerCase() === priority
 			);
@@ -141,7 +155,7 @@ class ReminderService {
 		// Se excluye reminder.status deliberadamente: ese campo suele contener
 		// códigos numéricos de tipo/estado (ej. 1 = activo) que no indican
 		// "completado" y provocan falsos positivos al comparar rawCompleted === 1.
-		// B_estado is the canonical completed flag for this endpoint
+		// B_estado es la bandera canónica de completado para este endpoint
 		const rawCompleted =
 			reminder.B_estado ??
 			reminder.B_completed ??
@@ -167,7 +181,7 @@ class ReminderService {
 				reminder._id ??
 				reminder.reminder_id ??
 				`reminder-${index}`,
-			// N_idRecordatorio is the PK the delete endpoint expects
+			// N_idRecordatorio es la PK que espera el endpoint de eliminación
 			recordatorioId: reminder.N_idRecordatorio ?? null,
 			name: this.getNullableString(
 				reminder.T_nombre ?? reminder.name ?? reminder.title ?? reminder.reminder ?? "Recordatorio"
@@ -185,6 +199,8 @@ class ReminderService {
 		};
 	}
 
+	// Obtiene y normaliza todos los recordatorios de un usuario
+	// Maneja múltiples estructuras de respuesta API
 	static async getByUser(userId) {
 		if (!userId) return [];
 
@@ -247,11 +263,12 @@ class ReminderService {
 		);
 	}
 
-	// Converts any date string to "YYYY-MM-DD HH:mm:ss" — the format the backend expects.
+	// Convierte cualquier formato de fecha a "YYYY-MM-DD HH:mm:ss"
+	// Soporta múltiples formatos: Date object, ISO 8601, DD-MM-YYYY, YYYY-MM-DD, etc.
 	static toDateTimeString(dateValue) {
 		if (!dateValue) return "";
 
-		// If it's already a Date object, format it directly
+		// Si ya es un objeto Date, formatearlo directamente
 		if (dateValue instanceof Date) {
 			if (Number.isNaN(dateValue.getTime())) {
 				console.warn("[ReminderService] toDateTimeString: invalid Date object");
@@ -271,7 +288,7 @@ class ReminderService {
 		const fmt = (yr, mo, dy, hh, mm, ss) =>
 			`${yr}-${mo}-${dy} ${hh}:${mm}:${ss ?? "00"}`;
 
-		// Already "YYYY-MM-DD HH:mm:ss"
+		// Ya está en formato "YYYY-MM-DD HH:mm:ss"
 		const already = raw.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
 		if (already) return raw;
 
@@ -279,7 +296,7 @@ class ReminderService {
 		const yyyymmHHmm = raw.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/);
 		if (yyyymmHHmm) return `${raw}:00`;
 
-		// "DD-MM-YYYY HH:mm:ss" or "DD-MM-YYYY HH:mm" (old format)
+		// "DD-MM-YYYY HH:mm:ss" o "DD-MM-YYYY HH:mm" (formato antiguo)
 		const ddmmHHmm = raw.match(/^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})(?::(\d{2}))?$/);
 		if (ddmmHHmm) {
 			return fmt(
@@ -288,7 +305,7 @@ class ReminderService {
 			);
 		}
 
-		// "YYYY-MM-DDThh:mm:ss[Z]" (ISO format)
+		// "YYYY-MM-DDThh:mm:ss[Z]" (formato ISO)
 		const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
 		if (iso) {
 			return fmt(
@@ -297,11 +314,11 @@ class ReminderService {
 			);
 		}
 
-		// "YYYY-MM-DD" only → midnight
+		// Solo "YYYY-MM-DD" → medianoche
 		const dateOnly = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
 		if (dateOnly) return fmt(dateOnly[1], dateOnly[2], dateOnly[3], "00", "00", "00");
 
-		// Fallback: let JS parse
+		// Alternativa: dejar que JS lo interprete
 		const d = new Date(raw.replace(" ", "T"));
 		if (!Number.isNaN(d.getTime())) {
 			const yr = d.getFullYear();
@@ -362,7 +379,7 @@ class ReminderService {
 			return;
 		}
 
-		// Warn if ID looks synthetic (generated fallback, not a real backend ID)
+		// Advertir si el ID parece sintético (generado de respaldo, no un ID real del servidor)
 		if (String(previousReminder.id).startsWith("reminder-")) {
 			console.warn("[ReminderService] ID looks synthetic (reminder-N), backend may reject it:", previousReminder.id);
 		}
@@ -383,9 +400,9 @@ class ReminderService {
 			updates.push(this.updateDescription(previousReminder.id, descNext));
 		}
 
-		// Normalise both sides to the same format before comparing so that
-		// "2026-03-02T14:30:00Z" (server) and "2026-03-02 14:30:00" (modal) don't
-		// falsely appear different when the user never changed the date.
+		// Normalizar ambos lados al mismo formato antes de comparar para que
+		// "2026-03-02T14:30:00Z" (servidor) y "2026-03-02 14:30:00" (modal) no
+		// parezcan distintos falsamente cuando el usuario no cambió la fecha.
 		const datePrev = this.toDateTimeString(previousReminder.dueDate ?? "");
 		const dateNext = this.toDateTimeString(updatedReminder.dueDate ?? "");
 		console.log(`  dueDate: "${datePrev}" → "${dateNext}" — changed: ${datePrev !== dateNext}`);
@@ -401,8 +418,8 @@ class ReminderService {
 		}
 
 		// ── Tags ──
-		// Exclude synthetic priority tags (type: "priority-*") — they are derived
-		// from the priority field and must not be written back as real backend tags.
+		// Excluir etiquetas sintéticas de prioridad (tipo: "priority-*") — se derivan
+		// del campo de prioridad y no deben enviarse al servidor como etiquetas reales.
 		const extractLabels = (tags) =>
 			(Array.isArray(tags) ? tags : [])
 				.filter(t => typeof t !== "string" ? !String(t?.type ?? "").startsWith("priority-") : true)
@@ -427,7 +444,7 @@ class ReminderService {
 		console.log("[ReminderService] All updates done");
 	}
 
-	/* Add a new reminder via POST */
+	/* Agrega un nuevo recordatorio mediante POST */
 	static async addReminder(userId, name, description, dueDate, priority, tags = [], codigoUsuario = null) {
 		if (!userId) return;
 		const priorityNumber = this.priorityToNumber(priority);
@@ -446,7 +463,7 @@ class ReminderService {
 			P_tag5: null
 		};
 
-		// include up to 5 tags, null for empty slots
+		// incluir hasta 5 etiquetas, null para espacios vacíos
 		if (Array.isArray(tags)) {
 			tags.slice(0, 5).forEach((t, ix) => {
 				payload[`P_tag${ix + 1}`] = t || null;
@@ -460,7 +477,7 @@ class ReminderService {
 		);
 	}
 
-	/* Delete a reminder by id */
+	/* Elimina un recordatorio por ID */
 	static async deleteReminder(reminderId) {
 		if (!reminderId) return;
 		return this.postUpdate(
@@ -470,10 +487,10 @@ class ReminderService {
 		);
 	}
 
-	/* Update state (completed/not completed) of a reminder */
+	/* Actualiza el estado (completado/no completado) de un recordatorio */
 	static async updateState(reminderId, state) {
 		if (!reminderId) return;
-		// Convert boolean to appropriate format (backend expects boolean or 0/1)
+		// Convertir booleano al formato apropiado (el servidor espera booleano o 0/1)
 		const stateValue = typeof state === 'boolean' ? state : Boolean(state);
 		return this.postUpdate(
 			UPDATE_STATE_ENDPOINT,
@@ -482,7 +499,7 @@ class ReminderService {
 		);
 	}
 
-	/* Update tags for a reminder */
+	/* Actualiza etiquetas de un recordatorio */
 	static async updateTags(reminderId, tags = []) {
 		console.log(`[ReminderService] updateTags called — reminderId: ${reminderId}, tags:`, tags);
 

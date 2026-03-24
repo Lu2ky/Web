@@ -72,6 +72,8 @@ function normalizeDayValue(rawDay, fallbackDate) {
   return normalizedDayNameMap[lowered] || "";
 }
 
+// Normaliza y formatea tiempo para mostrar en vistas (HH:MM)
+// Extrae hora:minutos desde múltiples formatos posibles
 function normalizeTimeForView(value) {
   const rawValue = unwrapApiScalar(value);
   if (rawValue == null || rawValue === "") return "";
@@ -109,6 +111,7 @@ function normalizeTimeForView(value) {
   return `${hours}:${minutes}`;
 }
 
+// Formatea fecha/hora hacia formato compatible con API (YYYY-MM-DD HH:MM:SS)
 function formatApiDateTime(value) {
   const pad = (number) => String(number).padStart(2, "0");
 
@@ -172,10 +175,9 @@ async function resolveIdUsuario(userId) {
   return idUsuario;
 }
 
-/**
- * Normaliza datos de actividades personales que vienen de la API
- * Convierte el formato API al formato esperado por el calendario
- */
+// Normaliza datos de actividades personales desde la API
+// Convierte múltiples variantes de campos API al formato estándar interno
+// Importante: maneja divergencias en nombres de propiedades entre endpoints
 function normalizePersonalData(apiData) {
   if (!Array.isArray(apiData)) {
     console.error("Datos de actividades personales no son un array:", apiData);
@@ -240,9 +242,18 @@ function normalizePersonalData(apiData) {
   });
 }
 
-// Componente para cargar datos de la API y pasarlos al padre
-// onDataLoaded es una función que se llama con los datos cargados normalizados,
-// userId es el ID del usuario para cargar su horario
+// ============================================================================
+// Componente PersonalFetcher
+// ============================================================================
+// Carga el horario personal/actividades del usuario desde la API.
+// Normaliza datos a formato estándar y notifica al padre mediante una función.
+// Muestra LoadingModal durante la carga. No renderiza elemento visual.
+//
+// Propiedades:
+//   - onDataLoaded: Función que recibe datos normalizados
+//   - userId: ID del usuario para obtener su horario personal
+// ============================================================================
+
 function PersonalFetcher({ onDataLoaded, userId }) {
   const [loading, setLoading] = useState(true); // Indica si la API está cargando
   const [apiData, setApiData] = useState([]); // Almacena los datos de la API
@@ -402,16 +413,16 @@ export const addPersonalActivity = async (userId, activityData) => {
     });
 
     if (!response.ok) {
-      // Read body once - it can only be read once per response
+      // Leer el body una sola vez: solo puede leerse una vez por respuesta
       const bodyText = await response.text();
       let errorDetails = bodyText;
       
       try {
-        // Try to parse as JSON for better error details
+        // Intentar parsear como JSON para mejores detalles de error
         const errorData = JSON.parse(bodyText);
         errorDetails = JSON.stringify(errorData);
       } catch (parseError) {
-        // If not JSON, use the raw text (e.g., HTML error page)
+        // Si no es JSON, usar el texto crudo (por ejemplo, una página HTML de error)
         errorDetails = bodyText || `HTTP ${response.status}`;
       }
       
@@ -420,7 +431,7 @@ export const addPersonalActivity = async (userId, activityData) => {
       throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorDetails}`);
     }
 
-    // Parse the successful response
+    // Parsear la respuesta exitosa
     const bodyText = await response.text();
     let data;
     try {
@@ -449,13 +460,13 @@ export const deletePersonalActivity = async (userId, activityId) => {
   try {
     const baseUrl = import.meta.env.VITE_API_DELETE_PERSONAL_ACTIVITY;
 
-    // deletePersonalActivity debug logs removed
+    // Logs de depuración de deletePersonalActivity removidos
 
     const payload = {
       IdPersonalSchedule: activityId
     };
 
-    // payload log removed
+    // Log de payload removido
 
     const response = await fetch(baseUrl, {
       method: "POST",
@@ -480,7 +491,7 @@ export const deletePersonalActivity = async (userId, activityId) => {
       throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorDetails}`);
     }
 
-    // Parse the successful response
+    // Parsear la respuesta exitosa
     const bodyText = await response.text();
     let data;
     try {
@@ -561,7 +572,7 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
       throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorDetails}`);
     }
 
-    // Parse the successful response
+    // Parsear la respuesta exitosa
     const bodyText = await response.text();
     let data;
     try {

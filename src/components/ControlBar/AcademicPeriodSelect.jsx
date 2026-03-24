@@ -1,3 +1,11 @@
+// ============================================================================
+// Componente AcademicPeriodSelect
+// ============================================================================
+// Dropdown de selección de períodos académicos.
+// Carga períodos desde API y notifica cambios al padre mediante una función.
+// Cierra dropdown al hacer click fuera (click-outside pattern).
+// ============================================================================
+
 import { useState, useEffect, useRef } from "react";
 import { fetchAcademicPeriods } from "../../services/academicPeriodsService";
 
@@ -7,7 +15,7 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
 
-    // Cargar períodos académicos
+    // Carga períodos académicos desde API en montaje
     useEffect(() => {
         const loadPeriods = async () => {
             try {
@@ -25,7 +33,7 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
         loadPeriods();
     }, []);
 
-    // Cerrar dropdown al hacer click fuera
+    // Cierra el dropdown cuando se hace click fuera del componente
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {

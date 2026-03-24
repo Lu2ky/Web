@@ -9,7 +9,7 @@ export default function UserProfile({ userId, onClose }) {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     
-    // Password change form state
+    // Estado del formulario de cambio de contraseña
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,7 +18,7 @@ export default function UserProfile({ userId, onClose }) {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-    // Load user data on component mount
+    // Cargar datos del usuario al montar el componente
     useEffect(() => {
         loadUserData();
     }, [userId]);
@@ -35,7 +35,7 @@ export default function UserProfile({ userId, onClose }) {
             if (data) {
                 // Backend puede devolver un array o un objeto
                 const userData = Array.isArray(data) ? data[0] : data;
-                console.log("[UserProfile] userData procesado:", userData); // DEBUG
+                console.log("[UserProfile] userData procesado:", userData); // DEPURACIÓN
                 setUserData(userData);
                 setError("");
             } else {
@@ -54,7 +54,7 @@ export default function UserProfile({ userId, onClose }) {
         setError("");
         setSuccess("");
 
-        // Validations
+        // Validaciones
         if (!currentPassword.trim()) {
             setError("Por favor ingresa tu contraseña actual");
             return;
@@ -100,7 +100,7 @@ export default function UserProfile({ userId, onClose }) {
                 setNewPassword("");
                 setConfirmPassword("");
                 
-                // Clear success message after 3 seconds
+                // Limpiar mensaje de éxito después de 3 segundos
                 setTimeout(() => setSuccess(""), 3000);
             } else {
                 setError(result?.message || "Error al cambiar la contraseña");

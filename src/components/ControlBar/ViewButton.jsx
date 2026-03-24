@@ -1,8 +1,16 @@
+// ============================================================================
+// Componente ViewButton
+// ============================================================================
+// Botón toggle segmentado para cambiar vista del calendario.
+// Alterna entre vista semanal y diaria con indicador visual.
+// ============================================================================
+
 import "../../styles/ViewButton.css";
 
 const options = ["Semanal", "Diario"];
 
 function ViewButton({viewMode, setViewMode}) {
+	// El indicador visual se mueve entre opciones según la selección
 	const selected = options.indexOf(viewMode);
 
 	return (

@@ -9,23 +9,23 @@ export default function UserPreferences({ userId, onClose }) {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     
-    // Email edit state
+    // Estado de edición de correo
     const [isEditingEmail, setIsEditingEmail] = useState(false);
     const [newEmail, setNewEmail] = useState("");
     const [isSavingEmail, setIsSavingEmail] = useState(false);
 
-    // Reminder anticipation state
+    // Estado de anticipación de recordatorios
     const [isEditingAnticipation, setIsEditingAnticipation] = useState(false);
     const [anticipationHours, setAnticipationHours] = useState(0);
     const [anticipationMinutes, setAnticipationMinutes] = useState(0);
     const [isSavingAnticipation, setIsSavingAnticipation] = useState(false);
 
-    // Cellphone edit state
+    // Estado de edición de celular
     const [isEditingCellphone, setIsEditingCellphone] = useState(false);
     const [newCellphone, setNewCellphone] = useState("");
     const [isSavingCellphone, setIsSavingCellphone] = useState(false);
 
-    // Mute notifications state
+    // Estado de silenciamiento de notificaciones
     const [isEditingMute, setIsEditingMute] = useState(false);
     const [muteInfo, setMuteInfo] = useState(null);
     const [isSavingMute, setIsSavingMute] = useState(false);
@@ -38,7 +38,7 @@ export default function UserPreferences({ userId, onClose }) {
         { minutes: 10080, label: "1 semana" }
     ];
 
-    // Load user data on component mount
+    // Cargar datos del usuario al montar el componente
     useEffect(() => {
         loadUserData();
         loadMuteInfo();
@@ -49,11 +49,11 @@ export default function UserPreferences({ userId, onClose }) {
             const stored = localStorage.getItem("notificationsMute");
             if (stored) {
                 const parsed = JSON.parse(stored);
-                // Check if still active
+                // Verificar si sigue activo
                 if (parsed.muteUntil && Date.now() < parsed.muteUntil) {
                     setMuteInfo(parsed);
                 } else {
-                    // Expired, clean up
+                    // Expirado, limpiar
                     localStorage.removeItem("notificationsMute");
                     setMuteInfo(null);
                 }
@@ -79,25 +79,25 @@ export default function UserPreferences({ userId, onClose }) {
                 setNewEmail(userData.email || userData.correo || "");
                 setNewCellphone(userData.telefono || userData.celular || "");
                 
-                // Extract anticipation time from 'antelacionNotis' field (TIME format: HH:MM:SS)
+                // Extraer tiempo de anticipación desde 'antelacionNotis' (formato TIME: HH:MM:SS)
                 let totalMinutes = 0;
                 const antelacionField = userData.antelacionNotis;
                 
                 if (antelacionField) {
-                    // If it's a TIME format string (HH:MM:SS)
+                    // Si es una cadena en formato TIME (HH:MM:SS)
                     if (typeof antelacionField === 'string' && antelacionField.includes(':')) {
                         const parts = antelacionField.split(':');
                         const hours = parseInt(parts[0]) || 0;
                         const minutes = parseInt(parts[1]) || 0;
                         totalMinutes = hours * 60 + minutes;
                     } 
-                    // If it's an object with hours and minutes properties
+                    // Si es un objeto con propiedades de horas y minutos
                     else if (typeof antelacionField === 'object' && antelacionField !== null) {
                         const hours = parseInt(antelacionField.hours || antelacionField.horas || 0) || 0;
                         const minutes = parseInt(antelacionField.minutes || antelacionField.minutos || 0) || 0;
                         totalMinutes = hours * 60 + minutes;
                     }
-                    // If it's already a number (total minutes)
+                    // Si ya es un número (minutos totales)
                     else if (typeof antelacionField === 'number') {
                         totalMinutes = antelacionField;
                     }
@@ -118,7 +118,7 @@ export default function UserPreferences({ userId, onClose }) {
         }
     };
 
-    // Validate email format
+    // Validar formato de correo
     const isValidEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
@@ -173,7 +173,7 @@ export default function UserPreferences({ userId, onClose }) {
                 });
                 setIsEditingEmail(false);
                 
-                // Clear success message after 3 seconds
+                // Limpiar mensaje de éxito después de 3 segundos
                 setTimeout(() => setSuccess(""), 3000);
             } else {
                 setError(result?.message || "Error al actualizar el correo");
@@ -195,7 +195,7 @@ export default function UserPreferences({ userId, onClose }) {
     const handleCancelAnticipation = () => {
         setIsEditingAnticipation(false);
         
-        // Restore from userData
+        // Restaurar desde userData
         let totalMinutes = 0;
         const antelacionField = userData?.antelacionNotis;
         
@@ -238,7 +238,7 @@ export default function UserPreferences({ userId, onClose }) {
             return;
         }
 
-        // Get current total minutes from userData
+        // Obtener minutos totales actuales desde userData
         let currentTotalMinutes = 0;
         const antelacionField = userData?.antelacionNotis;
         
@@ -275,7 +275,7 @@ export default function UserPreferences({ userId, onClose }) {
                 });
                 setIsEditingAnticipation(false);
                 
-                // Clear success message after 3 seconds
+                // Limpiar mensaje de éxito después de 3 segundos
                 setTimeout(() => setSuccess(""), 3000);
             } else {
                 setError(result?.message || "Error al actualizar el tiempo de anticipación");
@@ -332,7 +332,7 @@ export default function UserPreferences({ userId, onClose }) {
                 });
                 setIsEditingCellphone(false);
                 
-                // Clear success message after 3 seconds
+                // Limpiar mensaje de éxito después de 3 segundos
                 setTimeout(() => setSuccess(""), 3000);
             } else {
                 setError(result?.message || "Error al actualizar el celular");

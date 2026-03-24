@@ -170,7 +170,7 @@ export default function TaskEditModal({
             return;
         }
 
-        // Auto-include any pending tag left in the input
+        // Incluir automáticamente cualquier etiqueta pendiente que quede en el input
         let finalTags = formData.tags;
         const pending = tagLabel.trim();
         if (pending && !finalTags.some(t => t.label === pending)) {

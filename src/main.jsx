@@ -49,7 +49,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 				</Route>
 				<Route path="/RestorePassword" element={<RestorePassword />} />
 				<Route path="/TokenPassword" element={<TokenPassword />} />
-				{/* Fallback: cualquier ruta no definida va al login */}
+				{/* Respaldo: cualquier ruta no definida va al login */}
 				<Route path="*" element={<LogInForm />} />
 			</Routes>
 		</SessionTimeoutManager>

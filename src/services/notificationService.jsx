@@ -1,31 +1,36 @@
-// Basic helper for fetching notifications.  The actual backend
-// endpoint is expected to be configured via environment variable
-// VITE_API_URL_NOTIFICATIONS.  If the project already has a more
-// sophisticated notification API, this file can be replaced or
-// augmented accordingly.
+// ============================================================================
+// Servicio de Notificaciones
+// ============================================================================
+// Gestiona la obtención, creación y normalización de notificaciones.
+// Soporta múltiples formatos de respuesta API.
+// Las notificaciones pueden proceder de tareas completadas, recordatorios, etc.
+// ============================================================================
+
+// Utilidad para obtener notificaciones. El endpoint debe estar configurado
+// en la variable de entorno  VITE_API_URL_NOTIFICATIONS.
 
 const NOTIFICATIONS_BASE = import.meta.env.VITE_API_URL_NOTIFICATIONS || "";
 const ADD_NOTIFICATION_ENDPOINT = import.meta.env.VITE_API_ADD_NOTIFICATION;
 const ADD_EMAIL_ENDPOINT = import.meta.env.VITE_API_ADD_EMAIL;
 
 /**
- * Retrieve a list of notifications for the given user.
+ * Obtiene una lista de notificaciones para el usuario indicado.
  *
- * The returned value is typically an array of objects containing at
- * least some of the following properties:
- *   - id or _id
+ * El valor retornado suele ser un arreglo de objetos que contiene al
+ * menos algunas de las siguientes propiedades:
+ *   - id o _id
  *   - name/title/text
  *   - dueDate / date
- *   - read / completed flag
+ *   - bandera read / completed
  *
- * If the environment variable is not defined the function will simply
- * resolve to an empty array so that the UI can continue to work while
- * the backend is being implemented.
+ * Si la variable de entorno no está definida, la función simplemente
+ * retorna un arreglo vacío para que la UI siga funcionando mientras
+ * se implementa el backend.
  */
 export async function getNotifications(userId) {
     if (!userId) return [];
 
-    // if a real notifications endpoint is configured use it
+    // Si hay un endpoint real de notificaciones configurado, usarlo
     if (NOTIFICATIONS_BASE) {
         try {
             const url = `${NOTIFICATIONS_BASE}${userId}`;
@@ -42,7 +47,7 @@ export async function getNotifications(userId) {
             if (Array.isArray(data)) items = data;
             else if (Array.isArray(data?.data)) items = data.data;
             
-            // Normalize notification structure
+            // Normalizar estructura de notificación
             return items.map(n => ({
                 id: n.id || n._id || n.N_idNotificacion,
                 name: n.name || n.title || n.T_nombre || n.asunto || n.T_asunto || "(sin título)",
@@ -52,7 +57,7 @@ export async function getNotifications(userId) {
                 issueDate: n.issueDate || n.Dt_fechaEmision || "",
                 read: n.read || n.B_leido || false,
                 completed: n.completed || n.B_estado || false,
-                ...n // spread all other properties
+                ...n // conservar el resto de propiedades
             }));
         } catch (e) {
             console.error("Error fetching notifications", e);
@@ -60,7 +65,7 @@ export async function getNotifications(userId) {
         }
     }
 
-    // fallback behaviour: use reminders endpoint as a stand-in
+    // Comportamiento de respaldo: usar endpoint de recordatorios como sustituto
     try {
         const { default: ReminderService } = await import("./reminderService");
         return ReminderService.getByUser(userId);
@@ -70,7 +75,7 @@ export async function getNotifications(userId) {
 }
 
 /**
- * Add a notification
+ * Agrega una notificación
  * @param {object} params
  * @param {number|string} params.todoId - N_idToDoList
  * @param {string} params.name - T_nombre
@@ -105,7 +110,7 @@ export async function addNotification({ todoId, name, description, issueDate }) 
 }
 
 /**
- * Add an email notification
+ * Agrega una notificación por correo
  * @param {object} params
  * @param {number|string} params.todoId - N_idToDoList
  * @param {string} params.issue - T_asunto

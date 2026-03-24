@@ -108,19 +108,19 @@ function ToDoList({ userId = "" }) {
 
         const newCompletedState = !task.completed;
 
-        // Optimistically update UI
+        // Actualizar la UI de forma optimista
         setTasks((prev) =>
             prev.map((t) =>
                 t.id === id ? { ...t, completed: newCompletedState } : t
             )
         );
 
-        // Update backend
+        // Actualizar en servidor
         try {
             await ReminderService.updateState(id, newCompletedState);
         } catch (error) {
             console.error("Error al actualizar estado del recordatorio:", error);
-            // Revert on error
+            // Revertir en caso de error
             setTasks((prev) =>
                 prev.map((t) =>
                     t.id === id ? { ...t, completed: !newCompletedState } : t

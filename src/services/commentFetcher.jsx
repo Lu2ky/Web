@@ -1,5 +1,15 @@
+// ============================================================================
+// Servicio de Comentarios
+// ============================================================================
+// Gestiona la obtención y normalización de comentarios de clases.
+// Soporta múltiples formatos de API y filtra por curso/horario.
+// Maneja comentarios eliminados lógicamente (B_isDeleted flag).
+// ============================================================================
+
 const COMMENTS_ENDPOINT = import.meta.env.VITE_API_URL_COMMENTS;
 
+
+// Extrae array de datos desde múltiples estructuras API posibles
 const normalizeRawArray = (json) => {
     if (Array.isArray(json?.data)) return json.data;
     if (Array.isArray(json?.comments)) return json.comments;
@@ -19,6 +29,8 @@ const toComparableId = (value) => {
     return Number.isFinite(numeric) ? numeric : String(value);
 };
 
+
+// Verifica si un comentario está marcado como eliminado (eliminación lógica)
 const isDeleted = (comment) => {
     const flag = comment?.B_isDeleted;
     if (typeof flag === "boolean") return flag;
@@ -26,6 +38,8 @@ const isDeleted = (comment) => {
     return false;
 };
 
+
+// Filtra comentarios por curso y/u horario, excluyendo eliminados
 const filterByScope = (comments, { courseId, scheduleId }) => {
     const targetCourseId = toComparableId(courseId);
     const targetScheduleId = toComparableId(scheduleId);
