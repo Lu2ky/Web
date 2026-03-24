@@ -11,7 +11,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 
-export function useIdleTimeout(timeoutMinutes = 2, onTimeout = null, enabled = true) {
+export function useIdleTimeout(timeoutMinutes = 15, onTimeout = null, enabled = true) {
   const timeoutIdRef = useRef(null);
   const isIdleRef = useRef(false);
 

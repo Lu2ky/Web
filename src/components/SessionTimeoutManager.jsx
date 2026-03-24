@@ -7,7 +7,7 @@
  * Uso:
  * <SessionTimeoutManager 
  *   timeoutMinutes={15}
- *   warningMinutes={2}
+ *   warningMinutes={10}
  *   children={<ProtectedRoutes />}
  * />
  */
@@ -19,8 +19,8 @@ import { useIdleTimeout } from '../hooks/useIdleTimeout';
 
 export function SessionTimeoutManager({ 
   children, 
-  timeoutMinutes = 2,
-  warningMinutes = 1,
+  timeoutMinutes = 15,
+  warningMinutes = 10,
   showWarningModal = true,
 }) {
   const navigate = useNavigate();
