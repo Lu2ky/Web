@@ -1,15 +1,21 @@
+// Componente para la verificación del token de recuperación de contraseña
+
 import { useState, useRef } from "react";
 import Logo from './assets/logo.png';
 import Image from './assets/ImageRecover.jpeg';
 import './TokenPassword.css';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import TokenFetcher from './services/TokenFetcher';
 
 // Componente para la verificación del token de recuperación de contraseña
 const TokenPassword = () => {
     // Hook para navegar entre rutas
     const navigate = useNavigate();
+    const location = useLocation();
     // Estado para almacenar los dígitos del token, inicializado con 6 campos vacíos
     const [token, setToken] = useState(["", "", "", "", "", ""]);
+    const [submittedToken, setSubmittedToken] = useState('');
+    const [feedback, setFeedback] = useState('');
     // Referencia para manejar el enfoque de los inputs (es decir el lugar donde se digita el número)
     const inputsRef = useRef([]);
     // Función para manejar el cambio en los inputs del token
@@ -64,8 +70,31 @@ const TokenPassword = () => {
             alert("El token debe tener 6 dígitos");
             return;
         }
-        // Agregar conexión al backend para verificar el token aquí
-        console.log("Token:", finalToken);
+
+        setSubmittedToken(finalToken);
+    };
+
+    const handleTokenResult = (result) => {
+        if (!result) {
+            console.error('Error al procesar validación de token');
+            return;
+        }
+
+        const isSuccess = result.success !== false;
+        if (isSuccess) {
+            setFeedback('Token validado correctamente.');
+            navigate('/RestorePassword', {
+                state: {
+                    userCode: location.state?.userCode || '',
+                    token: submittedToken
+                }
+            });
+            return;
+        }
+
+        // Error en validación de token: se loguea en consola, no se muestra al usuario
+        console.error('Error en validación de token:', result.message);
+        setSubmittedToken('');
     };
 
     return (
@@ -97,10 +126,18 @@ const TokenPassword = () => {
                         Verificar
                     </button>
 
+                    {feedback && <p>{feedback}</p>}
+
                     <button type="button" className="btn-return" onClick={() => navigate('/')}>
                         Volver
                     </button>
                 </form>
+                {submittedToken && (
+                    <TokenFetcher
+                        passwordResetToken={submittedToken}
+                        onDataLoaded={handleTokenResult}
+                    />
+                )}
             </div>
         </div>
     );
