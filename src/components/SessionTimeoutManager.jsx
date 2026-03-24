@@ -1,10 +1,10 @@
 /**
- * SessionTimeoutManager Component
+ * Componente SessionTimeoutManager
  * 
- * Wraps protected routes/app and manages idle session timeout
- * Automatically logs out inactive users and optionally shows a warning modal
+ * Envuelve rutas protegidas/app y gestiona timeout por inactividad
+ * Cierra sesión automáticamente a usuarios inactivos y opcionalmente muestra un modal de aviso
  * 
- * Usage:
+ * Uso:
  * <SessionTimeoutManager 
  *   timeoutMinutes={15}
  *   warningMinutes={2}
@@ -27,32 +27,32 @@ export function SessionTimeoutManager({
   const [showTimeout, setShowTimeout] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(warningMinutes * 60);
 
-  // Only apply timeout if user is authenticated
+  // Aplicar timeout solo si el usuario está autenticado
   const isUserAuthenticated = isAuthenticated();
 
-  // Handle session timeout
+  // Manejar timeout de sesión
   const handleSessionTimeout = useCallback(() => {
-    // Clear session
+    // Limpiar sesión
     clearAuthSession();
     
-    // Hide warning modal
+    // Ocultar modal de aviso
     setShowTimeout(false);
 
-    // Redirect to login
+    // Redirigir al login
     navigate('/', { replace: true });
   }, [navigate]);
 
-  // Calculate when to show warning (timeoutMinutes - warningMinutes)
+  // Calcular cuándo mostrar aviso (timeoutMinutes - warningMinutes)
   const warningTriggerMinutes = timeoutMinutes - warningMinutes;
 
-  // Use idle timeout hook
+  // Usar utilidad de timeout por inactividad
   const { reset: resetIdleTimer } = useIdleTimeout(
     timeoutMinutes,
     handleSessionTimeout,
     isUserAuthenticated
   );
 
-  // Track remaining time for warning display
+  // Llevar control del tiempo restante para mostrar en el aviso
   useEffect(() => {
     if (!isUserAuthenticated || !showTimeout) return;
 
@@ -66,7 +66,7 @@ export function SessionTimeoutManager({
     return () => clearInterval(countdownInterval);
   }, [showTimeout, isUserAuthenticated]);
 
-  // Set up warning timer (when user is authenticated)
+  // Configurar temporizador de aviso (cuando el usuario está autenticado)
   useEffect(() => {
     if (!isUserAuthenticated || !showWarningModal) return;
 
@@ -78,13 +78,13 @@ export function SessionTimeoutManager({
     return () => clearTimeout(warningTimeoutId);
   }, [isUserAuthenticated, warningTriggerMinutes, warningMinutes, showWarningModal]);
 
-  // Handle user choosing to stay logged in
+  // Manejar cuando el usuario decide mantenerse conectado
   const handleStayLoggedIn = useCallback(() => {
     setShowTimeout(false);
     resetIdleTimer();
   }, [resetIdleTimer]);
 
-  // Format seconds to MM:SS
+  // Formatear segundos a MM:SS
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -95,7 +95,7 @@ export function SessionTimeoutManager({
     <>
       {children}
       
-      {/* Timeout Warning Modal */}
+      {/* Modal de aviso de timeout */}
       {showTimeout && isUserAuthenticated && showWarningModal && (
         <TimeoutWarningModal
           timeRemaining={timeRemaining}
@@ -109,8 +109,8 @@ export function SessionTimeoutManager({
 }
 
 /**
- * TimeoutWarningModal Component
- * Displays warning before automatic logout
+ * Componente TimeoutWarningModal
+ * Muestra aviso antes del cierre de sesión automático
  */
 function TimeoutWarningModal({ timeRemaining, onStayLoggedIn, onLogout, formatTime }) {
   return (

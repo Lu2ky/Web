@@ -25,7 +25,7 @@ export async function getCategories() {
         //console.error(baseUrl); // Log de la URL para depuración
         //console.error(`Error al cargar categorías: ${error.message}`); // Manejo de errores, muestra el error en consola
 
-        // Fallback: devolver lista estática si falla la API
+        // Respaldo: devolver lista estática si falla la API
         const fallback = [
             "Teoría",
             "Laboratorio",
@@ -35,7 +35,7 @@ export async function getCategories() {
             "Pastoral",
             "Personal",
         ];
-        cachedCategories = fallback; // Guarda el fallback en caché para futuros llamados
+        cachedCategories = fallback; // Guarda el respaldo en caché para futuros llamados
         return fallback; // Lo devuelve solo si la API falla
     }
 }

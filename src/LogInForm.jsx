@@ -10,7 +10,7 @@ import { FaUser } from "react-icons/fa"; //  npm install react-icons --save
 import { FaLock } from "react-icons/fa";
 import Image from './assets/ImageLogIn.jpeg';
 
-// Hook de react
+// Utilidades de estado y navegación de React
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -39,7 +39,7 @@ const LogInForm = () => {
         const result = await LDAPservice(userId, password);
 
         if (result) {
-            // Backend may return different success indicators
+            // El backend puede devolver distintos indicadores de éxito
             const isSuccess = result.success || result.status === 'success' || result.valid === true || Boolean(result.data);
             
             if (isSuccess) {

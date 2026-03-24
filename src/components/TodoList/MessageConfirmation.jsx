@@ -1,3 +1,19 @@
+// ============================================================================
+// Componente MessageConfirmation
+// ============================================================================
+// Modal de confirmación genérico reutilizable.
+// Personalizable con título, descripción y textos de botones.
+// 
+// Propiedades:
+//   - isOpen: Abre/cierra el modal
+//   - onClose: Función de retorno al hacer click en X o cancelar
+//   - onConfirm: Función de retorno al confirmar acción
+//   - title: Título del modal (por defecto: "¿Estás seguro de eliminar esto?")
+//   - description: Descripción de la acción
+//   - confirmText: Texto del botón confirmar
+//   - cancelText: Texto del botón cancelar
+// ============================================================================
+
 import React from 'react';
 import '../../styles/ConfirmMessage.css';
 

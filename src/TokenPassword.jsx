@@ -9,7 +9,7 @@ import TokenFetcher from './services/TokenFetcher';
 
 // Componente para la verificación del token de recuperación de contraseña
 const TokenPassword = () => {
-    // Hook para navegar entre rutas
+    // Utilidad para navegar entre rutas
     const navigate = useNavigate();
     const location = useLocation();
     // Estado para almacenar los dígitos del token, inicializado con 6 campos vacíos

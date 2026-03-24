@@ -1,3 +1,11 @@
+// ============================================================================
+// Componente NotificationBell
+// ============================================================================
+// Campana de notificaciones con dropdown.
+// Realiza polling cada 20 segundos para obtener notificaciones del usuario.
+// Cierra dropdown al hacer click fuera.
+// ============================================================================
+
 import { useState, useEffect, useRef } from "react";
 import * as NotificationService from "../../services/notificationService";
 import "../../styles/NotificationBell.css";
@@ -7,7 +15,7 @@ export default function NotificationBell({ userId }) {
     const [notifications, setNotifications] = useState([]);
     const containerRef = useRef(null);
 
-    // carga notis cada 10 segundos
+    // Carga notificaciones inmediatamente y luego cada 10 segundos (polling)
     useEffect(() => {
         async function load() {
             if (!userId) {
@@ -23,17 +31,17 @@ export default function NotificationBell({ userId }) {
             }
         }
         
-        // Load immediately
+        // Cargar de inmediato
         load();
         
-        // Set up interval to reload every 20 seconds
+        // Configurar intervalo para recargar cada 20 segundos
         const intervalId = setInterval(load, 20000);
         
-        // Cleanup interval on unmount or when userId changes
+        // Limpiar intervalo al desmontar o cuando cambie userId
         return () => clearInterval(intervalId);
     }, [userId]);
 
-    // close dropdown on outside click
+    // Cerrar dropdown al hacer click fuera
     useEffect(() => {
         function handleClickOutside(event) {
             if (containerRef.current && !containerRef.current.contains(event.target)) {
@@ -49,7 +57,7 @@ export default function NotificationBell({ userId }) {
     const unreadCount = notifications.filter(n => !n.read && !n.completed).length;
 
     const handleNotificationClick = (notificationId, notificationIndex) => {
-        // Mark notification as read
+        // Marcar notificación como leída
         setNotifications(prev => 
             prev.map((n, idx) => 
                 idx === notificationIndex ? { ...n, read: true } : n
@@ -66,7 +74,7 @@ export default function NotificationBell({ userId }) {
                 aria-expanded={isOpen}
                 title="Notificaciones"
             >
-                {/* bell SVG with dot for unread notifications */}
+                {/* SVG de campana con punto para notificaciones no leídas */}
                 {unreadCount > 0 ? (
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell-dot-icon lucide-bell-dot">
                         <path d="M10.268 21a2 2 0 0 0 3.464 0"/>

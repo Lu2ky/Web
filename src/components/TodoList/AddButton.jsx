@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "../../styles/addButton.css";
-import { saveToDo } from "../../services/todoService"; // fallback local
+import { saveToDo } from "../../services/todoService"; // respaldo local
 import ReminderService from "../../services/reminderService";
 import { addNotification } from "../../services/notificationService";
 import { getUserData } from "../../services/userService";
@@ -14,7 +14,7 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
         // data: { name, description, dueDate, tags, priority }
         const { name, description, dueDate, tags = [], priority = "" } = data || {};
 
-        // Convert dueDate ("YYYY-MM-DD" or "YYYY-MM-DD HH:MM:SS") to Date
+        // Convertir dueDate ("YYYY-MM-DD" o "YYYY-MM-DD HH:MM:SS") a Date
         let endDay = null;
         try {
             endDay = dueDate ? new Date(String(dueDate).replace(" ", "T")) : new Date();
@@ -28,7 +28,7 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
 
         if (userId) {
             try {
-                // Obtain the internal user ID from the API before adding the reminder
+                // Obtener el ID interno del usuario desde la API antes de agregar el recordatorio
                 const userData = await getUserData(userId);
                 const rawUser = Array.isArray(userData) ? userData[0] : userData;
                 const idUsuario =

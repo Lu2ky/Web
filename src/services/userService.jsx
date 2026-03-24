@@ -1,14 +1,25 @@
+// ============================================================================
+// Servicio de Usuario
+// ============================================================================
+// Gestiona operaciones relacionadas con datos y configuración de usuario.
+// Proporciona funciones para:
+// - Obtener datos de perfil del usuario (email, información personal)
+// - Actualizar email
+// - Cambiar contraseña
+// - Configurar notificaciones (anticipación)
+// ============================================================================
+
 const GET_USER_DATA_ENDPOINT = import.meta.env.VITE_API_GET_USER_DATA;
 const CONFIG_NOTIFICATION_ENDPOINT = import.meta.env.VITE_API_UPDATE_USER_EMAIL || import.meta.env.VITE_API_UPDATE_REMINDER_ANTICIPATION;
 const CHANGE_PASSWORD_ENDPOINT = import.meta.env.VITE_API_CHANGE_PASSWORD;
 
-// Log endpoints for debugging
+// Registrar endpoints para depuración
 console.log("Config Notification Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
 
 /**
- * Get user data by user ID
- * @param {number|string} userId - ID of the user
- * @returns {Promise<object|null>} User data or null if not found
+ * Obtiene datos del usuario por su ID
+ * @param {number|string} userId - ID del usuario
+ * @returns {Promise<object|null>} Datos del usuario o null si no se encuentra
  */
 export async function getUserData(userId) {
     if (!userId) {
@@ -32,7 +43,7 @@ export async function getUserData(userId) {
 
         const json = await res.json();
         
-        // Backend returns { success: boolean, data: {...} }
+        // El servidor retorna { success: boolean, data: {...} }
         if (json.success && json.data) {
             return json.data;
         }
@@ -45,10 +56,10 @@ export async function getUserData(userId) {
 }
 
 /**
- * Update user email
- * @param {number|string} userId - ID of the user
- * @param {string} newEmail - New email address
- * @returns {Promise<object|null>} Update result or null
+ * Actualiza el correo del usuario
+ * @param {number|string} userId - ID del usuario
+ * @param {string} newEmail - Nuevo correo electrónico
+ * @returns {Promise<object|null>} Resultado de la actualización o null
  */
 export async function updateUserEmail(userId, newEmail) {
     if (!userId || !newEmail) {
@@ -62,7 +73,7 @@ export async function updateUserEmail(userId, newEmail) {
         return { success: false, message };
     }
 
-    // Fetch current user data to get tiempoMute and actual idUsuario from DB
+    // Obtener datos actuales para recuperar tiempoMute e idUsuario real desde BD
     const currentData = await getUserData(userId);
     console.log("Current user data received:", currentData);
     
@@ -74,11 +85,11 @@ export async function updateUserEmail(userId, newEmail) {
         return { success: false, message: "No se encontraron datos del usuario" };
     }
     
-    // Use the actual idUsuario from the database, not the one passed as parameter
+    // Usar el idUsuario real de la base de datos, no el pasado por parámetro
     const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
     console.log("Using actualUserId from DB:", actualUserId);
     
-    // Get tiempoMute - try multiple field names
+    // Obtener tiempoMute intentando múltiples nombres de campo
     let currentTimeMute = currentUser?.antelacionNotis || 
                          currentUser?.tiempoMute || 
                          currentUser?.anticipationTime ||
@@ -86,7 +97,7 @@ export async function updateUserEmail(userId, newEmail) {
     
     console.log("Current tiempoMute:", currentTimeMute);
     
-    // Validate tiempoMute format (should be HH:MM:SS)
+    // Validar formato de tiempoMute (debe ser HH:MM:SS)
     if (typeof currentTimeMute !== 'string' || !currentTimeMute.includes(':')) {
         console.warn("tiempoMute format invalid, using default");
         currentTimeMute = "00:00:00";
@@ -119,7 +130,7 @@ export async function updateUserEmail(userId, newEmail) {
         const body = contentType.includes("application/json") ? await res.json() : await res.text();
         console.log("Response body:", body);
 
-        // Check if backend returned success: false in the body (even with status 200)
+        // Verificar si el servidor retornó success: false en el cuerpo (incluso con status 200)
         if (typeof body === 'object' && body.success === false) {
             console.error("Backend returned success: false -", body.message);
             return { success: false, message: body.message || "El servidor rechazó la actualización" };
@@ -139,11 +150,11 @@ export async function updateUserEmail(userId, newEmail) {
 }
 
 /**
- * Change user password
- * @param {number|string} userId - ID of the user
- * @param {string} currentPassword - Current password for verification
- * @param {string} newPassword - New password
- * @returns {Promise<object|null>} Change result or null
+ * Cambia la contraseña del usuario
+ * @param {number|string} userId - ID del usuario
+ * @param {string} currentPassword - Contraseña actual para verificación
+ * @param {string} newPassword - Nueva contraseña
+ * @returns {Promise<object|null>} Resultado del cambio o null
  */
 export async function changePassword(userId, currentPassword, newPassword) {
     if (!userId || !currentPassword || !newPassword) {
@@ -210,10 +221,10 @@ export async function changePassword(userId, currentPassword, newPassword) {
 }
 
 /**
- * Update reminder anticipation time for user preferences
- * @param {number|string} userId - ID of the user
- * @param {number} minutes - Minutes of anticipation (max 1440 = 24 hours)
- * @returns {Promise<object|null>} Update result or null
+ * Actualiza el tiempo de anticipación de recordatorios en preferencias de usuario
+ * @param {number|string} userId - ID del usuario
+ * @param {number} minutes - Minutos de anticipación (máximo 1440 = 24 horas)
+ * @returns {Promise<object|null>} Resultado de la actualización o null
  */
 export async function updateReminderAnticipation(userId, minutes) {
     if (!userId || minutes === undefined) {
@@ -221,7 +232,7 @@ export async function updateReminderAnticipation(userId, minutes) {
         return null;
     }
 
-    // Validate max 24 hours (1440 minutes)
+    // Validar máximo 24 horas (1440 minutos)
     const validatedMinutes = Math.min(Math.max(0, parseInt(minutes)), 1440);
 
     if (!CONFIG_NOTIFICATION_ENDPOINT) {
@@ -230,12 +241,12 @@ export async function updateReminderAnticipation(userId, minutes) {
         return { success: false, message };
     }
 
-    // Convert minutes to TIME format (HH:MM:SS) as expected by backend
+    // Convertir minutos a formato TIME (HH:MM:SS) como espera el servidor
     const hours = Math.floor(validatedMinutes / 60);
     const mins = validatedMinutes % 60;
     const tiempoMute = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
 
-    // Fetch current user data to get correo and actual idUsuario from DB
+    // Obtener datos actuales para recuperar correo e idUsuario real desde BD
     const currentData = await getUserData(userId);
     console.log("Current user data received:", currentData);
     
@@ -247,7 +258,7 @@ export async function updateReminderAnticipation(userId, minutes) {
         return { success: false, message: "No se encontraron datos del usuario" };
     }
     
-    // Use the actual idUsuario from the database, not the one passed as parameter
+    // Usar el idUsuario real de la base de datos, no el pasado por parámetro
     const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
     console.log("Using actualUserId from DB:", actualUserId);
     
@@ -281,7 +292,7 @@ export async function updateReminderAnticipation(userId, minutes) {
         const body = contentType.includes("application/json") ? await res.json() : await res.text();
         console.log("Response body:", body);
 
-        // Check if backend returned success: false in the body (even with status 200)
+        // Verificar si el servidor retornó success: false en el cuerpo (incluso con status 200)
         if (typeof body === 'object' && body.success === false) {
             console.error("Backend returned success: false -", body.message);
             return { success: false, message: body.message || "El servidor rechazó la actualización" };
@@ -301,10 +312,10 @@ export async function updateReminderAnticipation(userId, minutes) {
 }
 
 /**
- * Update user cellphone number
- * @param {number|string} userId - ID of the user
- * @param {string} cellphone - Cellphone number
- * @returns {Promise<object|null>} Update result or null
+ * Actualiza el número de celular del usuario
+ * @param {number|string} userId - ID del usuario
+ * @param {string} cellphone - Número de celular
+ * @returns {Promise<object|null>} Resultado de la actualización o null
  */
 export async function updateUserCellphone(userId, cellphone) {
     if (!userId || !cellphone) {
@@ -318,7 +329,7 @@ export async function updateUserCellphone(userId, cellphone) {
         return { success: false, message };
     }
 
-    // Fetch current user data to get correo, tiempoMute and actual idUsuario from DB
+    // Obtener datos actuales para recuperar correo, tiempoMute e idUsuario real desde BD
     const currentData = await getUserData(userId);
     console.log("Current user data received:", currentData);
     
@@ -330,14 +341,14 @@ export async function updateUserCellphone(userId, cellphone) {
         return { success: false, message: "No se encontraron datos del usuario" };
     }
     
-    // Use the actual idUsuario from the database, not the one passed as parameter
+    // Usar el idUsuario real de la base de datos, no el pasado por parámetro
     const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
     console.log("Using actualUserId from DB:", actualUserId);
     
     const currentEmail = (currentUser?.correo || currentUser?.email || "").trim();
     console.log("Current email:", currentEmail);
     
-    // Get tiempoMute - try multiple field names
+    // Obtener tiempoMute intentando múltiples nombres de campo
     let currentTimeMute = currentUser?.antelacionNotis || 
                          currentUser?.tiempoMute || 
                          currentUser?.anticipationTime ||
@@ -345,7 +356,7 @@ export async function updateUserCellphone(userId, cellphone) {
     
     console.log("Current tiempoMute:", currentTimeMute);
     
-    // Validate tiempoMute format (should be HH:MM:SS)
+    // Validar formato de tiempoMute (debe ser HH:MM:SS)
     if (typeof currentTimeMute !== 'string' || !currentTimeMute.includes(':')) {
         console.warn("tiempoMute format invalid, using default");
         currentTimeMute = "00:00:00";
@@ -375,7 +386,7 @@ export async function updateUserCellphone(userId, cellphone) {
         const body = contentType.includes("application/json") ? await res.json() : await res.text();
         console.log("Response body:", body);
 
-        // Check if backend returned success: false in the body (even with status 200)
+        // Verificar si el servidor retornó success: false en el cuerpo (incluso con status 200)
         if (typeof body === 'object' && body.success === false) {
             console.error("Backend returned success: false -", body.message);
             return { success: false, message: body.message || "El servidor rechazó la actualización" };

@@ -1,3 +1,14 @@
+// ============================================================================
+// Servicio de Autenticación y Gestión de Sesiones
+// ============================================================================
+// Gestiona la sesión de usuario en localStorage, incluyendo:
+// - Creación y validación de sesiones autenticadas
+// - Gestión de roles y permisos de usuario
+// - Determinar ruta de inicio según rol del usuario
+//
+// Los datos se almacenan en localStorage bajo la clave 'auth_session'.
+// ============================================================================
+
 const AUTH_STORAGE_KEY = "auth_session";
 
 export const ROLE_ADMIN_UPB_PLANNER = "admin_upb_planner";
@@ -19,6 +30,7 @@ const writeSession = (session) => {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
 };
 
+// Normaliza roles: convierte a array, limpia espacios y filtra valores vacíos
 const normalizeRoles = (roles) => {
     if (!Array.isArray(roles)) return [];
     return roles
@@ -56,6 +68,8 @@ export const clearAuthSession = () => {
     localStorage.removeItem("token");
 };
 
+// Verifica si el usuario actual tiene al menos uno de los roles requeridos
+// Si no hay roles requeridos, retorna true (acceso permitido por defecto)
 export const hasAnyRole = (requiredRoles = []) => {
     const normalizedRequired = normalizeRoles(requiredRoles);
     if (normalizedRequired.length === 0) return true;

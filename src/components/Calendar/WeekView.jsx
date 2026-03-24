@@ -18,18 +18,18 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
   const [hourPx, setHourPx] = useState(0);
   const [weekOffset, setWeekOffset] = useState(0);
   const gridRef = useRef(null);
-  // Get week date range
+  // Obtener rango de fechas de la semana
   const getWeekDateRange = () => {
       const today = new Date();
-      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      // Calculate start of week (Monday)
-      const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Monday is day 1
+      const currentDay = today.getDay(); // 0 = Domingo, 1 = Lunes, etc.
+      // Calcular inicio de semana (Lunes)
+      const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Lunes es día 1
       const startOfWeek = new Date(today);
       startOfWeek.setDate(today.getDate() - daysFromMonday + (weekOffset * 7));
-      // Calculate end of week (Sunday)
+      // Calcular fin de semana (Domingo)
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
-      // Format dates
+      // Formatear fechas
       const formatDate = (date) => {
       const month = date.toLocaleDateString("es-ES", { month: "short" });
       const day = date.getDate();
@@ -61,7 +61,7 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
     eventsByDay[event.day].push(event);
   });
 
-  // Debug: mostrar agrupación
+  // Depuración: mostrar agrupación
   personalEvents.forEach(ev => {
     console.log(`  - Evento "${ev.name}" en día: "${ev.day}" (type: ${typeof ev.day})`);
   });

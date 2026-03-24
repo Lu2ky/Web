@@ -1,45 +1,45 @@
 /**
- * Session Configuration
+ * Configuración de Sesión
  * 
- * Centralized configuration for idle session timeout behavior
- * Modify these settings to adjust timeout parameters across the application
+ * Configuración centralizada para el comportamiento del timeout por inactividad
+ * Modifica estos ajustes para adaptar los parámetros en toda la aplicación
  */
 
 export const SESSION_CONFIG = {
-  // Main idle timeout (in minutes)
-  // After this duration with no user activity, session expires
-  IDLE_TIMEOUT_MINUTES: 2,
+  // Timeout principal por inactividad (en minutos)
+  // Después de este tiempo sin actividad, la sesión expira
+  IDLE_TIMEOUT_MINUTES: 15,
 
-  // Warning display time (in minutes)
-  // Modal shows X minutes before actual timeout
-  // MUST be less than IDLE_TIMEOUT_MINUTES
-  WARNING_BEFORE_LOGOUT_MINUTES: 1,
+  // Tiempo de aviso (en minutos)
+  // El modal aparece X minutos antes del timeout real
+  // DEBE ser menor que IDLE_TIMEOUT_MINUTES
+  WARNING_BEFORE_LOGOUT_MINUTES: 10,
 
-  // Show/hide warning modal
+  // Mostrar/ocultar modal de aviso
   SHOW_TIMEOUT_WARNING: true,
 
-  // Events to track as user activity
-  // These events reset the inactivity timer
+  // Eventos a rastrear como actividad del usuario
+  // Estos eventos reinician el temporizador de inactividad
   ACTIVITY_EVENTS: [
-    'mousemove',      // Mouse movement
-    'keydown',        // Keyboard input
-    'click',          // Mouse/touch clicks
-    'touchstart',     // Touch events
-    'scroll',         // Page scroll
-    'wheel',          // Mouse wheel scroll
+    'mousemove',      // Movimiento de mouse
+    'keydown',        // Entrada de teclado
+    'click',          // Clics de mouse/touch
+    'touchstart',     // Eventos táctiles
+    'scroll',         // Desplazamiento de página
+    'wheel',          // Desplazamiento de rueda del mouse
   ],
 
-  // Optional: Custom event handlers or callbacks
-  // onBeforeLogout: () => { /* cleanup */ },
-  // onLogoutComplete: () => { /* analytics */ },
+  // Opcional: manejadores o callbacks personalizados
+  // onBeforeLogout: () => { /* limpieza */ },
+  // onLogoutComplete: () => { /* analítica */ },
 };
 
 /**
- * Helper function to get timeout config
- * Allows environment-based overrides if needed
+ * Función de utilidad para obtener configuración de timeout
+ * Permite sobrescribir por entorno si es necesario
  */
 export function getSessionConfig() {
-  // Example: Override with environment variables if needed
+  // Ejemplo: sobrescribir con variables de entorno si hace falta
   return {
     ...SESSION_CONFIG,
     // IDLE_TIMEOUT_MINUTES: parseInt(process.env.REACT_APP_IDLE_TIMEOUT || SESSION_CONFIG.IDLE_TIMEOUT_MINUTES),

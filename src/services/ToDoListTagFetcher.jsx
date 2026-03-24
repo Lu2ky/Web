@@ -1,5 +1,15 @@
+// ============================================================================
+// Componente ToDoListTagFetcher
+// ============================================================================
+// Carga las etiquetas de tareas personales del usuario desde la API.
+// Normaliza etiquetas desde múltiples formatos API al formato estándar.
+// No renderiza elemento visual, solo carga y notifica datos al padre.
+// ============================================================================
+
 import { useEffect } from "react";
 
+// Normaliza una etiqueta desde múltiples formatos de API
+// Retorna objeto con id y label estandarizado
 function normalizeTag(tag, index) {
     if (typeof tag === "string") {
         return { id: `tag-${index}`, label: tag };
@@ -21,7 +31,7 @@ function normalizeTag(tag, index) {
         };
     }
 
-    // Backend sends { id, nombre }
+    // El backend envía { id, nombre }
     if (tag?.nombre) {
         return {
             id: tag.id || `tag-${index}`,
@@ -51,7 +61,7 @@ function ToDoListTagFetcher({ onDataLoaded, userId }) {
                     ? json
                     : [];
                 const normalizedTags = rawData.map(normalizeTag).filter(Boolean);
-                // Deduplicate by id to prevent React key collisions
+                // Quitar duplicados por id para evitar colisiones de key en React
                 const seen = new Set();
                 const dedupedTags = normalizedTags.filter(t => {
                     if (seen.has(t.id)) return false;

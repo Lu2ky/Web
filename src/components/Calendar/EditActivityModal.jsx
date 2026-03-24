@@ -1,3 +1,10 @@
+// ============================================================================
+// Componente EditActivityModal
+// ============================================================================
+// Modal para editar/actualizar una actividad personal.
+// Valida que todos los campos sean válidos y que las horas sean coherentes.
+// ============================================================================
+
 import { useState, useEffect } from "react";
 import "../../styles/AddActivityButton.css";
 import { updatePersonalActivity } from "../../services/PersonalFetcher";
@@ -37,6 +44,8 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
     if (error) setError("");
   };
 
+  // Valida que el formulario cumpla con todas las restricciones
+  // Verifica: título, día, horas, coherencia de horarios y fechas
   const validate = () => {
     if (!formData.title.trim()) return "El título es obligatorio.";
     if (!formData.day) return "Debes seleccionar un día.";

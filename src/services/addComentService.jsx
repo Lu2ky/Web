@@ -7,7 +7,7 @@ const normalizeId = (value) => {
 };
 
 /**
- * Add a personal comment for a course/session.
+ * Agrega un comentario personal para un curso/horario.
  * @param {object} params
  * @param {number|string} params.scheduleId - N_idHorario
  * @param {number|string} params.userId - N_idUsuario
@@ -38,7 +38,7 @@ export default async function addComment({ scheduleId, userId, courseId, courseN
     }
 
     try {
-        // debug: help trace failing requests in the browser/server logs
+        // depuración: ayuda a rastrear solicitudes fallidas en logs del navegador/servidor
         console.debug("addComment POST", ADD_COMMENT_ENDPOINT, payload);
 
         const res = await fetch(ADD_COMMENT_ENDPOINT, {

@@ -1,12 +1,12 @@
 /**
- * useIdleTimeout Hook
+ * Hook useIdleTimeout
  * 
- * Detects user inactivity and triggers automatic logout
- * Listens for: mousemove, keydown, click, touch, scroll events
+ * Detecta inactividad del usuario y ejecuta cierre de sesión automático
+ * Escucha eventos: mousemove, keydown, click, touch, scroll
  * 
- * @param {number} timeoutMinutes - Minutes of inactivity before logout (default: 15)
- * @param {function} onTimeout - Callback function when timeout occurs
- * @param {boolean} enabled - Whether the timeout is active (default: true)
+ * @param {number} timeoutMinutes - Minutos de inactividad antes de cerrar sesión (default: 15)
+ * @param {function} onTimeout - Función callback cuando ocurre el timeout
+ * @param {boolean} enabled - Indica si el timeout está activo (default: true)
  */
 
 import { useEffect, useRef, useCallback } from 'react';
@@ -15,22 +15,22 @@ export function useIdleTimeout(timeoutMinutes = 2, onTimeout = null, enabled = t
   const timeoutIdRef = useRef(null);
   const isIdleRef = useRef(false);
 
-  // Convert minutes to milliseconds
+  // Convertir minutos a milisegundos
   const timeoutMilliseconds = timeoutMinutes * 60 * 1000;
 
-  // Reset the idle timer
+  // Reiniciar el temporizador de inactividad
   const resetIdleTimer = useCallback(() => {
-    // Clear existing timeout
+    // Limpiar timeout existente
     if (timeoutIdRef.current) {
       clearTimeout(timeoutIdRef.current);
     }
 
     isIdleRef.current = false;
 
-    // Only set new timeout if enabled
+    // Solo crear nuevo timeout si está habilitado
     if (!enabled) return;
 
-    // Set new timeout
+    // Establecer nuevo timeout
     timeoutIdRef.current = setTimeout(() => {
       isIdleRef.current = true;
       if (onTimeout && typeof onTimeout === 'function') {
@@ -41,31 +41,31 @@ export function useIdleTimeout(timeoutMinutes = 2, onTimeout = null, enabled = t
 
   useEffect(() => {
     if (!enabled) {
-      // Clean up if disabled
+      // Limpiar si está deshabilitado
       if (timeoutIdRef.current) {
         clearTimeout(timeoutIdRef.current);
       }
       return;
     }
 
-    // Define event handler
+    // Definir manejador de eventos
     const handleUserActivity = () => {
       resetIdleTimer();
     };
 
-    // List of events to track user activity
+    // Lista de eventos para detectar actividad del usuario
     const events = ['mousemove', 'keydown', 'click', 'touchstart', 'scroll', 'wheel'];
 
-    // Add event listeners (use passive: true for scroll/wheel performance)
+    // Agregar listeners (usar passive: true para rendimiento en scroll/wheel)
     events.forEach((event) => {
       const isPassive = ['scroll', 'wheel'].includes(event);
       window.addEventListener(event, handleUserActivity, { passive: isPassive });
     });
 
-    // Initialize timer on mount
+    // Inicializar temporizador al montar
     resetIdleTimer();
 
-    // Cleanup function
+    // Función de limpieza
     return () => {
       events.forEach((event) => {
         window.removeEventListener(event, handleUserActivity);
@@ -77,10 +77,10 @@ export function useIdleTimeout(timeoutMinutes = 2, onTimeout = null, enabled = t
     };
   }, [enabled, resetIdleTimer]);
 
-  // Expose method to manually check if idle
+  // Exponer método para verificar manualmente si está inactivo
   const isIdle = useCallback(() => isIdleRef.current, []);
 
-  // Expose method to manually reset timer
+  // Exponer método para reiniciar manualmente el temporizador
   const manualReset = useCallback(() => {
     resetIdleTimer();
   }, [resetIdleTimer]);
@@ -88,10 +88,10 @@ export function useIdleTimeout(timeoutMinutes = 2, onTimeout = null, enabled = t
   return {
     isIdle,
     reset: manualReset,
-    /** Milliseconds remaining before timeout (approximate) */
+    /** Milisegundos restantes antes del timeout (aproximado) */
     getTimeRemaining: () => {
       if (!timeoutIdRef.current) return 0;
-      // Note: This is approximate since we can't access Timer internals directly
+      // Nota: es aproximado porque no se puede acceder directamente al estado interno del Timer
       return timeoutMilliseconds;
     },
   };

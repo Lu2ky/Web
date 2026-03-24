@@ -1,6 +1,15 @@
+// ============================================================================
+// Componente WeekMover
+// ============================================================================
+// Controla la navegación de semanas en el calendario.
+// Permite avanzar/retroceder semanas y muestra rango de fechas formateado.
+// ============================================================================
+
 import React, {useState} from "react";
 import "../../styles/WeekMover.css";
 
+// Calcula el inicio de la semana (lunes) para una fecha dada
+// Ajusta para que la semana siempre comience en lunes (no domingo)
 function GetStartOfWeek(date) {
 	const fullDate = new Date(date);
 	const day = fullDate.getDay();
@@ -11,28 +20,30 @@ function GetStartOfWeek(date) {
 	return fullDate;
 }
 
-function FormatWeekRange(startDate, endDate) {
-	const sameYear = startDate.getFullYear() === endDate.getFullYear();
-	if (sameYear) {
+	// Formatea rango de fechas para vista legible (ej: "Mar 19 - Mar 25, 2025")
+	// Evita mostrar el año si ambas fechas están en el mismo año
+	function FormatWeekRange(startDate, endDate) {
+		const sameYear = startDate.getFullYear() === endDate.getFullYear();
+		if (sameYear) {
+			return `${startDate.toLocaleDateString("en-US", {
+				month: "short",
+				day: "numeric"
+			})} - ${endDate.toLocaleDateString("en-US", {
+				month: "short",
+				day: "numeric",
+				year: "numeric"
+			})}`;
+		}
 		return `${startDate.toLocaleDateString("en-US", {
 			month: "short",
-			day: "numeric"
+			day: "numeric",
+			year: "numeric"
 		})} - ${endDate.toLocaleDateString("en-US", {
 			month: "short",
 			day: "numeric",
 			year: "numeric"
 		})}`;
 	}
-	return `${startDate.toLocaleDateString("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric"
-	})} - ${endDate.toLocaleDateString("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric"
-	})}`;
-}
 
 function WeekMover() {
 	const [weekOffset, setWeekOffset] = useState(0);

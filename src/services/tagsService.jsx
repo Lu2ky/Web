@@ -1,4 +1,4 @@
-// Service helper for various tag-related endpoints
+// Utilidad de servicio para varios endpoints relacionados con etiquetas
 
 const TAGS_USER_URL = import.meta.env.VITE_API_URL_TAGS_USER;
 
@@ -15,7 +15,7 @@ function normalizeTag(tag) {
     if (typeof tag === "string") {
         return tag;
     }
-    // Backend sends { id, nombre }
+    // El backend envía { id, nombre }
     if (tag?.nombre) {
         return tag.nombre;
     }
@@ -43,7 +43,7 @@ export async function getTagsByUserAndCourse(userId, courseId) {
 
 export async function deleteTag(tagId) {
     if (!tagId) return;
-    // backend expects body: { idTag: { IdTag: tagId } }
+    // El backend espera body: { idTag: { IdTag: tagId } }
     const payload = { idTag: { IdTag: tagId } };
     const res = await fetch(DELETE_TAG_URL, {
         method: "POST",
@@ -72,7 +72,7 @@ export async function getTagsByReminder(userId, reminderId) {
 
 export async function deleteTagsForReminder(reminderId) {
     if (!reminderId) return;
-    // body convention depends on backend; sending simple object
+    // La convención del body depende del backend; se envía un objeto simple
     const payload = { N_idRecordatorio: reminderId };
     const res = await fetch(DELETE_TAGS_REMINDER_URL, {
         method: "POST",
@@ -103,7 +103,7 @@ export async function getTagsByUser(userId) {
         if (tag?.name) return { id: tag.id || `tag-${index}`, label: tag.name, type: tag.type || "custom" };
         return null;
     }).filter(Boolean);
-    // Deduplicate by id to prevent React key collisions
+    // Quitar duplicados por id para evitar colisiones de key en React
     const seen = new Set();
     return normalized.filter(t => {
         if (seen.has(t.id)) return false;

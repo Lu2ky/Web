@@ -2,14 +2,14 @@
 // COMPONENTE: RecoverPassword
 // ============================================================================
 // Gestiona la primera pantalla del flujo de recuperación de contraseña.
-// El usuario ingresa su ID institucional, que se valida con el backend.
+// El usuario ingresa su ID institucional, que se valida con el servidor.
 //
 // FLUJO:
 // 1. Usuario digita ID en el input → actualiza institutionalId
 // 2. Usuario hace submit → valida y actualiza submittedUserCode
 // 3. submittedUserCode dispara el useEffect del UserIdFetcher
-// 4. Fetcher hace POST al backend con USER_CODE
-// 5. Backend responde y handleUserIdResult navega a TokenPassword
+// 4. El servicio hace POST al servidor con USER_CODE
+// 5. El servidor responde y handleUserIdResult navega a TokenPassword
 // ============================================================================
 
 import { useState } from 'react';
@@ -51,7 +51,7 @@ const RecoverPassword = () => {
         }
 
         // Verifica si la respuesta indica éxito
-        // (backend puede enviar success: true, success: false, etc.)
+        // (el servidor puede enviar success: true, success: false, etc.)
         const isSuccess = result.success !== false;
         
         if (isSuccess) {
@@ -68,7 +68,7 @@ const RecoverPassword = () => {
             return;
         }
 
-        // ERROR: El backend rechazó el ID (no existe, ya está recuperando, etc.)
+        // ERROR: El servidor rechazó el ID (no existe, ya está recuperando, etc.)
         // Loguea el error en consola para debugging, pero no muestra mensaje al usuario
         console.error('Error en validación de ID:', result.message);
         

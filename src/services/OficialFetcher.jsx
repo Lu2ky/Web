@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
 import LoadingModal from "./LoadingModal";
-//Prueba local runner
-// Componente para cargar datos de la API y pasarlos al padre
-// onDataLoaded es una función que se llama con los datos cargados,
-// userId es el ID del usuario para cargar su horario
-//TEST CI/CD DEPLOY TEST, ANOTHER
+
+// ============================================================================
+// Componente OficialFetcher
+// ============================================================================
+// Carga el horario oficial de un usuario desde la API en background.
+// Usa LoadingModal mientras se cargan los datos, luego notifica al padre
+// mediante la función onDataLoaded sin renderizar elemento visual.
+//
+// Propiedades:
+//   - onDataLoaded: Función que recibe los datos cargados
+//   - userId: ID del usuario para obtener su horario oficial
+// ============================================================================
 function OficialFetcher({ onDataLoaded, userId }) {
   const [loading, setLoading] = useState(true); // Indica si la API está cargando
   const [apiData, setApiData] = useState([]); // Almacena los datos de la API

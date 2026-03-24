@@ -254,7 +254,7 @@ function App() {
 		});
 	}, [themeId]);
 
-	//Callback que recibe el ThemeSelector cuando se cambia el tema, actualiza el estado del tema
+	// Función de retorno que recibe ThemeSelector al cambiar el tema y actualiza su estado
 	const handleThemeChange = newThemeId => {
 		setThemeId(newThemeId);
 	};

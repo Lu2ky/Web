@@ -1,6 +1,6 @@
 // Librerias para manejo de rutas y renderizado
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 // Componentes de la aplicación
 import LogInForm from "./LogInForm";
 import App from "./App"; 
@@ -18,14 +18,14 @@ import "./index.css";
 import "./styles/SessionTimeoutModal.css";
 // Renderizado de la aplicación con rutas definidas, solo se puede una ruta a la vez 
 // Crea un root para renderizar la aplicación en el elemento con id "root"
-// BrowserRouter para manejar las rutas de la aplicación sin recargar la página
+// HashRouter evita 404 al recargar en servidores sin reescritura de rutas SPA
 // Render() para renderizar los componentes según la ruta actual
 // Routes es un contenedor que evalúa las rutas definidas y renderiza el componente correspondiente
 // SessionTimeoutManager envuelve el router para gestionar la sesión idle timeout
 const sessionConfig = getSessionConfig();
 
 ReactDOM.createRoot(document.getElementById("root")).render( 
-	<BrowserRouter>
+	<HashRouter>
 		<SessionTimeoutManager 
 			timeoutMinutes={sessionConfig.IDLE_TIMEOUT_MINUTES}
 			warningMinutes={sessionConfig.WARNING_BEFORE_LOGOUT_MINUTES}
@@ -49,11 +49,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 				</Route>
 				<Route path="/RestorePassword" element={<RestorePassword />} />
 				<Route path="/TokenPassword" element={<TokenPassword />} />
-				{/* Fallback: cualquier ruta no definida va al login */}
+				{/* Respaldo: cualquier ruta no definida va al login */}
 				<Route path="*" element={<LogInForm />} />
 			</Routes>
 		</SessionTimeoutManager>
-	</BrowserRouter>
+	</HashRouter>
 );
 
 

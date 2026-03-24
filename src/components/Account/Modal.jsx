@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react"; // UseRef para manejo de referencias sin
-//  renderizar todo de nuevo, UseEffect para manejo de eventos y efectos secundarios
+import { useEffect, useRef } from "react"; // useRef para manejo de referencias sin
+//  renderizar todo de nuevo, useEffect para manejo de eventos y efectos secundarios
 import "./Modal.css";
 
-// Recibe 4 props: isOpen(esta abierto), onClose(función para cerrar), title(título del modal) y children(contenido del modal)
+// Recibe 4 propiedades: isOpen(esta abierto), onClose(función para cerrar), title(título del modal) y children(contenido del modal)
 const Modal = ({ isOpen, onClose, title, children }) => { // componente funcional y base para las ventanas de notificación y configuración
     const modalRef = useRef(null); // ref para el contenedor del modal, para manejar el enfoque y eventos de teclado
     const closeBtnRef = useRef(null); // ref para el botón de cerrar, para establecer el foco inicial cuando se abre el modal
