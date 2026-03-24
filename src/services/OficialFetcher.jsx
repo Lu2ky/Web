@@ -1,12 +1,4 @@
 import { useEffect, useState } from "react";
-<<<<<<< Updated upstream
-import LoadingModal from "./loadingModal";
-//Prueba local runner
-// Componente para cargar datos de la API y pasarlos al padre
-// onDataLoaded es una función que se llama con los datos cargados,
-// userId es el ID del usuario para cargar su horario
-//TEST CI/CD DEPLOY TEST, ANOTHER
-=======
 import LoadingModal from "./LoadingModal";
 
 // ============================================================================
@@ -20,8 +12,6 @@ import LoadingModal from "./LoadingModal";
 //   - onDataLoaded: Función que recibe los datos cargados
 //   - userId: ID del usuario para obtener su horario oficial
 // ============================================================================
-
->>>>>>> Stashed changes
 function OficialFetcher({ onDataLoaded, userId }) {
   const [loading, setLoading] = useState(true); // Indica si la API está cargando
   const [apiData, setApiData] = useState([]); // Almacena los datos de la API
