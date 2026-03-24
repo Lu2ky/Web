@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CommentButton } from "./CommentButton";
-import fetchComments from "../../services/commentFetcher";
+import fetchComments from "../../services/CommentFetcher";
 import addComment from "../../services/addComentService";
 import updateComment from "../../services/updateComentService";
 import deleteComment from "../../services/removeComentService";
@@ -293,7 +293,7 @@ export const PopUpClasses = ({
                   <div key={comment.id} className="comment-item">
                     <div className="comment-header">
                       <span className="comment-timestamp">{comment.timestamp}</span>
-                      <div style={{ display: 'flex', gap: '4px' }}>
+                      <div className="comment-header-actions">
                         <button
                           className="delete-comment-button"
                           onClick={() => handle_start_edit(comment)}

@@ -304,6 +304,7 @@ function App() {
 						viewMode={viewMode}
 						events={filteredClassesEvents}
 						personalEvents={filteredPersonalEvents}
+
 						onClassClick={handleClassClick}
 						onDeletePersonal={handleRequestDeletePersonal}
 						onPersonalClick={handlePersonalClick}
@@ -343,6 +344,7 @@ function App() {
 						onThemeChange={handleThemeChange}
 						selectedTag={selectedTag}
 						setSelectedTag={setSelectedTag}
+
 					/>
 				</div>
 			</div>

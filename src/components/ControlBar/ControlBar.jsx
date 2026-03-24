@@ -5,6 +5,7 @@ import ViewButton from "./ViewButton";
 import AddButton from "./AddActivityButton";
 import FilterButton from "./FilterButton";
 import ThemeSelect from "./ThemeSelector";
+import AcademicPeriodSelect from "./AcademicPeriodSelect";
 
 function ControlBar({viewMode, setViewMode, userId, onActivityAdd, onThemeChange, selectedTag, setSelectedTag}) {
 
@@ -16,6 +17,7 @@ function ControlBar({viewMode, setViewMode, userId, onActivityAdd, onThemeChange
             <div className="Center">
             </div>
             <div className="Right">
+                <AcademicPeriodSelect />
                 <AddButton userId={userId} onActivityAdd={onActivityAdd} />
                 <FilterButton selectedTag={selectedTag} setSelectedTag={setSelectedTag} />
                 <ThemeSelect onThemeChange={onThemeChange} />

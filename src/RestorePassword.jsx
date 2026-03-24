@@ -1,6 +1,8 @@
+// Página de cambio de contraseña
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { changeRecoveredPassword } from './services/passwordChangeService.jsx';
 
 import Logo from './assets/logo.png';
 import Image from './assets/ImagePassword.jpeg';
@@ -8,6 +10,8 @@ import './RestorePassword.css';
 
 const RestorePassword = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const recoveryUser = location.state?.userCode || '';
 
     // Estados
 
@@ -51,6 +55,17 @@ const RestorePassword = () => {
         setIsLoading(true);
 
         try {
+            if (!recoveryUser) {
+                setError("No se encontro el usuario de recuperacion. Reinicia el flujo desde 'Olvide mi contrasena'.");
+                return;
+            }
+
+            const result = await changeRecoveredPassword(recoveryUser, newPassword);
+            if (!result || result.success === false) {
+                console.error("Error al cambiar contrasena:", result?.message);
+                setError("No se pudo actualizar la contrasena");
+                return;
+            }
 
             setSuccess("¡Contraseña actualizada exitosamente! Redirigiendo...");
 
