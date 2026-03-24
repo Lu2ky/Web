@@ -10,9 +10,9 @@ export const SESSION_CONFIG = {
   // Después de este tiempo sin actividad, la sesión expira
   IDLE_TIMEOUT_MINUTES: 15,
 
-  // Tiempo de aviso (en minutos)
-  // El modal aparece X minutos antes del timeout real
-  // DEBE ser menor que IDLE_TIMEOUT_MINUTES
+  // Minuto de aviso por inactividad (en minutos)
+  // El modal aparece al minuto X de inactividad
+  // Debe ser menor o igual que IDLE_TIMEOUT_MINUTES
   WARNING_BEFORE_LOGOUT_MINUTES: 10,
 
   // Mostrar/ocultar modal de aviso
