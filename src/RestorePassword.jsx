@@ -8,6 +8,18 @@ import Logo from './assets/logo.png';
 import Image from './assets/ImagePassword.jpeg';
 import './RestorePassword.css';
 
+function validatePasswordComplexity(password) {
+    const value = String(password || "");
+
+    if (value.length < 8) return "La contraseña debe tener al menos 8 caracteres";
+    if (!/[a-z]/.test(value)) return "La contraseña debe incluir al menos una letra minúscula";
+    if (!/[A-Z]/.test(value)) return "La contraseña debe incluir al menos una letra mayúscula";
+    if (!/\d/.test(value)) return "La contraseña debe incluir al menos un número";
+    if (!/[^A-Za-z0-9\s]/.test(value)) return "La contraseña debe incluir al menos un símbolo";
+
+    return null;
+}
+
 const RestorePassword = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -35,8 +47,9 @@ const RestorePassword = () => {
             return;
         }
 
-        if (newPassword.length < 6) {
-            setError("La contraseña debe tener al menos 6 caracteres");
+        const policyError = validatePasswordComplexity(newPassword);
+        if (policyError) {
+            setError(policyError);
             return;
         }
 

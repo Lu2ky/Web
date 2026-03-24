@@ -36,12 +36,12 @@ describe("UserProfile - cambio de contrasena", () => {
 
         await completarFormularioContrasena(user, {
             current: "Actual123",
-            newPassword: "Nueva123",
-            confirm: "Nueva123",
+            newPassword: "Nueva#123",
+            confirm: "Nueva#123",
         });
 
         await waitFor(() => {
-            expect(userService.changePassword).toHaveBeenCalledWith(123, "Actual123", "Nueva123");
+            expect(userService.changePassword).toHaveBeenCalledWith(123, "Actual123", "Nueva#123");
         });
 
         expect(await screen.findByText(/Contrase.a cambiada exitosamente/i)).toBeInTheDocument();
@@ -58,12 +58,12 @@ describe("UserProfile - cambio de contrasena", () => {
 
         await completarFormularioContrasena(user, {
             current: "Actual123",
-            newPassword: "Nueva123",
-            confirm: "Distinta123",
+            newPassword: "Nueva#123",
+            confirm: "Distinta#123",
         });
 
         expect(userService.changePassword).not.toHaveBeenCalled();
-        expect(screen.getByText(/Las contrase.as no coinciden/i)).toBeInTheDocument();
+        expect(screen.getAllByText(/Las contrase.as no coinciden/i).length).toBeGreaterThan(0);
     });
 
     it("muestra validacion por longitud minima y no llama al servicio", async () => {
@@ -79,7 +79,34 @@ describe("UserProfile - cambio de contrasena", () => {
         });
 
         expect(userService.changePassword).not.toHaveBeenCalled();
-        expect(screen.getByText(/La nueva contrase.a debe tener al menos 6 caracteres/i)).toBeInTheDocument();
+        expect(screen.getByText(/La contrase.a debe tener al menos 8 caracteres/i)).toBeInTheDocument();
+    });
+
+    it("actualiza checklist en tiempo real segun criterios cumplidos", async () => {
+        const user = userEvent.setup();
+        render(<UserProfile userId={123} onClose={() => {}} />);
+
+        await screen.findByRole("button", { name: /Cambiar Contrase.a/i });
+
+        expect(screen.getByText("Criterios de seguridad")).toBeInTheDocument();
+        expect(screen.getByText(/0\s*\/\s*6/)).toBeInTheDocument();
+
+        await user.type(screen.getByLabelText(/^Nueva Contrase.a$/i), "Nueva#123");
+        expect(screen.getByText(/5\s*\/\s*6/)).toBeInTheDocument();
+
+        await user.type(screen.getByLabelText(/Contrase.a Actual/i), "Actual#123");
+        expect(screen.getByText(/6\s*\/\s*6/)).toBeInTheDocument();
+
+        await user.clear(screen.getByLabelText(/Contrase.a Actual/i));
+        await user.type(screen.getByLabelText(/Contrase.a Actual/i), "Nueva#123");
+
+        expect(screen.getByText(/5\s*\/\s*6/)).toBeInTheDocument();
+
+        await user.clear(screen.getByLabelText(/Contrase.a Actual/i));
+        await user.type(screen.getByLabelText(/Contrase.a Actual/i), "Vieja#123");
+
+        expect(screen.getByText(/6\s*\/\s*6/)).toBeInTheDocument();
+        expect(screen.getByText(/Debe ser diferente a la contrase.a actual/i)).toBeInTheDocument();
     });
 
     it("muestra validacion cuando la nueva contrasena es igual a la actual", async () => {
@@ -89,9 +116,9 @@ describe("UserProfile - cambio de contrasena", () => {
         await screen.findByRole("button", { name: /Cambiar Contrase.a/i });
 
         await completarFormularioContrasena(user, {
-            current: "Misma123",
-            newPassword: "Misma123",
-            confirm: "Misma123",
+            current: "Misma#123",
+            newPassword: "Misma#123",
+            confirm: "Misma#123",
         });
 
         expect(userService.changePassword).not.toHaveBeenCalled();
@@ -108,8 +135,8 @@ describe("UserProfile - cambio de contrasena", () => {
 
         await completarFormularioContrasena(user, {
             current: "Actual123",
-            newPassword: "Nueva123",
-            confirm: "Nueva123",
+            newPassword: "Nueva#123",
+            confirm: "Nueva#123",
         });
 
         await waitFor(() => {

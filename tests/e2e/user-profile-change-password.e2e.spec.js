@@ -1,7 +1,20 @@
 import { test, expect } from "@playwright/test";
 
+async function seedAuthSession(page, userId) {
+    await page.addInitScript((session) => {
+        window.localStorage.setItem("auth_session", JSON.stringify(session));
+    }, {
+        userId: String(userId),
+        token: "test-token",
+        roles: ["Usuarios"],
+        createdAt: Date.now(),
+    });
+}
+
 test.describe("E2E Mi perfil - cambio de contrasena", () => {
     test("usuario cambia contrasena correctamente desde Mi Perfil", async ({ page }) => {
+        await seedAuthSession(page, "123");
+
         await page.route("**/*", async (route) => {
             const request = route.request();
             const resourceType = request.resourceType();
@@ -30,7 +43,7 @@ test.describe("E2E Mi perfil - cambio de contrasena", () => {
                 return;
             }
 
-            if (url.includes("/api/change-password")) {
+            if (url.includes("/api/auth/changepassword") || url.includes("/api/change-password")) {
                 await route.fulfill({
                     status: 200,
                     contentType: "application/json",
@@ -81,21 +94,21 @@ test.describe("E2E Mi perfil - cambio de contrasena", () => {
 
         const changePasswordRequestPromise = page.waitForRequest(
             (request) =>
-                request.url().includes("/api/change-password") && request.method() === "PUT"
+                (request.url().includes("/api/auth/changepassword") || request.url().includes("/api/change-password"))
+                && request.method() === "POST"
         );
 
         await page.getByLabel("Contrase\u00f1a Actual").fill("Actual123");
-        await page.getByLabel(/^Nueva Contrase\u00f1a$/).fill("Nueva123");
-        await page.getByLabel(/^Confirmar Nueva Contrase\u00f1a$/).fill("Nueva123");
+        await page.getByLabel(/^Nueva Contrase\u00f1a$/).fill("Nueva#123");
+        await page.getByLabel(/^Confirmar Nueva Contrase\u00f1a$/).fill("Nueva#123");
         await page.getByRole("button", { name: "Cambiar Contrase\u00f1a" }).click();
 
         const changePasswordRequest = await changePasswordRequestPromise;
         const payload = JSON.parse(changePasswordRequest.postData() || "{}");
 
         expect(payload).toEqual({
-            userId: "123",
-            currentPassword: "Actual123",
-            newPassword: "Nueva123",
+            user: "123",
+            pass: "Nueva#123",
         });
 
         await expect(page.getByText("Contrase\u00f1a cambiada exitosamente")).toBeVisible();

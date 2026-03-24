@@ -1,7 +1,57 @@
 import { useState, useEffect } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaCheckCircle, FaRegCircle, FaExclamationCircle } from "react-icons/fa";
 import * as userService from "../../services/userService";
 import "./UserProfile.css";
+
+function validatePasswordComplexity(password) {
+    const value = String(password || "");
+
+    if (value.length < 8) return "La contraseña debe tener al menos 8 caracteres";
+    if (!/[a-z]/.test(value)) return "La contraseña debe incluir al menos una letra minúscula";
+    if (!/[A-Z]/.test(value)) return "La contraseña debe incluir al menos una letra mayúscula";
+    if (!/\d/.test(value)) return "La contraseña debe incluir al menos un número";
+    if (!/[^A-Za-z0-9\s]/.test(value)) return "La contraseña debe incluir al menos un símbolo";
+
+    return null;
+}
+
+function getPasswordChecklist(password, currentPassword) {
+    const value = String(password || "");
+    const current = String(currentPassword || "");
+
+    return [
+        {
+            id: "min-length",
+            label: "Al menos 8 caracteres",
+            met: value.length >= 8,
+        },
+        {
+            id: "lowercase",
+            label: "Al menos una letra minúscula",
+            met: /[a-z]/.test(value),
+        },
+        {
+            id: "uppercase",
+            label: "Al menos una letra mayúscula",
+            met: /[A-Z]/.test(value),
+        },
+        {
+            id: "number",
+            label: "Al menos un número",
+            met: /\d/.test(value),
+        },
+        {
+            id: "symbol",
+            label: "Al menos un símbolo",
+            met: /[^A-Za-z0-9\s]/.test(value),
+        },
+        {
+            id: "different-current",
+            label: "Debe ser diferente a la contraseña actual",
+            met: value.length > 0 && current.length > 0 && value !== current,
+        },
+    ];
+}
 
 export default function UserProfile({ userId, onClose }) {
     const [userData, setUserData] = useState(null);
@@ -17,6 +67,12 @@ export default function UserProfile({ userId, onClose }) {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+    const passwordChecklist = getPasswordChecklist(newPassword, currentPassword);
+    const metCriteriaCount = passwordChecklist.filter((criteria) => criteria.met).length;
+    const checklistProgress = Math.round((metCriteriaCount / passwordChecklist.length) * 100);
+    const showMatchHint = confirmPassword.length > 0;
+    const passwordsMatch = newPassword.length > 0 && newPassword === confirmPassword;
 
     // Cargar datos del usuario al montar el componente
     useEffect(() => {
@@ -70,8 +126,9 @@ export default function UserProfile({ userId, onClose }) {
             return;
         }
 
-        if (newPassword.length < 6) {
-            setError("La nueva contraseña debe tener al menos 6 caracteres");
+        const policyError = validatePasswordComplexity(newPassword);
+        if (policyError) {
+            setError(policyError);
             return;
         }
 
@@ -205,6 +262,34 @@ export default function UserProfile({ userId, onClose }) {
                                 {showNewPassword ? <FaEyeSlash /> : <FaEye />}
                             </button>
                         </div>
+
+                        <div className="password-checklist" aria-live="polite">
+                            <div className="password-checklist-header">
+                                <span className="password-checklist-title">Criterios de seguridad</span>
+                                <span className="password-checklist-score">{metCriteriaCount}/{passwordChecklist.length}</span>
+                            </div>
+
+                            <div className="password-checklist-progress-track" aria-hidden="true">
+                                <span
+                                    className="password-checklist-progress-fill"
+                                    style={{ width: `${checklistProgress}%` }}
+                                />
+                            </div>
+
+                            <ul className="password-checklist-list">
+                                {passwordChecklist.map((criteria) => (
+                                    <li
+                                        key={criteria.id}
+                                        className={`password-checklist-item ${criteria.met ? "met" : "pending"}`}
+                                    >
+                                        <span className="password-checklist-icon" aria-hidden="true">
+                                            {criteria.met ? <FaCheckCircle /> : <FaRegCircle />}
+                                        </span>
+                                        <span>{criteria.label}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
 
                     <div className="form-group">
@@ -230,6 +315,15 @@ export default function UserProfile({ userId, onClose }) {
                                 {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                             </button>
                         </div>
+
+                        {showMatchHint && (
+                            <p className={`password-match-hint ${passwordsMatch ? "match" : "no-match"}`}>
+                                <span aria-hidden="true">
+                                    {passwordsMatch ? <FaCheckCircle /> : <FaExclamationCircle />}
+                                </span>
+                                {passwordsMatch ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"}
+                            </p>
+                        )}
                     </div>
 
                     <button
