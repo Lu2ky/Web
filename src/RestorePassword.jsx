@@ -5,7 +5,7 @@ import { FaEye, FaEyeSlash, FaCheckCircle, FaRegCircle, FaExclamationCircle } fr
 import { changeRecoveredPassword } from './services/passwordChangeService.jsx';
 
 import Logo from './assets/logo.png';
-import Image from './assets/ImagePassword.jpeg';
+import Image from './assets/ImagePassword.webp';
 import './RestorePassword.css';
 
 function validatePasswordComplexity(password) {

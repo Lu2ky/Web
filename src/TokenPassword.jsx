@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import Logo from './assets/logo.png';
-import Image from './assets/ImageRecover.jpeg';
+import Image from './assets/ImageRecover.webp';
 import './TokenPassword.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import TokenFetcher from './services/TokenFetcher';
