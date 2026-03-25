@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Componente botón para agregar comentarios
-export const CommentButton = ({ on_add_comment }) => {
+export const CommentButton = ({ on_add_comment, onboardingButtonId, onboardingModalId }) => {
   const [is_open, set_is_open] = useState(false);
   const [is_closing, set_is_closing] = useState(false);
   const [comment_text, set_comment_text] = useState("");
@@ -30,6 +30,7 @@ export const CommentButton = ({ on_add_comment }) => {
     }
 
     set_is_open(true);
+    window.dispatchEvent(new CustomEvent("onboarding:official-comment-opened"));
   };
 
   // Guardar comentario y notificar al padre
@@ -60,6 +61,19 @@ export const CommentButton = ({ on_add_comment }) => {
     });
   };
 
+  useEffect(() => {
+    const handleCloseUnrelatedUi = (event) => {
+      const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+      if (!allowOpenUi.includes("dropdown-official-comment")) {
+        set_is_open(false);
+        set_is_closing(false);
+      }
+    };
+
+    window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+    return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+  }, []);
+
   // Actualizar texto del comentario
   const handle_change = (evt) => {
     set_comment_text(evt.target.value);
@@ -73,13 +87,14 @@ export const CommentButton = ({ on_add_comment }) => {
         onClick={toggle_open}
         aria-expanded={is_open}
         title="Agregar comentario"
+        data-onboarding-id={onboardingButtonId}
       >
         <span className="add-comment-plus">+</span>
         <span className="add-comment-label">Agregar Comentario</span>
       </button>
 
       {is_open && (
-        <div className={`add-comment-dropdown ${is_closing ? "hide" : "show"}`}>
+        <div className={`add-comment-dropdown ${is_closing ? "hide" : "show"}`} data-onboarding-id={onboardingModalId}>
           <textarea
             className="add-comment-textarea"
             value={comment_text}

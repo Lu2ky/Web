@@ -74,14 +74,32 @@ function RemindCard({ task, priority = "", onToggle, onEdit, onDelete, onDuplica
                 </div>
 
                 <div className="remindcard-actions">
-                    <EditButton onClick={() => onEdit(task.id)} />
-                    <DuplicateButton onClick={() => onDuplicate(task.id)} />
+                    <EditButton
+                        onClick={() => {
+                            window.dispatchEvent(new CustomEvent("onboarding:todo-card-edit-clicked"));
+                            onEdit(task.id);
+                        }}
+                        className="todo-card-edit-btn"
+                        dataOnboardingId="todo-card-edit-button"
+                    />
+                    <DuplicateButton
+                        onClick={() => {
+                            window.dispatchEvent(new CustomEvent("onboarding:todo-card-duplicate-clicked"));
+                            onDuplicate(task.id);
+                        }}
+                        className="todo-card-duplicate-btn"
+                        dataOnboardingId="todo-card-duplicate-button"
+                    />
                     <button
                         className="remindcard-delete"
-                        onClick={() => onDelete(task.id)}
+                        onClick={() => {
+                            window.dispatchEvent(new CustomEvent("onboarding:todo-card-delete-clicked"));
+                            onDelete(task.id);
+                        }}
                         aria-label="Eliminar tarea"
                         title="Eliminar"
                         type="button"
+                        data-onboarding-id="todo-card-delete-button"
                     >
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
                             <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />

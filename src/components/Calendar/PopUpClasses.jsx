@@ -21,7 +21,23 @@ export const PopUpClasses = ({
   // Sincronizar el estado interno con el prop externo
   useEffect(() => {
     set_is_open(isOpen);
+    if (isOpen) {
+      window.dispatchEvent(new CustomEvent("onboarding:official-card-opened"));
+    }
   }, [isOpen]);
+
+  useEffect(() => {
+    const handleCloseUnrelatedUi = (event) => {
+      const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+      if (!allowOpenUi.includes("modal-official-card")) {
+        set_is_open(false);
+        onClose();
+      }
+    };
+
+    window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+    return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+  }, [onClose]);
 
   // Limpiar comentarios al cambiar de asignatura o al abrir
   useEffect(() => {
@@ -202,7 +218,7 @@ export const PopUpClasses = ({
   return (
     <>
       <div className="popup-overlay" onClick={handle_close}>
-      <div className="popup-container" onClick={(e) => e.stopPropagation()}>
+      <div className="popup-container" onClick={(e) => e.stopPropagation()} data-onboarding-id="official-card-modal">
         {/* Header */}
         <div className="popup-header">
           <h2>Detalle de Asignatura</h2>
@@ -285,7 +301,11 @@ export const PopUpClasses = ({
           {/* Comentarios */}
           <div className="info-section">
             <h3 className="section-title">Comentarios y Observaciones</h3>
-            <CommentButton on_add_comment={handle_add_comment} />
+            <CommentButton
+              on_add_comment={handle_add_comment}
+              onboardingButtonId="official-comment-button"
+              onboardingModalId="official-comment-modal"
+            />
 
             {comments.length > 0 && (
               <div className="comments-list">

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "../../styles/ControlBar.css";
 import WeekMover from "./WeekMover";
 import ViewButton from "./ViewButton";
@@ -10,7 +9,7 @@ import AcademicPeriodSelect from "./AcademicPeriodSelect";
 function ControlBar({viewMode, setViewMode, userId, onActivityAdd, onThemeChange, selectedTag, setSelectedTag, onPeriodChange}) {
 
     return (
-        <div className="ControlBar">
+        <div className="ControlBar" data-onboarding-id="controlbar">
             <div className="Left">
             <ViewButton viewMode={viewMode} setViewMode={setViewMode} />
             </div>

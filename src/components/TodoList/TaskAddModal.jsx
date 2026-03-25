@@ -12,7 +12,9 @@ export default function TaskAddModal({
     title = "Nueva Tarea",
     userId,
     availableTags = [],
-    task = null // Propiedad para recibir la tarea a duplicar
+    task = null,
+    onboardingId,
+    onboardingNameTypedEvent
 }) {
     const [formData, setFormData] = useState({
         name: '',
@@ -143,6 +145,9 @@ export default function TaskAddModal({
     // useEffect modificado para precargar datos cuando es duplicado
     useEffect(() => {
         if (isOpen) {
+            if (onboardingId === "todo-duplicate-modal") {
+                window.dispatchEvent(new CustomEvent("onboarding:todo-card-duplicate-clicked"));
+            }
             setTagLabel('');
             setTagType('custom');
             
@@ -252,7 +257,11 @@ export default function TaskAddModal({
                 onClose();
             }}
         >
-            <div className="modalContainer" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="modalContainer"
+                onClick={(e) => e.stopPropagation()}
+                data-onboarding-id={onboardingId}
+            >
                 <h2>{title}</h2>
 
                 <button
@@ -275,7 +284,12 @@ export default function TaskAddModal({
                     name="name"
                     placeholder="Nombre del recordatorio"
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) => {
+                        setFormData(prev => ({ ...prev, name: e.target.value }));
+                        if (onboardingNameTypedEvent && String(e.target.value || "").trim()) {
+                            window.dispatchEvent(new CustomEvent(onboardingNameTypedEvent));
+                        }
+                    }}
                     required
                 />
 

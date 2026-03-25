@@ -6,9 +6,13 @@ import DayView from "./DayView";
 function Calendar({ viewMode, events = [], personalEvents = [], onClassClick = () => { }, onDeletePersonal = () => { }, onPersonalClick = () => { }, tagColorMap = {}, getContrastColor = () => "#000000" }) {
     const isDayView = viewMode === "Diario";
 
+    const handleCalendarExplore = () => {
+        window.dispatchEvent(new CustomEvent("onboarding:calendar-clicked"));
+    };
+
     // Se devuelve según la vista seleccionada, pasando los eventos, los eventos personales
     return (
-        <div className="Calendar">
+        <div className="Calendar" data-onboarding-id="calendar-grid" onClick={handleCalendarExplore}>
             {isDayView ? (
                 <DayView
                     events={events}

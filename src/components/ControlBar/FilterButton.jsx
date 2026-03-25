@@ -17,6 +17,7 @@ function FilterButton({selectedTag, setSelectedTag}) {
 	}, []);
 
 	const handleSelect = category => {
+		window.dispatchEvent(new CustomEvent("onboarding:calendar-filter-option-selected"));
 		setSelectedTag(category);
 		setIsOpen(false);
 	};
@@ -33,21 +34,37 @@ function FilterButton({selectedTag, setSelectedTag}) {
 		};
 	}, []);
 
+	useEffect(() => {
+		const handleCloseUnrelatedUi = (event) => {
+			const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+			if (!allowOpenUi.includes("dropdown-calendar-filter")) {
+				setIsOpen(false);
+			}
+		};
+
+		window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+		return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+	}, []);
+
 	return (
 		<div className="filterContainer" ref={dropdownRef}>
 			<button
 				className="filterButton"
-				onClick={() => setIsOpen(!isOpen)}
+				onClick={() => {
+					setIsOpen(!isOpen);
+					window.dispatchEvent(new CustomEvent("onboarding:calendar-filter-opened"));
+				}}
 				aria-expanded={isOpen}
 				title="Filtrar actividades"
 				type="button"
+				data-onboarding-id="calendar-filter-button"
 			>
 				<FaFilter className="filterIcon" />
 				Filtrar: {selectedTag}
 			</button>
 
 			{isOpen && (
-				<ul className="filterMenu">
+				<ul className="filterMenu" data-onboarding-id="calendar-filter-menu">
 					{categories.map(category => (
 						<li key={category}>
 							<button

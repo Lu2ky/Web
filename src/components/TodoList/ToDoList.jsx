@@ -108,6 +108,31 @@ function ToDoList({ userId = "" }) {
         loadReminderTasks();
     }, [loadReminderTasks]);
 
+    useEffect(() => {
+        const handleCloseUnrelatedUi = (event) => {
+            const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+
+            if (!allowOpenUi.includes("modal-todo-filter")) {
+                setIsFilterModalOpen(false);
+            }
+            if (!allowOpenUi.includes("modal-todo-edit")) {
+                setIsEditModalOpen(false);
+                setTaskToEdit(null);
+            }
+            if (!allowOpenUi.includes("modal-todo-delete")) {
+                setIsDeleteModalOpen(false);
+                setTaskToDelete(null);
+            }
+            if (!allowOpenUi.includes("modal-todo-duplicate")) {
+                setIsDuplicateModalOpen(false);
+                setTaskToDuplicate(null);
+            }
+        };
+
+        window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+        return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+    }, []);
+
     const [availableTags, setAvailableTags] = useState([]);
 
     const filteredTasks = useMemo(() => {
@@ -375,6 +400,7 @@ function ToDoList({ userId = "" }) {
                     title={taskToDuplicate ? "Duplicar Tarea" : "Nueva Tarea"}
                     userId={userId}
                     availableTags={availableTags}
+                    onboardingId="todo-duplicate-modal"
                 />
 
                 <TaskEditModal

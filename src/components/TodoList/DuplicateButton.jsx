@@ -3,7 +3,8 @@ import "../../styles/DuplicateButton.css";
 export default function DuplicateButton({
 	onClick = () => {},
 	title = "Duplicar",
-	className = ""
+	className = "",
+	dataOnboardingId
 }) {
 	return (
 		<button
@@ -12,6 +13,7 @@ export default function DuplicateButton({
 			title={title}
 			aria-label={title}
 			type="button"
+			data-onboarding-id={dataOnboardingId}
 		>
 			<svg
 				width="24"  

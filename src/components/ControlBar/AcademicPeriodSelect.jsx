@@ -42,7 +42,20 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    useEffect(() => {
+        const handleCloseUnrelatedUi = (event) => {
+            const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+            if (!allowOpenUi.includes("dropdown-academic-period")) {
+                setIsOpen(false);
+            }
+        };
+
+        window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+        return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+    }, []);
+
     const handleSelectPeriod = (period) => {
+        window.dispatchEvent(new CustomEvent("onboarding:academic-period-selected"));
         setSelectedPeriod(period);
         // Pasar el período seleccionado (o null para "Todos") al padre
         onPeriodChange(period);
@@ -55,16 +68,25 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
         <div className="academicPeriodSelectWrapper" ref={wrapperRef}>
             <button
                 className="academicPeriodButton"
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => {
+                    setIsOpen((prev) => {
+                        const nextState = !prev;
+                        if (nextState) {
+                            window.dispatchEvent(new CustomEvent("onboarding:academic-period-opened"));
+                        }
+                        return nextState;
+                    });
+                }}
                 title={displayText}
                 aria-label="Seleccionar período académico"
                 type="button"
+                data-onboarding-id="academic-period-button"
             >
                 <span>{displayText}</span>
             </button>
 
             {isOpen && (
-                <div className="academicPeriodMenu">
+                <div className="academicPeriodMenu" data-onboarding-id="academic-period-menu">
                     {/* Opción "Todos" */}
                     <button
                         className={`academicPeriodOption ${selectedPeriod === null ? "selected" : ""}`}

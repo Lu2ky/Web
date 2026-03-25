@@ -10,6 +10,7 @@ import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
 import ToDoList from "./components/TodoList/ToDoList"; 
 import MessageConfirmation from "./components/TodoList/MessageConfirmation";
+import OnboardingOverlay from "./components/Onboarding/OnboardingOverlay";
 // Componentes secundarios
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
 import { PopUpPersonal } from "./components/Calendar/PopUpPersonal";
@@ -312,12 +313,15 @@ function App() {
 	return (
 
 		<div className="App">
-			<Header userId={userId} />
+			<OnboardingOverlay />
+			<div data-onboarding-id="header">
+				<Header userId={userId} />
+			</div>
 			<div className="mainContent">
-				<div className="ToDoSection">
+				<div className="ToDoSection" data-onboarding-id="todo">
 					<ToDoList userId={userId} />
 				</div>
-				<div className="CalendarSection">
+				<div className="CalendarSection" data-onboarding-id="calendar">
 					<OficialFetcher
 						userId={userId}
 						onDataLoaded={handleDataLoaded}

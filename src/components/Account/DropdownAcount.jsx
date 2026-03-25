@@ -29,9 +29,50 @@ export default function DropdownAcount({ userId }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const toggleDropdown = () => setIsDropdownOpen((prev) => !prev);
+    useEffect(() => {
+        const handleCloseUnrelatedUi = (event) => {
+            const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+
+            if (!allowOpenUi.includes("dropdown-account")) {
+                setIsDropdownOpen(false);
+            }
+
+            setActiveModal((prev) => {
+                if (!prev) return prev;
+
+                const modalKeyMap = {
+                    acount: "modal-account",
+                    prefer: "modal-preferences",
+                    close: "modal-logout"
+                };
+
+                const mappedKey = modalKeyMap[prev];
+                if (mappedKey && allowOpenUi.includes(mappedKey)) {
+                    return prev;
+                }
+
+                return null;
+            });
+        };
+
+        window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+        return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+    }, []);
+
+    const toggleDropdown = () => {
+        setIsDropdownOpen((prev) => {
+            const nextState = !prev;
+            if (nextState) {
+                window.dispatchEvent(new CustomEvent("onboarding:account-dropdown-opened"));
+            }
+            return nextState;
+        });
+    };
 
     const handleOptionClick = (optionId) => {
+        if (optionId === "prefer") {
+            window.dispatchEvent(new CustomEvent("onboarding:preferences-opened"));
+        }
         setActiveModal(optionId);
         setIsDropdownOpen(false);
     };
@@ -49,7 +90,7 @@ export default function DropdownAcount({ userId }) {
     return (
         <div>
             {/* Dropdown */}
-            <div className="dropdown-container" ref={dropdownRef}>
+            <div className="dropdown-container" ref={dropdownRef} data-onboarding-id="account-dropdown">
                 <button
                     className="dropdown-image-button"
                     onClick={toggleDropdown}
@@ -69,6 +110,7 @@ export default function DropdownAcount({ userId }) {
                             <li key={option.id} role="menuitem">
                                 <button
                                     className="dropdown-menu-item"
+                                    data-onboarding-id={option.id === "prefer" ? "open-preferences-button" : undefined}
                                     onClick={() => handleOptionClick(option.id)}
                                 >
                                     <span>{option.label}</span>

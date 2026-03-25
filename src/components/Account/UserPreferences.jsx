@@ -128,6 +128,7 @@ export default function UserPreferences({ userId, onClose }) {
         setIsEditingEmail(true);
         setError("");
         setSuccess("");
+        window.dispatchEvent(new CustomEvent("onboarding:preferences-email-edit-opened"));
     };
 
     const handleCancelEmail = () => {
@@ -138,6 +139,7 @@ export default function UserPreferences({ userId, onClose }) {
 
     const handleSaveEmail = async (e) => {
         e.preventDefault();
+        window.dispatchEvent(new CustomEvent("onboarding:preferences-email-saved"));
         setError("");
         setSuccess("");
 
@@ -424,6 +426,14 @@ export default function UserPreferences({ userId, onClose }) {
     }
 
     const currentEmail = userData?.email || userData?.correo || "No disponible";
+    const handleOnboardingEmailInput = (value) => {
+        setNewEmail(value);
+
+        const trimmedValue = String(value || "").trim();
+        if (trimmedValue && isValidEmail(trimmedValue)) {
+            window.dispatchEvent(new CustomEvent("onboarding:preferences-email-typed"));
+        }
+    };
 
     return (
         <div className="user-preferences">
@@ -431,18 +441,18 @@ export default function UserPreferences({ userId, onClose }) {
             {success && <div className="alert alert-success">{success}</div>}
 
             {/* Email Preferences Section */}
-            <section className="preferences-section">
+            <section className="preferences-section" data-onboarding-id="preferences-email-section">
                 <h3 className="preferences-section-title">Correo Electrónico</h3>
                 
                 <div className="pref-group">
                     <label className="pref-label">Correo Principal</label>
                     {isEditingEmail ? (
                         <form onSubmit={handleSaveEmail} className="email-edit-form">
-                            <div className="email-input-wrapper">
+                            <div className="email-input-wrapper" data-onboarding-id="preferences-email-input">
                                 <input
                                     type="email"
                                     value={newEmail}
-                                    onChange={(e) => setNewEmail(e.target.value)}
+                                    onChange={(e) => handleOnboardingEmailInput(e.target.value)}
                                     placeholder="nuevo.email@upb.edu"
                                     className="form-input email-input"
                                     disabled={isSavingEmail}
@@ -452,6 +462,7 @@ export default function UserPreferences({ userId, onClose }) {
                                     className="email-action-btn email-save-btn"
                                     disabled={isSavingEmail}
                                     title="Guardar"
+                                    data-onboarding-id="preferences-email-save-button"
                                 >
                                     <FaCheck />
                                 </button>
@@ -474,6 +485,7 @@ export default function UserPreferences({ userId, onClose }) {
                                 onClick={handleEditEmail}
                                 disabled={isSavingEmail}
                                 title="Editar correo"
+                                data-onboarding-id="preferences-email-edit-button"
                             >
                                 <FaEdit />
                             </button>
