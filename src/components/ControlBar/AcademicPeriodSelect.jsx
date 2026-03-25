@@ -92,6 +92,8 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
                         className={`academicPeriodOption ${selectedPeriod === null ? "selected" : ""}`}
                         onClick={() => handleSelectPeriod(null)}
                         type="button"
+                        title="Mostrar todos los períodos"
+                        aria-label="Todos los períodos"
                     >
                         Todos los períodos
                     </button>
@@ -103,6 +105,8 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
                             className={`academicPeriodOption ${selectedPeriod?.id === period.id ? "selected" : ""}`}
                             onClick={() => handleSelectPeriod(period)}
                             type="button"
+                            title={`Seleccionar período ${period.nombre}`}
+                            aria-label={`Período ${period.nombre}`}
                         >
                             {period.nombre}
                         </button>

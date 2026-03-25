@@ -295,6 +295,7 @@ export default function TaskEditModal({
                         type="button"
                         className="calendarToggle"
                         aria-label="Abrir Calendario"
+                        title="Abrir calendario"
                         onClick={() => setShowCalendar(!showCalendar)}
                     >
                         📅
@@ -338,6 +339,8 @@ export default function TaskEditModal({
                                     priority: prev.priority === level ? "" : level
                                 }))
                             }
+                            title={`Establecer prioridad como ${level}`}
+                            aria-label={`Prioridad ${level}`}
                         >
                             {level.charAt(0).toUpperCase() + level.slice(1)}
                         </button>
@@ -355,8 +358,7 @@ export default function TaskEditModal({
                                         type="button"
                                         className="tagChipRemove"
                                         onClick={() => handleRemoveTag(tag)}
-                                        aria-label={`Quitar ${tag.label}`}
-                                    >
+                                        aria-label={`Quitar ${tag.label}`}                                        title={`Quitar etiqueta ${tag.label}`}                                    >
                                         ✕
                                     </button>
                                 </span>
@@ -407,6 +409,9 @@ export default function TaskEditModal({
                             setShowCalendar(false);
                             onClose();
                         }}
+                        type="button"
+                        title="Cancelar y descartar cambios"
+                        aria-label="Cancelar"
                     >
                         Cancelar
                     </button>
@@ -415,6 +420,9 @@ export default function TaskEditModal({
                         className="saveButton"
                         onClick={handleSave}
                         disabled={!formData.name.trim()}
+                        type="button"
+                        title="Guardar cambios del recordatorio"
+                        aria-label="Guardar"
                     >
                         Guardar
                     </button>
@@ -457,7 +465,8 @@ export default function TaskEditModal({
                                 <div className="tagDropdownItemActions">
                                     <button
                                         className="tagActionBtn tagActionEdit"
-                                        title="Editar"
+                                        title="Editar etiqueta"
+                                        aria-label="Editar etiqueta"
                                         onMouseDown={(e) => {
                                             e.stopPropagation();
                                             e.preventDefault();
@@ -471,6 +480,7 @@ export default function TaskEditModal({
                                     <button
                                         className="tagActionBtn tagActionDelete"
                                         title="Eliminar de la tarea"
+                                        aria-label="Eliminar etiqueta"
                                         onMouseDown={(e) => {
                                             e.stopPropagation();
                                             e.preventDefault();

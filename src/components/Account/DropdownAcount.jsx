@@ -96,6 +96,8 @@ export default function DropdownAcount({ userId }) {
                     onClick={toggleDropdown}
                     aria-haspopup="true"
                     aria-expanded={isDropdownOpen}
+                    title="Abrir menú de usuario"
+                    type="button"
                 >
                     <img
                         src="https://i.pinimg.com/1200x/4a/18/f7/4a18f79fa10516601b7ab9a6ae0af0f7.jpg"
@@ -112,6 +114,8 @@ export default function DropdownAcount({ userId }) {
                                     className="dropdown-menu-item"
                                     data-onboarding-id={option.id === "prefer" ? "open-preferences-button" : undefined}
                                     onClick={() => handleOptionClick(option.id)}
+                                    title={option.label}
+                                    type="button"
                                 >
                                     <span>{option.label}</span>
                                 </button>
@@ -146,6 +150,8 @@ export default function DropdownAcount({ userId }) {
                 <button
                     className="modal-confirm-btn"
                     onClick={handleLogout}
+                    title="Confirmar cierre de sesión"
+                    type="button"
                 >
                     Sí, cerrar sesión
                 </button>

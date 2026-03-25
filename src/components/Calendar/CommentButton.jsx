@@ -109,6 +109,8 @@ export const CommentButton = ({ on_add_comment, onboardingButtonId, onboardingMo
               type="button"
               onClick={handle_save}
               disabled={comment_text.trim() === "" || is_saving}
+              title="Guardar comentario"
+              aria-label="Guardar comentario"
             >
               {is_saving ? "Guardando..." : "Guardar"}
             </button>
@@ -117,6 +119,8 @@ export const CommentButton = ({ on_add_comment, onboardingButtonId, onboardingMo
               className="add-comment-action-button cancel"
               type="button"
               onClick={handle_cancel}
+              title="Cancelar comentario"
+              aria-label="Cancelar comentario"
             >
               Cancelar
             </button>

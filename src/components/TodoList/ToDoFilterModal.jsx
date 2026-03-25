@@ -92,10 +92,22 @@ function ToDoFilterModal({ isOpen, onClose, onApply, initialFilters = defaultFil
                 )}
 
                 <div className="modalActions">
-                    <button className="cancelButton" onClick={handleClear}>
+                    <button 
+                        className="cancelButton" 
+                        onClick={handleClear}
+                        title="Limpiar todos los filtros"
+                        aria-label="Limpiar filtros"
+                        type="button"
+                    >
                         Limpiar
                     </button>
-                    <button className="saveButton" onClick={handleApply}>
+                    <button 
+                        className="saveButton" 
+                        onClick={handleApply}
+                        title="Aplicar filtros seleccionados"
+                        aria-label="Aplicar filtros"
+                        type="button"
+                    >
                         Aplicar
                     </button>
                 </div>

@@ -138,8 +138,23 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
         <input type="date" name="dateEnd" value={formData.dateEnd ? formData.dateEnd.split('T')[0] : ''} onChange={handleChange} />
 
         <div className="modalActions">
-          <button className="saveButton" onClick={handleSave} disabled={loading}>{loading ? "Guardando..." : "Guardar"}</button>
-          <button className="close-button" onClick={onClose}>Cancelar</button>
+          <button 
+            className="saveButton" 
+            onClick={handleSave} 
+            disabled={loading}
+            title="Guardar cambios de actividad"
+            aria-label="Guardar cambios"
+          >
+            {loading ? "Guardando..." : "Guardar"}
+          </button>
+          <button 
+            className="close-button" 
+            onClick={onClose}
+            title="Cancelar y descartar cambios"
+            aria-label="Cancelar"
+          >
+            Cancelar
+          </button>
         </div>
       </div>
     </div>

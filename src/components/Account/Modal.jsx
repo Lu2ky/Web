@@ -88,7 +88,13 @@ const Modal = ({ isOpen, onClose, title, children }) => { // componente funciona
                 <div className="modal-body">{children}</div> {/* Contenido dinámico */}
 
                 <footer className="modal-footer"> {/*Pie del modal y boton de cerrar*/}
-                    <button className="modal-action-btn" onClick={onClose}>
+                    <button 
+                        className="modal-action-btn" 
+                        onClick={onClose}
+                        title="Cerrar ventana"
+                        aria-label="Cerrar"
+                        type="button"
+                    >
                         Cerrar
                     </button>
                 </footer>

@@ -348,6 +348,8 @@ export const PopUpClasses = ({
                             type="button"
                             onClick={() => handle_save_edit(comment.id)}
                             disabled={!editText.trim()}
+                            title="Guardar cambios del comentario"
+                            aria-label="Guardar comentario"
                           >
                             Guardar
                           </button>
@@ -355,6 +357,8 @@ export const PopUpClasses = ({
                             className="add-comment-action-button cancel"
                             type="button"
                             onClick={handle_cancel_edit}
+                            title="Cancelar edición del comentario"
+                            aria-label="Cancelar"
                           >
                             Cancelar
                           </button>
@@ -372,7 +376,12 @@ export const PopUpClasses = ({
 
         {/* Footer */}
         <div className="popup-footer">
-          <button className="close-button" onClick={handle_close}>
+          <button 
+            className="close-button" 
+            onClick={handle_close}
+            title="Cerrar ventana de detalle"
+            aria-label="Cerrar"
+          >
             Cerrar Detalle
           </button>
         </div>

@@ -137,12 +137,18 @@ function TimeoutWarningModal({ timeRemaining, onStayLoggedIn, onLogout, formatTi
           <button 
             className="session-timeout-btn session-timeout-stay"
             onClick={onStayLoggedIn}
+            title="Continuar con la sesión activa"
+            aria-label="Mantener sesión"
+            type="button"
           >
             Mantener Sesión
           </button>
           <button 
             className="session-timeout-btn session-timeout-logout"
             onClick={onLogout}
+            title="Cerrar sesión actual"
+            aria-label="Cerrar sesión"
+            type="button"
           >
             Cerrar Sesión
           </button>

@@ -376,6 +376,8 @@ export default function TaskAddModal({
                                     priority: prev.priority === level ? "" : level
                                 }))
                             }
+                            title={`Establecer prioridad como ${level}`}
+                            aria-label={`Prioridad ${level}`}
                         >
                             {level.charAt(0).toUpperCase() + level.slice(1)}
                         </button>
@@ -393,8 +395,7 @@ export default function TaskAddModal({
                                         type="button"
                                         className="tagChipRemove"
                                         onClick={() => handleRemoveTag(tag)}
-                                        aria-label={`Quitar ${tag.label}`}
-                                    >
+                                        aria-label={`Quitar ${tag.label}`}                                        title={`Quitar etiqueta ${tag.label}`}                                    >
                                         ✕
                                     </button>
                                 </span>
@@ -445,6 +446,9 @@ export default function TaskAddModal({
                             setShowCalendar(false);
                             onClose();
                         }}
+                        type="button"
+                        title="Cancelar y descartar cambios"
+                        aria-label="Cancelar"
                     >
                         Cancelar
                     </button>
@@ -453,6 +457,9 @@ export default function TaskAddModal({
                         className="saveButton"
                         onClick={handleSave}
                         disabled={!formData.name.trim()}
+                        type="button"
+                        title="Guardar recordatorio"
+                        aria-label="Guardar"
                     >
                         Guardar
                     </button>
@@ -495,7 +502,8 @@ export default function TaskAddModal({
                                 <div className="tagDropdownItemActions">
                                     <button
                                         className="tagActionBtn tagActionEdit"
-                                        title="Editar"
+                                        title="Editar etiqueta"
+                                        aria-label="Editar etiqueta"
                                         onMouseDown={(e) => {
                                             e.stopPropagation();
                                             e.preventDefault();

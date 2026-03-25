@@ -88,11 +88,23 @@ export default function MessageConfirmation({
 
                     {/* Botones de acción */}
                     <div className="confirmacion-message-actions">
-                        <button className="confirmacion-message-cancel-btn" onClick={onClose}>
+                        <button 
+                            className="confirmacion-message-cancel-btn" 
+                            onClick={onClose}
+                            title="Cancelar y cerrar"
+                            aria-label="Cancelar"
+                            type="button"
+                        >
                             {cancelText}
                         </button>
                         
-                        <button className="confirmacion-message-confirm-btn" onClick={onConfirm}>
+                        <button 
+                            className="confirmacion-message-confirm-btn" 
+                            onClick={onConfirm}
+                            title="Confirmar acción"
+                            aria-label="Confirmar"
+                            type="button"
+                        >
                             {confirmText}
                         </button>
                     </div>
