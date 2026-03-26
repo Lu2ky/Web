@@ -5,7 +5,7 @@ import FilterButton from "./FilterButton";
 import ThemeSelect from "./ThemeSelector";
 import AcademicPeriodSelect from "./AcademicPeriodSelect";
 
-function ControlBar({viewMode, setViewMode, userId, onActivityAdd, onThemeChange, selectedTag, setSelectedTag, onPeriodChange}) {
+function ControlBar({viewMode, setViewMode, userId, onActivityAdd, onThemeChange, selectedTag, setSelectedTag, onPeriodChange, weekOffset, setWeekOffset}) {
 
     return (
         <div className="ControlBar" data-onboarding-id="controlbar">
