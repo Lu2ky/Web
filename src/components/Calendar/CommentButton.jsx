@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 
 // Componente botón para agregar comentarios
-export const CommentButton = ({ on_add_comment, onboardingButtonId, onboardingModalId }) => {
+export const CommentButton = ({
+  on_add_comment,
+  onboardingButtonId,
+  onboardingModalId,
+  isDisabled = false,
+}) => {
   const [is_open, set_is_open] = useState(false);
   const [is_closing, set_is_closing] = useState(false);
   const [comment_text, set_comment_text] = useState("");
@@ -36,7 +41,7 @@ export const CommentButton = ({ on_add_comment, onboardingButtonId, onboardingMo
   // Guardar comentario y notificar al padre
   const handle_save = async () => {
     const text_to_send = comment_text.trim();
-    if (text_to_send === "" || is_saving) return;
+    if (text_to_send === "" || is_saving || isDisabled) return;
 
     try {
       set_is_saving(true);
@@ -88,6 +93,7 @@ export const CommentButton = ({ on_add_comment, onboardingButtonId, onboardingMo
         aria-expanded={is_open}
         title="Agregar comentario"
         data-onboarding-id={onboardingButtonId}
+        disabled={isDisabled || is_saving}
       >
         <span className="add-comment-plus">+</span>
         <span className="add-comment-label">Agregar Comentario</span>
@@ -101,6 +107,7 @@ export const CommentButton = ({ on_add_comment, onboardingButtonId, onboardingMo
             onChange={handle_change}
             placeholder="Escribe tu comentario..."
             rows={4}
+            disabled={is_saving || isDisabled}
           />
 
           <div className="add-comment-actions">
@@ -108,7 +115,7 @@ export const CommentButton = ({ on_add_comment, onboardingButtonId, onboardingMo
               className="add-comment-action-button save"
               type="button"
               onClick={handle_save}
-              disabled={comment_text.trim() === "" || is_saving}
+              disabled={comment_text.trim() === "" || is_saving || isDisabled}
               title="Guardar comentario"
               aria-label="Guardar comentario"
             >
@@ -119,6 +126,7 @@ export const CommentButton = ({ on_add_comment, onboardingButtonId, onboardingMo
               className="add-comment-action-button cancel"
               type="button"
               onClick={handle_cancel}
+              disabled={is_saving}
               title="Cancelar comentario"
               aria-label="Cancelar comentario"
             >
