@@ -17,6 +17,9 @@ export const PopUpClasses = ({
   const [reloadKey, setReloadKey] = useState(0);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [isAddingComment, setIsAddingComment] = useState(false);
+  const [savingCommentId, setSavingCommentId] = useState(null);
+  const [deletingCommentId, setDeletingCommentId] = useState(null);
 
   // Sincronizar el estado interno con el prop externo
   useEffect(() => {
@@ -136,6 +139,16 @@ export const PopUpClasses = ({
       throw new Error("Cannot add comment: userId is missing");
     }
 
+    const optimisticId = `temp-${Date.now()}`;
+    const optimisticComment = {
+      id: optimisticId,
+      text: comment_text,
+      timestamp: "Ahora",
+    };
+
+    setIsAddingComment(true);
+    set_comments((prev) => [optimisticComment, ...prev]);
+
     try {
       const result = await addComment({
         scheduleId,
@@ -149,6 +162,9 @@ export const PopUpClasses = ({
         window.setTimeout(resolve, ms);
       });
 
+      let found = false;
+      let lastLoaded = [];
+
       for (let attempt = 0; attempt < 3; attempt += 1) {
         try {
           const loaded = await fetchComments({
@@ -156,10 +172,13 @@ export const PopUpClasses = ({
             courseId,
             scheduleId,
           });
-          set_comments(loaded);
+          lastLoaded = loaded;
 
           const expected = String(comment_text).trim().toLowerCase();
-          const found = loaded.some((comment) => String(comment?.text ?? "").trim().toLowerCase() === expected);
+          found = loaded.some((comment) => String(comment?.text ?? "").trim().toLowerCase() === expected);
+          if (found) {
+            set_comments(loaded);
+          }
           if (found) break;
         } catch (reloadError) {
           console.error("Error recargando comentarios tras guardar:", reloadError);
@@ -168,22 +187,43 @@ export const PopUpClasses = ({
         await wait(300);
       }
 
+      if (!found) {
+        set_comments((prev) => {
+          const withoutOptimistic = prev.filter((comment) => comment.id !== optimisticId);
+          if (lastLoaded.length > 0) {
+            return [optimisticComment, ...lastLoaded];
+          }
+          return withoutOptimistic;
+        });
+      }
+
       setReloadKey((k) => k + 1);
 
       return result;
     } catch (err) {
+      set_comments((prev) => prev.filter((comment) => comment.id !== optimisticId));
       console.error("Error añadiendo comentario:", err);
       throw err;
+    } finally {
+      setIsAddingComment(false);
     }
   };
 
   const handle_delete_comment = async (comment_id) => {
+    if (savingCommentId !== null || deletingCommentId !== null) return;
+
+    const previousComments = comments;
+    setDeletingCommentId(comment_id);
     set_comments((prev) => prev.filter((comment) => comment.id !== comment_id));
+
     try {
       await deleteComment(comment_id);
       setReloadKey((k) => k + 1);
     } catch (err) {
+      set_comments(previousComments);
       console.error("Error eliminando comentario:", err);
+    } finally {
+      setDeletingCommentId(null);
     }
   };
 
@@ -195,14 +235,24 @@ export const PopUpClasses = ({
   const handle_save_edit = async (comment_id) => {
     const trimmed = editText.trim();
     if (!trimmed) return;
+
+    if (savingCommentId !== null || deletingCommentId !== null) return;
+
+    const previousComments = comments;
+
+    setSavingCommentId(comment_id);
     set_comments((prev) => prev.map((c) => (c.id === comment_id ? { ...c, text: trimmed } : c)));
     setEditingId(null);
     setEditText("");
+
     try {
       await updateComment(comment_id, trimmed);
       setReloadKey((k) => k + 1);
     } catch (err) {
+      set_comments(previousComments);
       console.error("Error actualizando comentario:", err);
+    } finally {
+      setSavingCommentId(null);
     }
   };
 
@@ -210,6 +260,8 @@ export const PopUpClasses = ({
     setEditingId(null);
     setEditText("");
   };
+
+  const isCommentsBusy = isAddingComment || savingCommentId !== null || deletingCommentId !== null;
 
   if (!is_open) {
     return null;
@@ -305,32 +357,40 @@ export const PopUpClasses = ({
               on_add_comment={handle_add_comment}
               onboardingButtonId="official-comment-button"
               onboardingModalId="official-comment-modal"
+              isDisabled={isCommentsBusy}
             />
 
             {comments.length > 0 && (
               <div className="comments-list">
-                {comments.map((comment) => (
+                {comments.map((comment) => {
+                  const isEditingThis = editingId === comment.id;
+                  const isSavingThis = savingCommentId === comment.id;
+                  const isDeletingThis = deletingCommentId === comment.id;
+
+                  return (
                   <div key={comment.id} className="comment-item">
                     <div className="comment-header">
                       <span className="comment-timestamp">{comment.timestamp}</span>
                       <div className="comment-header-actions">
                         <button
-                          className="delete-comment-button"
+                          className={`edit-comment-button${isSavingThis ? " is-loading" : ""}`}
                           onClick={() => handle_start_edit(comment)}
                           title="Editar comentario"
                           aria-label="Editar comentario"
                           type="button"
+                          disabled={isCommentsBusy && !isEditingThis}
                         >
-                          ✎
+                          {isSavingThis ? "..." : "✎"}
                         </button>
                         <button
-                          className="delete-comment-button"
+                          className={`delete-comment-button${isDeletingThis ? " is-loading" : ""}`}
                           onClick={() => handle_delete_comment(comment.id)}
                           title="Eliminar comentario"
                           aria-label="Eliminar comentario"
                           type="button"
+                          disabled={isCommentsBusy && !isDeletingThis}
                         >
-                          ✕
+                          {isDeletingThis ? "..." : "✕"}
                         </button>
                       </div>
                     </div>
@@ -341,22 +401,24 @@ export const PopUpClasses = ({
                           value={editText}
                           onChange={(e) => setEditText(e.target.value)}
                           rows={2}
+                          disabled={savingCommentId === comment.id || deletingCommentId !== null}
                         />
                         <div className="add-comment-actions">
                           <button
                             className="add-comment-action-button save"
                             type="button"
                             onClick={() => handle_save_edit(comment.id)}
-                            disabled={!editText.trim()}
+                            disabled={!editText.trim() || savingCommentId === comment.id || deletingCommentId !== null}
                             title="Guardar cambios del comentario"
                             aria-label="Guardar comentario"
                           >
-                            Guardar
+                            {savingCommentId === comment.id ? "Guardando..." : "Guardar"}
                           </button>
                           <button
                             className="add-comment-action-button cancel"
                             type="button"
                             onClick={handle_cancel_edit}
+                            disabled={savingCommentId === comment.id || deletingCommentId !== null}
                             title="Cancelar edición del comentario"
                             aria-label="Cancelar"
                           >
@@ -368,8 +430,13 @@ export const PopUpClasses = ({
                       <p className="comment-text">{comment.text}</p>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
+            )}
+
+            {comments.length === 0 && (
+              <p className="no-comments">Aun no hay comentarios para esta asignatura.</p>
             )}
           </div>
         </div>

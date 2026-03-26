@@ -23,18 +23,32 @@ const joinUserUrl = (base, userId) => {
     return `${sanitizedBase}/${userId}`;
 };
 
+const unwrapDbValue = (value) => {
+    if (value === null || value === undefined) return value;
+    if (typeof value !== "object") return value;
+
+    if ("Int64" in value) return value.Int64;
+    if ("Float64" in value) return value.Float64;
+    if ("String" in value) return value.String;
+    if ("Bool" in value) return value.Bool;
+
+    return value;
+};
+
 const toComparableId = (value) => {
-    if (value === null || value === undefined || value === "") return null;
-    const numeric = Number(value);
-    return Number.isFinite(numeric) ? numeric : String(value);
+    const unwrapped = unwrapDbValue(value);
+    if (unwrapped === null || unwrapped === undefined || unwrapped === "") return null;
+
+    const sanitized = typeof unwrapped === "string" ? unwrapped.trim() : unwrapped;
+    const numeric = Number(sanitized);
+    return Number.isFinite(numeric) ? numeric : String(sanitized);
 };
 
 
 // Verifica si un comentario está marcado como eliminado (eliminación lógica)
 const isDeleted = (comment) => {
-    const flag = comment?.B_isDeleted;
+    const flag = unwrapDbValue(comment?.B_isDeleted);
     if (typeof flag === "boolean") return flag;
-    if (flag && typeof flag === "object" && typeof flag.Bool === "boolean") return flag.Bool;
     return false;
 };
 
@@ -50,14 +64,26 @@ const filterByScope = (comments, { courseId, scheduleId }) => {
         const commentCourseId = toComparableId(comment?.N_idCurso ?? comment?.id_course ?? comment?.courseId ?? comment?.ID_CURSO);
         const commentScheduleId = toComparableId(comment?.N_idHorario ?? comment?.id_schedule ?? comment?.scheduleId ?? comment?.ID_HORARIO);
 
+        const matchesCourse = targetCourseId !== null
+            && commentCourseId !== null
+            && commentCourseId === targetCourseId;
+
+        const matchesSchedule = targetScheduleId !== null
+            && commentScheduleId !== null
+            && commentScheduleId === targetScheduleId;
+
+        // Cuando tenemos ambos IDs, aceptar coincidencia por cualquiera.
+        // Esto evita perder comentarios cuando backend asocia mejor por horario.
+        if (targetCourseId !== null && targetScheduleId !== null) {
+            return matchesCourse || matchesSchedule;
+        }
+
         if (targetCourseId !== null) {
-            if (commentCourseId === null) return false;
-            return commentCourseId === targetCourseId;
+            return matchesCourse;
         }
 
         if (targetScheduleId !== null) {
-            if (commentScheduleId === null) return false;
-            return commentScheduleId === targetScheduleId;
+            return matchesSchedule;
         }
 
         return true;
@@ -98,9 +124,9 @@ const fetchJson = async (url) => {
 };
 
 export const normalizeComment = (comment, fallbackId) => ({
-    id: comment?.N_idComentarios ?? comment?.id ?? comment?.ID ?? fallbackId,
-    text: comment?.T_comentario ?? comment?.text ?? comment?.comentario ?? "",
-    timestamp: comment?.Dt_fecha ?? comment?.timestamp ?? comment?.fecha ?? "",
+    id: unwrapDbValue(comment?.N_idComentarios) ?? unwrapDbValue(comment?.id) ?? unwrapDbValue(comment?.ID) ?? fallbackId,
+    text: unwrapDbValue(comment?.T_comentario) ?? unwrapDbValue(comment?.text) ?? unwrapDbValue(comment?.comentario) ?? "",
+    timestamp: unwrapDbValue(comment?.Dt_fecha) ?? unwrapDbValue(comment?.timestamp) ?? unwrapDbValue(comment?.fecha) ?? "",
 });
 
 export const normalizeComments = (comments) => {

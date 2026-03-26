@@ -3,7 +3,7 @@ import "../../styles/WeekView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
 
-function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000" }) {
+function WeekView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffset = () => {}, onClassClick = () => { }, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000" }) {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const days = [
     "Lunes",
@@ -17,7 +17,6 @@ function WeekView({ events = [], personalEvents = [], onClassClick = () => { }, 
   const MINUTES_IN_HOUR = 60;
   const HOUR_HEIGHT = 64; // 4rem = 64px
   const [hourPx, setHourPx] = useState(64); // Inicializar con 64px en lugar de 0
-  const [weekOffset, setWeekOffset] = useState(0);
   const gridRef = useRef(null);
   // Obtener rango de fechas de la semana
   const getWeekDateRange = () => {
