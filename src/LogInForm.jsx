@@ -35,7 +35,6 @@ const LogInForm = () => {
             setError("Por favor ingresa usuario y contraseña");
             return;
         }
-
         const result = await LDAPservice(userId, password);
 
         if (result) {

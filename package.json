@@ -16,7 +16,12 @@
     "test:e2e:security": "playwright test tests/e2e/user-profile-change-password.security.e2e.spec.js",
     "test:password:local": "node scripts/run-local-password-validation.mjs",
     "test:perf:password": "artillery run tests/performance/change-password.artillery.yml",
-    "test:perf:password:report": "node -e \"console.log('Artillery report fue deprecado; revisa tests/evidencia/mi-perfil-cambio-contrasena-rendimiento.txt y .json')\""
+    "test:perf:password:report": "node -e \"console.log('Artillery report fue deprecado; revisa tests/evidencia/mi-perfil-cambio-contrasena-rendimiento.txt y .json')\"",
+    "test:theme:unit": "vitest run src/components/ControlBar/ThemeSelector.test.jsx",
+    "test:theme:e2e": "playwright test tests/e2e/theme-selector.e2e.spec.js",
+    "test:theme:perf": "node tests/performance/theme-selector-performance.mjs",
+    "test:theme:perf:artillery": "artillery run tests/performance/theme-selector.artillery.yml",
+    "test:theme:full": "npm run test:theme:unit && npm run test:theme:e2e && npm run test:theme:perf"
   },
   "dependencies": {
     "react": "^19.2.0",

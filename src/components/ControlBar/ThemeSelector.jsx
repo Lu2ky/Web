@@ -73,10 +73,24 @@ export const ThemeSelector = ({ onThemeChange }) => {
     );
 
     useEffect(() => {
-        // Cargar categorías al subir el componente
-        getCategories().then((data) => {
-            set_categories(data);
-        });
+        let is_mounted = true;
+
+        // Cargar categorías al subir el componente y evitar rechazos no controlados
+        getCategories()
+            .then((data) => {
+                if (is_mounted) {
+                    set_categories(Array.isArray(data) ? data : []);
+                }
+            })
+            .catch(() => {
+                if (is_mounted) {
+                    set_categories([]);
+                }
+            });
+
+        return () => {
+            is_mounted = false;
+        };
     }, []);
 
     return (
@@ -98,6 +112,7 @@ export const ThemeSelector = ({ onThemeChange }) => {
                     >
                         <div className="themeModal">
                             <h2>Paleta de temas</h2>
+                            <button className="closeModal" onClick={toggle_modal} title="Cerrar" aria-label="Cerrar" type="button">X</button>
                             <div className="themeGrid">
                                 {THEME_OPTIONS.map((theme) => (
                                     <button
@@ -128,7 +143,6 @@ export const ThemeSelector = ({ onThemeChange }) => {
                                     </button>
                                 ))}
                             </div>
-                            <button className="closeModal" onClick={toggle_modal} title="Cerrar" aria-label="Cerrar" type="button">Cerrar</button>
                         </div>
                     </div>
                 )
