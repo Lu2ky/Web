@@ -1,5 +1,4 @@
 import "../../styles/ControlBar.css";
-import WeekMover from "./WeekMover";
 import ViewButton from "./ViewButton";
 import AddButton from "./AddActivityButton";
 import FilterButton from "./FilterButton";
