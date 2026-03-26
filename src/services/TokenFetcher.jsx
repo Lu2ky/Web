@@ -6,7 +6,7 @@ const RESET_TOKEN_ENDPOINT = import.meta.env.VITE_API_PASSWORD_RESET_TOKEN;
 // Componente para cargar y enviar el token de recuperación de contraseña
 // onDataLoaded es una función que se llama cuando el token se envía correctamente
 // passwordResetToken es el token único que el usuario recibió en su email
-function TokenFetcher({ onDataLoaded, passwordResetToken }) {
+function TokenFetcher({ onDataLoaded, passwordResetToken, userId }) {
     const [loading, setLoading] = useState(false); // Estado para controlar la carga
     const [error, setError] = useState(null); // Estado para guardar errores
 
@@ -18,8 +18,8 @@ function TokenFetcher({ onDataLoaded, passwordResetToken }) {
     }, [error]);
 
     useEffect(() => {
-        // Validar que el token esté presente
-        if (!passwordResetToken) {
+        // Validar que el token y el userId estén presentes
+        if (!passwordResetToken || !userId) {
             setLoading(false);
             setError(null);
             if (onDataLoaded) {
@@ -37,7 +37,7 @@ function TokenFetcher({ onDataLoaded, passwordResetToken }) {
                 if (!RESET_TOKEN_ENDPOINT) {
                     const missingConfig = {
                         success: false,
-                        message: "No esta configurado"
+                        message: "ERROR 401" // Error de configuración, no se puede enviar el token
                     };
                     if (onDataLoaded) {
                         onDataLoaded(missingConfig);
@@ -46,8 +46,12 @@ function TokenFetcher({ onDataLoaded, passwordResetToken }) {
                 }
 
                 // Preparar el body antes de enviarlo
-                const requestBody = { token: passwordResetToken };
+                const requestBody = {
+                    token: passwordResetToken,
+                    userId: userId
+                };
                 console.log("Enviando token:", passwordResetToken); // Log para debugging
+                console.log("Enviando userID:", userId); // Log para debugging
                 console.log("Request body:", requestBody); // Log del body ANTES de enviar
 
                 const response = await fetch(RESET_TOKEN_ENDPOINT, {
@@ -96,7 +100,7 @@ function TokenFetcher({ onDataLoaded, passwordResetToken }) {
         };
 
         fetchToken(); // Ejecutar la función
-    }, [onDataLoaded, passwordResetToken]);
+    }, [onDataLoaded, passwordResetToken, userId]);
 
     // Mostrar modal de carga mientras se envía el token
     if (loading) {
