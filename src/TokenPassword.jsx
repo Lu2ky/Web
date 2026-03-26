@@ -1,11 +1,12 @@
 // Componente para la verificación del token de recuperación de contraseña
 
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Logo from './assets/logo.png';
-import Image from './assets/ImageRecover.jpeg';
+import Image from './assets/ImageRecover.webp';
 import './TokenPassword.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import TokenFetcher from './services/TokenFetcher';
+import { getUserData } from './services/userService';
 
 // Componente para la verificación del token de recuperación de contraseña
 const TokenPassword = () => {
@@ -16,8 +17,48 @@ const TokenPassword = () => {
     const [token, setToken] = useState(["", "", "", "", "", ""]);
     const [submittedToken, setSubmittedToken] = useState('');
     const [feedback, setFeedback] = useState('');
+    const [dbUserId, setDbUserId] = useState('');
     // Referencia para manejar el enfoque de los inputs (es decir el lugar donde se digita el número)
     const inputsRef = useRef([]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const resolveDbUserId = async () => {
+            const recoveryUserCode = location.state?.userCode || '';
+            if (!recoveryUserCode) {
+                if (isMounted) {
+                    setDbUserId('');
+                }
+                return;
+            }
+
+            try {
+                // Se usa userService para obtener el idUsuario real de BD.
+                const currentData = await getUserData(recoveryUserCode);
+                console.log('Current user data received:', currentData);
+
+                const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
+                const actualUserId = currentUser?.idUsuario || currentUser?.id || Number(recoveryUserCode);
+                console.log('Using actualUserId from DB:', actualUserId);
+
+                if (isMounted) {
+                    setDbUserId(actualUserId ? String(actualUserId) : '');
+                }
+            } catch (error) {
+                console.error('Error resolving DB user ID in TokenPassword:', error);
+                if (isMounted) {
+                    setDbUserId('');
+                }
+            }
+        };
+
+        resolveDbUserId();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [location.state?.userCode]);
     // Función para manejar el cambio en los inputs del token
     const handleChange = (value, index) => {
         // Solo permite dígitos numéricos
@@ -71,6 +112,11 @@ const TokenPassword = () => {
             return;
         }
 
+        if (!dbUserId) {
+            alert("No se pudo obtener el ID real del usuario. Vuelve a iniciar el flujo.");
+            return;
+        }
+
         setSubmittedToken(finalToken);
     };
 
@@ -86,6 +132,7 @@ const TokenPassword = () => {
             navigate('/RestorePassword', {
                 state: {
                     userCode: location.state?.userCode || '',
+                    userId: dbUserId,
                     token: submittedToken
                 }
             });
@@ -135,6 +182,7 @@ const TokenPassword = () => {
                 {submittedToken && (
                     <TokenFetcher
                         passwordResetToken={submittedToken}
+                        userId={dbUserId}
                         onDataLoaded={handleTokenResult}
                     />
                 )}

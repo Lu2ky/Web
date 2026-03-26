@@ -14,7 +14,7 @@
 
 import { useState } from 'react';
 import Logo from './assets/logo.png';
-import Image from './assets/ImageRecover.jpeg';
+import Image from './assets/ImageRecover.webp';
 import './RecoverPassword.css';
 import { MdPassword } from "react-icons/md"; //  npm install react-icons --save
 import { useNavigate } from 'react-router-dom';

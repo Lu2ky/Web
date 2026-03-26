@@ -86,7 +86,7 @@ export async function getUserData(userId) {
         }
 
         const json = await res.json();
-        
+
         // El servidor retorna { success: boolean, data: {...} }
         if (json.success && json.data) {
             return json.data;
@@ -120,27 +120,27 @@ export async function updateUserEmail(userId, newEmail) {
     // Obtener datos actuales para recuperar tiempoMute e idUsuario real desde BD
     const currentData = await getUserData(userId);
     console.log("Current user data received:", currentData);
-    
+
     const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
     console.log("Current user object:", currentUser);
-    
+
     if (!currentUser) {
         console.error("No user data found for userId:", userId);
         return { success: false, message: "No se encontraron datos del usuario" };
     }
-    
+
     // Usar el idUsuario real de la base de datos, no el pasado por parámetro
     const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
     console.log("Using actualUserId from DB:", actualUserId);
-    
+
     // Obtener tiempoMute intentando múltiples nombres de campo
-    let currentTimeMute = currentUser?.antelacionNotis || 
-                         currentUser?.tiempoMute || 
-                         currentUser?.anticipationTime ||
-                         "00:00:00";
-    
+    let currentTimeMute = currentUser?.antelacionNotis ||
+        currentUser?.tiempoMute ||
+        currentUser?.anticipationTime ||
+        "00:00:00";
+
     console.log("Current tiempoMute:", currentTimeMute);
-    
+
     // Validar formato de tiempoMute (debe ser HH:MM:SS)
     if (typeof currentTimeMute !== 'string' || !currentTimeMute.includes(':')) {
         console.warn("tiempoMute format invalid, using default");
@@ -156,7 +156,7 @@ export async function updateUserEmail(userId, newEmail) {
     try {
         console.log("Updating email with payload:", payload);
         console.log("Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
-        
+
         const res = await fetch(CONFIG_NOTIFICATION_ENDPOINT, {
             method: "POST",
             headers: {
@@ -297,19 +297,19 @@ export async function updateReminderAnticipation(userId, minutes) {
     // Obtener datos actuales para recuperar correo e idUsuario real desde BD
     const currentData = await getUserData(userId);
     console.log("Current user data received:", currentData);
-    
+
     const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
     console.log("Current user object:", currentUser);
-    
+
     if (!currentUser) {
         console.error("No user data found for userId:", userId);
         return { success: false, message: "No se encontraron datos del usuario" };
     }
-    
+
     // Usar el idUsuario real de la base de datos, no el pasado por parámetro
     const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
     console.log("Using actualUserId from DB:", actualUserId);
-    
+
     const currentEmail = (currentUser?.correo || currentUser?.email || "").trim();
     console.log("Current email:", currentEmail);
 
@@ -322,7 +322,7 @@ export async function updateReminderAnticipation(userId, minutes) {
     try {
         console.log("Updating reminder anticipation with payload:", payload);
         console.log("Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
-        
+
         const res = await fetch(CONFIG_NOTIFICATION_ENDPOINT, {
             method: "POST",
             headers: {
