@@ -62,7 +62,7 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
         setIsOpen(false);
     };
 
-    const displayText = selectedPeriod ? selectedPeriod.nombre : "Todos los períodos";
+    const displayText = selectedPeriod ? selectedPeriod.nombre : "Período Académico";
 
     return (
         <div className="academicPeriodSelectWrapper" ref={wrapperRef}>

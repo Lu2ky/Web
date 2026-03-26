@@ -3,23 +3,35 @@ import "../../styles/DayView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
 
-function DayView({ events = [], personalEvents = [], onClassClick = () => {}, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000"}) {
+function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffset = () => {}, onClassClick = () => {}, onDeletePersonal = () => {}, onPersonalClick = () => {}, tagColorMap = {}, getContrastColor = () => "#000000"}) {
     const hours = Array.from({ length: 24 }, (_, i) => i);
     const MINUTES_IN_HOUR = 60;
     const [hourPx, setHourPx] = useState(64); // Inicializar con 4rem = 64px
-    const [dayOffset, setDayOffset] = useState(0);
+    const [dayOffsetLocal, setDayOffsetLocal] = useState(0); // Offset relativo dentro de la semana actual (0-6)
     const HOUR_HEIGHT = 64; // 4rem = 64px exactamente
     const bodyRef = useRef(null);
 
-    // Días de la semana
-    const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+    // Días de la semana (comenzando en lunes para mantener consistencia con WeekView)
+    const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
-    // Obtener día actual + offset
+    // Calcular el día seleccionado considerando weekOffset y dayOffsetLocal
     const getSelectedDay = () => {
         const today = new Date();
-        const selectedDate = new Date(today);
-        selectedDate.setDate(today.getDate() + dayOffset);
-        return days[selectedDate.getDay()];
+        const currentDay = today.getDay(); // 0 = Domingo, 1 = Lunes
+        const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1;
+        
+        // Calcular la fecha de inicio de la semana (lunes)
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - daysFromMonday + (weekOffset * 7));
+        
+        // Sumar dayOffsetLocal para obtener el día específico
+        const selectedDate = new Date(startOfWeek);
+        selectedDate.setDate(startOfWeek.getDate() + dayOffsetLocal);
+        
+        // Retornar el nombre del día en el orden de daysOfWeek (que se alinea con WeekView)
+        const dayIndex = selectedDate.getDay();
+        if (dayIndex === 0) return "Domingo"; // Domingo
+        return daysOfWeek[dayIndex - 1]; // Lunes a Sábado
     };
 
     const selectedDay = getSelectedDay();
@@ -27,9 +39,34 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
     // Obtener fecha formateada
     const getFormattedDate = () => {
         const today = new Date();
-        const selectedDate = new Date(today);
-        selectedDate.setDate(today.getDate() + dayOffset);
+        const currentDay = today.getDay();
+        const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1;
+        
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - daysFromMonday + (weekOffset * 7));
+        
+        const selectedDate = new Date(startOfWeek);
+        selectedDate.setDate(startOfWeek.getDate() + dayOffsetLocal);
+        
         return selectedDate.toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    };
+
+    // Sincronizar navegación: cuando se navega hacia atrás/adelante, ajustar weekOffset si es necesario
+    const handleDayNavigation = (direction) => {
+        const newDayOffsetLocal = dayOffsetLocal + direction;
+        
+        if (newDayOffsetLocal < 0) {
+            // Ir a la semana anterior
+            setWeekOffset(weekOffset - 1);
+            setDayOffsetLocal(6); // Último día de la semana anterior
+        } else if (newDayOffsetLocal > 6) {
+            // Ir a la semana siguiente
+            setWeekOffset(weekOffset + 1);
+            setDayOffsetLocal(0); // Primer día de la semana siguiente
+        } else {
+            // Navegar dentro de la misma semana
+            setDayOffsetLocal(newDayOffsetLocal);
+        }
     };
 
     useLayoutEffect(() => {
@@ -122,7 +159,7 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
             <div className="daySelector">
                 <button 
                     className="daySelectorArrow"
-                    onClick={() => setDayOffset(dayOffset - 1)}
+                    onClick={() => handleDayNavigation(-1)}
                     title="Día anterior"
                     aria-label="Día anterior"
                     type="button"
@@ -134,7 +171,7 @@ function DayView({ events = [], personalEvents = [], onClassClick = () => {}, on
                 </div>
                 <button 
                     className="daySelectorArrow"
-                    onClick={() => setDayOffset(dayOffset + 1)}
+                    onClick={() => handleDayNavigation(1)}
                     title="Día siguiente"
                     aria-label="Día siguiente"
                     type="button"
