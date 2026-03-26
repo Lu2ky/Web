@@ -151,53 +151,41 @@ const isWeekInPeriod = (weekOffset, period) => {
 // ============================================================================
 const isActiveLaterallyInWeek = (activity, weekOffset) => {
 	if (!activity) return false;
-	
-	// Si no tiene fechas de vigencia, NO mostrar (cambio: antes era true)
+
+	// Si no tiene fechas de vigencia, NO mostrar
 	if (!activity.date_start && !activity.date_end) {
 		return false;
 	}
 
 	const { startDate: weekStart, endDate: weekEnd } = getWeekDateRange(weekOffset);
-	
+
 	// Función auxiliar: extraer solo YYYY-MM-DD de strings que pueden incluir hora
 	const extractDateOnly = (dateStr) => {
 		if (!dateStr) return null;
-		// Si tiene formato "YYYY-MM-DD HH:MM:SS", extraer solo la parte de fecha
-		const datePart = String(dateStr).split(' ')[0].split('T')[0];
-		return datePart;
+		return String(dateStr).split(' ')[0].split('T')[0];
 	};
-	
+
 	const dateStartStr = extractDateOnly(activity.date_start);
 	const dateEndStr = extractDateOnly(activity.date_end);
-	
+
 	// Convertir strings de fecha (YYYY-MM-DD) a Date objects
 	const activityStart = dateStartStr ? new Date(dateStartStr + "T00:00:00") : null;
 	const activityEnd = dateEndStr ? new Date(dateEndStr + "T23:59:59") : null;
-	
-	// Debug: loguear para verificar qué está pasando
-	if (process.env.NODE_ENV === 'development') {
-		console.log(`[FILTER] Activity: "${activity.name}", dateStart: ${dateStartStr}, dateEnd: ${dateEndStr}, weekOffset: ${weekOffset}`);
-		console.log(`[FILTER] Week range: ${weekStart.toISOString()} to ${weekEnd.toISOString()}`);
-		console.log(`[FILTER] Activity dates: ${activityStart?.toISOString()} to ${activityEnd?.toISOString()}`);
-	}
-	
-	// Si la actividad no tiene fechas válidas, NO mostrar (es más estricto)
+
+	// Si la actividad no tiene fechas válidas, NO mostrar
 	if (!activityStart && !activityEnd) return false;
-	
+
 	// Si la actividad está completamente antes de la semana, no mostrar
 	if (activityEnd && weekStart > activityEnd) {
-		console.log(`[FILTER] Activity is BEFORE week - filtering out`);
 		return false;
 	}
-	
+
 	// Si la actividad está completamente después de la semana, no mostrar
 	if (activityStart && weekEnd < activityStart) {
-		console.log(`[FILTER] Activity is AFTER week - filtering out`);
 		return false;
 	}
-	
+
 	// Si la actividad se superpone con la semana, mostrar
-	console.log(`[FILTER] Activity OVERLAPS week - showing`);
 	return true;
 };
 

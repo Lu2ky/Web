@@ -178,6 +178,10 @@ export default function TaskEditModal({
         }
 
         onSave({ ...formData, tags: finalTags });
+        
+        // Disparar evento de onboarding después de guardar
+        window.dispatchEvent(new CustomEvent("onboarding:todo-edit-saved"));
+        
         setTagLabel('');
         onClose();
     };

@@ -102,8 +102,8 @@ const ONBOARDING_STEPS = [
 		description:
 			"En este modal defines nombre, fecha, hora, etiquetas y prioridad del recordatorio.",
 		targetSelector: "[data-onboarding-id='todo-add-modal']",
-		requiredAction: "todoAddTitleTyped",
-		requirementText: "Escribe el nombre del recordatorio en el modal.",
+		requiredAction: "todoAddSaved",
+		requirementText: "Crea y guarda el recordatorio en el modal.",
 		autoAdvance: true,
 		allowOpenUi: ["modal-todo-add"],
 		panelPosition: "top-right"
@@ -148,6 +148,9 @@ const ONBOARDING_STEPS = [
 		description:
 			"Aquí puedes ajustar nombre, fecha límite, prioridad y etiquetas del recordatorio.",
 		targetSelector: "[data-onboarding-id='todo-edit-modal']",
+		requiredAction: "todoEditSaved",
+		requirementText: "Guarda los cambios en el recordatorio.",
+		autoAdvance: true,
 		allowOpenUi: ["modal-todo-edit"],
 		panelPosition: "top-right"
 	},
@@ -168,6 +171,9 @@ const ONBOARDING_STEPS = [
 		description:
 			"Este modal reutiliza los datos del recordatorio para crear uno nuevo más rápido.",
 		targetSelector: "[data-onboarding-id='todo-duplicate-modal']",
+		requiredAction: "todoDuplicateSaved",
+		requirementText: "Guarda el recordatorio duplicado.",
+		autoAdvance: true,
 		allowOpenUi: ["modal-todo-duplicate"],
 		panelPosition: "top-right"
 	},
@@ -188,6 +194,9 @@ const ONBOARDING_STEPS = [
 		description:
 			"Aquí confirmas si deseas eliminar el recordatorio de forma permanente.",
 		targetSelector: "[data-onboarding-id='todo-delete-modal']",
+		requiredAction: "todoDeleted",
+		requirementText: "Confirma la eliminación del recordatorio.",
+		autoAdvance: true,
 		allowOpenUi: ["modal-todo-delete"],
 		panelPosition: "top-right"
 	},
@@ -239,6 +248,9 @@ const ONBOARDING_STEPS = [
 		description:
 			"Aquí puedes escribir y guardar comentarios para documentar seguimiento de la materia.",
 		targetSelector: "[data-onboarding-id='official-comment-modal']",
+		requiredAction: "officialCommentSaved",
+		requirementText: "Guarda el comentario en la materia.",
+		autoAdvance: true,
 		allowOpenUi: ["modal-official-card", "dropdown-official-comment"],
 		panelPosition: "top-right"
 	},
@@ -261,7 +273,8 @@ const ONBOARDING_STEPS = [
 		requiredAction: "academicPeriodOpened",
 		requirementText: "Haz clic en el botón de períodos académicos.",
 		autoAdvance: true,
-		allowOpenUi: ["dropdown-academic-period"]
+		allowOpenUi: ["dropdown-academic-period"],
+		panelPosition: "top-right"
 	},
 	{
 		id: "academic-period-dropdown",
@@ -393,7 +406,10 @@ export function OnboardingProvider({ children, userId }) {
 		emailSaved: false,
 		notificationsOpened: false,
 		todoAddOpened: false,
-		todoAddTitleTyped: false,
+		todoAddSaved: false,
+		todoEditSaved: false,
+		todoDuplicateSaved: false,
+		todoDeleted: false,
 		todoFilterOpened: false,
 		todoFilterApplied: false,
 		todoCardEditClicked: false,
@@ -408,10 +424,10 @@ export function OnboardingProvider({ children, userId }) {
 		addActivityOpened: false,
 		addActivityTitleTyped: false,
 		calendarFilterOpened: false,
-		calendarFilterOptionSelected: false
-		,
+		calendarFilterOptionSelected: false,
 		officialCardOpened: false,
-		officialCommentOpened: false
+		officialCommentOpened: false,
+		officialCommentSaved: false
 	});
 	const [validationMessage, setValidationMessage] = useState("");
 
@@ -439,7 +455,10 @@ export function OnboardingProvider({ children, userId }) {
 			emailSaved: false,
 			notificationsOpened: false,
 			todoAddOpened: false,
-			todoAddTitleTyped: false,
+			todoAddSaved: false,
+			todoEditSaved: false,
+			todoDuplicateSaved: false,
+			todoDeleted: false,
 			todoFilterOpened: false,
 			todoFilterApplied: false,
 			todoCardEditClicked: false,
@@ -456,7 +475,8 @@ export function OnboardingProvider({ children, userId }) {
 			calendarFilterOpened: false,
 			calendarFilterOptionSelected: false,
 			officialCardOpened: false,
-			officialCommentOpened: false
+			officialCommentOpened: false,
+			officialCommentSaved: false
 		});
 		setValidationMessage("");
 		setIsOpen(!isCompleted);
@@ -494,8 +514,23 @@ export function OnboardingProvider({ children, userId }) {
 			setValidationMessage("");
 		};
 
-		const handleTodoAddTitleTyped = () => {
-			setCompletedActions((prev) => ({ ...prev, todoAddTitleTyped: true }));
+		const handleTodoAddSaved = () => {
+			setCompletedActions((prev) => ({ ...prev, todoAddSaved: true }));
+			setValidationMessage("");
+		};
+
+		const handleTodoEditSaved = () => {
+			setCompletedActions((prev) => ({ ...prev, todoEditSaved: true }));
+			setValidationMessage("");
+		};
+
+		const handleTodoDuplicateSaved = () => {
+			setCompletedActions((prev) => ({ ...prev, todoDuplicateSaved: true }));
+			setValidationMessage("");
+		};
+
+		const handleTodoDeleted = () => {
+			setCompletedActions((prev) => ({ ...prev, todoDeleted: true }));
 			setValidationMessage("");
 		};
 
@@ -589,6 +624,11 @@ export function OnboardingProvider({ children, userId }) {
 			setValidationMessage("");
 		};
 
+		const handleOfficialCommentSaved = () => {
+			setCompletedActions((prev) => ({ ...prev, officialCommentSaved: true }));
+			setValidationMessage("");
+		};
+
 		window.addEventListener("onboarding:account-dropdown-opened", handleDropdownOpened);
 		window.addEventListener("onboarding:preferences-email-typed", handleEmailTyped);
 		window.addEventListener("onboarding:preferences-email-saved", handleEmailSaved);
@@ -596,7 +636,10 @@ export function OnboardingProvider({ children, userId }) {
 		window.addEventListener("onboarding:preferences-opened", handlePreferencesOpened);
 		window.addEventListener("onboarding:notifications-opened", handleNotificationsOpened);
 		window.addEventListener("onboarding:todo-add-opened", handleTodoAddOpened);
-		window.addEventListener("onboarding:todo-add-title-typed", handleTodoAddTitleTyped);
+		window.addEventListener("onboarding:todo-add-saved", handleTodoAddSaved);
+		window.addEventListener("onboarding:todo-edit-saved", handleTodoEditSaved);
+		window.addEventListener("onboarding:todo-duplicate-saved", handleTodoDuplicateSaved);
+		window.addEventListener("onboarding:todo-deleted", handleTodoDeleted);
 		window.addEventListener("onboarding:todo-filter-opened", handleTodoFilterOpened);
 		window.addEventListener("onboarding:todo-filter-applied", handleTodoFilterApplied);
 		window.addEventListener("onboarding:todo-card-edit-clicked", handleTodoCardEditClicked);
@@ -614,6 +657,7 @@ export function OnboardingProvider({ children, userId }) {
 		window.addEventListener("onboarding:calendar-filter-option-selected", handleCalendarFilterOptionSelected);
 		window.addEventListener("onboarding:official-card-opened", handleOfficialCardOpened);
 		window.addEventListener("onboarding:official-comment-opened", handleOfficialCommentOpened);
+		window.addEventListener("onboarding:official-comment-saved", handleOfficialCommentSaved);
 
 		return () => {
 			window.removeEventListener("onboarding:account-dropdown-opened", handleDropdownOpened);
@@ -623,7 +667,10 @@ export function OnboardingProvider({ children, userId }) {
 			window.removeEventListener("onboarding:preferences-opened", handlePreferencesOpened);
 			window.removeEventListener("onboarding:notifications-opened", handleNotificationsOpened);
 			window.removeEventListener("onboarding:todo-add-opened", handleTodoAddOpened);
-			window.removeEventListener("onboarding:todo-add-title-typed", handleTodoAddTitleTyped);
+			window.removeEventListener("onboarding:todo-add-saved", handleTodoAddSaved);
+			window.removeEventListener("onboarding:todo-edit-saved", handleTodoEditSaved);
+			window.removeEventListener("onboarding:todo-duplicate-saved", handleTodoDuplicateSaved);
+			window.removeEventListener("onboarding:todo-deleted", handleTodoDeleted);
 			window.removeEventListener("onboarding:todo-filter-opened", handleTodoFilterOpened);
 			window.removeEventListener("onboarding:todo-filter-applied", handleTodoFilterApplied);
 			window.removeEventListener("onboarding:todo-card-edit-clicked", handleTodoCardEditClicked);
@@ -641,6 +688,7 @@ export function OnboardingProvider({ children, userId }) {
 			window.removeEventListener("onboarding:calendar-filter-option-selected", handleCalendarFilterOptionSelected);
 			window.removeEventListener("onboarding:official-card-opened", handleOfficialCardOpened);
 			window.removeEventListener("onboarding:official-comment-opened", handleOfficialCommentOpened);
+			window.removeEventListener("onboarding:official-comment-saved", handleOfficialCommentSaved);
 		};
 	}, []);
 

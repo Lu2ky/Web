@@ -49,6 +49,9 @@ export const CommentButton = ({
         await Promise.resolve(on_add_comment(text_to_send));
       }
 
+      // Disparar evento de onboarding después de guardar el comentario
+      window.dispatchEvent(new CustomEvent("onboarding:official-comment-saved"));
+
       close_with_anim(() => {
         set_comment_text("");
       });

@@ -203,6 +203,14 @@ export default function TaskAddModal({
         console.log('[TaskAddModal] tags count:', finalTags.length, 'tags:', finalTags);
         try {
             await onSave(dataToSend);
+            
+            // Disparar evento de onboarding después de guardar
+            if (onboardingId === "todo-duplicate-modal") {
+                window.dispatchEvent(new CustomEvent("onboarding:todo-duplicate-saved"));
+            } else {
+                window.dispatchEvent(new CustomEvent("onboarding:todo-add-saved"));
+            }
+            
             setTagLabel('');
             setError('');
         } catch (saveError) {

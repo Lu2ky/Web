@@ -312,6 +312,9 @@ function ToDoList({ userId = "" }) {
         setTasks(prev => prev.filter(task => task.id !== taskToDelete?.id));
         setIsDeleteModalOpen(false);
         setTaskToDelete(null);
+        
+        // Disparar evento de onboarding después de eliminar
+        window.dispatchEvent(new CustomEvent("onboarding:todo-deleted"));
     };
 
     const handleCloseEditModal = () => {
