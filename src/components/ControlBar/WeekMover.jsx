@@ -5,7 +5,7 @@
 // Permite avanzar/retroceder semanas y muestra rango de fechas formateado.
 // ============================================================================
 
-import React, {useState} from "react";
+import React from "react";
 import "../../styles/WeekMover.css";
 
 // Calcula el inicio de la semana (lunes) para una fecha dada
@@ -45,8 +45,7 @@ function GetStartOfWeek(date) {
 		})}`;
 	}
 
-function WeekMover() {
-	const [weekOffset, setWeekOffset] = useState(0);
+function WeekMover({ weekOffset = 0, setWeekOffset = () => {} }) {
 	const today = new Date();
 	const startOfWeek = GetStartOfWeek(today);
 	const displayStart = new Date(startOfWeek);
@@ -54,31 +53,7 @@ function WeekMover() {
 	const displayEnd = new Date(displayStart);
 	displayEnd.setDate(displayEnd.getDate() + 6);
 
-	return (
-		<div className="navigatorContainer">
-			<button
-				className="dateBoxArrowBox"
-				onClick={() => setWeekOffset(weekOffset - 1)}
-				title="Semana anterior"
-				aria-label="Semana anterior"
-				type="button"
-			>
-				<span>←</span>
-			</button>
-
-			<div className="dateBoxCenterBox">
-				{FormatWeekRange(displayStart, displayEnd)}
-			</div>
-
-			<button
-				className="dateBoxArrowBox"
-				onClick={() => setWeekOffset(weekOffset + 1)}
-				title="Semana siguiente"
-				aria-label="Semana siguiente"
-				type="button"
-			>
-				<span>→</span>
-			</button>
+	return null;
 		</div>
 	);
 }

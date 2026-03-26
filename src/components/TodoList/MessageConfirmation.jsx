@@ -53,7 +53,7 @@ export default function MessageConfirmation({
 
     return (
         <div className="confirmacion-message-overlay" onClick={onClose}>
-            <div className="confirmacion-message-container" onClick={(e) => e.stopPropagation()}>
+            <div className="confirmacion-message-container" onClick={(e) => e.stopPropagation()} data-onboarding-id="todo-delete-modal">
                 {/* Barra decorativa */}
                 <div className="confirmacion-message-gradient-bar" />
                 
@@ -88,11 +88,23 @@ export default function MessageConfirmation({
 
                     {/* Botones de acción */}
                     <div className="confirmacion-message-actions">
-                        <button className="confirmacion-message-cancel-btn" onClick={onClose}>
+                        <button 
+                            className="confirmacion-message-cancel-btn" 
+                            onClick={onClose}
+                            title="Cancelar y cerrar"
+                            aria-label="Cancelar"
+                            type="button"
+                        >
                             {cancelText}
                         </button>
                         
-                        <button className="confirmacion-message-confirm-btn" onClick={onConfirm}>
+                        <button 
+                            className="confirmacion-message-confirm-btn" 
+                            onClick={onConfirm}
+                            title="Confirmar acción"
+                            aria-label="Confirmar"
+                            type="button"
+                        >
                             {confirmText}
                         </button>
                     </div>

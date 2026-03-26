@@ -20,11 +20,6 @@ export default function UserPreferences({ userId, onClose }) {
     const [anticipationMinutes, setAnticipationMinutes] = useState(0);
     const [isSavingAnticipation, setIsSavingAnticipation] = useState(false);
 
-    // Estado de edición de celular
-    const [isEditingCellphone, setIsEditingCellphone] = useState(false);
-    const [newCellphone, setNewCellphone] = useState("");
-    const [isSavingCellphone, setIsSavingCellphone] = useState(false);
-
     // Estado de silenciamiento de notificaciones
     const [isEditingMute, setIsEditingMute] = useState(false);
     const [muteInfo, setMuteInfo] = useState(null);
@@ -77,7 +72,6 @@ export default function UserPreferences({ userId, onClose }) {
                 const userData = Array.isArray(data) ? data[0] : data;
                 setUserData(userData);
                 setNewEmail(userData.email || userData.correo || "");
-                setNewCellphone(userData.telefono || userData.celular || "");
                 
                 // Extraer tiempo de anticipación desde 'antelacionNotis' (formato TIME: HH:MM:SS)
                 let totalMinutes = 0;
@@ -128,6 +122,7 @@ export default function UserPreferences({ userId, onClose }) {
         setIsEditingEmail(true);
         setError("");
         setSuccess("");
+        window.dispatchEvent(new CustomEvent("onboarding:preferences-email-edit-opened"));
     };
 
     const handleCancelEmail = () => {
@@ -138,6 +133,7 @@ export default function UserPreferences({ userId, onClose }) {
 
     const handleSaveEmail = async (e) => {
         e.preventDefault();
+        window.dispatchEvent(new CustomEvent("onboarding:preferences-email-saved"));
         setError("");
         setSuccess("");
 
@@ -288,63 +284,6 @@ export default function UserPreferences({ userId, onClose }) {
         }
     };
 
-    const handleEditCellphone = () => {
-        setIsEditingCellphone(true);
-        setError("");
-        setSuccess("");
-    };
-
-    const handleCancelCellphone = () => {
-        setIsEditingCellphone(false);
-        setNewCellphone(userData?.telefono || userData?.celular || "");
-        setError("");
-    };
-
-    const handleSaveCellphone = async (e) => {
-        e.preventDefault();
-        setError("");
-        setSuccess("");
-
-        const cellphoneToSave = newCellphone.trim();
-        
-        if (!cellphoneToSave) {
-            setError("Por favor ingresa un número de celular");
-            return;
-        }
-
-        const currentCellphone = userData?.telefono || userData?.celular || "";
-        if (cellphoneToSave === currentCellphone) {
-            setError("El número de celular nuevo debe ser diferente al actual");
-            return;
-        }
-
-        setIsSavingCellphone(true);
-
-        try {
-            const result = await userService.updateUserCellphone(userId, cellphoneToSave);
-
-            if (result && (result.success || result.status === "success" || result.ok === true)) {
-                setSuccess("Número de celular actualizado exitosamente");
-                setUserData({
-                    ...userData,
-                    telefono: cellphoneToSave,
-                    celular: cellphoneToSave
-                });
-                setIsEditingCellphone(false);
-                
-                // Limpiar mensaje de éxito después de 3 segundos
-                setTimeout(() => setSuccess(""), 3000);
-            } else {
-                setError(result?.message || "Error al actualizar el celular");
-            }
-        } catch (err) {
-            setError(err?.message || "Error al actualizar el celular");
-            console.error(err);
-        } finally {
-            setIsSavingCellphone(false);
-        }
-    };
-
     // Mute notifications handlers
     const handleEditMute = () => {
         setIsEditingMute(true);
@@ -424,6 +363,14 @@ export default function UserPreferences({ userId, onClose }) {
     }
 
     const currentEmail = userData?.email || userData?.correo || "No disponible";
+    const handleOnboardingEmailInput = (value) => {
+        setNewEmail(value);
+
+        const trimmedValue = String(value || "").trim();
+        if (trimmedValue && isValidEmail(trimmedValue)) {
+            window.dispatchEvent(new CustomEvent("onboarding:preferences-email-typed"));
+        }
+    };
 
     return (
         <div className="user-preferences">
@@ -431,18 +378,18 @@ export default function UserPreferences({ userId, onClose }) {
             {success && <div className="alert alert-success">{success}</div>}
 
             {/* Email Preferences Section */}
-            <section className="preferences-section">
+            <section className="preferences-section" data-onboarding-id="preferences-email-section">
                 <h3 className="preferences-section-title">Correo Electrónico</h3>
                 
                 <div className="pref-group">
                     <label className="pref-label">Correo Principal</label>
                     {isEditingEmail ? (
                         <form onSubmit={handleSaveEmail} className="email-edit-form">
-                            <div className="email-input-wrapper">
+                            <div className="email-input-wrapper" data-onboarding-id="preferences-email-input">
                                 <input
                                     type="email"
                                     value={newEmail}
-                                    onChange={(e) => setNewEmail(e.target.value)}
+                                    onChange={(e) => handleOnboardingEmailInput(e.target.value)}
                                     placeholder="nuevo.email@upb.edu"
                                     className="form-input email-input"
                                     disabled={isSavingEmail}
@@ -452,6 +399,7 @@ export default function UserPreferences({ userId, onClose }) {
                                     className="email-action-btn email-save-btn"
                                     disabled={isSavingEmail}
                                     title="Guardar"
+                                    data-onboarding-id="preferences-email-save-button"
                                 >
                                     <FaCheck />
                                 </button>
@@ -474,6 +422,7 @@ export default function UserPreferences({ userId, onClose }) {
                                 onClick={handleEditEmail}
                                 disabled={isSavingEmail}
                                 title="Editar correo"
+                                data-onboarding-id="preferences-email-edit-button"
                             >
                                 <FaEdit />
                             </button>
@@ -648,59 +597,6 @@ export default function UserPreferences({ userId, onClose }) {
                 </div>
             </section>
 
-            {/* Cellphone Preferences Section */}
-            <section className="preferences-section">
-                <h3 className="preferences-section-title">Número de Celular</h3>
-                
-                <div className="pref-group">
-                    <label className="pref-label">Celular Principal</label>
-                    <p className="pref-description">Actualiza tu número de celular para recibir notificaciones</p>
-                    
-                    {isEditingCellphone ? (
-                        <form onSubmit={handleSaveCellphone} className="cellphone-edit-form">
-                            <div className="cellphone-input-wrapper">
-                                <input
-                                    type="tel"
-                                    value={newCellphone}
-                                    onChange={(e) => setNewCellphone(e.target.value)}
-                                    placeholder="+57 3001234567"
-                                    className="form-input cellphone-input"
-                                    disabled={isSavingCellphone}
-                                />
-                                <button
-                                    type="submit"
-                                    className="email-action-btn email-save-btn"
-                                    disabled={isSavingCellphone}
-                                    title="Guardar"
-                                >
-                                    <FaCheck />
-                                </button>
-                                <button
-                                    type="button"
-                                    className="email-action-btn email-cancel-btn"
-                                    onClick={handleCancelCellphone}
-                                    disabled={isSavingCellphone}
-                                    title="Cancelar"
-                                >
-                                    <FaTimes />
-                                </button>
-                            </div>
-                        </form>
-                    ) : (
-                        <div className="cellphone-display-wrapper">
-                            <div className="pref-value">{userData?.telefono || userData?.celular || "No disponible"}</div>
-                            <button
-                                className="email-edit-button"
-                                onClick={handleEditCellphone}
-                                disabled={isSavingCellphone}
-                                title="Editar celular"
-                            >
-                                <FaEdit />
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </section>
         </div>
     );
 }

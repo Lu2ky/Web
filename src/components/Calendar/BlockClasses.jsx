@@ -44,7 +44,11 @@ export const BlockClasses = ({
     <div
       className={"activity-card" + (is_mounted ? " enter" : "")}
       style={{ ...style, backgroundColor: background_color, color: text_color, cursor: "pointer" }}
-      onClick={onClick}
+      data-onboarding-id="official-class-card"
+      onClick={() => {
+        window.dispatchEvent(new CustomEvent("onboarding:official-card-opened"));
+        onClick();
+      }}
     >
       <div className="activity-card-header">
         <div className="activity-card-left">

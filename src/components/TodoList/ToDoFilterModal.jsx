@@ -13,12 +13,14 @@ function ToDoFilterModal({ isOpen, onClose, onApply, initialFilters = defaultFil
     useEffect(() => {
         if (isOpen) {
             setFilters({ ...defaultFilters, ...initialFilters });
+            window.dispatchEvent(new CustomEvent("onboarding:todo-filter-modal-opened"));
         }
     }, [isOpen, initialFilters]);
 
     if (!isOpen) return null;
 
     const handleApply = () => {
+        window.dispatchEvent(new CustomEvent("onboarding:todo-filter-applied"));
         onApply({
             ...filters,
             tag: filters.tag.trim()
@@ -39,7 +41,7 @@ function ToDoFilterModal({ isOpen, onClose, onApply, initialFilters = defaultFil
             aria-modal="true"
             onClick={onClose}
         >
-            <div className="modalContainer" onClick={e => e.stopPropagation()}>
+            <div className="modalContainer" onClick={e => e.stopPropagation()} data-onboarding-id="todo-filter-modal">
                 <h2>Filtrar tareas</h2>
 
                 <button className="modalClose" onClick={onClose} title="Cerrar" aria-label="Cerrar" type="button">
@@ -90,10 +92,22 @@ function ToDoFilterModal({ isOpen, onClose, onApply, initialFilters = defaultFil
                 )}
 
                 <div className="modalActions">
-                    <button className="cancelButton" onClick={handleClear}>
+                    <button 
+                        className="cancelButton" 
+                        onClick={handleClear}
+                        title="Limpiar todos los filtros"
+                        aria-label="Limpiar filtros"
+                        type="button"
+                    >
                         Limpiar
                     </button>
-                    <button className="saveButton" onClick={handleApply}>
+                    <button 
+                        className="saveButton" 
+                        onClick={handleApply}
+                        title="Aplicar filtros seleccionados"
+                        aria-label="Aplicar filtros"
+                        type="button"
+                    >
                         Aplicar
                     </button>
                 </div>

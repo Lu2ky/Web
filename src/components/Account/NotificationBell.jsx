@@ -52,7 +52,27 @@ export default function NotificationBell({ userId }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const toggle = () => setIsOpen((prev) => !prev);
+    useEffect(() => {
+        const handleCloseUnrelatedUi = (event) => {
+            const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+            if (!allowOpenUi.includes("dropdown-notifications")) {
+                setIsOpen(false);
+            }
+        };
+
+        window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+        return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+    }, []);
+
+    const toggle = () => {
+        setIsOpen((prev) => {
+            const nextState = !prev;
+            if (nextState) {
+                window.dispatchEvent(new CustomEvent("onboarding:notifications-opened"));
+            }
+            return nextState;
+        });
+    };
 
     const unreadCount = notifications.filter(n => !n.read && !n.completed).length;
 
@@ -66,7 +86,7 @@ export default function NotificationBell({ userId }) {
     };
 
     return (
-        <div className="notification-bell-container" ref={containerRef}>
+        <div className="notification-bell-container" ref={containerRef} data-onboarding-id="notification-bell">
             <button
                 className="notification-bell-button"
                 onClick={toggle}
@@ -91,7 +111,7 @@ export default function NotificationBell({ userId }) {
             </button>
 
             {isOpen && (
-                <ul className="notification-dropdown" role="menu">
+                <ul className="notification-dropdown" role="menu" data-onboarding-id="notification-dropdown">
                     {notifications.length > 0 ? (
                         notifications.map((n, idx) => (
                             <li 

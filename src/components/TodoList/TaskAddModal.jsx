@@ -12,7 +12,9 @@ export default function TaskAddModal({
     title = "Nueva Tarea",
     userId,
     availableTags = [],
-    task = null // Propiedad para recibir la tarea a duplicar
+    task = null,
+    onboardingId,
+    onboardingNameTypedEvent
 }) {
     const [formData, setFormData] = useState({
         name: '',
@@ -143,6 +145,9 @@ export default function TaskAddModal({
     // useEffect modificado para precargar datos cuando es duplicado
     useEffect(() => {
         if (isOpen) {
+            if (onboardingId === "todo-duplicate-modal") {
+                window.dispatchEvent(new CustomEvent("onboarding:todo-card-duplicate-clicked"));
+            }
             setTagLabel('');
             setTagType('custom');
             
@@ -198,6 +203,14 @@ export default function TaskAddModal({
         console.log('[TaskAddModal] tags count:', finalTags.length, 'tags:', finalTags);
         try {
             await onSave(dataToSend);
+            
+            // Disparar evento de onboarding después de guardar
+            if (onboardingId === "todo-duplicate-modal") {
+                window.dispatchEvent(new CustomEvent("onboarding:todo-duplicate-saved"));
+            } else {
+                window.dispatchEvent(new CustomEvent("onboarding:todo-add-saved"));
+            }
+            
             setTagLabel('');
             setError('');
         } catch (saveError) {
@@ -252,7 +265,11 @@ export default function TaskAddModal({
                 onClose();
             }}
         >
-            <div className="modalContainer" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="modalContainer"
+                onClick={(e) => e.stopPropagation()}
+                data-onboarding-id={onboardingId}
+            >
                 <h2>{title}</h2>
 
                 <button
@@ -275,7 +292,12 @@ export default function TaskAddModal({
                     name="name"
                     placeholder="Nombre del recordatorio"
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) => {
+                        setFormData(prev => ({ ...prev, name: e.target.value }));
+                        if (onboardingNameTypedEvent && String(e.target.value || "").trim()) {
+                            window.dispatchEvent(new CustomEvent(onboardingNameTypedEvent));
+                        }
+                    }}
                     required
                 />
 
@@ -362,6 +384,8 @@ export default function TaskAddModal({
                                     priority: prev.priority === level ? "" : level
                                 }))
                             }
+                            title={`Establecer prioridad como ${level}`}
+                            aria-label={`Prioridad ${level}`}
                         >
                             {level.charAt(0).toUpperCase() + level.slice(1)}
                         </button>
@@ -379,8 +403,7 @@ export default function TaskAddModal({
                                         type="button"
                                         className="tagChipRemove"
                                         onClick={() => handleRemoveTag(tag)}
-                                        aria-label={`Quitar ${tag.label}`}
-                                    >
+                                        aria-label={`Quitar ${tag.label}`}                                        title={`Quitar etiqueta ${tag.label}`}                                    >
                                         ✕
                                     </button>
                                 </span>
@@ -431,6 +454,9 @@ export default function TaskAddModal({
                             setShowCalendar(false);
                             onClose();
                         }}
+                        type="button"
+                        title="Cancelar y descartar cambios"
+                        aria-label="Cancelar"
                     >
                         Cancelar
                     </button>
@@ -439,6 +465,9 @@ export default function TaskAddModal({
                         className="saveButton"
                         onClick={handleSave}
                         disabled={!formData.name.trim()}
+                        type="button"
+                        title="Guardar recordatorio"
+                        aria-label="Guardar"
                     >
                         Guardar
                     </button>
@@ -481,7 +510,8 @@ export default function TaskAddModal({
                                 <div className="tagDropdownItemActions">
                                     <button
                                         className="tagActionBtn tagActionEdit"
-                                        title="Editar"
+                                        title="Editar etiqueta"
+                                        aria-label="Editar etiqueta"
                                         onMouseDown={(e) => {
                                             e.stopPropagation();
                                             e.preventDefault();

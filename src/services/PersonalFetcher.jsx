@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import LoadingModal from "./loadingModal";
+import LoadingModal from "./LoadingModal";
 import { getUserData } from "./userService";
 
 // Mapa para convertir números de día a nombres de días
@@ -252,9 +252,10 @@ function normalizePersonalData(apiData) {
 // Propiedades:
 //   - onDataLoaded: Función que recibe datos normalizados
 //   - userId: ID del usuario para obtener su horario personal
+//   - academicPeriod: { id, nombre } del período académico a filtrar, null = todos
 // ============================================================================
 
-function PersonalFetcher({ onDataLoaded, userId }) {
+function PersonalFetcher({ onDataLoaded, userId, academicPeriod }) {
   const [loading, setLoading] = useState(true); // Indica si la API está cargando
   const [apiData, setApiData] = useState([]); // Almacena los datos de la API
 
@@ -274,7 +275,14 @@ function PersonalFetcher({ onDataLoaded, userId }) {
     const fetchData = async () => {
       // Función asincrona para cargar datos
       setLoading(true); // Activar estado de carga
-      const url = `${baseUrl}${userId}`;
+      
+      // Construir URL con parámetros: userId y opcionalmente periodId
+      let url = `${baseUrl}${userId}`;
+      if (academicPeriod && academicPeriod.id) {
+        url += `?academicPeriod=${encodeURIComponent(academicPeriod.id)}`;
+      }
+      
+      console.log("Fetching personal schedule:", url);
       try {
         const response = await fetch(url);
         
@@ -337,7 +345,7 @@ function PersonalFetcher({ onDataLoaded, userId }) {
     };
 
     fetchData(); //Llama a fetchData para iniciar la carga de datos
-  }, [onDataLoaded, userId]); // en caso de que cambie el ID o onDataLoaded
+  }, [onDataLoaded, userId, academicPeriod]); // Re-fetch si cambia el período, ID o onDataLoaded
 
   if (loading) {
     //Mientras se cargan los datos, muestra un mensaje de carga

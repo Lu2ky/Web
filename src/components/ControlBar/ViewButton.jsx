@@ -14,7 +14,7 @@ function ViewButton({viewMode, setViewMode}) {
 	const selected = options.indexOf(viewMode);
 
 	return (
-		<div className="segmented">
+		<div className="segmented" data-onboarding-id="view-toggle">
 			<div
 				className="indicator"
 				style={{transform: `translateX(${selected * 100}%)`}}
@@ -23,7 +23,10 @@ function ViewButton({viewMode, setViewMode}) {
 				<button
 					key={option}
 					className={index === selected ? "active" : ""}
-					onClick={() => setViewMode(option)}
+					onClick={() => {
+						setViewMode(option);
+						window.dispatchEvent(new CustomEvent("onboarding:view-changed"));
+					}}
 					title={`Vista ${option}`}
 					type="button"
 				>

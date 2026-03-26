@@ -195,7 +195,12 @@ export const PopUpPersonal = ({
 
         {/* Footer */}
         <div className="popup-footer">
-          <button className="close-button" onClick={handle_close}>
+          <button 
+            className="close-button" 
+            onClick={handle_close}
+            title="Cerrar ventana de detalle"
+            aria-label="Cerrar"
+          >
             Cerrar Detalle
           </button>
         </div>

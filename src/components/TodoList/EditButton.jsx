@@ -3,7 +3,8 @@ import "../../styles/EditButton.css";
 export default function EditButton({
 	onClick  = () => {},
 	title = "Editar",
-	className = ""
+	className = "",
+	dataOnboardingId
 }) {
 	return (
 		<button
@@ -12,6 +13,7 @@ export default function EditButton({
 			title={title}
 			aria-label={title}
 			type="button"
+			data-onboarding-id={dataOnboardingId}
 		>
 			<svg
 				width="48"

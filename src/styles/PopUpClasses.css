@@ -389,6 +389,7 @@
   font-weight: 600;
 }
 
+.edit-comment-button,
 .delete-comment-button {
   background: none;
   border: none;
@@ -402,9 +403,29 @@
   transition: all 0.2s ease;
 }
 
+.edit-comment-button:hover {
+  color: #0f766e;
+  background-color: #ecfeff;
+}
+
 .delete-comment-button:hover {
   color: #ff006e;
   background-color: #fff5f9;
+}
+
+.edit-comment-button:disabled,
+.delete-comment-button:disabled,
+.add-comment-button:disabled,
+.add-comment-action-button:disabled,
+.add-comment-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.edit-comment-button.is-loading,
+.delete-comment-button.is-loading {
+  background-color: #f3f4f6;
 }
 
 .delete-comment-button:active {
@@ -473,8 +494,14 @@
   transform: translateY(-2px);
 }
 
+.add-comment-button:disabled:hover {
+  box-shadow: none;
+  transform: none;
+}
+
 .add-comment-button:focus-visible,
 .add-comment-action-button:focus-visible,
+.edit-comment-button:focus-visible,
 .delete-comment-button:focus-visible {
   outline: 2px solid #c026d3;
   outline-offset: 2px;

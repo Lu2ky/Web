@@ -15,7 +15,12 @@ function ModalArchivo({ label, accept = '*', onFiles }) {
 
   return (
     <div className="upload-button" onClick={triggerFileDialog}>
-      <button type="button" className="cta">
+      <button 
+        type="button" 
+        className="cta"
+        title={label}
+        aria-label={label}
+      >
         {label}
       </button>
       <input

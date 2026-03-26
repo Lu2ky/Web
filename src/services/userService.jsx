@@ -147,14 +147,10 @@ export async function updateUserEmail(userId, newEmail) {
         currentTimeMute = "00:00:00";
     }
 
-    const currentPhone = currentUser?.cellphoneDisplay ? currentUser.cellphoneDisplay.trim() : null;
-    console.log("Current telefono:", currentPhone);
-
     const payload = {
         idUsuario: actualUserId,
         correo: newEmail.trim(),
-        tiempoMute: currentTimeMute,
-        telefono: currentPhone
+        tiempoMute: currentTimeMute
     };
 
     try {
@@ -317,14 +313,10 @@ export async function updateReminderAnticipation(userId, minutes) {
     const currentEmail = (currentUser?.correo || currentUser?.email || "").trim();
     console.log("Current email:", currentEmail);
 
-    const currentPhone = currentUser?.cellphoneDisplay ? currentUser.cellphoneDisplay.trim() : null;
-    console.log("Current telefono:", currentPhone);
-
     const payload = {
         idUsuario: actualUserId,
         correo: currentEmail,
-        tiempoMute: tiempoMute,
-        telefono: currentPhone
+        tiempoMute: tiempoMute
     };
 
     try {
@@ -363,98 +355,4 @@ export async function updateReminderAnticipation(userId, minutes) {
     }
 }
 
-/**
- * Actualiza el número de celular del usuario
- * @param {number|string} userId - ID del usuario
- * @param {string} cellphone - Número de celular
- * @returns {Promise<object|null>} Resultado de la actualización o null
- */
-export async function updateUserCellphone(userId, cellphone) {
-    if (!userId || !cellphone) {
-        console.warn("updateUserCellphone: userId and cellphone are required");
-        return null;
-    }
-
-    if (!CONFIG_NOTIFICATION_ENDPOINT) {
-        const message = "Falta configurar VITE_API_UPDATE_USER_CELLPHONE para guardar el celular";
-        console.error(message);
-        return { success: false, message };
-    }
-
-    // Obtener datos actuales para recuperar correo, tiempoMute e idUsuario real desde BD
-    const currentData = await getUserData(userId);
-    console.log("Current user data received:", currentData);
-
-    const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
-    console.log("Current user object:", currentUser);
-
-    if (!currentUser) {
-        console.error("No user data found for userId:", userId);
-        return { success: false, message: "No se encontraron datos del usuario" };
-    }
-
-    // Usar el idUsuario real de la base de datos, no el pasado por parámetro
-    const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
-    console.log("Using actualUserId from DB:", actualUserId);
-
-    const currentEmail = (currentUser?.correo || currentUser?.email || "").trim();
-    console.log("Current email:", currentEmail);
-
-    // Obtener tiempoMute intentando múltiples nombres de campo
-    let currentTimeMute = currentUser?.antelacionNotis ||
-        currentUser?.tiempoMute ||
-        currentUser?.anticipationTime ||
-        "00:00:00";
-
-    console.log("Current tiempoMute:", currentTimeMute);
-
-    // Validar formato de tiempoMute (debe ser HH:MM:SS)
-    if (typeof currentTimeMute !== 'string' || !currentTimeMute.includes(':')) {
-        console.warn("tiempoMute format invalid, using default");
-        currentTimeMute = "00:00:00";
-    }
-
-    const payload = {
-        idUsuario: actualUserId,
-        correo: currentEmail,
-        tiempoMute: currentTimeMute,
-        telefono: cellphone.trim()
-    };
-
-    try {
-        console.log("Updating cellphone with payload:", payload);
-        console.log("Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
-
-        const res = await fetch(CONFIG_NOTIFICATION_ENDPOINT, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-        });
-
-        console.log("Response status:", res.status);
-        const contentType = res.headers.get("content-type") || "";
-        const body = contentType.includes("application/json") ? await res.json() : await res.text();
-        console.log("Response body:", body);
-
-        // Verificar si el servidor retornó success: false en el cuerpo (incluso con status 200)
-        if (typeof body === 'object' && body.success === false) {
-            console.error("Backend returned success: false -", body.message);
-            return { success: false, message: body.message || "El servidor rechazó la actualización" };
-        }
-
-        if (!res.ok) {
-            const message = typeof body === "string" ? body : body?.message;
-            console.error(`updateUserCellphone HTTP ${res.status}:`, message);
-            return { success: false, message: `HTTP ${res.status} - ${message}` };
-        }
-
-        return typeof body === "string" ? { success: true, message: body } : body;
-    } catch (error) {
-        console.error("Error updating user cellphone:", error);
-        return { success: false, message: error?.message || "No se pudo actualizar el celular" };
-    }
-}
-
-export default { getUserData, updateUserEmail, changePassword, updateReminderAnticipation, updateUserCellphone };
+export default { getUserData, updateUserEmail, changePassword, updateReminderAnticipation };

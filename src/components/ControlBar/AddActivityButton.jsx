@@ -154,9 +154,29 @@ function AddActivityButton({ userId, onActivityAdd }) {
         return () => document.removeEventListener("keydown", handleEsc);
     }, [isOpen]);
 
+    useEffect(() => {
+        const handleCloseUnrelatedUi = (event) => {
+            const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+            if (!allowOpenUi.includes("modal-add-activity")) {
+                closeModal();
+            }
+        };
+
+        window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+        return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+    }, []);
+
     return (
         <>
-            <button className="addButton" onClick={() => setIsOpen(true)} type="button">
+            <button
+                className="addButton"
+                onClick={() => {
+                    setIsOpen(true);
+                    window.dispatchEvent(new CustomEvent("onboarding:add-activity-opened"));
+                }}
+                type="button"
+                data-onboarding-id="add-activity-button"
+            >
                 Agregar actividad
             </button>
 
@@ -170,6 +190,7 @@ function AddActivityButton({ userId, onActivityAdd }) {
                 >
                     <div
                         className="modalContainer"
+                        data-onboarding-id="add-activity-modal"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <h2>Nueva Actividad</h2>
@@ -184,7 +205,12 @@ function AddActivityButton({ userId, onActivityAdd }) {
                             name="title"
                             placeholder="Título"
                             value={formData.title}
-                            onChange={handleChange}
+                            onChange={(e) => {
+                                handleChange(e);
+                                if (String(e.target.value || "").trim()) {
+                                    window.dispatchEvent(new CustomEvent("onboarding:add-activity-title-typed"));
+                                }
+                            }}
                             required
                         />
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import "../../styles/addButton.css";
 import { saveToDo } from "../../services/todoService"; // respaldo local
 import ReminderService from "../../services/reminderService";
@@ -8,6 +9,18 @@ import TaskAddModal from "./TaskAddModal";
 
 function AddButton({ onToDoSaved, userId, availableTags = [] }) {
     const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        const handleCloseUnrelatedUi = (event) => {
+            const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+            if (!allowOpenUi.includes("modal-todo-add")) {
+                setIsOpen(false);
+            }
+        };
+
+        window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+        return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+    }, []);
 
     const handleAddSave = async (data) => {
         console.log('[AddButton] handleAddSave received data:', JSON.stringify(data, null, 2));
@@ -71,10 +84,14 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
         <>
             <button
                 className="addButton"
-                onClick={() => setIsOpen(true)}
+                onClick={() => {
+                    setIsOpen(true);
+                    window.dispatchEvent(new CustomEvent("onboarding:todo-add-opened"));
+                }}
                 title="Agregar tarea"
                 aria-label="Agregar tarea"
                 type="button"
+                data-onboarding-id="todo-add-button"
             />
 
             <TaskAddModal
@@ -83,6 +100,8 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
                 onSave={handleAddSave}
                 userId={userId}
                 availableTags={availableTags}
+                onboardingId="todo-add-modal"
+                onboardingNameTypedEvent="onboarding:todo-add-title-typed"
             />
         </>
     );

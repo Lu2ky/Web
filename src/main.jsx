@@ -1,6 +1,6 @@
 // Librerias para manejo de rutas y renderizado
 import ReactDOM from "react-dom/client";
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route, useParams } from "react-router-dom";
 // Componentes de la aplicación
 import LogInForm from "./LogInForm";
 import App from "./App"; 
@@ -11,6 +11,7 @@ import TokenPassword from "./TokenPassword";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicOnlyRoute from "./routes/PublicOnlyRoute";
 import { SessionTimeoutManager } from "./components/SessionTimeoutManager";
+import { OnboardingProvider } from "./context/OnboardingContext";
 import { getSessionConfig } from "./config/sessionConfig";
 import { ROLE_ADMIN_UPB_PLANNER, ROLE_USUARIOS } from "./services/authSession";
 
@@ -23,6 +24,16 @@ import "./styles/SessionTimeoutModal.css";
 // Routes es un contenedor que evalúa las rutas definidas y renderiza el componente correspondiente
 // SessionTimeoutManager envuelve el router para gestionar la sesión idle timeout
 const sessionConfig = getSessionConfig();
+
+function AppWithOnboarding() {
+	const { userId } = useParams();
+
+	return (
+		<OnboardingProvider userId={userId}>
+			<App />
+		</OnboardingProvider>
+	);
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render( 
 	<HashRouter>
@@ -41,7 +52,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 				<Route path="/RecoverPassword" element={<RecoverPassword />} />
 				{/* Protegida solo para Usuarios: sesión + userId URL debe coincidir */}
 				<Route element={<ProtectedRoute requireMatchingUser={true} allowedRoles={[ROLE_USUARIOS]} />}>
-					<Route path="/App/:userId" element={<App />} />
+					<Route path="/App/:userId" element={<AppWithOnboarding />} />
 				</Route>
 				{/* Protegida solo para admin_upb_planner */}
 				<Route element={<ProtectedRoute allowedRoles={[ROLE_ADMIN_UPB_PLANNER]} />}>

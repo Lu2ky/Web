@@ -98,7 +98,7 @@
 .eventsLayer-day {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 5rem;
     right: 0;
     bottom: 0;
     pointer-events: none;
@@ -114,7 +114,7 @@
 .hourRow {
     display: grid;
     grid-template-columns: 5rem 1fr;
-    min-height: 4rem;
+    height: 4rem;
     border-bottom: 1px solid #f3f4f6;
 }
 
@@ -125,11 +125,14 @@
     border-right: 1px solid #e5e7eb;
     display: flex;
     align-items: flex-start;
+    height: 4rem;
+    box-sizing: border-box;
 }
 
 .dayCell-day {
     position: relative;
-    min-height: 4rem;
+    height: 4rem;
+    box-sizing: border-box;
 }
 
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserProfile from "./UserProfile";
@@ -17,6 +17,10 @@ describe("UserProfile - cambio de contrasena", () => {
             semestreActual: "7",
             programa: "Ingenieria",
         });
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
     });
 
     async function completarFormularioContrasena(user, values) {
@@ -144,5 +148,97 @@ describe("UserProfile - cambio de contrasena", () => {
         });
 
         expect(await screen.findByText(/Error al cambiar la contrase.a/i)).toBeInTheDocument();
+    });
+
+    it("muestra validacion cuando falta la contrasena actual", async () => {
+        const user = userEvent.setup();
+        render(<UserProfile userId={123} onClose={() => {}} />);
+
+        await screen.findByRole("button", { name: /Cambiar Contrase.a/i });
+
+        await user.type(screen.getByLabelText(/^Nueva Contrase.a$/i), "Nueva#123");
+        await user.type(screen.getByLabelText(/^Confirmar Nueva Contrase.a$/i), "Nueva#123");
+        await user.click(screen.getByRole("button", { name: /Cambiar Contrase.a/i }));
+
+        expect(userService.changePassword).not.toHaveBeenCalled();
+        expect(screen.getByText(/Por favor ingresa tu contrase.a actual/i)).toBeInTheDocument();
+    });
+
+    it("muestra validacion cuando falta la nueva contrasena", async () => {
+        const user = userEvent.setup();
+        render(<UserProfile userId={123} onClose={() => {}} />);
+
+        await screen.findByRole("button", { name: /Cambiar Contrase.a/i });
+
+        await user.type(screen.getByLabelText(/Contrase.a Actual/i), "Actual#123");
+        await user.type(screen.getByLabelText(/^Confirmar Nueva Contrase.a$/i), "Nueva#123");
+        await user.click(screen.getByRole("button", { name: /Cambiar Contrase.a/i }));
+
+        expect(userService.changePassword).not.toHaveBeenCalled();
+        expect(screen.getByText(/Por favor ingresa una nueva contrase.a/i)).toBeInTheDocument();
+    });
+
+    it("muestra validacion cuando falta confirmar la nueva contrasena", async () => {
+        const user = userEvent.setup();
+        render(<UserProfile userId={123} onClose={() => {}} />);
+
+        await screen.findByRole("button", { name: /Cambiar Contrase.a/i });
+
+        await user.type(screen.getByLabelText(/Contrase.a Actual/i), "Actual#123");
+        await user.type(screen.getByLabelText(/^Nueva Contrase.a$/i), "Nueva#123");
+        await user.click(screen.getByRole("button", { name: /Cambiar Contrase.a/i }));
+
+        expect(userService.changePassword).not.toHaveBeenCalled();
+        expect(screen.getByText(/Por favor confirma la nueva contrase.a/i)).toBeInTheDocument();
+    });
+
+    it("deshabilita formulario mientras se procesa el cambio", async () => {
+        let resolveRequest;
+        userService.changePassword.mockImplementation(
+            () => new Promise((resolve) => {
+                resolveRequest = resolve;
+            })
+        );
+
+        const user = userEvent.setup();
+        render(<UserProfile userId={123} onClose={() => {}} />);
+
+        await screen.findByRole("button", { name: /Cambiar Contrase.a/i });
+
+        await completarFormularioContrasena(user, {
+            current: "Actual#123",
+            newPassword: "Nueva#123",
+            confirm: "Nueva#123",
+        });
+
+        expect(screen.getByRole("button", { name: /Actualizando/i })).toBeDisabled();
+        expect(screen.getByLabelText(/Contrase.a Actual/i)).toBeDisabled();
+        expect(screen.getByLabelText(/^Nueva Contrase.a$/i)).toBeDisabled();
+        expect(screen.getByLabelText(/^Confirmar Nueva Contrase.a$/i)).toBeDisabled();
+
+        resolveRequest({ success: true });
+
+        await waitFor(() => {
+            expect(screen.getByRole("button", { name: /Cambiar Contrase.a/i })).toBeEnabled();
+        });
+    });
+
+    it("programa limpieza del mensaje de exito a los 3 segundos", async () => {
+        const timeoutSpy = vi.spyOn(globalThis, "setTimeout");
+        userService.changePassword.mockResolvedValue({ success: true });
+
+        const user = userEvent.setup();
+        render(<UserProfile userId={123} onClose={() => {}} />);
+
+        await screen.findByRole("button", { name: /Cambiar Contrase.a/i });
+
+        await completarFormularioContrasena(user, {
+            current: "Actual#123",
+            newPassword: "Nueva#123",
+            confirm: "Nueva#123",
+        });
+
+        expect(await screen.findByText(/Contrase.a cambiada exitosamente/i)).toBeInTheDocument();
+        expect(timeoutSpy).toHaveBeenCalledWith(expect.any(Function), 3000);
     });
 });

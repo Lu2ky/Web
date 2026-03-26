@@ -43,6 +43,38 @@ const getTaskPriority = task => {
     return "";
 };
 
+const parseDueDateForFilter = value => {
+    if (!value) return null;
+    if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? null : value;
+    }
+
+    const raw = String(value).trim();
+    if (!raw) return null;
+
+    const dateOnly = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dateOnly) {
+        const year = Number(dateOnly[1]);
+        const month = Number(dateOnly[2]) - 1;
+        const day = Number(dateOnly[3]);
+        return new Date(year, month, day, 23, 59, 59, 999);
+    }
+
+    const dateTime = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (dateTime) {
+        const year = Number(dateTime[1]);
+        const month = Number(dateTime[2]) - 1;
+        const day = Number(dateTime[3]);
+        const hour = Number(dateTime[4]);
+        const minute = Number(dateTime[5]);
+        const second = Number(dateTime[6] || 0);
+        return new Date(year, month, day, hour, minute, second);
+    }
+
+    const parsed = new Date(raw.replace(" ", "T"));
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
 function ToDoList({ userId = "" }) {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [tasks, setTasks] = useState(initialTasks);
@@ -76,10 +108,40 @@ function ToDoList({ userId = "" }) {
         loadReminderTasks();
     }, [loadReminderTasks]);
 
+    useEffect(() => {
+        const handleCloseUnrelatedUi = (event) => {
+            const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+
+            if (!allowOpenUi.includes("modal-todo-filter")) {
+                setIsFilterModalOpen(false);
+            }
+            if (!allowOpenUi.includes("modal-todo-edit")) {
+                setIsEditModalOpen(false);
+                setTaskToEdit(null);
+            }
+            if (!allowOpenUi.includes("modal-todo-delete")) {
+                setIsDeleteModalOpen(false);
+                setTaskToDelete(null);
+            }
+            if (!allowOpenUi.includes("modal-todo-duplicate")) {
+                setIsDuplicateModalOpen(false);
+                setTaskToDuplicate(null);
+            }
+        };
+
+        window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+        return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+    }, []);
+
     const [availableTags, setAvailableTags] = useState([]);
 
     const filteredTasks = useMemo(() => {
+        const now = new Date();
+
         return tasks.filter(task => {
+            const dueDate = parseDueDateForFilter(task.dueDate);
+            const dueDateMatches = !dueDate || dueDate >= now;
+
             const statusMatches =
                 activeFilters.status === "all" ||
                 (activeFilters.status === "completed" && task.completed) ||
@@ -98,7 +160,7 @@ function ToDoList({ userId = "" }) {
                         .includes(normalizedTagFilter)
                 );
 
-            return statusMatches && priorityMatches && tagMatches;
+            return dueDateMatches && statusMatches && priorityMatches && tagMatches;
         });
     }, [tasks, activeFilters]);
 
@@ -250,6 +312,9 @@ function ToDoList({ userId = "" }) {
         setTasks(prev => prev.filter(task => task.id !== taskToDelete?.id));
         setIsDeleteModalOpen(false);
         setTaskToDelete(null);
+        
+        // Disparar evento de onboarding después de eliminar
+        window.dispatchEvent(new CustomEvent("onboarding:todo-deleted"));
     };
 
     const handleCloseEditModal = () => {
@@ -338,6 +403,7 @@ function ToDoList({ userId = "" }) {
                     title={taskToDuplicate ? "Duplicar Tarea" : "Nueva Tarea"}
                     userId={userId}
                     availableTags={availableTags}
+                    onboardingId="todo-duplicate-modal"
                 />
 
                 <TaskEditModal

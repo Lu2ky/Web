@@ -7,7 +7,7 @@
  * Uso:
  * <SessionTimeoutManager 
  *   timeoutMinutes={15}
- *   warningMinutes={2}
+ *   warningMinutes={10}
  *   children={<ProtectedRoutes />}
  * />
  */
@@ -19,13 +19,17 @@ import { useIdleTimeout } from '../hooks/useIdleTimeout';
 
 export function SessionTimeoutManager({ 
   children, 
-  timeoutMinutes = 2,
-  warningMinutes = 1,
+  timeoutMinutes = 15,
+  warningMinutes = 10,
   showWarningModal = true,
 }) {
   const navigate = useNavigate();
   const [showTimeout, setShowTimeout] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(warningMinutes * 60);
+  const safeTimeoutMinutes = Math.max(0, timeoutMinutes);
+  const safeWarningMinutes = Math.max(0, Math.min(warningMinutes, safeTimeoutMinutes));
+  const warningTriggerMinutes = safeWarningMinutes;
+  const warningWindowSeconds = Math.max(0, (safeTimeoutMinutes - safeWarningMinutes) * 60);
+  const [timeRemaining, setTimeRemaining] = useState(warningWindowSeconds);
 
   // Aplicar timeout solo si el usuario está autenticado
   const isUserAuthenticated = isAuthenticated();
@@ -42,14 +46,24 @@ export function SessionTimeoutManager({
     navigate('/', { replace: true });
   }, [navigate]);
 
-  // Calcular cuándo mostrar aviso (timeoutMinutes - warningMinutes)
-  const warningTriggerMinutes = timeoutMinutes - warningMinutes;
+  const handleWarningTimeout = useCallback(() => {
+    if (!showWarningModal || safeWarningMinutes <= 0) return;
+    setShowTimeout(true);
+    setTimeRemaining(warningWindowSeconds);
+  }, [showWarningModal, safeWarningMinutes, warningWindowSeconds]);
 
   // Usar utilidad de timeout por inactividad
   const { reset: resetIdleTimer } = useIdleTimeout(
-    timeoutMinutes,
+    safeTimeoutMinutes,
     handleSessionTimeout,
     isUserAuthenticated
+  );
+
+  // Timer de aviso de timeout, sincronizado con actividad del usuario
+  const { reset: resetWarningTimer } = useIdleTimeout(
+    warningTriggerMinutes,
+    handleWarningTimeout,
+    isUserAuthenticated && showWarningModal && safeWarningMinutes > 0
   );
 
   // Llevar control del tiempo restante para mostrar en el aviso
@@ -66,23 +80,12 @@ export function SessionTimeoutManager({
     return () => clearInterval(countdownInterval);
   }, [showTimeout, isUserAuthenticated]);
 
-  // Configurar temporizador de aviso (cuando el usuario está autenticado)
-  useEffect(() => {
-    if (!isUserAuthenticated || !showWarningModal) return;
-
-    let warningTimeoutId = setTimeout(() => {
-      setShowTimeout(true);
-      setTimeRemaining(warningMinutes * 60);
-    }, warningTriggerMinutes * 60 * 1000);
-
-    return () => clearTimeout(warningTimeoutId);
-  }, [isUserAuthenticated, warningTriggerMinutes, warningMinutes, showWarningModal]);
-
   // Manejar cuando el usuario decide mantenerse conectado
   const handleStayLoggedIn = useCallback(() => {
     setShowTimeout(false);
     resetIdleTimer();
-  }, [resetIdleTimer]);
+    resetWarningTimer();
+  }, [resetIdleTimer, resetWarningTimer]);
 
   // Formatear segundos a MM:SS
   const formatTime = (seconds) => {
@@ -134,12 +137,18 @@ function TimeoutWarningModal({ timeRemaining, onStayLoggedIn, onLogout, formatTi
           <button 
             className="session-timeout-btn session-timeout-stay"
             onClick={onStayLoggedIn}
+            title="Continuar con la sesión activa"
+            aria-label="Mantener sesión"
+            type="button"
           >
             Mantener Sesión
           </button>
           <button 
             className="session-timeout-btn session-timeout-logout"
             onClick={onLogout}
+            title="Cerrar sesión actual"
+            aria-label="Cerrar sesión"
+            type="button"
           >
             Cerrar Sesión
           </button>

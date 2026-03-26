@@ -36,6 +36,7 @@ export const ThemeSelector = ({ onThemeChange }) => {
             }, MODAL_CLOSE_DURATION);
         } else {
             set_is_modal_open(true);
+            window.dispatchEvent(new CustomEvent("onboarding:theme-selector-opened"));
         }
     };
 
@@ -93,6 +94,19 @@ export const ThemeSelector = ({ onThemeChange }) => {
         };
     }, []);
 
+    useEffect(() => {
+        const handleCloseUnrelatedUi = (event) => {
+            const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
+            if (!allowOpenUi.includes("modal-theme-selector")) {
+                set_is_modal_open(false);
+                set_is_modal_closing(false);
+            }
+        };
+
+        window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+        return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+    }, []);
+
     return (
         <div className="themeSelectorContainer">
             <button
@@ -101,6 +115,7 @@ export const ThemeSelector = ({ onThemeChange }) => {
                 aria-label="Selector de temas"
                 title="Selector de temas"
                 type="button"
+                data-onboarding-id="theme-selector-button"
             >
                 <IoColorPalette />
             </button>
@@ -110,7 +125,7 @@ export const ThemeSelector = ({ onThemeChange }) => {
                     <div className={`themeModalOverlay ${is_modal_closing ? "hide" : "show"}`}
                         onClick={toggle_modal}
                     >
-                        <div className="themeModal">
+                        <div className="themeModal" data-onboarding-id="theme-selector-modal">
                             <h2>Paleta de temas</h2>
                             <button className="closeModal" onClick={toggle_modal} title="Cerrar" aria-label="Cerrar" type="button">X</button>
                             <div className="themeGrid">
@@ -118,7 +133,10 @@ export const ThemeSelector = ({ onThemeChange }) => {
                                     <button
                                         key={theme.id}
                                         className={`themeCard ${current_theme === theme.id ? "active" : ""}`}
-                                        onClick={() => handle_theme_change(theme.id)}
+                                        onClick={() => {
+                                            handle_theme_change(theme.id);
+                                            window.dispatchEvent(new CustomEvent("onboarding:theme-selected"));
+                                        }}
                                         type="button"
                                         title={`Seleccionar ${theme.name}`}
                                         aria-label={`Seleccionar tema ${theme.name}`}

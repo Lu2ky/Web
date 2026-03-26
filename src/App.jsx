@@ -10,6 +10,7 @@ import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
 import ToDoList from "./components/TodoList/ToDoList"; 
 import MessageConfirmation from "./components/TodoList/MessageConfirmation";
+import OnboardingOverlay from "./components/Onboarding/OnboardingOverlay";
 // Componentes secundarios
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
 import { PopUpPersonal } from "./components/Calendar/PopUpPersonal";
@@ -19,6 +20,7 @@ import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
 // Horario oficial 
 import OficialFetcher from "./services/OficialFetcher";
 import { getCategories } from "./services/categoriesService";
+import { fetchAcademicPeriods } from "./services/academicPeriodsService";
 
 // Actividades personales
 import PersonalFetcher, { deletePersonalActivity } from "./services/PersonalFetcher";
@@ -47,23 +49,34 @@ function normalizeApiData(apiData) {
 	}
 
 	// Normaliza cada item del array de la API a un formato consistente para el calendario
-	return apiData.map((item, index) => ({
-		id: `materiaOficial-${item.nrc}-${index}`,
-		subject_name: item.subject_name,
-		professor_name: item.professor_name,
-		classroom: item.classroom,
-		NRC: item.NRC,
-		start_time: item.times[0].slice(0, 5), // recortar segundos
-		end_time: item.times[1].slice(0, 5),
-		day: dayMap[item.times[2]] || "Lunes",
-		etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
-		// Datos para PopUp
-		campus: item.campus,
-		credits: item.Credits?.Float64 || 0,
-		//tagColour: item.tagColour, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
-		// Datos originales
-		apiData: item
-	}));
+	return apiData.map((item, index) => {
+		// Extraer período académico de múltiples posibles claves
+		const academicPeriod = item.academicPeriod 
+			?? item.academic_period 
+			?? item.periodoAcademico 
+			?? item.periodo_academico
+			?? item.period
+			?? "Desconocido";
+		
+		return {
+			id: `materiaOficial-${item.nrc}-${index}`,
+			subject_name: item.subject_name,
+			professor_name: item.professor_name,
+			classroom: item.classroom,
+			NRC: item.NRC,
+			start_time: item.times[0].slice(0, 5), // recortar segundos
+			end_time: item.times[1].slice(0, 5),
+			day: dayMap[item.times[2]] || "Lunes",
+			etiqueta: item.tag, // Para mostrar el tipo de clase (Teoría, Práctica, etc.) en el calendario
+			academicPeriod: academicPeriod, // Período académico de la materia
+			// Datos para PopUp
+			campus: item.campus,
+			credits: item.Credits?.Float64 || 0,
+			//tagColour: item.tagColour, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
+			// Datos originales
+			apiData: item
+		};
+	});
 }
 
 // Normalizar actividades personales con la info de la API
@@ -80,6 +93,100 @@ const normalizePersonalEvents = (eventsList) => {
 	return eventsList
 		.map((event) => normalizePersonalEvent(event))
 		.filter((event) => event.start_time && event.end_time && event.day);
+};
+
+// ============================================================================
+// Calcula el rango de fechas de la semana basado en weekOffset
+// Devuelve { startDate, endDate } con objetos Date para comparación
+// ============================================================================
+const getWeekDateRange = (weekOffset = 0) => {
+	const today = new Date();
+	const currentDay = today.getDay(); // 0 = Domingo, 1 = Lunes, etc.
+	const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1;
+	const startOfWeek = new Date(today);
+	startOfWeek.setDate(today.getDate() - daysFromMonday + (weekOffset * 7));
+	startOfWeek.setHours(0, 0, 0, 0);
+	
+	const endOfWeek = new Date(startOfWeek);
+	endOfWeek.setDate(startOfWeek.getDate() + 6);
+	endOfWeek.setHours(23, 59, 59, 999);
+	
+	return { startDate: startOfWeek, endDate: endOfWeek };
+};
+
+// ============================================================================
+// Verifica si una semana (por weekOffset) cae dentro del rango de un período académico
+// ============================================================================
+const isWeekInPeriod = (weekOffset, period) => {
+	if (!period || (!period.start_date && !period.end_date)) {
+		// Si el período no tiene fechas, considerarlo válido para todas las semanas
+		return true;
+	}
+
+	const { startDate, endDate } = getWeekDateRange(weekOffset);
+	
+	// Convertir strings de fecha (YYYY-MM-DD) a Date objects
+	const periodStart = period.start_date ? new Date(period.start_date) : null;
+	const periodEnd = period.end_date ? new Date(period.end_date + "T23:59:59") : null;
+	
+	// Lógica de verificación
+	const result = !(periodStart && endDate < periodStart) && !(periodEnd && startDate > periodEnd);
+	
+	// Si el período no tiene fechas válidas, considerarlo válido
+	if (!periodStart && !periodEnd) return true;
+	
+	// Si la semana está completamente antes del inicio del período, no mostrar
+	if (periodStart && endDate < periodStart) return false;
+	
+	// Si la semana está completamente después del fin del período, no mostrar
+	if (periodEnd && startDate > periodEnd) return false;
+	
+	// Si la semana se superpone con el período, mostrar
+	return true;
+};
+
+// ============================================================================
+// Verifica si una actividad personal es vigente durante la semana especificada
+// Compara date_start y date_end de la actividad con el rango de la semana
+// ============================================================================
+const isActiveLaterallyInWeek = (activity, weekOffset) => {
+	if (!activity) return false;
+
+	// Si no tiene fechas de vigencia, NO mostrar
+	if (!activity.date_start && !activity.date_end) {
+		return false;
+	}
+
+	const { startDate: weekStart, endDate: weekEnd } = getWeekDateRange(weekOffset);
+
+	// Función auxiliar: extraer solo YYYY-MM-DD de strings que pueden incluir hora
+	const extractDateOnly = (dateStr) => {
+		if (!dateStr) return null;
+		return String(dateStr).split(' ')[0].split('T')[0];
+	};
+
+	const dateStartStr = extractDateOnly(activity.date_start);
+	const dateEndStr = extractDateOnly(activity.date_end);
+
+	// Convertir strings de fecha (YYYY-MM-DD) a Date objects
+	const activityStart = dateStartStr ? new Date(dateStartStr + "T00:00:00") : null;
+	const activityEnd = dateEndStr ? new Date(dateEndStr + "T23:59:59") : null;
+
+	// Si la actividad no tiene fechas válidas, NO mostrar
+	if (!activityStart && !activityEnd) return false;
+
+	// Si la actividad está completamente antes de la semana, no mostrar
+	if (activityEnd && weekStart > activityEnd) {
+		return false;
+	}
+
+	// Si la actividad está completamente después de la semana, no mostrar
+	if (activityStart && weekEnd < activityStart) {
+		return false;
+	}
+
+	// Si la actividad se superpone con la semana, mostrar
+	return true;
 };
 
 const getInitialView = () => {
@@ -101,26 +208,22 @@ function App() {
 	const [themeId, setThemeId] = useState("default"); // ID del tema seleccionado, se pasa al ThemeSelector y se usa para cargar el mapa de colores de etiquetas
 	const [tagColorMap, setTagColorMap] = useState({}); // Mapa de colores para etiquetas, se carga desde las categorías obtenidas de la API
 	const [selectedTag, setSelectedTag] = useState("Todos"); // Etiqueta seleccionada para filtrar actividades en el calendario
+	const [selectedAcademicPeriod, setSelectedAcademicPeriod] = useState(null); // { id, nombre } del período académico seleccionado, null = "Todos"
+	const [academicPeriods, setAcademicPeriods] = useState([]); // Array de períodos académicos con { id, nombre, start_date, end_date }
+
+	// Log actual de sincronización de datos
 
 
 
 	const handleDataLoaded = useCallback((data) => {
-		console.log("Datos recibidos en App:", data);
-		if (!Array.isArray(data)) {
-			console.error("La API no devolvió un array:", data);
-			return;
-		}
+		if (!Array.isArray(data)) return;
 		const normalized = normalizeApiData(data);
-		console.log("Datos normalizados:", normalized);
 		setClassEvents(normalized);
 	}, []);
 
 	// Manejador para datos personales que vienen del PersonalFetcher (ya normalizados)
 	const handlePersonalDataLoaded = useCallback((data) => {
-		console.log("Datos personales recibidos del API en App:", data);
-
 		if (!Array.isArray(data)) {
-			console.error("Los datos personales de la API no son un array:", data);
 			setPersonalEvents([]);
 			return;
 		}
@@ -254,9 +357,30 @@ function App() {
 		});
 	}, [themeId]);
 
+	// Cargar períodos académicos con rangos de fechas al montar el componente
+	useEffect(() => {
+		const loadAcademicPeriods = async () => {
+			try {
+				const periods = await fetchAcademicPeriods();
+				setAcademicPeriods(periods);
+			} catch (error) {
+				setAcademicPeriods([]);
+			}
+		};
+		loadAcademicPeriods();
+	}, []);
+
 	// Función de retorno que recibe ThemeSelector al cambiar el tema y actualiza su estado
 	const handleThemeChange = newThemeId => {
 		setThemeId(newThemeId);
+	};
+
+	// Manejador para cambio de período académico
+	// Recibe { id, nombre } del período o null para "Todos"
+	const handlePeriodChange = (periodObj) => {
+		console.log("Período académico seleccionado:", periodObj);
+		setSelectedAcademicPeriod(periodObj);
+		// Los fetchers se re-ejecutarán automáticamente cuando cambien sus dependencias
 	};
 
 	//Obtener color por etiqueta
@@ -273,38 +397,62 @@ function App() {
 		return luminance > 0.5 ? "#000000" : "#FFFFFF";
 	};
 
-	//Calcular materias filtradas 
-	const filteredClassesEvents = selectedTag === "Todos" ?
-		classEvents :
-		classEvents.filter(event => event.etiqueta === selectedTag);
-	const filteredPersonalEvents =
-		selectedTag === "Todos" || selectedTag === "Personal" ?
-			personalEvents :
-			[];
+	//Calcular materias filtradas por PERÍODO, FECHA (weekOffset) y ETIQUETA
+	const filteredClassesEvents = classEvents.filter(event => {
+		// Filtro por período académico seleccionado
+		const periodMatch = !selectedAcademicPeriod || event.academicPeriod === selectedAcademicPeriod.nombre;
+		
+		// Filtro por etiqueta
+		const tagMatch = selectedTag === "Todos" || event.etiqueta === selectedTag;
+		
+		// Filtro por rango de fechas del período académico basado en weekOffset
+		// Buscar el período académico que corresponde a esta materia
+		const classPeriod = academicPeriods.find(p => p.nombre === event.academicPeriod);
+		const dateInRange = isWeekInPeriod(weekOffset, classPeriod);
+		
+		return periodMatch && tagMatch && dateInRange;
+	});
+
+
+	const filteredPersonalEvents = personalEvents.filter(event => {
+		// Filtro por etiqueta
+		const tagMatch = selectedTag === "Todos" || selectedTag === "Personal";
+		
+		// Filtro por vigencia: la actividad debe superponerse con la semana actual
+		const dateInRange = isActiveLaterallyInWeek(event, weekOffset);
+		
+		return tagMatch && dateInRange;
+	});
 	return (
 
 		<div className="App">
-			<Header userId={userId} />
+			<OnboardingOverlay />
+			<div data-onboarding-id="header">
+				<Header userId={userId} />
+			</div>
 			<div className="mainContent">
-				<div className="ToDoSection">
+				<div className="ToDoSection" data-onboarding-id="todo">
 					<ToDoList userId={userId} />
 				</div>
-				<div className="CalendarSection">
+				<div className="CalendarSection" data-onboarding-id="calendar">
 					<OficialFetcher
 						userId={userId}
 						onDataLoaded={handleDataLoaded}
+						academicPeriod={selectedAcademicPeriod}
 					/>
 
 					<PersonalFetcher
 						userId={userId}
 						onDataLoaded={handlePersonalDataLoaded}
+						academicPeriod={selectedAcademicPeriod}
 					/>
 
 					<Calendar
 						viewMode={viewMode}
 						events={filteredClassesEvents}
 						personalEvents={filteredPersonalEvents}
-
+						weekOffset={weekOffset}
+						setWeekOffset={setWeekOffset}
 						onClassClick={handleClassClick}
 						onDeletePersonal={handleRequestDeletePersonal}
 						onPersonalClick={handlePersonalClick}
@@ -342,9 +490,11 @@ function App() {
 						userId={userId}
 						onActivityAdd={handleActivityAdd}
 						onThemeChange={handleThemeChange}
+						onPeriodChange={handlePeriodChange}
 						selectedTag={selectedTag}
 						setSelectedTag={setSelectedTag}
-
+						weekOffset={weekOffset}
+						setWeekOffset={setWeekOffset}
 					/>
 				</div>
 			</div>

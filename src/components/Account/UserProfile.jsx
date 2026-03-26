@@ -233,6 +233,8 @@ export default function UserProfile({ userId, onClose }) {
                                 className="password-toggle-btn"
                                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                                 disabled={isChangingPassword}
+                                title="Mostrar/ocultar contraseña"
+                                aria-label="Alternar visibilidad de contraseña"
                             >
                                 {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
                             </button>
@@ -258,6 +260,8 @@ export default function UserProfile({ userId, onClose }) {
                                 className="password-toggle-btn"
                                 onClick={() => setShowNewPassword(!showNewPassword)}
                                 disabled={isChangingPassword}
+                                title="Mostrar/ocultar contraseña"
+                                aria-label="Alternar visibilidad de contraseña"
                             >
                                 {showNewPassword ? <FaEyeSlash /> : <FaEye />}
                             </button>
@@ -311,6 +315,8 @@ export default function UserProfile({ userId, onClose }) {
                                 className="password-toggle-btn"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                 disabled={isChangingPassword}
+                                title="Mostrar/ocultar contraseña"
+                                aria-label="Alternar visibilidad de contraseña"
                             >
                                 {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                             </button>
@@ -330,6 +336,8 @@ export default function UserProfile({ userId, onClose }) {
                         type="submit"
                         className="profile-submit-btn"
                         disabled={isChangingPassword}
+                        title="Confirmar cambio de contraseña"
+                        aria-label="Cambiar contraseña"
                     >
                         {isChangingPassword ? "Actualizando..." : "Cambiar Contraseña"}
                     </button>
