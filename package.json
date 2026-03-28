@@ -11,6 +11,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:profile-preferences": "vitest run src/components/Account/UserPreferences.test.jsx",
+    "test:comments:unit": "vitest run src/components/Calendar/PopUpClasses.add-comment.test.jsx src/components/Calendar/PopUpClasses.remove-comment.test.jsx",
     "test:e2e": "playwright test",
     "test:e2e:run": "playwright test tests/e2e/user-profile-change-password.e2e.spec.js",
     "test:e2e:real": "playwright test -c playwright.real.config.js tests/e2e/user-profile-change-password.real-persistence.e2e.spec.js",
