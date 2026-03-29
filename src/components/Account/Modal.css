@@ -156,6 +156,29 @@
     outline-offset: 2px;
 }
 
+.modal-secondary-btn {
+    padding: 0.625rem 1.25rem;
+    background: #ffffff;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-secondary-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #374151;
+}
+
+.modal-secondary-btn:focus-visible {
+    outline: 2px solid #9ca3af;
+    outline-offset: 2px;
+}
+
 /* Animaciones */
 @keyframes overlayFadeIn {
     from {

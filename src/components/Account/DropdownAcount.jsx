@@ -145,6 +145,9 @@ export default function DropdownAcount({ userId }) {
                 isOpen={activeModal === "close"}
                 onClose={closeModal}
                 title="Cerrar Sesión"
+                onConfirm={handleLogout}
+                confirmLabel="Sí, cerrar sesión"
+                closeLabel="Cancelar"
             >
                 <p>¿Estás seguro de que deseas cerrar sesión?</p>
                 <button

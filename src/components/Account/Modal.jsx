@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react"; // useRef para manejo de referencias 
 import "./Modal.css";
 
 // Recibe 4 propiedades: isOpen(esta abierto), onClose(función para cerrar), title(título del modal) y children(contenido del modal)
-const Modal = ({ isOpen, onClose, title, children }) => { // componente funcional y base para las ventanas de notificación y configuración
+const Modal = ({ isOpen, onClose, title, children, onConfirm = null, confirmLabel = "Confirmar", closeLabel = "Cerrar" }) => { // componente funcional y base para las ventanas de notificación y configuración
     const modalRef = useRef(null); // ref para el contenedor del modal, para manejar el enfoque y eventos de teclado
     const closeBtnRef = useRef(null); // ref para el botón de cerrar, para establecer el foco inicial cuando se abre el modal
 
@@ -88,15 +88,20 @@ const Modal = ({ isOpen, onClose, title, children }) => { // componente funciona
                 <div className="modal-body">{children}</div> {/* Contenido dinámico */}
 
                 <footer className="modal-footer"> {/*Pie del modal y boton de cerrar*/}
-                    <button 
-                        className="modal-action-btn" 
-                        onClick={onClose}
-                        title="Cerrar ventana"
-                        aria-label="Cerrar"
-                        type="button"
-                    >
-                        Cerrar
-                    </button>
+                    {onConfirm ? (
+                        <>
+                            <button className="modal-secondary-btn" onClick={onClose}>
+                                {closeLabel}
+                            </button>
+                            <button className="modal-action-btn" onClick={onConfirm}>
+                                {confirmLabel}
+                            </button>
+                        </>
+                    ) : (
+                        <button className="modal-action-btn" onClick={onClose}>
+                            {closeLabel}
+                        </button>
+                    )}
                 </footer>
             </div>
         </div>

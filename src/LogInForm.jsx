@@ -102,6 +102,11 @@ const LogInForm = () => {
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </span>
                     </div>
+                    {error && (
+                        <div className="error-message" style={{ color: 'red', marginBottom: '10px', textAlign: 'center' }}>
+                            {error}
+                        </div>
+                    )}
                     <div className="rememberForgot">
                         <Link to="/RecoverPassword">Olvidé mi contraseña</Link>
                         <label><input type="checkbox" required /> Acepto los términos y condiciones</label> {/*Poner la politica de términos y condiciones*/}
