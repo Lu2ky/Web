@@ -117,7 +117,7 @@ export async function updateUserEmail(userId, newEmail) {
         return { success: false, message };
     }
 
-    // Obtener datos actuales para recuperar tiempoMute e idUsuario real desde BD
+    // Obtener datos actuales para recuperar antelacionNotis e idUsuario real desde BD
     const currentData = await getUserData(userId);
     console.log("Current user data received:", currentData);
 
@@ -133,24 +133,24 @@ export async function updateUserEmail(userId, newEmail) {
     const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
     console.log("Using actualUserId from DB:", actualUserId);
 
-    // Obtener tiempoMute intentando múltiples nombres de campo
-    let currentTimeMute = currentUser?.antelacionNotis ||
+    // Obtener antelacionNotis intentando multiples nombres de campo heredados
+    let currentAnticipation = currentUser?.antelacionNotis ||
         currentUser?.tiempoMute ||
         currentUser?.anticipationTime ||
         "00:00:00";
 
-    console.log("Current tiempoMute:", currentTimeMute);
+    console.log("Current antelacionNotis:", currentAnticipation);
 
-    // Validar formato de tiempoMute (debe ser HH:MM:SS)
-    if (typeof currentTimeMute !== 'string' || !currentTimeMute.includes(':')) {
-        console.warn("tiempoMute format invalid, using default");
-        currentTimeMute = "00:00:00";
+    // Validar formato TIME (debe ser HH:MM:SS)
+    if (typeof currentAnticipation !== 'string' || !currentAnticipation.includes(':')) {
+        console.warn("antelacionNotis format invalid, using default");
+        currentAnticipation = "00:00:00";
     }
 
     const payload = {
         idUsuario: actualUserId,
         correo: newEmail.trim(),
-        tiempoMute: currentTimeMute
+        antelacionNotis: currentAnticipation
     };
 
     try {
@@ -292,7 +292,7 @@ export async function updateReminderAnticipation(userId, minutes) {
     // Convertir minutos a formato TIME (HH:MM:SS) como espera el servidor
     const hours = Math.floor(validatedMinutes / 60);
     const mins = validatedMinutes % 60;
-    const tiempoMute = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
+    const antelacionNotis = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
 
     // Obtener datos actuales para recuperar correo e idUsuario real desde BD
     const currentData = await getUserData(userId);
@@ -316,7 +316,7 @@ export async function updateReminderAnticipation(userId, minutes) {
     const payload = {
         idUsuario: actualUserId,
         correo: currentEmail,
-        tiempoMute: tiempoMute
+        antelacionNotis: antelacionNotis
     };
 
     try {
