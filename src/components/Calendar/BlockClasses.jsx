@@ -42,7 +42,7 @@ export const BlockClasses = ({
 
   return (
     <div
-      className={"activity-card" + (is_mounted ? " enter" : "")}
+      className={"activity-card official-class-card" + (is_mounted ? " enter" : "")}
       style={{ ...style, backgroundColor: background_color, color: text_color, cursor: "pointer" }}
       data-onboarding-id="official-class-card"
       onClick={() => {

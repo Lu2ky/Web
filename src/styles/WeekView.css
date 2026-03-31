@@ -331,6 +331,81 @@
   gap: 4px;
 }
 
+.official-class-card {
+  container-type: size;
+  gap: 2px;
+}
+
+.official-class-card .activity-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.official-class-card .activity-card-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.official-class-card .activity-card-title,
+.official-class-card .activity-card-professor,
+.official-class-card .activity-card-classroom,
+.official-class-card .activity-card-nrc {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.official-class-card .activity-card-title {
+  margin: 0;
+  font-size: clamp(0.56rem, 7.2cqh, 0.78rem);
+  line-height: 1.1;
+}
+
+.official-class-card .activity-card-professor {
+  margin: 0;
+  font-size: clamp(0.52rem, 6cqh, 0.68rem);
+  line-height: 1.1;
+}
+
+.official-class-card .activity-card-time {
+  font-size: clamp(0.5rem, 5.5cqh, 0.66rem);
+  line-height: 1;
+}
+
+.official-class-card .activity-card-footer {
+  margin-top: 2px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+@container (max-height: 72px) {
+  .official-class-card {
+    padding: 4px 6px;
+  }
+
+  .official-class-card .activity-card-footer {
+    display: flex;
+    margin-top: 1px;
+    gap: 2px;
+  }
+
+  .official-class-card .activity-card-nrc {
+    display: none;
+  }
+}
+
+@container (max-height: 54px) {
+  .official-class-card .activity-card-time {
+    display: none;
+  }
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .hourHeaderCell,
@@ -362,6 +437,15 @@
 
   .dayCell {
     flex: 0 0 3.5rem;
+  }
+
+  .official-class-card .activity-card-header {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .official-class-card .activity-card-time {
+    align-self: flex-start;
   }
 }
 
