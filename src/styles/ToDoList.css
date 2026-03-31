@@ -429,6 +429,222 @@
     box-shadow: 0 8px 24px rgba(192, 38, 211, 0.5);
 }
 
+/* ========== BULK SELECTION STYLES ========== */
+
+/* Selection mode toggle button */
+.todolist-selection-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: white;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #000000;
+    border: 1px solid #e5e7eb;
+    margin: 0;
+    width: auto;
+}
+
+.todolist-selection-toggle-icon {
+    font-size: 16px;
+    color: inherit;
+}
+
+/* Hover */
+.todolist-selection-toggle-btn:hover {
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
+}
+
+/* Selection bar - appears when selection mode is active */
+.todolist-selection-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    margin-left: auto;
+}
+
+/* Cancel button in selection bar */
+.todolist-selection-cancel-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: white;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    margin: 0;
+    width: auto;
+}
+
+.todolist-selection-cancel-icon {
+    font-size: 16px;
+    color: inherit;
+}
+
+.todolist-selection-cancel-btn:hover {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #f87171;
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.2);
+}
+
+/* Selection count text */
+.todolist-selection-count {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1f2937;
+    min-width: 120px;
+    text-align: center;
+}
+
+/* Select all button */
+.todolist-select-all-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: white;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #000000;
+    border: 1px solid #e5e7eb;
+    white-space: nowrap;
+    margin: 0;
+    width: auto;
+}
+
+.todolist-select-all-btn:hover {
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
+}
+
+/* Bulk delete button */
+.todolist-bulk-delete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: white;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    white-space: nowrap;
+    margin: 0;
+    width: auto;
+}
+
+.todolist-bulk-delete-icon {
+    font-size: 16px;
+    color: inherit;
+}
+
+.todolist-bulk-delete-btn:hover:not(:disabled) {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #f87171;
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.2);
+}
+
+.todolist-bulk-delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ========== REMINDER CARD SELECTION STYLES ========== */
+
+/* Selection checkbox in RemindCard */
+.remindcard-selection-checkbox {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 4px;
+    border: 2px solid #d1d5db;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-top: 1px;
+    margin-right: 4px;
+    transition: all 0.2s ease;
+}
+
+.remindcard-selection-checkbox:hover {
+    border-color: #c026d3;
+    background: #fdf4ff;
+}
+
+.remindcard-selection-checkbox.checked {
+    background: #c026d3;
+    border-color: #c026d3;
+    box-shadow: 0 2px 6px rgba(192, 38, 211, 0.35);
+}
+
+.remindcard-selection-checkbox svg {
+    display: block;
+    width: 10px;
+    height: 10px;
+}
+
+/* Selected card styling */
+.remindcard.selected {
+    background: #fdf4ff;
+    border-color: #c026d3;
+    box-shadow: 0 0 0 2px rgba(192, 38, 211, 0.1);
+}
+
+.remindcard.selected:hover {
+    border-color: #c026d3;
+    box-shadow: 0 0 0 2px rgba(192, 38, 211, 0.15), 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* ========== RESPONSIVE: BULK SELECTION ========== */
+@media (max-width: 768px) {
+    .todolist-selection-bar {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .todolist-select-all-btn,
+    .todolist-bulk-delete-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.7rem;
+    }
+
+    .todolist-selection-count {
+        min-width: auto;
+        flex-basis: 100%;
+    }
+}
+
 /* ========== RESPONSIVE: DRAWER MOBILE ========== */
 @media (max-width: 1023px) {
     .todo-drawer-toggle {

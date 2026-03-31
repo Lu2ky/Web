@@ -186,9 +186,40 @@ export default function TaskAddModal({
     if (!isOpen) return null;
 
     const handleSave = async () => {
+        console.log('[TaskAddModal] handleSave iniciado');
+        console.log('[TaskAddModal] formData:', JSON.stringify(formData, null, 2));
+        
+        // LIMPIAR ERROR PREVIO
+        setError('');
+        
         if (!formData.name.trim()) {
+            console.log('[TaskAddModal] Error: nombre vacío');
             setError('El nombre es obligatorio');
             return;
+        }
+
+        // Validación OBLIGATORIA de fecha
+        if (!formData.dueDate || !formData.dueDate.trim()) {
+            console.log('[TaskAddModal] ❌ Error: fecha vacía');
+            setError('La fecha es obligatoria. Selecciona una fecha y hora.');
+            return;
+        } else {
+            console.log('[TaskAddModal] Validando fecha:', formData.dueDate);
+            const selectedDate = stringToDate(formData.dueDate);
+            const now = new Date();
+            
+            console.log('[TaskAddModal] 📅 selectedDate:', selectedDate.toString());
+            console.log('[TaskAddModal] 📅 now:', now.toString());
+            console.log('[TaskAddModal] 📅 Comparación - selectedDate < now:', selectedDate < now);
+            
+            if (selectedDate <= now) {
+                console.log('[TaskAddModal] ❌ VALIDACIÓN FALLIDA: Fecha vencida o en el pasado');
+                const errorMsg = 'No puedes agregar un recordatorio con fecha vencida. Selecciona una fecha futura.';
+                setError(errorMsg);
+                console.log('[TaskAddModal] Error establecido:', errorMsg);
+                return;
+            }
+            console.log('[TaskAddModal] ✅ Fecha válida, continuando...');
         }
 
         // Incluir automáticamente cualquier etiqueta pendiente que quede en el input
@@ -222,12 +253,20 @@ export default function TaskAddModal({
     const handleAddTag = () => {
         const label = tagLabel.trim();
         if (!label) return;
+        
+        // Validar límite de 5 etiquetas
+        if (formData.tags.length >= 5) {
+            setError('No puedes agregar más de 5 etiquetas');
+            return;
+        }
+        
         const exists = formData.tags.some(t => t.label === label);
         if (!exists) {
             setFormData(prev => ({
                 ...prev,
                 tags: [...prev.tags, { label, type: tagType }]
             }));
+            setError(''); // Limpiar error si se agrega exitosamente
         }
         setTagLabel('');
         setTagType('custom');
@@ -439,7 +478,8 @@ export default function TaskAddModal({
                             type="button"
                             className="addTagButton"
                             onClick={handleAddTag}
-                            title="Agregar etiqueta"
+                            disabled={formData.tags.length >= 5}
+                            title={formData.tags.length >= 5 ? "Límite de 5 etiquetas alcanzado" : "Agregar etiqueta"}
                             aria-label="Agregar etiqueta"
                         >
                             +
@@ -494,9 +534,16 @@ export default function TaskAddModal({
                                     // Add tag directly to formData
                                     const label = t.label.trim();
                                     if (label) {
+                                        // Validar límite antes de agregar
+                                        if (formData.tags.length >= 5) {
+                                            setError('No puedes agregar más de 5 etiquetas');
+                                            setShowTagDropdown(false);
+                                            return;
+                                        }
                                         setFormData(prev => {
                                             const exists = prev.tags.some(tag => tag.label === label);
                                             if (exists) return prev;
+                                            setError(''); // Limpiar error si se agrega exitosamente
                                             return { ...prev, tags: [...prev.tags, { label, type: t.type || 'custom' }] };
                                         });
                                     }

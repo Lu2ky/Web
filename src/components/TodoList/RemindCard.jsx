@@ -2,7 +2,7 @@ import EditButton from "./EditButton";
 import DuplicateButton from "./DuplicateButton";
 import "../../styles/Reminder.css";
 
-function RemindCard({ task, priority = "", onToggle, onEdit, onDelete, onDuplicate = () => {} }) {
+function RemindCard({ task, priority = "", onToggle, onEdit, onDelete, onDuplicate = () => {}, isSelectionMode = false, isSelected = false, onSelection = () => {} }) {
     const priorityClass = priority ? `remindcard-priority-${priority}` : "";
     const title = task?.name || "Recordatorio";
     const description = task?.description || "";
@@ -33,10 +33,25 @@ function RemindCard({ task, priority = "", onToggle, onEdit, onDelete, onDuplica
     const dueDateText = formatDueDate(task?.dueDate);
 
     return (
-        <div className={`remindcard ${priorityClass}${task.completed ? " completed" : ""}`}>
+        <div className={`remindcard ${priorityClass}${task.completed ? " completed" : ""}${isSelected ? " selected" : ""}`}>
             <div className="remindcard-accent" />
             <div className="remindcard-body">
                 <div className="remindcard-top">
+                    {isSelectionMode && (
+                        <button
+                            className={`remindcard-selection-checkbox${isSelected ? " checked" : ""}`}
+                            onClick={() => onSelection(task.id)}
+                            aria-label={isSelected ? "Deseleccionar" : "Seleccionar"}
+                            title={isSelected ? "Deseleccionar" : "Seleccionar"}
+                            type="button"
+                        >
+                            {isSelected && (
+                                <svg width="10" height="10" viewBox="0 0 12 10" fill="none">
+                                    <path d="M1 5.5L4 8.5L11 1.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            )}
+                        </button>
+                    )}
                     <button
                         className={`remindcard-checkbox${task.completed ? " checked" : ""}`}
                         onClick={() => onToggle(task.id)}

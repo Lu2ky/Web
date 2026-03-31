@@ -24,8 +24,27 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
 
     const handleAddSave = async (data) => {
         console.log('[AddButton] handleAddSave received data:', JSON.stringify(data, null, 2));
+        
+        // Validación: Si no hay dueDate o es inválida, no guardar
+        const { dueDate } = data || {};
+        if (dueDate && dueDate.trim()) {
+            try {
+                const selectedDate = new Date(String(dueDate).replace(" ", "T"));
+                const now = new Date();
+                console.log('[AddButton] Validating date - selectedDate:', selectedDate, 'now:', now, 'isExpired:', selectedDate < now);
+                if (selectedDate <= now) {
+                    console.log('[AddButton] ❌ BLOQUEADO: Fecha vencida, no se puede guardar');
+                    // NO hacer nada - el error ya se mostró en TaskAddModal
+                    // NO cerrar el modal
+                    return;
+                }
+            } catch (e) {
+                console.error('[AddButton] Error validando fecha:', e);
+            }
+        }
+
         // data: { name, description, dueDate, tags, priority }
-        const { name, description, dueDate, tags = [], priority = "" } = data || {};
+        const { name, description, tags = [], priority = "" } = data || {};
 
         // Convertir dueDate ("YYYY-MM-DD" o "YYYY-MM-DD HH:MM:SS") a Date
         let endDay = null;
@@ -36,11 +55,20 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
             endDay = new Date();
         }
 
-        const tagLabels = tags.map(t => (typeof t === 'string' ? t : t.label || "" )).filter(Boolean);
-        console.log('[AddButton] tagLabels to send:', tagLabels, 'userId:', userId);
+        // Procesar tags: convertir array de objetos a array de strings (labels)
+        // Si 'tags' es undefined/null, usar array vacío
+        const safeTagsArray = Array.isArray(tags) ? tags : [];
+        const tagLabels = safeTagsArray
+            .map(t => {
+                if (typeof t === 'string') return t;
+                if (t && typeof t === 'object' && t.label) return String(t.label).trim();
+                return "";
+            })
+            .filter(label => label.length > 0);
+        console.log('[AddButton] tagLabels to send:', tagLabels, 'tags count:', tagLabels.length, 'userId:', userId);
 
-        if (userId) {
-            try {
+        try {
+            if (userId) {
                 // Obtener el ID interno del usuario desde la API antes de agregar el recordatorio
                 const userData = await getUserData(userId);
                 const rawUser = Array.isArray(userData) ? userData[0] : userData;
@@ -53,31 +81,43 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
                     userId;
                 console.log('[AddButton] idUsuario resolved:', idUsuario);
 
-                await ReminderService.addReminder(idUsuario, name, description, endDay, priority, tagLabels, userId).then(async (result) => {
-                    const newId = result?.data?.InsertedId;
-                    if (newId) {
-                        try {
-                            await addNotification({
-                                todoId: newId,
-                                name,
-                                description,
-                                issueDate: new Date().toISOString(),
-                            });
-                        } catch (notifErr) {
-                            console.warn("[AddButton] Error al agregar notificación:", notifErr);
-                        }
+                // ESPERAR a que addReminder se complete antes de continuar
+                const result = await ReminderService.addReminder(idUsuario, name, description, endDay, priority, tagLabels, userId);
+                console.log('[AddButton] recordatorio creado:', result);
+                
+                const newId = result?.data?.InsertedId;
+                if (newId) {
+                    try {
+                        await addNotification({
+                            todoId: newId,
+                            name,
+                            description,
+                            issueDate: new Date().toISOString(),
+                        });
+                        console.log('[AddButton] notificación agregada para ID:', newId);
+                    } catch (notifErr) {
+                        console.warn("[AddButton] Error al agregar notificación:", notifErr);
                     }
-                });
-            } catch (err) {
-                console.error("Error al agregar recordatorio en servidor:", err);
+                }
+            } else {
+                // Sin userId, guardar en localStorage
                 saveToDo({ title: name, description, endDay: endDay.toISOString().split("T")[0], priority, tag: tagLabels });
             }
-        } else {
+        } catch (err) {
+            console.error("Error al agregar recordatorio:", err);
+            // Fallback a localStorage en caso de error
             saveToDo({ title: name, description, endDay: endDay.toISOString().split("T")[0], priority, tag: tagLabels });
         }
-
+        
+        // Cierre exitoso: recargar tareas y cerrar modal
+        console.log('[AddButton] ✅ Recordatorio guardado, cerrando modal e recargando tareas...');
         setIsOpen(false);
-        if (onToDoSaved) onToDoSaved();
+        if (onToDoSaved) {
+            setTimeout(() => {
+                console.log('[AddButton] onToDoSaved callback ejecutándose...');
+                onToDoSaved();
+            }, 500);
+        }
     };
 
     return (

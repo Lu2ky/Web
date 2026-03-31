@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { FaFilter, FaCheckSquare, FaTimes, FaTrash } from "react-icons/fa";
 import "../../styles/ToDoList.css";
 import ToDoFilterButton from "./ToDoFilterButton";
 import AddButton from "./AddButton";
@@ -88,6 +89,11 @@ function ToDoList({ userId = "" }) {
     // Estados para manejar la duplicación de recordatorios
     const [taskToDuplicate, setTaskToDuplicate] = useState(null);
     const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
+    
+    // Estados para manejar selección en masa y eliminación múltiple
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [selectedTaskIds, setSelectedTaskIds] = useState(new Set());
+    const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
     const loadReminderTasks = useCallback(async () => {
         if (!userId) {
@@ -97,7 +103,19 @@ function ToDoList({ userId = "" }) {
 
         try {
             const reminders = await ReminderService.getByUser(userId);
-            setTasks(reminders);
+            
+            // Validación adicional: asegurar que no hay IDs duplicados
+            const seenIds = new Set();
+            const uniqueReminders = reminders.filter(task => {
+                if (seenIds.has(task.id)) {
+                    console.warn(`[ToDoList] Duplicate task ID detected in loaded reminders: ${task.id}, filtering out`);
+                    return false;
+                }
+                seenIds.add(task.id);
+                return true;
+            });
+            
+            setTasks(uniqueReminders);
         } catch (error) {
             console.error("Error al cargar recordatorios:", error);
             setTasks([]);
@@ -177,9 +195,9 @@ function ToDoList({ userId = "" }) {
             )
         );
 
-        // Actualizar en servidor
+        // Actualizar en servidor, pasando el task completo para que use el nuevo endpoint unificado
         try {
-            await ReminderService.updateState(id, newCompletedState);
+            await ReminderService.updateState(id, newCompletedState, task);
         } catch (error) {
             console.error("Error al actualizar estado del recordatorio:", error);
             // Revertir en caso de error
@@ -327,6 +345,100 @@ function ToDoList({ userId = "" }) {
         setTaskToDelete(null);
     };
 
+    // Funciones para selección en masa
+    const toggleSelectionMode = () => {
+        setSelectionMode(!selectionMode);
+        if (selectionMode) {
+            // Si estamos saliendo del modo de selección, limpiar selecciones
+            setSelectedTaskIds(new Set());
+        }
+    };
+
+    const toggleTaskSelection = (taskId) => {
+        setSelectedTaskIds(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(taskId)) {
+                newSet.delete(taskId);
+            } else {
+                newSet.add(taskId);
+            }
+            return newSet;
+        });
+    };
+
+    const toggleAllTasks = () => {
+        if (selectedTaskIds.size === filteredTasks.length) {
+            // Si todos están seleccionados, deseleccionar todos
+            setSelectedTaskIds(new Set());
+        } else {
+            // Seleccionar todos los filtrados
+            const allIds = new Set(filteredTasks.map(task => task.id));
+            setSelectedTaskIds(allIds);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        console.log("[handleBulkDelete] Starting bulk delete. userId from URL:", userId, "selectedTaskIds:", Array.from(selectedTaskIds));
+        
+        if (selectedTaskIds.size === 0) {
+            console.log("[handleBulkDelete] No tasks selected");
+            return;
+        }
+
+        // Preparar IDs para API: usar recordatorioId si existe, sino usar id
+        const tasksToDelete = Array.from(selectedTaskIds).map(id => 
+            tasks.find(t => t.id === id)
+        ).filter(Boolean);
+
+        console.log("[handleBulkDelete] tasksToDelete:", tasksToDelete);
+
+        // Extraer los IDs de API (recordatorioId o id)
+        const apiIds = tasksToDelete.map(task => task.recordatorioId ?? task.id);
+        
+        console.log("[handleBulkDelete] apiIds to send:", apiIds);
+
+        try {
+            // Obtener datos del usuario desde el endpoint para obtener el idUsuario real de BD
+            console.log("[handleBulkDelete] Getting user data from endpoint with userId:", userId);
+            const userData = await getUserData(userId);
+            console.log("[handleBulkDelete] User data from endpoint:", userData);
+            
+            // Extraer el idUsuario real de la BD (puede ser array o objeto)
+            const userObj = Array.isArray(userData) ? userData[0] : userData;
+            const actualUserId = userObj?.idUsuario || userObj?.id || userId;
+            
+            console.log("[handleBulkDelete] Extracted idUsuario from API response:", actualUserId);
+            
+            if (!actualUserId) {
+                throw new Error("No se pudo obtener el ID del usuario");
+            }
+            
+            // Llamada única a la API para eliminar múltiples recordatorios
+            const result = await ReminderService.deleteMultipleReminders(actualUserId, apiIds);
+            console.log("[handleBulkDelete] Success! Result:", result);
+        } catch (err) {
+            console.error("[handleBulkDelete] Error en eliminación en masa:", err);
+            return; // No actualizar la UI si hay error
+        }
+
+        // Actualizar UI: eliminar las tareas de la lista
+        setTasks(prev => prev.filter(task => !selectedTaskIds.has(task.id)));
+        
+        // Limpiar selecciones y cerrar modales
+        setSelectedTaskIds(new Set());
+        setIsBulkDeleteModalOpen(false);
+        setSelectionMode(false);
+        
+        // Disparar evento onboarding por cada elemento eliminado
+        tasksToDelete.forEach(() => {
+            window.dispatchEvent(new CustomEvent("onboarding:todo-deleted"));
+        });
+    };
+
+    const handleCloseBulkDeleteModal = () => {
+        setIsBulkDeleteModalOpen(false);
+    };
+
     const hasActiveFilters =
         activeFilters.status !== "all" ||
         activeFilters.priority !== "all" ||
@@ -356,8 +468,58 @@ function ToDoList({ userId = "" }) {
                 <div className="todolist-header">
                     <h2 className="todolist-title">To-Do List</h2>
                     <div className="todolist-header-actions">
-                        <ToDoFilterButton onClick={() => setIsFilterModalOpen(true)} />
-                        <AddButton userId={userId} onToDoSaved={loadReminderTasks} availableTags={availableTags} />
+                        {!selectionMode && (
+                            <>
+                                <ToDoFilterButton onClick={() => setIsFilterModalOpen(true)} />
+                                <button
+                                    className="todolist-selection-toggle-btn"
+                                    onClick={toggleSelectionMode}
+                                    title="Seleccionar múltiples tareas"
+                                    aria-label="Seleccionar múltiples tareas"
+                                    type="button"
+                                >
+                                    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" className="todolist-selection-toggle-icon" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M400 480H48c-26.51 0-48-21.49-48-48V80c0-26.51 21.49-48 48-48h352c26.51 0 48 21.49 48 48v352c0 26.51-21.49 48-48 48zm-204.686-98.059l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.248-16.379-6.249-22.628 0L184 302.745l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.25 16.379 6.25 22.628.001z"></path>
+                                    </svg>
+                                </button>
+                                <AddButton userId={userId} onToDoSaved={loadReminderTasks} availableTags={availableTags} />
+                            </>
+                        )}
+                        {selectionMode && (
+                            <div className="todolist-selection-bar">
+                                <button
+                                    className="todolist-selection-cancel-btn"
+                                    onClick={toggleSelectionMode}
+                                    title="Cancelar selección"
+                                    aria-label="Cancelar selección"
+                                    type="button"
+                                >
+                                    <FaTimes className="todolist-selection-cancel-icon" />
+                                </button>
+                                <span className="todolist-selection-count">
+                                    {selectedTaskIds.size} seleccionado{selectedTaskIds.size !== 1 ? "s" : ""}
+                                </span>
+                                <button
+                                    className="todolist-select-all-btn"
+                                    onClick={toggleAllTasks}
+                                    title={selectedTaskIds.size === filteredTasks.length ? "Deseleccionar todo" : "Seleccionar todo"}
+                                    aria-label={selectedTaskIds.size === filteredTasks.length ? "Deseleccionar todo" : "Seleccionar todo"}
+                                    type="button"
+                                >
+                                    {selectedTaskIds.size === filteredTasks.length ? "Deseleccionar todo" : "Seleccionar todo"}
+                                </button>
+                                <button
+                                    className="todolist-bulk-delete-btn"
+                                    onClick={() => setIsBulkDeleteModalOpen(true)}
+                                    disabled={selectedTaskIds.size === 0}
+                                    title={selectedTaskIds.size === 0 ? "Selecciona al menos una tarea" : "Eliminar seleccionadas"}
+                                    aria-label="Eliminar tareas seleccionadas"
+                                    type="button"
+                                >
+                                    <FaTrash className="todolist-bulk-delete-icon" />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -377,7 +539,10 @@ function ToDoList({ userId = "" }) {
                                 onToggle={toggleTask}
                                 onEdit={editTask}
                                 onDelete={deleteTask}
-                                onDuplicate={handleDuplicate} //Pasar función para duplicar
+                                onDuplicate={handleDuplicate}
+                                isSelectionMode={selectionMode}
+                                isSelected={selectedTaskIds.has(task.id)}
+                                onSelection={toggleTaskSelection}
                             />
                         );
                     })}
@@ -422,6 +587,14 @@ function ToDoList({ userId = "" }) {
                     onConfirm={handleDelete}
                     title="Eliminar Tarea"
                     description="¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer."
+                />
+
+                <MessageConfirmation
+                    isOpen={isBulkDeleteModalOpen}
+                    onClose={handleCloseBulkDeleteModal}
+                    onConfirm={handleBulkDelete}
+                    title="Eliminar Tareas"
+                    description={`¿Estás seguro de que deseas eliminar ${selectedTaskIds.size} tarea${selectedTaskIds.size !== 1 ? "s" : ""}? Esta acción no se puede deshacer.`}
                 />
 
                 <ToDoFilterModal
