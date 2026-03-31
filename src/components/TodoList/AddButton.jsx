@@ -23,23 +23,19 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
     }, []);
 
     const handleAddSave = async (data) => {
-        console.log('[AddButton] handleAddSave received data:', JSON.stringify(data, null, 2));
-        
         // Validación: Si no hay dueDate o es inválida, no guardar
         const { dueDate } = data || {};
         if (dueDate && dueDate.trim()) {
             try {
                 const selectedDate = new Date(String(dueDate).replace(" ", "T"));
                 const now = new Date();
-                console.log('[AddButton] Validating date - selectedDate:', selectedDate, 'now:', now, 'isExpired:', selectedDate < now);
                 if (selectedDate <= now) {
-                    console.log('[AddButton] ❌ BLOQUEADO: Fecha vencida, no se puede guardar');
                     // NO hacer nada - el error ya se mostró en TaskAddModal
                     // NO cerrar el modal
                     return;
                 }
             } catch (e) {
-                console.error('[AddButton] Error validando fecha:', e);
+                // Error validando fecha
             }
         }
 
@@ -65,7 +61,6 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
                 return "";
             })
             .filter(label => label.length > 0);
-        console.log('[AddButton] tagLabels to send:', tagLabels, 'tags count:', tagLabels.length, 'userId:', userId);
 
         try {
             if (userId) {
@@ -79,11 +74,9 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
                     rawUser?.ID_USER ??
                     rawUser?.id ??
                     userId;
-                console.log('[AddButton] idUsuario resolved:', idUsuario);
 
                 // ESPERAR a que addReminder se complete antes de continuar
                 const result = await ReminderService.addReminder(idUsuario, name, description, endDay, priority, tagLabels, userId);
-                console.log('[AddButton] recordatorio creado:', result);
                 
                 const newId = result?.data?.InsertedId;
                 if (newId) {
@@ -94,9 +87,8 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
                             description,
                             issueDate: new Date().toISOString(),
                         });
-                        console.log('[AddButton] notificación agregada para ID:', newId);
                     } catch (notifErr) {
-                        console.warn("[AddButton] Error al agregar notificación:", notifErr);
+                        // Error al agregar notificación
                     }
                 }
             } else {
@@ -104,17 +96,15 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
                 saveToDo({ title: name, description, endDay: endDay.toISOString().split("T")[0], priority, tag: tagLabels });
             }
         } catch (err) {
-            console.error("Error al agregar recordatorio:", err);
+            // Error al agregar recordatorio
             // Fallback a localStorage en caso de error
             saveToDo({ title: name, description, endDay: endDay.toISOString().split("T")[0], priority, tag: tagLabels });
         }
         
         // Cierre exitoso: recargar tareas y cerrar modal
-        console.log('[AddButton] ✅ Recordatorio guardado, cerrando modal e recargando tareas...');
         setIsOpen(false);
         if (onToDoSaved) {
             setTimeout(() => {
-                console.log('[AddButton] onToDoSaved callback ejecutándose...');
                 onToDoSaved();
             }, 500);
         }
