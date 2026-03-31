@@ -5,6 +5,33 @@ import * as notificationsSilenceService from "../../services/notificationsSilenc
 import Modal from "./Modal";
 import "./UserPreferences.css";
 
+function parseAnticipationMinutes(userData) {
+    const rawValue = userData?.antelacionNotis ?? userData?.tiempoMute ?? userData?.anticipationTime;
+
+    if (!rawValue) {
+        return 0;
+    }
+
+    if (typeof rawValue === "string" && rawValue.includes(":")) {
+        const parts = rawValue.split(":");
+        const hours = parseInt(parts[0], 10) || 0;
+        const minutes = parseInt(parts[1], 10) || 0;
+        return hours * 60 + minutes;
+    }
+
+    if (typeof rawValue === "object") {
+        const hours = parseInt(rawValue.hours ?? rawValue.horas ?? 0, 10) || 0;
+        const minutes = parseInt(rawValue.minutes ?? rawValue.minutos ?? 0, 10) || 0;
+        return hours * 60 + minutes;
+    }
+
+    if (typeof rawValue === "number") {
+        return rawValue;
+    }
+
+    return 0;
+}
+
 export default function UserPreferences({ userId, onClose }) {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -56,30 +83,7 @@ export default function UserPreferences({ userId, onClose }) {
                 const userData = Array.isArray(data) ? data[0] : data;
                 setUserData(userData);
                 setNewEmail(userData.email || userData.correo || "");
-                
-                // Extraer tiempo de anticipación desde 'antelacionNotis' (formato TIME: HH:MM:SS)
-                let totalMinutes = 0;
-                const antelacionField = userData.antelacionNotis;
-                
-                if (antelacionField) {
-                    // Si es una cadena en formato TIME (HH:MM:SS)
-                    if (typeof antelacionField === 'string' && antelacionField.includes(':')) {
-                        const parts = antelacionField.split(':');
-                        const hours = parseInt(parts[0]) || 0;
-                        const minutes = parseInt(parts[1]) || 0;
-                        totalMinutes = hours * 60 + minutes;
-                    } 
-                    // Si es un objeto con propiedades de horas y minutos
-                    else if (typeof antelacionField === 'object' && antelacionField !== null) {
-                        const hours = parseInt(antelacionField.hours || antelacionField.horas || 0) || 0;
-                        const minutes = parseInt(antelacionField.minutes || antelacionField.minutos || 0) || 0;
-                        totalMinutes = hours * 60 + minutes;
-                    }
-                    // Si ya es un número (minutos totales)
-                    else if (typeof antelacionField === 'number') {
-                        totalMinutes = antelacionField;
-                    }
-                }
+                const totalMinutes = parseAnticipationMinutes(userData);
                 
                 setAnticipationHours(Math.floor(totalMinutes / 60));
                 setAnticipationMinutes(totalMinutes % 60);
@@ -174,25 +178,7 @@ export default function UserPreferences({ userId, onClose }) {
 
     const handleCancelAnticipation = () => {
         setIsEditingAnticipation(false);
-        
-        // Restaurar desde userData
-        let totalMinutes = 0;
-        const antelacionField = userData?.antelacionNotis;
-        
-        if (antelacionField) {
-            if (typeof antelacionField === 'string' && antelacionField.includes(':')) {
-                const parts = antelacionField.split(':');
-                const hours = parseInt(parts[0]) || 0;
-                const minutes = parseInt(parts[1]) || 0;
-                totalMinutes = hours * 60 + minutes;
-            } else if (typeof antelacionField === 'object' && antelacionField !== null) {
-                const hours = parseInt(antelacionField.hours || antelacionField.horas || 0) || 0;
-                const minutes = parseInt(antelacionField.minutes || antelacionField.minutos || 0) || 0;
-                totalMinutes = hours * 60 + minutes;
-            } else if (typeof antelacionField === 'number') {
-                totalMinutes = antelacionField;
-            }
-        }
+        const totalMinutes = parseAnticipationMinutes(userData);
         
         setAnticipationHours(Math.floor(totalMinutes / 60));
         setAnticipationMinutes(totalMinutes % 60);
@@ -218,24 +204,7 @@ export default function UserPreferences({ userId, onClose }) {
             return;
         }
 
-        // Obtener minutos totales actuales desde userData
-        let currentTotalMinutes = 0;
-        const antelacionField = userData?.antelacionNotis;
-        
-        if (antelacionField) {
-            if (typeof antelacionField === 'string' && antelacionField.includes(':')) {
-                const parts = antelacionField.split(':');
-                const h = parseInt(parts[0]) || 0;
-                const m = parseInt(parts[1]) || 0;
-                currentTotalMinutes = h * 60 + m;
-            } else if (typeof antelacionField === 'object' && antelacionField !== null) {
-                const h = parseInt(antelacionField.hours || antelacionField.horas || 0) || 0;
-                const m = parseInt(antelacionField.minutes || antelacionField.minutos || 0) || 0;
-                currentTotalMinutes = h * 60 + m;
-            } else if (typeof antelacionField === 'number') {
-                currentTotalMinutes = antelacionField;
-            }
-        }
+        const currentTotalMinutes = parseAnticipationMinutes(userData);
         
         if (totalMinutes === currentTotalMinutes) {
             setError("El nuevo tiempo debe ser diferente al actual");
@@ -251,7 +220,8 @@ export default function UserPreferences({ userId, onClose }) {
                 setSuccess("Tiempo de anticipación actualizado exitosamente");
                 setUserData({
                     ...userData,
-                    antelacionNotis: totalMinutes
+                    antelacionNotis: totalMinutes,
+                    tiempoMute: totalMinutes
                 });
                 setIsEditingAnticipation(false);
                 
