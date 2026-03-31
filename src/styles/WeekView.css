@@ -285,6 +285,7 @@
   text-align: left;
   margin: 0;
   font-weight: 600;
+  text-transform: uppercase;
 }
 
 .activity-card-description {
