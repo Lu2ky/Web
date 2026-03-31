@@ -18,7 +18,7 @@ function ControlBar({viewMode, setViewMode, userId, onActivityAdd, onThemeChange
                 <AcademicPeriodSelect onPeriodChange={onPeriodChange} />
                 <AddButton userId={userId} onActivityAdd={onActivityAdd} />
                 <FilterButton selectedTag={selectedTag} setSelectedTag={setSelectedTag} />
-                <ThemeSelect onThemeChange={onThemeChange} />
+                <ThemeSelect userId={userId} onThemeChange={onThemeChange} />
             </div>
         </div>
     );

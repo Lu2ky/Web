@@ -44,7 +44,7 @@ export const createAuthSession = ({ userId, token = "", roles = [] }) => {
 
     const session = {
         userId: safeUserId,
-        token: String(token || ""),
+        //token: String(token || ""),
         roles: normalizeRoles(roles),
         createdAt: Date.now()
     };
