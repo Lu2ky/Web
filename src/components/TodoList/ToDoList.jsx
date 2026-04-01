@@ -478,8 +478,19 @@ function ToDoList({ userId = "" }) {
                                     aria-label="Seleccionar múltiples tareas"
                                     type="button"
                                 >
-                                    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" className="todolist-selection-toggle-icon" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M400 480H48c-26.51 0-48-21.49-48-48V80c0-26.51 21.49-48 48-48h352c26.51 0 48 21.49 48 48v352c0 26.51-21.49 48-48 48zm-204.686-98.059l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.248-16.379-6.249-22.628 0L184 302.745l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.25 16.379 6.25 22.628.001z"></path>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="todolist-selection-toggle-icon" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M7 7V5C7 4.44772 7.44772 4 8 4H18C18.5523 4 19 4.44772 19 5V15C19 15.5523 18.5523 16 18 16H16"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            opacity="0.4"
+                                        />
+                                        <rect x="3" y="8" width="12" height="13" rx="2" stroke="currentColor" strokeWidth="2" fill="white" />
+                                        <path d="M6 12H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+                                        <path d="M6 16H10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+                                        <circle cx="18" cy="18" r="5" fill="currentColor" />
+                                        <path d="M15.5 18H20.5" stroke="white" strokeWidth="2" strokeLinecap="round" />
                                     </svg>
                                 </button>
                                 <AddButton userId={userId} onToDoSaved={loadReminderTasks} availableTags={availableTags} />

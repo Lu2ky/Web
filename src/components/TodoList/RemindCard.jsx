@@ -6,6 +6,7 @@ function RemindCard({ task, priority = "", onToggle, onEdit, onDelete, onDuplica
     const priorityClass = priority ? `remindcard-priority-${priority}` : "";
     const title = task?.name || "Recordatorio";
     const description = task?.description || "";
+    const isCompleted = task.completed === true;
 
     const formatDueDate = (value) => {
         if (!value) return "";
@@ -33,7 +34,7 @@ function RemindCard({ task, priority = "", onToggle, onEdit, onDelete, onDuplica
     const dueDateText = formatDueDate(task?.dueDate);
 
     return (
-        <div className={`remindcard ${priorityClass}${task.completed ? " completed" : ""}${isSelected ? " selected" : ""}`}>
+        <div className={`remindcard ${priorityClass}${isCompleted ? " completed" : ""}${isSelected ? " selected" : ""}${isSelectionMode ? " selection-mode" : ""}`}>
             <div className="remindcard-accent" />
             <div className="remindcard-body">
                 <div className="remindcard-top">
@@ -52,27 +53,18 @@ function RemindCard({ task, priority = "", onToggle, onEdit, onDelete, onDuplica
                             )}
                         </button>
                     )}
-                    <button
-                        className={`remindcard-checkbox${task.completed ? " checked" : ""}`}
-                        onClick={() => onToggle(task.id)}
-                        aria-label={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
-                        title={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
-                        type="button"
-                    >
-                        {task.completed && (
-                            <svg width="10" height="10" viewBox="0 0 12 10" fill="none">
-                                <path d="M1 5.5L4 8.5L11 1.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        )}
-                    </button>
                     <div className="remindcard-info">
                         <div className="remindcard-title-row">
                             <span className="remindcard-name">{title}</span>
-                            {priority && (
-                                <span className={`remindcard-priority-chip remindcard-priority-chip-${priority}`}>
-                                    {priority}
-                                </span>
-                            )}
+                            <button
+                                className={`remindcard-status-toggle remindcard-status-toggle-${isCompleted ? "completed" : "pending"}`}
+                                onClick={() => onToggle(task.id)}
+                                aria-label={isCompleted ? "Marcar como pendiente" : "Marcar como completada"}
+                                title={isCompleted ? "Marcar como pendiente" : "Marcar como completada"}
+                                type="button"
+                            >
+                                {isCompleted ? "Completada" : "Pendiente"}
+                            </button>
                         </div>
                         {description && (
                             <span className="remindcard-description">{description}</span>

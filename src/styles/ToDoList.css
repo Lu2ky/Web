@@ -438,7 +438,9 @@
     justify-content: center;
     min-width: 42px;
     min-height: 42px;
-    padding: 0.7rem 1.2rem;
+    width: 42px;
+    height: 42px;
+    padding: 0;
     font-size: 0.9rem;
     font-weight: 600;
     background: white;
@@ -452,7 +454,9 @@
 }
 
 .todolist-selection-toggle-icon {
-    font-size: 16px;
+    width: 20px;
+    height: 20px;
+    display: block;
     color: inherit;
 }
 
