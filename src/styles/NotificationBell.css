@@ -58,6 +58,43 @@
     transition: background-color 0.2s;
 }
 
+.notification-item.notification-deleting {
+    opacity: 0.45;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.notification-actions {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    background: #f9fafb;
+}
+
+.notification-clear-all-button {
+    border: 1px solid #fecaca;
+    background: #ffffff;
+    color: #ef4444;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.notification-clear-all-button:hover:not(:disabled) {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #f87171;
+}
+
+.notification-clear-all-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .notification-item:hover {
     background-color: #f9fafb;
 }

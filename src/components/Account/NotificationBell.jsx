@@ -13,29 +13,68 @@ import "../../styles/NotificationBell.css";
 export default function NotificationBell({ userId }) {
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const [isDeletingAll, setIsDeletingAll] = useState(false);
+    const [deletingNotificationId, setDeletingNotificationId] = useState(null);
     const containerRef = useRef(null);
+
+    function getNotificationId(notification) {
+        if (!notification || typeof notification !== "object") return "";
+
+        const directCandidates = [
+            notification.id,
+            notification._id,
+            notification.N_idNotificacion,
+            notification.N_idNotification,
+            notification.notificationId,
+            notification.IdNotificacion,
+        ];
+
+        for (const candidate of directCandidates) {
+            if (candidate !== null && candidate !== undefined && String(candidate).trim() !== "") {
+                return String(candidate).trim();
+            }
+        }
+
+        for (const [key, value] of Object.entries(notification)) {
+            if (
+                value !== null &&
+                value !== undefined &&
+                /id/i.test(key) &&
+                /(noti|notif|notification)/i.test(key) &&
+                String(value).trim() !== ""
+            ) {
+                return String(value).trim();
+            }
+        }
+
+        return "";
+    }
+
+    async function refreshNotifications() {
+        if (!userId) {
+            setNotifications([]);
+            return [];
+        }
+
+        try {
+            const items = await NotificationService.getNotifications(userId);
+            const normalized = Array.isArray(items) ? items : [];
+            setNotifications(normalized);
+            return normalized;
+        } catch (err) {
+            console.error("Error cargando notificaciones:", err);
+            setNotifications([]);
+            return [];
+        }
+    }
 
     // Carga notificaciones inmediatamente y luego cada 10 segundos (polling)
     useEffect(() => {
-        async function load() {
-            if (!userId) {
-                setNotifications([]);
-                return;
-            }
-            try {
-                const items = await NotificationService.getNotifications(userId);
-                setNotifications(Array.isArray(items) ? items : []);
-            } catch (err) {
-                console.error("Error cargando notificaciones:", err);
-                setNotifications([]);
-            }
-        }
-        
         // Cargar de inmediato
-        load();
+        refreshNotifications();
         
         // Configurar intervalo para recargar cada 20 segundos
-        const intervalId = setInterval(load, 20000);
+        const intervalId = setInterval(refreshNotifications, 20000);
         
         // Limpiar intervalo al desmontar o cuando cambie userId
         return () => clearInterval(intervalId);
@@ -74,15 +113,123 @@ export default function NotificationBell({ userId }) {
         });
     };
 
-    const unreadCount = notifications.filter(n => !n.read && !n.completed).length;
+    const unreadCount = notifications.filter((n) => !n.read).length;
+    const orderedNotifications = [...notifications].sort((a, b) => {
+        const aRead = Boolean(a?.read);
+        const bRead = Boolean(b?.read);
+        if (aRead === bRead) return 0;
+        return aRead ? 1 : -1;
+    });
 
-    const handleNotificationClick = (notificationId, notificationIndex) => {
-        // Marcar notificación como leída
-        setNotifications(prev => 
-            prev.map((n, idx) => 
-                idx === notificationIndex ? { ...n, read: true } : n
-            )
-        );
+    const tryMarkNotificationAsRead = async (notificationId) => {
+        if (!notificationId) {
+            return false;
+        }
+
+        const result = await NotificationService.acknowledgeNotifications([notificationId], userId);
+        const refreshedItems = await refreshNotifications();
+
+        const persisted = !refreshedItems.some((item) => {
+            const currentId = getNotificationId(item);
+            return currentId === notificationId && !item.read;
+        });
+
+        if (!persisted && result?.logicalError) {
+            console.warn("Backend reporto error logico y el GET confirmo que no persistio", {
+                notificationId,
+                response: result?.response,
+            });
+        }
+
+        return persisted;
+    };
+
+    const handleDeleteNotification = async (notification) => {
+        if (isDeletingAll || deletingNotificationId) {
+            return;
+        }
+
+        const notificationId = getNotificationId(notification);
+        if (!notificationId) {
+            console.warn("Notificacion sin N_idNotificacion, no se puede marcar como leida", notification);
+            return;
+        }
+
+        try {
+            setDeletingNotificationId(notificationId);
+            // Marcar como leida en UI inmediatamente; el backend persiste este estado via POST.
+            setNotifications((prev) =>
+                prev.map((n) =>
+                    getNotificationId(n) === notificationId ? { ...n, read: true } : n
+                )
+            );
+
+            const deleted = await tryMarkNotificationAsRead(notificationId);
+
+            if (!deleted) {
+                console.warn("La notificacion individual sigue presente despues del borrado");
+                await refreshNotifications();
+            }
+        } catch (err) {
+            console.error("Error eliminando notificacion:", err, {
+                notificationId,
+                notification,
+            });
+            await refreshNotifications();
+        } finally {
+            setDeletingNotificationId(null);
+        }
+    };
+
+    const handleDeleteAllNotifications = async () => {
+        if (isDeletingAll || deletingNotificationId || unreadCount === 0) {
+            return;
+        }
+
+        try {
+            setIsDeletingAll(true);
+            const notificationIds = [...new Set(
+                notifications
+                    .filter((notification) => !notification.read)
+                    .map((notification) => getNotificationId(notification))
+                    .filter(Boolean)
+            )];
+
+            if (notificationIds.length === 0) {
+                return;
+            }
+
+            setNotifications((prev) =>
+                prev.map((notification) =>
+                    notificationIds.includes(getNotificationId(notification))
+                        ? { ...notification, read: true }
+                        : notification
+                )
+            );
+
+            const result = await NotificationService.acknowledgeNotifications(notificationIds, userId);
+
+            const latestItems = await refreshNotifications();
+            const stillVisibleCount = latestItems.filter((item) => {
+                const currentId = getNotificationId(item);
+                return notificationIds.includes(currentId) && !item.read;
+            }).length;
+
+            if (stillVisibleCount > 0) {
+                console.warn("El backend devolvio notificaciones despues del borrado masivo");
+            }
+
+            if (stillVisibleCount > 0 && result?.logicalError) {
+                console.warn("Backend reporto error logico en marcado masivo", {
+                    notificationIds,
+                    response: result?.response,
+                });
+            }
+        } catch (err) {
+            console.error("Error eliminando notificaciones:", err);
+        } finally {
+            setIsDeletingAll(false);
+        }
     };
 
     return (
@@ -112,19 +259,39 @@ export default function NotificationBell({ userId }) {
 
             {isOpen && (
                 <ul className="notification-dropdown" role="menu" data-onboarding-id="notification-dropdown">
-                    {notifications.length > 0 ? (
-                        notifications.map((n, idx) => (
+                    {unreadCount > 0 && (
+                        <li className="notification-actions" role="none">
+                            <button
+                                type="button"
+                                className="notification-clear-all-button"
+                                onClick={handleDeleteAllNotifications}
+                                disabled={isDeletingAll || Boolean(deletingNotificationId)}
+                            >
+                                {isDeletingAll ? "Marcando..." : "Marcar todas"}
+                            </button>
+                        </li>
+                    )}
+                    {orderedNotifications.length > 0 ? (
+                        orderedNotifications.map((n) => {
+                            const notificationId = getNotificationId(n);
+                            const isDeletingItem = deletingNotificationId === notificationId;
+                            return (
                             <li 
-                                key={n.id || n._id || JSON.stringify(n)} 
-                                className={`notification-item ${n.read ? 'notification-read' : 'notification-unread'}`}
+                                key={notificationId || JSON.stringify(n)} 
+                                className={`notification-item ${n.read ? 'notification-read' : 'notification-unread'} ${isDeletingItem ? 'notification-deleting' : ''}`}
                                 role="menuitem"
-                                onClick={() => handleNotificationClick(n.id, idx)}
+                                aria-disabled={isDeletingItem || isDeletingAll}
+                                onClick={() => {
+                                    if (isDeletingItem || isDeletingAll) return;
+                                    handleDeleteNotification(n);
+                                }}
                             >
                                 <span className="notification-title">{n.name || n.title || "(sin título)"}</span>
                                 {n.description && <span className="notification-description">{n.description}</span>}
                                 {n.dueDate && <span className="notification-date">{n.dueDate}</span>}
                             </li>
-                        ))
+                            );
+                        })
                     ) : (
                         <li className="notification-empty">No hay notificaciones</li>
                     )}

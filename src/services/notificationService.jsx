@@ -11,7 +11,89 @@
 
 const NOTIFICATIONS_BASE = import.meta.env.VITE_API_URL_NOTIFICATIONS || "";
 const ADD_NOTIFICATION_ENDPOINT = import.meta.env.VITE_API_ADD_NOTIFICATION;
+const DELETE_NOTIFICATIONS_ENDPOINT =
+    import.meta.env.VITE_API_DELETE_NOTIFICATIONS ||
+    NOTIFICATIONS_BASE.replace(/notifications-by-user\/?$/, "delete-notifications");
 const ADD_EMAIL_ENDPOINT = import.meta.env.VITE_API_ADD_EMAIL;
+
+function unwrapDbValue(value) {
+    if (value === null || value === undefined) return value;
+    if (typeof value !== "object") return value;
+
+    if ("Int64" in value) return value.Int64;
+    if ("Float64" in value) return value.Float64;
+    if ("String" in value) return value.String;
+    if ("Bool" in value) return value.Bool;
+
+    return value;
+}
+
+function extractNotificationId(notification) {
+    if (!notification || typeof notification !== "object") return "";
+
+    const directCandidates = [
+        notification.N_idNotificacion,
+        notification.N_idNotification,
+        notification.notificationId,
+        notification.IdNotificacion,
+        notification.id,
+        notification._id,
+    ];
+
+    for (const candidate of directCandidates) {
+        const unwrapped = unwrapDbValue(candidate);
+        if (unwrapped !== null && unwrapped !== undefined && String(unwrapped).trim() !== "") {
+            return String(unwrapped).trim();
+        }
+    }
+
+    for (const [key, value] of Object.entries(notification)) {
+        const unwrapped = unwrapDbValue(value);
+        if (
+            unwrapped !== null &&
+            unwrapped !== undefined &&
+            /id/i.test(key) &&
+            /(noti|notif|notification)/i.test(key) &&
+            String(unwrapped).trim() !== ""
+        ) {
+            return String(unwrapped).trim();
+        }
+    }
+
+    return "";
+}
+
+function toBooleanFlag(value) {
+    const unwrapped = unwrapDbValue(value);
+    if (typeof unwrapped === "boolean") return unwrapped;
+    if (typeof unwrapped === "number") return unwrapped === 1;
+    if (typeof unwrapped === "string") {
+        const normalized = unwrapped.trim().toLowerCase();
+        return normalized === "1" || normalized === "true" || normalized === "t" || normalized === "yes";
+    }
+    return false;
+}
+
+function extractReadFlag(notification) {
+    if (!notification || typeof notification !== "object") return false;
+
+    const stateCandidates = [
+        notification.B_estado,
+        notification.B_leido,
+        notification.B_notiLeida,
+        notification.notiLeida,
+        notification.read,
+        notification.isRead,
+    ];
+
+    for (const candidate of stateCandidates) {
+        if (candidate !== undefined && candidate !== null) {
+            return toBooleanFlag(candidate);
+        }
+    }
+
+    return false;
+}
 
 /**
  * Obtiene una lista de notificaciones para el usuario indicado.
@@ -35,7 +117,13 @@ export async function getNotifications(userId) {
         try {
             const url = `${NOTIFICATIONS_BASE}${userId}`;
             console.log("[NotificationService] GET", url);
-            const res = await fetch(url);
+            const res = await fetch(url, {
+                cache: "no-store",
+                headers: {
+                    "Cache-Control": "no-cache",
+                    Pragma: "no-cache",
+                },
+            });
             if (!res.ok) {
                 console.error("getNotifications failed", res.status);
                 return [];
@@ -47,31 +135,30 @@ export async function getNotifications(userId) {
             if (Array.isArray(data)) items = data;
             else if (Array.isArray(data?.data)) items = data.data;
             
-            // Normalizar estructura de notificación
-            return items.map(n => ({
-                id: n.id || n._id || n.N_idNotificacion,
-                name: n.name || n.title || n.T_nombre || n.asunto || n.T_asunto || "(sin título)",
-                title: n.title || n.T_nombre || n.name,
-                description: n.description || n.T_descripcion || n.content || n.T_contenido || "",
-                dueDate: n.dueDate || n.Dt_fechaVencimiento || n.date || n.Dt_fechaEmision || "",
-                issueDate: n.issueDate || n.Dt_fechaEmision || "",
-                read: n.read || n.B_leido || false,
-                completed: n.completed || n.B_estado || false,
-                ...n // conservar el resto de propiedades
-            }));
+            // Normalizar estructura de notificación según contrato backend (B_estado y N_idNotificacion)
+            const normalizedItems = items.map(n => {
+                const normalizedId = extractNotificationId(n);
+                return {
+                    ...n,
+                    id: normalizedId,
+                    notificationId: normalizedId,
+                    name: n.T_nombre || n.name || n.title || "(sin título)",
+                    title: n.T_nombre || n.title || n.name || "(sin título)",
+                    description: n.T_descripcion || n.description || n.content || "",
+                    dueDate: n.Dt_fechaEmision || n.dueDate || n.date || "",
+                    issueDate: n.Dt_fechaEmision || n.issueDate || "",
+                    read: extractReadFlag(n),
+                };
+            });
+
+            return normalizedItems;
         } catch (e) {
             console.error("Error fetching notifications", e);
             return [];
         }
     }
 
-    // Comportamiento de respaldo: usar endpoint de recordatorios como sustituto
-    try {
-        const { default: ReminderService } = await import("./reminderService");
-        return ReminderService.getByUser(userId);
-    } catch (e) {
-        return [];
-    }
+    return [];
 }
 
 /**
@@ -143,3 +230,94 @@ export async function addEmail({ todoId, issue, content, issueDate }) {
 
     return res.json();
 }
+
+/**
+ * Marca múltiples notificaciones como leídas por ids.
+ * @param {Array<string|number>|string} ids
+ * @param {string|number} [userId]
+ */
+export async function acknowledgeNotifications(ids, userId) {
+    if (!DELETE_NOTIFICATIONS_ENDPOINT) {
+        console.warn("VITE_API_DELETE_NOTIFICATIONS not configured");
+        return { ok: false, reason: "missing-endpoint" };
+    }
+
+    const normalizedIds = Array.isArray(ids)
+        ? ids
+            .map((id) => String(id).trim())
+            .filter(Boolean)
+        : String(ids || "")
+            .split(",")
+            .map((id) => id.trim())
+            .filter(Boolean);
+
+    const uniqueIds = [...new Set(normalizedIds)];
+
+    if (uniqueIds.some((id) => !/^\d+$/.test(id))) {
+        throw new Error(`acknowledgeNotifications invalid ids: ${JSON.stringify(uniqueIds)}`);
+    }
+
+    if (uniqueIds.length === 0) {
+        return { ok: true, skipped: true, ids: [] };
+    }
+
+    const MAX_IDS_PER_REQUEST = 10;
+    const batches = [];
+    for (let i = 0; i < uniqueIds.length; i += MAX_IDS_PER_REQUEST) {
+        batches.push(uniqueIds.slice(i, i + MAX_IDS_PER_REQUEST));
+    }
+
+    const responses = [];
+
+    for (const batch of batches) {
+        const idsCsv = batch.join(",");
+        // Mantener el payload exactamente igual al caso validado en Postman.
+        const payload = { ids: idsCsv };
+
+        const res = await fetch(DELETE_NOTIFICATIONS_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        const raw = await res.text();
+        let parsed;
+        try {
+            parsed = raw ? JSON.parse(raw) : null;
+        } catch {
+            parsed = raw;
+        }
+
+        if (!res.ok) {
+            throw new Error(`acknowledgeNotifications failed: ${res.status} ${typeof parsed === "string" ? parsed : JSON.stringify(parsed)}`);
+        }
+
+        const hasLogicalError =
+            parsed &&
+            typeof parsed === "object" &&
+            (parsed.success === false ||
+                String(parsed.status || "").toLowerCase() === "error" ||
+                String(parsed.result || "").toLowerCase() === "error" ||
+                String(parsed.ok || "").toLowerCase() === "false");
+
+        responses.push({
+            ids: batch,
+            logicalError: hasLogicalError,
+            status: res.status,
+            response: parsed,
+        });
+    }
+
+    const logicalError = responses.some((entry) => entry.logicalError);
+
+    return {
+        ok: !logicalError,
+        logicalError,
+        status: 200,
+        response: responses,
+        ids: uniqueIds,
+    };
+}
+
+// Compatibilidad temporal con llamadas existentes.
+export const deleteNotifications = acknowledgeNotifications;
