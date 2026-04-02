@@ -24,6 +24,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
     padding: 12px 14px;
     border-bottom: 2px solid transparent;
     background-image:
@@ -37,6 +38,9 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    min-width: 0;
+    flex: 1;
+    justify-content: flex-end;
 }
 
 .todolist-title {
@@ -45,6 +49,17 @@
     color: #1f2937;
     margin: 0;
     letter-spacing: -0.01em;
+    white-space: nowrap;
+    line-height: 1.1;
+    flex: 0 0 auto;
+}
+
+.todolist-header.selection-mode {
+    padding: 10px 12px;
+}
+
+.todolist-header.selection-mode .todolist-title {
+    font-size: 0.98rem;
 }
 
 .todolist-add-btn {
@@ -474,6 +489,8 @@
     gap: 12px;
     flex: 1;
     margin-left: auto;
+    min-width: 0;
+    flex-wrap: nowrap;
 }
 
 /* Cancel button in selection bar */
@@ -510,11 +527,24 @@
 
 /* Selection count text */
 .todolist-selection-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 0.8rem;
     font-weight: 600;
     color: #1f2937;
-    min-width: 120px;
+    min-width: 0;
     text-align: center;
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+.todolist-selection-count-number {
+    min-width: 1ch;
+}
+
+.todolist-selection-count-label {
+    white-space: nowrap;
 }
 
 /* Select all button */
@@ -532,6 +562,8 @@
     color: #000000;
     border: 1px solid #e5e7eb;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     margin: 0;
     width: auto;
 }
@@ -633,19 +665,48 @@
 /* ========== RESPONSIVE: BULK SELECTION ========== */
 @media (max-width: 768px) {
     .todolist-selection-bar {
-        gap: 8px;
-        flex-wrap: wrap;
+        gap: 6px;
+        flex-wrap: nowrap;
     }
 
+    .todolist-selection-cancel-btn,
     .todolist-select-all-btn,
     .todolist-bulk-delete-btn {
-        padding: 0.6rem 1rem;
+        padding: 0.55rem 0.75rem;
         font-size: 0.7rem;
+        min-height: 38px;
     }
 
     .todolist-selection-count {
-        min-width: auto;
-        flex-basis: 100%;
+        font-size: 0.72rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .todolist-selection-bar {
+        gap: 4px;
+    }
+
+    .todolist-selection-cancel-btn,
+    .todolist-bulk-delete-btn {
+        min-width: 34px;
+        min-height: 34px;
+        padding: 0.35rem;
+    }
+
+    .todolist-select-all-btn {
+        min-height: 34px;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.64rem;
+    }
+
+    .todolist-selection-count {
+        font-size: 0.68rem;
+        gap: 2px;
+    }
+
+    .todolist-selection-count-label {
+        display: none;
     }
 }
 
@@ -687,5 +748,34 @@
     .todo-drawer-toggle,
     .todo-drawer-overlay {
         display: none;
+    }
+
+    .todolist-selection-bar {
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .todolist-selection-cancel-btn,
+    .todolist-select-all-btn,
+    .todolist-bulk-delete-btn {
+        min-height: 40px;
+        padding: 0.55rem 0.95rem;
+    }
+
+    .todolist-selection-count {
+        font-size: 0.78rem;
+    }
+}
+
+@media (min-width: 1440px) {
+    .todolist-selection-bar {
+        gap: 12px;
+    }
+
+    .todolist-selection-cancel-btn,
+    .todolist-select-all-btn,
+    .todolist-bulk-delete-btn {
+        min-height: 42px;
+        padding: 0.65rem 1.1rem;
     }
 }

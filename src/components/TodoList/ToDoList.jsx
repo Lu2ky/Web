@@ -465,7 +465,7 @@ function ToDoList({ userId = "" }) {
             <div className={`todolist-panel${isDrawerOpen ? " open" : ""}`}>
                 <ToDoListTagFetcher userId={userId} onDataLoaded={setAvailableTags} />
 
-                <div className="todolist-header">
+                <div className={`todolist-header${selectionMode ? " selection-mode" : ""}`}>
                     <h2 className="todolist-title">To-Do List</h2>
                     <div className="todolist-header-actions">
                         {!selectionMode && (
@@ -508,16 +508,16 @@ function ToDoList({ userId = "" }) {
                                     <FaTimes className="todolist-selection-cancel-icon" />
                                 </button>
                                 <span className="todolist-selection-count">
-                                    {selectedTaskIds.size} seleccionado{selectedTaskIds.size !== 1 ? "s" : ""}
+                                    <span className="todolist-selection-count-number">{selectedTaskIds.size}</span>
                                 </span>
                                 <button
                                     className="todolist-select-all-btn"
                                     onClick={toggleAllTasks}
-                                    title={selectedTaskIds.size === filteredTasks.length ? "Deseleccionar todo" : "Seleccionar todo"}
-                                    aria-label={selectedTaskIds.size === filteredTasks.length ? "Deseleccionar todo" : "Seleccionar todo"}
+                                    title={selectedTaskIds.size === filteredTasks.length ? "Deseleccionar" : "Seleccionar todo"}
+                                    aria-label={selectedTaskIds.size === filteredTasks.length ? "Deseleccionar" : "Seleccionar todo"}
                                     type="button"
                                 >
-                                    {selectedTaskIds.size === filteredTasks.length ? "Deseleccionar todo" : "Seleccionar todo"}
+                                    {selectedTaskIds.size === filteredTasks.length ? "Deseleccionar" : "Seleccionar todo"}
                                 </button>
                                 <button
                                     className="todolist-bulk-delete-btn"
