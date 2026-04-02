@@ -211,3 +211,83 @@ export const fetchAcademicPeriods = async () => {
     return [];
   }
 };
+
+/**
+ * Crea un nuevo período académico
+ * @param {object} payload - Datos del período
+ * @param {string|number} payload.idUsuario - ID del usuario administrador
+ * @param {string} payload.nombre - Nombre del período
+ * @param {string} payload.fechaInicio - Fecha de inicio (YYYY-MM-DD)
+ * @param {string} payload.fechaFinal - Fecha final (YYYY-MM-DD)
+ * @returns {Promise<{success:boolean, message:string, data?:any}>}
+ */
+export const createAcademicPeriod = async ({ idUsuario, nombre, fechaInicio, fechaFinal }) => {
+  const endpoint = import.meta.env.VITE_API_ADD_ACADEMIC_PERIOD;
+
+  if (!endpoint) {
+    return {
+      success: false,
+      message: "VITE_API_ADD_ACADEMIC_PERIOD no configurado"
+    };
+  }
+
+  const safeUserId = String(idUsuario || "").trim();
+  const safeName = String(nombre || "").trim();
+  const safeStart = String(fechaInicio || "").trim();
+  const safeEnd = String(fechaFinal || "").trim();
+
+  if (!safeUserId || !safeName || !safeStart || !safeEnd) {
+    return {
+      success: false,
+      message: "Faltan campos obligatorios para crear el período"
+    };
+  }
+
+  const requestBody = {
+    idUsuario: safeUserId,
+    nombre: safeName,
+    fechaInicio: safeStart,
+    fechaFinal: safeEnd
+  };
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    let parsedBody = null;
+    try {
+      parsedBody = await response.json();
+    } catch {
+      parsedBody = null;
+    }
+
+    if (!response.ok) {
+      const backendMessage =
+        parsedBody?.message ||
+        parsedBody?.error ||
+        `Error ${response.status} al crear período académico`;
+
+      return {
+        success: false,
+        message: backendMessage,
+        data: parsedBody
+      };
+    }
+
+    return {
+      success: true,
+      message: parsedBody?.message || "Período académico creado correctamente",
+      data: parsedBody
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error?.message || "No se pudo conectar con el servicio de períodos"
+    };
+  }
+};
