@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import './LogInForm.css';
 import LDAPservice from './services/LDAPservice';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import Modal from './components/Account/Modal';
 
 //Imagenes y logos
 import Logo from './assets/logo.png';
@@ -24,12 +25,16 @@ const LogInForm = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [loginFeedback, setLoginFeedback] = useState('');
+    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setIsFeedbackModalOpen(false);
+        setLoginFeedback('');
 
         if (!userId.trim() || !password.trim()) {
             setError("Por favor ingresa usuario y contraseña");
@@ -63,10 +68,12 @@ const LogInForm = () => {
 
                 setError("Tu usuario no tiene permisos para acceder a la aplicación");
             } else {
-                setError(result.message || "Usuario o contraseña incorrectos");
+                setLoginFeedback(result.message || "Usuario o contraseña incorrectos");
+                setIsFeedbackModalOpen(true);
             }
         } else {
-            setError("Error al conectar con el servidor");
+            setLoginFeedback("Credenciales incorrectas");
+            setIsFeedbackModalOpen(true);
         }
     };
 
@@ -102,6 +109,11 @@ const LogInForm = () => {
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </span>
                     </div>
+                    {error && (
+                        <div className="error-message" style={{ color: 'red', marginBottom: '10px', textAlign: 'center' }}>
+                            {error}
+                        </div>
+                    )}
                     <div className="rememberForgot">
                         <Link to="/RecoverPassword">Olvidé mi contraseña</Link>
                         <label><input type="checkbox" required /> Acepto los términos y condiciones</label> {/*Poner la politica de términos y condiciones*/}
@@ -109,6 +121,15 @@ const LogInForm = () => {
                     <button type="submit" className="btn">Iniciar Sesión</button>
                 </form>
             </div>
+
+            <Modal
+                isOpen={isFeedbackModalOpen}
+                onClose={() => setIsFeedbackModalOpen(false)}
+                title="No fue posible iniciar sesión"
+                closeLabel="Entendido"
+            >
+                <p>{loginFeedback}</p>
+            </Modal>
         </div>
     );
 }

@@ -41,19 +41,18 @@ const normalizeRoles = (roles) => {
 export const createAuthSession = ({ userId, token = "", roles = [] }) => {
     const safeUserId = String(userId || "").trim();
     if (!safeUserId) return;
+    const safeToken = String(token || "").trim();
 
     const session = {
         userId: safeUserId,
-        token: String(token || ""),
+        token: safeToken,
         roles: normalizeRoles(roles),
         createdAt: Date.now()
     };
 
     writeSession(session);
-    if (session.token) {
-        // Mantener compatibilidad con código legado que aún lee este valor.
-        localStorage.setItem("token", session.token);
-    }
+    // Mantener compatibilidad con código legado que aún lee este valor global.
+    localStorage.setItem("token", safeToken);
 };
 
 export const getAuthSession = () => readSession();

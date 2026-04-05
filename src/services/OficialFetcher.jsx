@@ -42,7 +42,17 @@ function OficialFetcher({ onDataLoaded, userId, academicPeriod }) {
         }
         
         console.log("Fetching official schedule:", url);
-        const response = await fetch(url);
+        // Cabecera Authorization.
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
+
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Authorization": token,
+          },
+        });
+
         const json = await response.json(); // Convierte respuesta en un json
         if (!json || json.length === 0) {
           // Si no tiene datos:

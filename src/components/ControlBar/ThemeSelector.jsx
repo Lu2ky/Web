@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import "../../styles/ThemeSelector.css";
 import { IoColorPalette } from "react-icons/io5";
 import { getCategories } from "../../services/categoriesService";
+import { getColorPalette, saveColorPalette } from "../../services/colorService";
 import { THEME_OPTIONS } from "./ThemeOptions";
 
 // Temas disponibles, por Id, nombre y paleta según etiqueta de la materia (o tema)
 
 // Componente selector de temas
-export const ThemeSelector = ({ onThemeChange }) => {
+export const ThemeSelector = ({ userId, onThemeChange }) => {
     const [is_modal_open, set_is_modal_open] = useState(false);
     const [current_theme, set_current_theme] = useState("default");
     const [is_saved_anim, set_is_saved_anim] = useState(false);
@@ -15,6 +16,27 @@ export const ThemeSelector = ({ onThemeChange }) => {
     const [categories, set_categories] = useState([]); // Carga de categorias 
 
     const MODAL_CLOSE_DURATION = 150; // ms, debe coincidir con App.css
+
+    const resolveThemeId = (paletteValue) => {
+        const value = String(paletteValue || "").trim();
+        if (!value) return null;
+
+        const byId = THEME_OPTIONS.find((theme) => theme.id === value);
+        if (byId) return byId.id;
+
+        const lowered = value.toLowerCase();
+        const byName = THEME_OPTIONS.find((theme) => String(theme.name || "").toLowerCase() === lowered);
+        return byName ? byName.id : null;
+    };
+
+    const unwrapApiScalar = (value) => {
+        if (value == null) return value;
+        if (typeof value !== "object") return value;
+        if (value.Valid === false) return null;
+        if (value.String != null) return value.String;
+        if (value.value != null) return value.value;
+        return value;
+    };
 
     // Calcular el color de letra para cada tema según su paleta, usando la función de contraste para asegurar legibilidad
     const getContrastColor = (hex) => {
@@ -62,6 +84,20 @@ export const ThemeSelector = ({ onThemeChange }) => {
             });
         });
 
+        // Guardar el tema en la API si hay userId
+        if (userId) {
+            const selectedTheme = THEME_OPTIONS.find((theme) => theme.id === theme_id);
+            const paletteToSave = selectedTheme?.name || theme_id;
+
+            saveColorPalette(userId, paletteToSave)
+                .then((result) => {
+                    console.log("[ThemeSelector] Color palette saved:", result);
+                })
+                .catch((error) => {
+                    console.error("[ThemeSelector] Error saving color palette:", error);
+                });
+        }
+
         // Notificar al componente padre
         if (onThemeChange) {
             onThemeChange(theme_id);
@@ -93,6 +129,46 @@ export const ThemeSelector = ({ onThemeChange }) => {
             is_mounted = false;
         };
     }, []);
+
+    // Cargar paleta de colores guardada del usuario
+    useEffect(() => {
+        let is_mounted = true;
+
+        if (userId) {
+            // Cargar la paleta guardada del usuario
+            getColorPalette(userId)
+                .then((palette) => {
+                    if (is_mounted && palette) {
+                        // Soporta respuestas como string, { palette }, { data: { palette } }, y estructuras legacy.
+                        const paletteValue =
+                            (typeof palette === "string" ? palette : null) ||
+                            unwrapApiScalar(palette.palette) ||
+                            unwrapApiScalar(palette?.data?.palette) ||
+                            unwrapApiScalar(palette.id) ||
+                            palette.paletteId ||
+                            palette.themeName;
+
+                        const paletteId = resolveThemeId(paletteValue);
+                        
+                        // Verificar que el ID existe en THEME_OPTIONS
+                        if (paletteId && THEME_OPTIONS.find(t => t.id === paletteId)) {
+                            set_current_theme(paletteId);
+                            if (onThemeChange) {
+                                onThemeChange(paletteId);
+                            }
+                            console.log("[ThemeSelector] Loaded saved palette:", paletteId);
+                        }
+                    }
+                })
+                .catch((error) => {
+                    console.log("[ThemeSelector] Could not load saved palette (expected on first load):", error);
+                });
+        }
+
+        return () => {
+            is_mounted = false;
+        };
+    }, [userId]);
 
     useEffect(() => {
         const handleCloseUnrelatedUi = (event) => {

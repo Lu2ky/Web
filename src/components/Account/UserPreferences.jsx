@@ -1,7 +1,36 @@
 import { useState, useEffect } from "react";
 import { FaEdit, FaTimes, FaCheck } from "react-icons/fa";
 import * as userService from "../../services/userService";
+import * as notificationsSilenceService from "../../services/notificationsSilenceService";
+import Modal from "./Modal";
 import "./UserPreferences.css";
+
+function parseAnticipationMinutes(userData) {
+    const rawValue = userData?.antelacionNotis ?? userData?.tiempoMute ?? userData?.anticipationTime;
+
+    if (!rawValue) {
+        return 0;
+    }
+
+    if (typeof rawValue === "string" && rawValue.includes(":")) {
+        const parts = rawValue.split(":");
+        const hours = parseInt(parts[0], 10) || 0;
+        const minutes = parseInt(parts[1], 10) || 0;
+        return hours * 60 + minutes;
+    }
+
+    if (typeof rawValue === "object") {
+        const hours = parseInt(rawValue.hours ?? rawValue.horas ?? 0, 10) || 0;
+        const minutes = parseInt(rawValue.minutes ?? rawValue.minutos ?? 0, 10) || 0;
+        return hours * 60 + minutes;
+    }
+
+    if (typeof rawValue === "number") {
+        return rawValue;
+    }
+
+    return 0;
+}
 
 export default function UserPreferences({ userId, onClose }) {
     const [userData, setUserData] = useState(null);
@@ -21,17 +50,9 @@ export default function UserPreferences({ userId, onClose }) {
     const [isSavingAnticipation, setIsSavingAnticipation] = useState(false);
 
     // Estado de silenciamiento de notificaciones
-    const [isEditingMute, setIsEditingMute] = useState(false);
     const [muteInfo, setMuteInfo] = useState(null);
     const [isSavingMute, setIsSavingMute] = useState(false);
-    const [selectedMutePreset, setSelectedMutePreset] = useState(null);
-
-    // Presets de silenciado
-    const MUTE_PRESETS = [
-        { minutes: 480, label: "8 h" },
-        { minutes: 1440, label: "1 día" },
-        { minutes: 10080, label: "1 semana" }
-    ];
+    const [showMuteConfirmModal, setShowMuteConfirmModal] = useState(false);
 
     // Cargar datos del usuario al montar el componente
     useEffect(() => {
@@ -41,18 +62,8 @@ export default function UserPreferences({ userId, onClose }) {
 
     const loadMuteInfo = () => {
         try {
-            const stored = localStorage.getItem("notificationsMute");
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                // Verificar si sigue activo
-                if (parsed.muteUntil && Date.now() < parsed.muteUntil) {
-                    setMuteInfo(parsed);
-                } else {
-                    // Expirado, limpiar
-                    localStorage.removeItem("notificationsMute");
-                    setMuteInfo(null);
-                }
-            }
+            const muteStatus = notificationsSilenceService.getMuteStatus();
+            setMuteInfo(muteStatus);
         } catch (err) {
             console.error("Error loading mute info:", err);
         }
@@ -72,30 +83,7 @@ export default function UserPreferences({ userId, onClose }) {
                 const userData = Array.isArray(data) ? data[0] : data;
                 setUserData(userData);
                 setNewEmail(userData.email || userData.correo || "");
-                
-                // Extraer tiempo de anticipación desde 'antelacionNotis' (formato TIME: HH:MM:SS)
-                let totalMinutes = 0;
-                const antelacionField = userData.antelacionNotis;
-                
-                if (antelacionField) {
-                    // Si es una cadena en formato TIME (HH:MM:SS)
-                    if (typeof antelacionField === 'string' && antelacionField.includes(':')) {
-                        const parts = antelacionField.split(':');
-                        const hours = parseInt(parts[0]) || 0;
-                        const minutes = parseInt(parts[1]) || 0;
-                        totalMinutes = hours * 60 + minutes;
-                    } 
-                    // Si es un objeto con propiedades de horas y minutos
-                    else if (typeof antelacionField === 'object' && antelacionField !== null) {
-                        const hours = parseInt(antelacionField.hours || antelacionField.horas || 0) || 0;
-                        const minutes = parseInt(antelacionField.minutes || antelacionField.minutos || 0) || 0;
-                        totalMinutes = hours * 60 + minutes;
-                    }
-                    // Si ya es un número (minutos totales)
-                    else if (typeof antelacionField === 'number') {
-                        totalMinutes = antelacionField;
-                    }
-                }
+                const totalMinutes = parseAnticipationMinutes(userData);
                 
                 setAnticipationHours(Math.floor(totalMinutes / 60));
                 setAnticipationMinutes(totalMinutes % 60);
@@ -190,25 +178,7 @@ export default function UserPreferences({ userId, onClose }) {
 
     const handleCancelAnticipation = () => {
         setIsEditingAnticipation(false);
-        
-        // Restaurar desde userData
-        let totalMinutes = 0;
-        const antelacionField = userData?.antelacionNotis;
-        
-        if (antelacionField) {
-            if (typeof antelacionField === 'string' && antelacionField.includes(':')) {
-                const parts = antelacionField.split(':');
-                const hours = parseInt(parts[0]) || 0;
-                const minutes = parseInt(parts[1]) || 0;
-                totalMinutes = hours * 60 + minutes;
-            } else if (typeof antelacionField === 'object' && antelacionField !== null) {
-                const hours = parseInt(antelacionField.hours || antelacionField.horas || 0) || 0;
-                const minutes = parseInt(antelacionField.minutes || antelacionField.minutos || 0) || 0;
-                totalMinutes = hours * 60 + minutes;
-            } else if (typeof antelacionField === 'number') {
-                totalMinutes = antelacionField;
-            }
-        }
+        const totalMinutes = parseAnticipationMinutes(userData);
         
         setAnticipationHours(Math.floor(totalMinutes / 60));
         setAnticipationMinutes(totalMinutes % 60);
@@ -234,24 +204,7 @@ export default function UserPreferences({ userId, onClose }) {
             return;
         }
 
-        // Obtener minutos totales actuales desde userData
-        let currentTotalMinutes = 0;
-        const antelacionField = userData?.antelacionNotis;
-        
-        if (antelacionField) {
-            if (typeof antelacionField === 'string' && antelacionField.includes(':')) {
-                const parts = antelacionField.split(':');
-                const h = parseInt(parts[0]) || 0;
-                const m = parseInt(parts[1]) || 0;
-                currentTotalMinutes = h * 60 + m;
-            } else if (typeof antelacionField === 'object' && antelacionField !== null) {
-                const h = parseInt(antelacionField.hours || antelacionField.horas || 0) || 0;
-                const m = parseInt(antelacionField.minutes || antelacionField.minutos || 0) || 0;
-                currentTotalMinutes = h * 60 + m;
-            } else if (typeof antelacionField === 'number') {
-                currentTotalMinutes = antelacionField;
-            }
-        }
+        const currentTotalMinutes = parseAnticipationMinutes(userData);
         
         if (totalMinutes === currentTotalMinutes) {
             setError("El nuevo tiempo debe ser diferente al actual");
@@ -267,7 +220,8 @@ export default function UserPreferences({ userId, onClose }) {
                 setSuccess("Tiempo de anticipación actualizado exitosamente");
                 setUserData({
                     ...userData,
-                    antelacionNotis: totalMinutes
+                    antelacionNotis: totalMinutes,
+                    tiempoMute: totalMinutes
                 });
                 setIsEditingAnticipation(false);
                 
@@ -285,73 +239,63 @@ export default function UserPreferences({ userId, onClose }) {
     };
 
     // Mute notifications handlers
-    const handleEditMute = () => {
-        setIsEditingMute(true);
-        setSelectedMutePreset(null);
+    const handleOpenMuteModal = () => {
+        setShowMuteConfirmModal(true);
         setError("");
         setSuccess("");
     };
 
     const handleCancelMute = () => {
-        setIsEditingMute(false);
-        setSelectedMutePreset(null);
-        setError("");
+        setShowMuteConfirmModal(false);
     };
 
-    const applyMutePreset = (minutes) => {
-        setSelectedMutePreset(minutes);
-    };
-
-    const handleSaveMute = (e) => {
-        e.preventDefault();
+    const handleConfirmMute = async () => {
+        setShowMuteConfirmModal(false);
+        setIsSavingMute(true);
         setError("");
         setSuccess("");
 
-        if (selectedMutePreset === null) {
-            setError("Por favor selecciona una duración");
-            return;
-        }
-
-        const totalMinutes = selectedMutePreset;
-
-        setIsSavingMute(true);
-
         try {
-            const now = Date.now();
-            const muteUntil = now + totalMinutes * 60 * 1000;
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
+            const result = await notificationsSilenceService.silenceNotifications(userId);
 
-            const payload = {
-                enabled: true,
-                hours,
-                minutes,
-                totalMinutes,
-                muteUntil,
-                createdAt: now,
-                userId,
-            };
-
-            localStorage.setItem("notificationsMute", JSON.stringify(payload));
-            setMuteInfo(payload);
-            setSuccess("Notificaciones silenciadas correctamente");
-            setIsEditingMute(false);
-            setSelectedMutePreset(null);
-
-            setTimeout(() => setSuccess(""), 3000);
+            if (result.success) {
+                setMuteInfo(result.data);
+                setSuccess("Notificaciones silenciadas correctamente");
+                setTimeout(() => setSuccess(""), 3000);
+            } else {
+                setError(result.error || "Error al silenciar notificaciones");
+                setTimeout(() => setError(""), 4000);
+            }
         } catch (err) {
             setError("Error al silenciar notificaciones");
             console.error(err);
+            setTimeout(() => setError(""), 4000);
         } finally {
             setIsSavingMute(false);
         }
     };
 
-    const handleUnmute = () => {
-        localStorage.removeItem("notificationsMute");
-        setMuteInfo(null);
-        setSuccess("Notificaciones reactivadas");
-        setTimeout(() => setSuccess(""), 3000);
+    const handleUnmute = async () => {
+        setIsSavingMute(true);
+        setError("");
+        setSuccess("");
+
+        try {
+            const result = await notificationsSilenceService.activateNotifications(userId);
+
+            if (result.success) {
+                setMuteInfo(null);
+                setSuccess("Notificaciones reactivadas correctamente");
+                setTimeout(() => setSuccess(""), 3000);
+            } else {
+                setError(result.error || "Error al reactivar notificaciones");
+            }
+        } catch (err) {
+            setError("Error al reactivar notificaciones");
+            console.error(err);
+        } finally {
+            setIsSavingMute(false);
+        }
     };
 
     if (loading) {
@@ -444,76 +388,55 @@ export default function UserPreferences({ userId, onClose }) {
                 <div className="pref-group">
                     <label className="pref-label">Silenciar Notificaciones</label>
                     
-                    {muteInfo?.enabled && muteInfo?.muteUntil ? (
+                    {muteInfo?.enabled ? (
                         <div className="mute-status-badge">
                             <span className="mute-status-indicator">●</span>
                             <div className="mute-status-content">
-                                <p className="mute-status-text">Silenciadas</p>
-                                <p className="mute-status-until">
-                                    Hasta {new Date(muteInfo.muteUntil).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                                </p>
+                                <p className="mute-status-text">Notificaciones silenciadas</p>
                             </div>
                             <button
                                 type="button"
                                 className="email-action-btn email-cancel-btn"
                                 onClick={handleUnmute}
                                 title="Reactivar notificaciones"
+                                disabled={isSavingMute}
                             >
                                 <FaTimes />
                             </button>
                         </div>
-                    ) : null}
-
-                    {!isEditingMute && (!muteInfo?.enabled || !muteInfo?.muteUntil) ? (
+                    ) : (
                         <button
                             type="button"
                             className="mute-toggle-btn"
-                            onClick={handleEditMute}
+                            onClick={handleOpenMuteModal}
                             disabled={isSavingMute}
                         >
                             Silenciar Notificaciones
                         </button>
-                    ) : isEditingMute ? (
-                        <form onSubmit={handleSaveMute} className="mute-edit-form">
-                            <div className="mute-preset-section">
-                                <label className="pref-label">Duración predefinida</label>
-                                <div className="mute-preset-chips">
-                                    {MUTE_PRESETS.map((preset) => (
-                                        <button
-                                            key={preset.minutes}
-                                            type="button"
-                                            className={`time-chip ${selectedMutePreset === preset.minutes ? "active" : ""}`}
-                                            onClick={() => applyMutePreset(preset.minutes)}
-                                        >
-                                            {preset.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="time-actions">
-                                <button
-                                    type="submit"
-                                    className="email-action-btn email-save-btn"
-                                    disabled={isSavingMute || selectedMutePreset === null}
-                                    title="Guardar"
-                                >
-                                    <FaCheck />
-                                </button>
-                                <button
-                                    type="button"
-                                    className="email-action-btn email-cancel-btn"
-                                    onClick={handleCancelMute}
-                                    disabled={isSavingMute}
-                                    title="Cancelar"
-                                >
-                                    <FaTimes />
-                                </button>
-                            </div>
-                        </form>
-                    ) : null}
+                    )}
                 </div>
             </section>
+
+            {/* Modal de confirmación para silenciar */}
+            <Modal
+                isOpen={showMuteConfirmModal}
+                onClose={handleCancelMute}
+                title="¿Silenciar notificaciones?"
+                confirmLabel="Sí, silenciar"
+                closeLabel="Cancelar"
+                onConfirm={isSavingMute ? null : handleConfirmMute}
+            >
+                {isSavingMute ? (
+                    <div style={{ textAlign: "center", padding: "1rem" }}>
+                        <div className="spinner" style={{ marginBottom: "1rem" }}></div>
+                        <p style={{ color: "#6b7280", marginTop: "1rem" }}>Silenciando notificaciones...</p>
+                    </div>
+                ) : (
+                    <p style={{ color: "#4b5563", lineHeight: "1.6" }}>
+                        Se desactivarán todas tus notificaciones. ¿Deseas continuar?
+                    </p>
+                )}
+            </Modal>
 
             {/* Reminder Anticipation Section */}
             <section className="preferences-section">

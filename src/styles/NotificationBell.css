@@ -146,3 +146,41 @@
     text-align: center;
     color: #6b7280;
 }
+
+/* Estilos para notificaciones silenciadas */
+.notification-bell-button.muted {
+    opacity: 0.6;
+    color: #9ca3af;
+}
+
+.notification-bell-button.muted:hover {
+    opacity: 0.8;
+    color: #6b7280;
+}
+
+.notification-bell-muted-indicator {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 1.2rem;
+    color: #f59e0b;
+}
+
+.notification-status-muted {
+    padding: 10px 12px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-bottom: 2px solid #f59e0b;
+    font-weight: 600;
+    color: #78350f;
+    text-align: center;
+}
+
+.muted-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #f59e0b;
+    color: #fff;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}

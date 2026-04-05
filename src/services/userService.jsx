@@ -10,8 +10,35 @@
 // ============================================================================
 
 const GET_USER_DATA_ENDPOINT = import.meta.env.VITE_API_GET_USER_DATA;
-const CONFIG_NOTIFICATION_ENDPOINT = import.meta.env.VITE_API_UPDATE_USER_EMAIL || import.meta.env.VITE_API_UPDATE_REMINDER_ANTICIPATION;
+const UPDATE_USER_EMAIL_ENDPOINT = import.meta.env.VITE_API_UPDATE_USER_EMAIL || import.meta.env.VITE_API_UPDATE_REMINDER_ANTICIPATION;
+const UPDATE_REMINDER_ANTICIPATION_ENDPOINT = import.meta.env.VITE_API_UPDATE_REMINDER_ANTICIPATION || import.meta.env.VITE_API_UPDATE_USER_EMAIL;
 const CHANGE_PASSWORD_ENDPOINT = import.meta.env.VITE_API_CHANGE_PASSWORD || import.meta.env.VITE_API_PASSWORD_CHANGE;
+
+function toTimeMuteValue(value) {
+    if (typeof value === "string" && value.includes(":")) {
+        const parts = value.split(":");
+        const hours = Math.max(0, parseInt(parts[0], 10) || 0);
+        const minutes = Math.max(0, parseInt(parts[1], 10) || 0);
+        const seconds = Math.max(0, parseInt(parts[2], 10) || 0);
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+        const normalizedMinutes = Math.max(0, Math.floor(value));
+        const hours = Math.floor(normalizedMinutes / 60);
+        const minutes = normalizedMinutes % 60;
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
+    }
+
+    if (value && typeof value === "object") {
+        const hours = Math.max(0, parseInt(value.hours ?? value.horas ?? 0, 10) || 0);
+        const minutes = Math.max(0, parseInt(value.minutes ?? value.minutos ?? 0, 10) || 0);
+        const seconds = Math.max(0, parseInt(value.seconds ?? value.segundos ?? 0, 10) || 0);
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    return "00:00:00";
+}
 
 function buildPasswordEndpointCandidates(rawEndpoint) {
     const normalized = String(rawEndpoint || "").trim();
@@ -58,7 +85,8 @@ function validatePasswordComplexity(password) {
 }
 
 // Registrar endpoints para depuración
-console.log("Config Notification Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
+console.log("Update User Email Endpoint:", UPDATE_USER_EMAIL_ENDPOINT);
+console.log("Update Reminder Anticipation Endpoint:", UPDATE_REMINDER_ANTICIPATION_ENDPOINT);
 
 /**
  * Obtiene datos del usuario por su ID
@@ -111,7 +139,7 @@ export async function updateUserEmail(userId, newEmail) {
         return null;
     }
 
-    if (!CONFIG_NOTIFICATION_ENDPOINT) {
+    if (!UPDATE_USER_EMAIL_ENDPOINT) {
         const message = "Falta configurar VITE_API_UPDATE_USER_EMAIL para guardar el correo del perfil";
         console.error(message);
         return { success: false, message };
@@ -141,11 +169,8 @@ export async function updateUserEmail(userId, newEmail) {
 
     console.log("Current antelacionNotis:", currentAnticipation);
 
-    // Validar formato TIME (debe ser HH:MM:SS)
-    if (typeof currentAnticipation !== 'string' || !currentAnticipation.includes(':')) {
-        console.warn("antelacionNotis format invalid, using default");
-        currentAnticipation = "00:00:00";
-    }
+    // Normaliza formato de tiempoMute (HH:MM:SS) incluso si llega como minutos u objeto.
+    currentTimeMute = toTimeMuteValue(currentTimeMute);
 
     const payload = {
         idUsuario: actualUserId,
@@ -155,9 +180,9 @@ export async function updateUserEmail(userId, newEmail) {
 
     try {
         console.log("Updating email with payload:", payload);
-        console.log("Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
+        console.log("Endpoint:", UPDATE_USER_EMAIL_ENDPOINT);
 
-        const res = await fetch(CONFIG_NOTIFICATION_ENDPOINT, {
+        const res = await fetch(UPDATE_USER_EMAIL_ENDPOINT, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -283,7 +308,7 @@ export async function updateReminderAnticipation(userId, minutes) {
     // Validar máximo 24 horas (1440 minutos)
     const validatedMinutes = Math.min(Math.max(0, parseInt(minutes)), 1440);
 
-    if (!CONFIG_NOTIFICATION_ENDPOINT) {
+    if (!UPDATE_REMINDER_ANTICIPATION_ENDPOINT) {
         const message = "Falta configurar VITE_API_UPDATE_REMINDER_ANTICIPATION para guardar el tiempo de anticipación";
         console.error(message);
         return { success: false, message };
@@ -321,9 +346,9 @@ export async function updateReminderAnticipation(userId, minutes) {
 
     try {
         console.log("Updating reminder anticipation with payload:", payload);
-        console.log("Endpoint:", CONFIG_NOTIFICATION_ENDPOINT);
+        console.log("Endpoint:", UPDATE_REMINDER_ANTICIPATION_ENDPOINT);
 
-        const res = await fetch(CONFIG_NOTIFICATION_ENDPOINT, {
+        const res = await fetch(UPDATE_REMINDER_ANTICIPATION_ENDPOINT, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
