@@ -47,7 +47,7 @@ const LogInForm = () => {
             const isSuccess = result.success || result.status === 'success' || result.valid === true || Boolean(result.data);
             
             if (isSuccess) {
-                const token = result?.token ?? result?.accessToken ?? result?.key ?? "";
+                const token = result?.token ?? result?.jwt_token ?? "";
                 const roles = Array.isArray(result?.role)
                     ? result.role
                     : Array.isArray(result?.roles)
