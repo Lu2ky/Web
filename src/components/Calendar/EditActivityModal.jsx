@@ -9,6 +9,43 @@ import { useState, useEffect } from "react";
 import "../../styles/AddActivityButton.css";
 import { updatePersonalActivity } from "../../services/PersonalFetcher";
 
+const normalizeDateForInput = (value) => {
+  if (!value) return "";
+
+  const raw = String(value).trim();
+  const isoDate = raw.match(/^(\d{4}-\d{2}-\d{2})$/);
+  if (isoDate) return isoDate[1];
+
+  const dateTime = raw.match(/^(\d{4}-\d{2}-\d{2})[ T]\d{2}:\d{2}(?::\d{2})?$/);
+  if (dateTime) return dateTime[1];
+
+  const parsed = new Date(raw.replace(" ", "T"));
+  if (Number.isNaN(parsed.getTime())) return "";
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const normalizeTimeForInput = (value) => {
+  if (!value) return "";
+  const raw = String(value).trim();
+
+  const strict = raw.match(/^(\d{2}):(\d{2})(?::\d{2})?$/);
+  if (strict) return `${strict[1]}:${strict[2]}`;
+
+  const embedded = raw.match(/(?:^|[ T])(\d{2}):(\d{2})(?::\d{2})?(?:$|\b)/);
+  if (embedded) return `${embedded[1]}:${embedded[2]}`;
+
+  const parsed = new Date(raw.replace(" ", "T"));
+  if (Number.isNaN(parsed.getTime())) return "";
+
+  const hours = String(parsed.getHours()).padStart(2, "0");
+  const minutes = String(parsed.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
 function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activity = {}, onUpdated = () => {} }) {
   const [formData, setFormData] = useState({
     title: "",
@@ -28,10 +65,10 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
         title: activity.name || activity.activity_name || activity.subject_name || "",
         description: activity.description || "",
         day: activity.day || "",
-        startHour: activity.start_time || activity.start_hour || "",
-        endHour: activity.end_time || activity.end_hour || "",
-        dateStart: activity.date_start || "",
-        dateEnd: activity.date_end || ""
+        startHour: normalizeTimeForInput(activity.start_time || activity.start_hour || ""),
+        endHour: normalizeTimeForInput(activity.end_time || activity.end_hour || ""),
+        dateStart: normalizeDateForInput(activity.date_start || ""),
+        dateEnd: normalizeDateForInput(activity.date_end || "")
       });
     }
   }, [activity]);
@@ -70,8 +107,8 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
         day: formData.day,
         startHour: formData.startHour,
         endHour: formData.endHour,
-        dateStart: formData.dateStart ? new Date(formData.dateStart).toISOString() : new Date().toISOString(),
-        dateEnd: formData.dateEnd ? new Date(formData.dateEnd).toISOString() : new Date().toISOString()
+        dateStart: formData.dateStart,
+        dateEnd: formData.dateEnd
       };
 
       const resp = await updatePersonalActivity(userId, activity.id || activity.id_course, payload);
@@ -132,10 +169,10 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
         <input type="time" name="endHour" value={formData.endHour} onChange={handleChange} />
 
         <label>Fecha inicio</label>
-        <input type="date" name="dateStart" value={formData.dateStart ? formData.dateStart.split('T')[0] : ''} onChange={handleChange} />
+        <input type="date" name="dateStart" value={formData.dateStart} onChange={handleChange} />
 
         <label>Fecha fin</label>
-        <input type="date" name="dateEnd" value={formData.dateEnd ? formData.dateEnd.split('T')[0] : ''} onChange={handleChange} />
+        <input type="date" name="dateEnd" value={formData.dateEnd} onChange={handleChange} />
 
         <div className="modalActions">
           <button 

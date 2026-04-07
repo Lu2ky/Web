@@ -334,7 +334,11 @@ function ToDoList({ userId = "" }) {
         if (userId && taskToDelete) {
             const apiId = taskToDelete.recordatorioId ?? taskToDelete.id;
             try {
-                await ReminderService.deleteReminder(apiId);
+                const userData = await getUserData(userId);
+                const userObj = Array.isArray(userData) ? userData[0] : userData;
+                const actualUserId = userObj?.idUsuario || userObj?.id || userId;
+
+                await ReminderService.deleteReminder(apiId, actualUserId);
             } catch (err) {
                 console.error("Error al eliminar recordatorio en servidor:", err);
             }

@@ -56,8 +56,17 @@ export const PopUpPersonal = ({
   };
 
   const handleDeleteClick = () => {
-    if (personalData?.id) {
-      onDelete(personalData.id);
+    const activityId =
+      personalData?.id ??
+      data?.id ??
+      personalData?.id_course ??
+      data?.id_course ??
+      personalData?.apiData?.id_course ??
+      personalData?.apiData?.N_idcourse ??
+      personalData?.apiData?.N_idCourse;
+
+    if (activityId) {
+      onDelete(activityId);
       handle_close();
     } else {
       console.error("❌ No hay ID disponible para eliminar. personalData:", personalData);
@@ -208,7 +217,13 @@ export const PopUpPersonal = ({
       <EditActivityModal
         isOpen={isEditOpen}
         onClose={handleCloseEdit}
-        userId={data?.apiData?.id_user || data?.apiData?.ID_USER}
+        userId={
+          userId ||
+          data?.apiData?.id_user ||
+          data?.apiData?.ID_USER ||
+          data?.apiData?.idUsuario ||
+          data?.apiData?.N_idUsuario
+        }
         activity={data}
         onUpdated={handleUpdated}
       />

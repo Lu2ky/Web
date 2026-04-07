@@ -161,19 +161,26 @@ function formatTimeWithColons(time) {
 
 async function resolveIdUsuario(userId) {
   const userData = await getUserData(userId);
-  console.log("userData completa:", userData);
-  
+
   const rawUser = Array.isArray(userData) ? userData[0] : userData;
-  const idUsuario = rawUser?.idUsuario ?? rawUser?.N_idUsuario;
+  const idUsuario =
+    unwrapApiScalar(rawUser?.idUsuario) ??
+    unwrapApiScalar(rawUser?.N_idUsuario) ??
+    unwrapApiScalar(rawUser?.id_user) ??
+    unwrapApiScalar(rawUser?.ID_USER) ??
+    unwrapApiScalar(rawUser?.id) ??
+    unwrapApiScalar(rawUser?.N_idUser);
 
-  console.log("idUsuario resuelto:", idUsuario);
-  console.log("Propiedades disponibles en rawUser:", Object.keys(rawUser || {}));
-
-  if (!idUsuario) {
-    throw new Error("No se pudo resolver idUsuario desde userService");
+  if (idUsuario != null && idUsuario !== "") {
+    return idUsuario;
   }
 
-  return idUsuario;
+  const numericFallback = Number(userId);
+  if (Number.isFinite(numericFallback) && numericFallback > 0) {
+    return numericFallback;
+  }
+
+  throw new Error("No se pudo resolver idUsuario desde userService");
 }
 
 // Normaliza datos de actividades personales desde la API
@@ -471,11 +478,14 @@ export const deletePersonalActivity = async (userId, activityId) => {
   try {
     const baseUrl = import.meta.env.VITE_API_DELETE_PERSONAL_ACTIVITY;
     const codUsuario = getSessionCodUsuario();
+    const idUsuario = await resolveIdUsuario(userId);
 
     // Logs de depuración de deletePersonalActivity removidos
 
     const payload = {
       IdPersonalSchedule: activityId,
+      id_user: idUsuario,
+      idUsuario,
       codUsuario
     };
 
@@ -513,6 +523,10 @@ export const deletePersonalActivity = async (userId, activityId) => {
       console.error("Error al parsear respuesta JSON:", parseError);
       console.error("Respuesta recibida:", bodyText);
       throw new Error(`Error al parsear respuesta: ${parseError.message}`);
+    }
+
+    if (data?.success === false) {
+      throw new Error(data?.message || "El servidor rechazo la eliminacion de la actividad personal");
     }
     
     return data;
@@ -596,6 +610,10 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
       console.error("Error al parsear respuesta JSON:", parseError);
       console.error("Respuesta recibida:", bodyText);
       throw new Error(`Error al parsear respuesta: ${parseError.message}`);
+    }
+
+    if (data?.success === false) {
+      throw new Error(data?.message || "El servidor rechazo la actualizacion de la actividad personal");
     }
     console.log("Actividad actualizada:", data);
     
