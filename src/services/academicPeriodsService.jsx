@@ -329,6 +329,7 @@ export const createAcademicPeriod = async ({ idUsuario, nombre, fechaInicio, fec
   const safeName = String(nombre || "").trim();
   const safeStart = String(fechaInicio || "").trim();
   const safeEnd = String(fechaFinal || "").trim();
+  const userIdAsInt = Number.parseInt(safeUserRaw, 10);
 
   if (!safeUserRaw || !safeName || !safeStart || !safeEnd) {
     return {
@@ -336,14 +337,6 @@ export const createAcademicPeriod = async ({ idUsuario, nombre, fechaInicio, fec
       message: "Faltan campos obligatorios para crear el período"
     };
   }
-
-  const requestBody = {
-    idUsuario: safeUserId,
-    nombre: safeName,
-    fechaInicio: safeStart,
-    fechaFinal: safeEnd,
-    codUsuario
-  };
 
   if (!Number.isInteger(userIdAsInt)) {
     logAcademicPeriodsError("createAcademicPeriod: invalid user ID", { 
@@ -362,7 +355,8 @@ export const createAcademicPeriod = async ({ idUsuario, nombre, fechaInicio, fec
       idUsuario: userIdAsInt,
       nombre: safeName,
       fechaInicio: safeStart,
-      fechaFinal: safeEnd
+      fechaFinal: safeEnd,
+      codUsuario
     },
     defaultError: (status) => `Error ${status} al crear período académico`
   });

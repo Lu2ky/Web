@@ -78,10 +78,11 @@ describe("academicPeriodsService.createAcademicPeriod", () => {
     expect(url).toBe("http://api.local/insert");
     expect(request.method).toBe("POST");
     expect(JSON.parse(request.body)).toEqual({
-      idUsuario: "501",
+      idUsuario: 501,
       nombre: "2026-10",
       fechaInicio: "2026-01-10",
-      fechaFinal: "2026-06-20"
+      fechaFinal: "2026-06-20",
+      codUsuario: ""
     });
   });
 
