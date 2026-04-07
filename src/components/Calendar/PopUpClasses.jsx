@@ -217,7 +217,7 @@ export const PopUpClasses = ({
     set_comments((prev) => prev.filter((comment) => comment.id !== comment_id));
 
     try {
-      await deleteComment(comment_id);
+      await deleteComment(comment_id, commentCourseId);
       setReloadKey((k) => k + 1);
     } catch (err) {
       set_comments(previousComments);
@@ -246,7 +246,7 @@ export const PopUpClasses = ({
     setEditText("");
 
     try {
-      await updateComment(comment_id, trimmed);
+      await updateComment(comment_id, trimmed, commentCourseId);
       setReloadKey((k) => k + 1);
     } catch (err) {
       set_comments(previousComments);

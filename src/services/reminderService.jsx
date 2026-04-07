@@ -7,6 +7,9 @@
 // ============================================================================
 
 // Variables de entorno para endpoints API (cargadas dinámicamente)
+import { getSessionCodUsuario } from "./authSession";
+
+// Variables de entorno para endpoints API (cargadas dinámicamente)
 const REMINDERS_TAGS_API_BASE = import.meta.env.VITE_API_URL_REMINDERS_TAGS_USER;
 const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER;
 const DELETE_REMINDER_ENDPOINT = import.meta.env.VITE_API_DELETE_REMINDER;
@@ -434,6 +437,8 @@ class ReminderService {
 			return null;
 		}
 
+		const codUsuario = getSessionCodUsuario();
+
 		// Extraer etiquetas custom (filtrar tags sintéticos de prioridad)
 		const tags = Array.isArray(reminder.tags)
 			? reminder.tags
@@ -456,6 +461,7 @@ class ReminderService {
 			P_tag3: tags[2] ?? null,
 			P_tag4: tags[3] ?? null,
 			P_tag5: tags[4] ?? null,
+			codUsuario,
 		};
 	}
 
@@ -530,9 +536,10 @@ class ReminderService {
 	/* Elimina un recordatorio por ID */
 	static async deleteReminder(reminderId) {
 		if (!reminderId) return;
+		const codUsuario = getSessionCodUsuario();
 		return this.postUpdate(
 			DELETE_REMINDER_ENDPOINT,
-			{ N_idRecordatorio: reminderId },
+			{ N_idRecordatorio: reminderId, codUsuario },
 			"Error al eliminar recordatorio"
 		);
 	}
@@ -564,12 +571,15 @@ class ReminderService {
 		}
 		
 		console.log("[deleteMultipleReminders] Sending payload:", { idRecordatorios: validIds, idUsuario: userId });
+		const codUsuario = getSessionCodUsuario();
+		const idsCsv = validIds.join(",");
 		
 		return this.postUpdate(
 			DELETE_MULTIPLE_REMINDERS_ENDPOINT,
 			{ 
-				idRecordatorios: validIds,
-				idUsuario: userId
+				idRecordatorios: idsCsv,
+				idUsuario: userId,
+				codUsuario
 			},
 			"Error al eliminar recordatorios múltiples"
 		);

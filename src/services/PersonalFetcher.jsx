@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import LoadingModal from "./LoadingModal";
 import { getUserData } from "./userService";
+import { getSessionCodUsuario } from "./authSession";
 
 // Mapa para convertir números de día a nombres de días
 const dayMap = {
@@ -369,6 +370,7 @@ function PersonalFetcher({ onDataLoaded, userId, academicPeriod }) {
 export const addPersonalActivity = async (userId, activityData) => {
   try {
     const baseUrl = import.meta.env.VITE_API_ADD_PERSONAL_ACTIVITY;
+    const codUsuario = getSessionCodUsuario();
     
     // Obtener el día como número (1 = Lunes, 7 = Domingo)
     const dayMap = {
@@ -407,7 +409,8 @@ export const addPersonalActivity = async (userId, activityData) => {
       date_end: formattedDateEnd,
       start_hour: formatTimeWithColons(activityData.startHour),
       end_hour: formatTimeWithColons(activityData.endHour),
-      day: dayMap[activityData.day] || 1
+      day: dayMap[activityData.day] || 1,
+      codUsuario
     };
 
     console.log("Enviando actividad a la API:", payload);
@@ -467,11 +470,13 @@ export const addPersonalActivity = async (userId, activityData) => {
 export const deletePersonalActivity = async (userId, activityId) => {
   try {
     const baseUrl = import.meta.env.VITE_API_DELETE_PERSONAL_ACTIVITY;
+    const codUsuario = getSessionCodUsuario();
 
     // Logs de depuración de deletePersonalActivity removidos
 
     const payload = {
-      IdPersonalSchedule: activityId
+      IdPersonalSchedule: activityId,
+      codUsuario
     };
 
     // Log de payload removido
@@ -527,6 +532,7 @@ export const deletePersonalActivity = async (userId, activityId) => {
 export const updatePersonalActivity = async (userId, activityId, updates) => {
   try {
     const baseUrl = import.meta.env.VITE_API_UPDATE_PERSONAL_ACTIVITY;
+    const codUsuario = getSessionCodUsuario();
 
     const dayMap = {
       "Lunes": 1,
@@ -552,7 +558,8 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
       date_end: formattedDateEnd,
       start_hour: formatTimeWithColons(updates.startHour),
       end_hour: formatTimeWithColons(updates.endHour),
-      day: dayMap[updates.day] || 1
+      day: dayMap[updates.day] || 1,
+      codUsuario
     };
 
     console.log("Actualizando actividad:", payload);

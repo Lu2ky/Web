@@ -8,6 +8,7 @@
 // - Cambiar contraseña
 // - Configurar notificaciones (anticipación)
 // ============================================================================
+import { getSessionCodUsuario } from "./authSession";
 
 const GET_USER_DATA_ENDPOINT = import.meta.env.VITE_API_GET_USER_DATA;
 const UPDATE_USER_EMAIL_ENDPOINT = import.meta.env.VITE_API_UPDATE_USER_EMAIL || import.meta.env.VITE_API_UPDATE_REMINDER_ANTICIPATION;
@@ -170,12 +171,14 @@ export async function updateUserEmail(userId, newEmail) {
     console.log("Current antelacionNotis:", currentAnticipation);
 
     // Normaliza formato de tiempoMute (HH:MM:SS) incluso si llega como minutos u objeto.
-    currentTimeMute = toTimeMuteValue(currentTimeMute);
+    currentAnticipation = toTimeMuteValue(currentAnticipation);
+    const codUsuario = getSessionCodUsuario() || String(userId || "").trim();
 
     const payload = {
         idUsuario: actualUserId,
         correo: newEmail.trim(),
-        antelacionNotis: currentAnticipation
+        antelacionNotis: currentAnticipation,
+        codUsuario
     };
 
     try {
@@ -337,11 +340,13 @@ export async function updateReminderAnticipation(userId, minutes) {
 
     const currentEmail = (currentUser?.correo || currentUser?.email || "").trim();
     console.log("Current email:", currentEmail);
+    const codUsuario = getSessionCodUsuario() || String(userId || "").trim();
 
     const payload = {
         idUsuario: actualUserId,
         correo: currentEmail,
-        antelacionNotis: antelacionNotis
+        antelacionNotis: antelacionNotis,
+        codUsuario
     };
 
     try {

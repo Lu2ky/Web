@@ -57,6 +57,11 @@ export const createAuthSession = ({ userId, token = "", roles = [] }) => {
 
 export const getAuthSession = () => readSession();
 
+export const getSessionCodUsuario = () => {
+    const session = readSession();
+    return String(session?.userId || "").trim();
+};
+
 export const isAuthenticated = () => {
     const session = readSession();
     return Boolean(session?.userId);

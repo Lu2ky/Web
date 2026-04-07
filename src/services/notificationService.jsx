@@ -8,6 +8,7 @@
 
 // Utilidad para obtener notificaciones. El endpoint debe estar configurado
 // en la variable de entorno  VITE_API_URL_NOTIFICATIONS.
+import { getSessionCodUsuario } from "./authSession";
 
 const NOTIFICATIONS_BASE = import.meta.env.VITE_API_URL_NOTIFICATIONS || "";
 const ADD_NOTIFICATION_ENDPOINT = import.meta.env.VITE_API_ADD_NOTIFICATION;
@@ -268,11 +269,12 @@ export async function acknowledgeNotifications(ids, userId) {
     }
 
     const responses = [];
+    const codUsuario = getSessionCodUsuario() || String(userId || "").trim();
 
     for (const batch of batches) {
         const idsCsv = batch.join(",");
         // Mantener el payload exactamente igual al caso validado en Postman.
-        const payload = { ids: idsCsv };
+        const payload = { ids: idsCsv, codUsuario };
 
         const res = await fetch(DELETE_NOTIFICATIONS_ENDPOINT, {
             method: "POST",

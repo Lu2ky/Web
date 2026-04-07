@@ -1,4 +1,5 @@
 // Utilidad de servicio para varios endpoints relacionados con etiquetas
+import { getSessionCodUsuario } from "./authSession";
 
 const TAGS_USER_URL = import.meta.env.VITE_API_URL_TAGS_USER;
 
@@ -43,8 +44,8 @@ export async function getTagsByUserAndCourse(userId, courseId) {
 
 export async function deleteTag(tagId, userId) {
     if (!tagId) return;
-    // El backend espera body: { idTag: tagId, idUsuario: userId }
-    const payload = { idTag: tagId, idUsuario: userId };
+    const codUsuario = getSessionCodUsuario();
+    const payload = { idTag: tagId, codUsuario };
     const res = await fetch(DELETE_TAG_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

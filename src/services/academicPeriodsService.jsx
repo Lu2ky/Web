@@ -335,7 +335,7 @@ export const createAcademicPeriod = async ({ idUsuario, nombre, fechaInicio, fec
     };
   }
 
-  const userIdAsInt = await resolveUserIdInt(safeUserRaw);
+  const requestBody = {
 
   if (!Number.isInteger(userIdAsInt)) {
     logAcademicPeriodsError("createAcademicPeriod: invalid user ID", { 

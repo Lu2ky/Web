@@ -1,4 +1,5 @@
 const ADD_COMMENT_ENDPOINT = import.meta.env.VITE_API_ADD_COMMENT;
+import { getSessionCodUsuario } from "./authSession";
 
 const normalizeId = (value) => {
     if (value === null || value === undefined || value === "") return null;
@@ -15,11 +16,12 @@ const normalizeId = (value) => {
  * @param {string} params.courseName - Curso
  * @param {string} params.comment - T_comentario
  */
-export default async function addComment({ scheduleId, userId, courseId, courseName, comment }) {
+export default async function addComment({ scheduleId, userId, courseId, courseName, comment, codUsuario: codUsuarioInput }) {
     const safeScheduleId = normalizeId(scheduleId);
     const safeUserId = normalizeId(userId);
     const safeCourseId = normalizeId(courseId);
     const safeComment = String(comment ?? "").trim();
+    const codUsuario = String(codUsuarioInput || getSessionCodUsuario() || "").trim();
 
     if (!safeScheduleId || !safeUserId || !safeCourseId || !safeComment) {
         throw new Error(`addComment invalid payload: scheduleId=${safeScheduleId}, userId=${safeUserId}, courseId=${safeCourseId}, commentLen=${safeComment.length}`);
@@ -31,6 +33,7 @@ export default async function addComment({ scheduleId, userId, courseId, courseN
         N_idCurso: safeCourseId,
         Curso: courseName,
         T_comentario: safeComment,
+        codUsuario,
     };
 
     if (!ADD_COMMENT_ENDPOINT) {
