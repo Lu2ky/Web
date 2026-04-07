@@ -1,0 +1,99 @@
+.addPeriodCard {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  min-height: 500px;
+  padding: 1.6rem;
+  border-radius: 1rem;
+  background: #ffffff;
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(white, white),
+    linear-gradient(120deg, #ff4f73 0%, #ff5db1 45%, #8a3bf3 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: 0 14px 28px rgba(138, 59, 243, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.addPeriodCard__header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #1f2b4a;
+}
+
+.addPeriodCard__header p {
+  margin: 0.45rem 0 0;
+  color: #4b5563;
+}
+
+.addPeriodCard__form {
+  margin-top: 1.2rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.addPeriodCard__field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.addPeriodCard__field span {
+  font-weight: 600;
+  color: #1f2b4a;
+}
+
+.addPeriodCard__field input {
+  border: 1px solid #d1d5db;
+  border-radius: 0.6rem;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.98rem;
+  color: #111827;
+}
+
+.addPeriodCard__field input:focus {
+  outline: none;
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+}
+
+.addPeriodCard__submit {
+  border: none;
+  border-radius: 0.65rem;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(120deg, #ff4f73 0%, #ff5db1 45%, #8a3bf3 100%);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.addPeriodCard__submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(138, 59, 243, 0.28);
+}
+
+.addPeriodCard__submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.addPeriodCard__message {
+  margin: 0;
+  font-weight: 600;
+}
+
+.addPeriodCard__message--error {
+  color: #b91c1c;
+}
+
+.addPeriodCard__message--success {
+  color: #047857;
+}
+
+@media (max-width: 700px) {
+  .addPeriodCard {
+    padding: 1rem;
+  }
+}

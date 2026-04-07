@@ -41,10 +41,10 @@ export async function getTagsByUserAndCourse(userId, courseId) {
     return rawData.map(normalizeTag).filter(Boolean);
 }
 
-export async function deleteTag(tagId) {
+export async function deleteTag(tagId, userId) {
     if (!tagId) return;
-    // El backend espera body: { idTag: { IdTag: tagId } }
-    const payload = { idTag: { IdTag: tagId } };
+    // El backend espera body: { idTag: tagId, idUsuario: userId }
+    const payload = { idTag: tagId, idUsuario: userId };
     const res = await fetch(DELETE_TAG_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

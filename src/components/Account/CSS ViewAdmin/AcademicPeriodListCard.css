@@ -1,0 +1,176 @@
+.academicPeriodListCard {
+  width: 100%;
+  border-radius: 1rem;
+  padding: 1.2rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.academicPeriodListCard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.academicPeriodListCard__header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 1.1rem;
+}
+
+.academicPeriodListCard__refresh {
+  border: 1px solid #d1d5db;
+  background: #f8fafc;
+  color: #1f2937;
+  border-radius: 0.55rem;
+  padding: 0.45rem 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.academicPeriodListCard__refresh:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.academicPeriodListCard__message {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.academicPeriodListCard__message--error {
+  color: #b91c1c;
+}
+
+.academicPeriodListCard__message--success {
+  color: #047857;
+}
+
+.academicPeriodListCard__state {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.92rem;
+}
+
+.academicPeriodListCard__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.7rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.academicPeriodListCard__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  background: #fcfcfd;
+}
+
+.academicPeriodListCard__details {
+  min-width: 0;
+}
+
+.academicPeriodListCard__name {
+  margin: 0;
+  color: #111827;
+  font-weight: 700;
+}
+
+.academicPeriodListCard__dates {
+  margin: 0.2rem 0 0;
+  color: #6b7280;
+  font-size: 0.86rem;
+}
+
+.academicPeriodListCard__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.academicPeriodListCard__actions .edit-button {
+  margin-right: 0;
+  border-radius: 0.4rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.academicPeriodListCard__actions .edit-button:hover {
+  background: #f3f4f6;
+  color: #16a34a;
+}
+
+.academicPeriodListCard__editForm {
+  width: 100%;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.academicPeriodListCard__editForm input {
+  border: 1px solid #d1d5db;
+  border-radius: 0.55rem;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.92rem;
+}
+
+.academicPeriodListCard__editForm input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.academicPeriodListCard__editActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.academicPeriodListCard__editActions button {
+  border: none;
+  border-radius: 0.55rem;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.academicPeriodListCard__editActions button:first-child {
+  background: #0f766e;
+  color: #fff;
+}
+
+.academicPeriodListCard__editActions button:last-child {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.academicPeriodListCard__editActions button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .academicPeriodListCard {
+    padding: 1rem;
+  }
+
+  .academicPeriodListCard__item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .academicPeriodListCard__actions {
+    align-self: flex-end;
+  }
+}

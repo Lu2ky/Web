@@ -2,27 +2,31 @@ import { useState, useCallback } from "react";
 import Header from "./components/Navegation/Header";
 import DropArea from "./components/Account/JSX ViewAdmin/DropArea";
 import ModalArchivo from "./components/Account/JSX ViewAdmin/ModalArchivo";
+import AddAcademicPeriodCard from "./components/Account/JSX ViewAdmin/AddAcademicPeriodCard";
+import { getAuthSession } from "./services/authSession";
+import AcademicPeriodListCard from "./components/Account/JSX ViewAdmin/AcademicPeriodListCard";
 import { parseExcelFile } from "./components/Account/JSX ViewAdmin/exelParce";
 import { importSchedule } from "./services/importScheduleService";
 import "./AdminView.css";
 
 function AdminView() {
+  const session = getAuthSession();
+  const userId = session?.userId ?? null;
+
   const [fileName, setFileName] = useState('');
-  const [parsedJson, setParsedJson] = useState(null);
   const [parseError, setParseError] = useState('');
   const [importStatus, setImportStatus] = useState('');
+  const [periodRefreshToken, setPeriodRefreshToken] = useState(0);
 
   const handleFiles = useCallback(async (files) => {
     if (!files?.length) return;
     const [first] = files;
     setFileName(first?.name || '');
     setParseError('');
-    setParsedJson(null);
     setImportStatus('');
 
     try {
       const parsed = await parseExcelFile(first);
-      setParsedJson(parsed);
       console.log('Archivo parseado:', parsed);
 
       setImportStatus('enviando');
@@ -38,6 +42,10 @@ function AdminView() {
     }
   }, []);
 
+  const handlePeriodCreated = useCallback(() => {
+    setPeriodRefreshToken((value) => value + 1);
+  }, []);
+
   return (
     <div className="adminViewContainer">
       <div className="adminView__header">
@@ -47,7 +55,7 @@ function AdminView() {
 
         <div className="adminView__overview">
           <div className="page">
-            <div className="card">
+            <div className="card adminPanel--import">
               <ModalArchivo
                 label="Subir Archivo"
                 accept=".xlsx"
@@ -66,6 +74,11 @@ function AdminView() {
               {importStatus === 'enviando' && <p style={{ color: '#888' }}>Enviando horario...</p>}
               {importStatus === 'ok' && <p style={{ color: 'green' }}>Horario importado correctamente.</p>}
               {importStatus === 'error' && <p style={{ color: 'red' }}>Error al enviar el horario a la API.</p>}
+            </div>
+
+            <div className="card adminPanel--period">
+              <AddAcademicPeriodCard userId={userId} onCreated={handlePeriodCreated} />
+              <AcademicPeriodListCard userId={userId} refreshToken={periodRefreshToken} />
             </div>
           </div>
         </div>

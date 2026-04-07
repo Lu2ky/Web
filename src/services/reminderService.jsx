@@ -22,29 +22,44 @@ const UPDATE_TAGS_ENDPOINT = import.meta.env.VITE_API_UPDATE_TAGS_REMINDER;
 
 class ReminderService {
 	static async postUpdate(endpoint, payload, errorContext) {
+		console.log(`[ReminderService] postUpdate starting — endpoint: ${endpoint}`);
+		console.log(`[ReminderService] postUpdate — context: ${errorContext}`);
+		console.log(`[ReminderService] postUpdate — payload:`, payload);
 
-
-		const response = await fetch(endpoint, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(payload),
-		});
-
-		const responseText = await response.text();
-
-		if (!response.ok) {
-			const suffix = responseText ? ` - ${responseText}` : "";
-			throw new Error(`${errorContext}: ${response.status}${suffix}`);
-		}
-
-		// Parsear y devolver el JSON, no el objeto Response
 		try {
-			return JSON.parse(responseText);
-		} catch (e) {
-			console.warn(`[ReminderService] Could not parse JSON response:`, e);
-			return { success: response.ok, responseText };
+			console.log(`[ReminderService] postUpdate — fetching from: ${endpoint}`);
+			const response = await fetch(endpoint, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(payload),
+			});
+
+			console.log(`[ReminderService] postUpdate — response status: ${response.status}`);
+			const responseText = await response.text();
+			console.log(`[ReminderService] postUpdate — response text:`, responseText);
+
+			if (!response.ok) {
+				const suffix = responseText ? ` - ${responseText}` : "";
+				const errorMsg = `${errorContext}: ${response.status}${suffix}`;
+				console.error(`[ReminderService] postUpdate — ERROR: ${errorMsg}`);
+				throw new Error(errorMsg);
+			}
+
+			// Parsear y devolver el JSON, no el objeto Response
+			try {
+				const parsedResponse = JSON.parse(responseText);
+				console.log(`[ReminderService] postUpdate — SUCCESS, parsed response:`, parsedResponse);
+				return parsedResponse;
+			} catch (e) {
+				console.warn(`[ReminderService] postUpdate — Could not parse JSON response:`, e);
+				return { success: response.ok, responseText };
+			}
+		} catch (error) {
+			console.error(`[ReminderService] postUpdate — EXCEPTION in fetch:`, error);
+			console.error(`[ReminderService] postUpdate — error message:`, error.message);
+			throw error;
 		}
 	}
 
@@ -561,55 +576,44 @@ class ReminderService {
 	}
 
 	/* Actualiza el estado (completado/no completado) de un recordatorio */
-	/* Si se proporciona el objeto task completo, usa el nuevo endpoint unificado.
-	   Si solo se proporciona el ID, usa el endpoint antiguo (fallback). */
+	/* Construye un payload con solo el estado y los demás campos en null
+	   para usar el endpoint unificado de editar recordatorio */
 	static async updateState(reminderId, state, taskComplete = null) {
-		if (!reminderId) return;
+		console.log("[ReminderService] updateState called with:", { reminderId, state, taskComplete });
+		
+		if (!reminderId) {
+			console.warn("[ReminderService] updateState — reminderId is empty, aborting");
+			return;
+		}
 		
 		// Convertir booleano al formato apropiado
 		const stateValue = typeof state === 'boolean' ? state : Boolean(state);
+		console.log("[ReminderService] updateState — stateValue converted to:", stateValue);
 		
-		// Si se proporciona el task completo, usar el nuevo endpoint unificado
-		if (taskComplete && taskComplete.id) {
+		// Construir payload con solo el ID y el estado (sin campos null)
+		const payload = {
+			P_idToDo: reminderId,
+			P_estado: stateValue
+		};
 		
-			
-			// Crear un nuevo objeto task con el estado actualizado
-			const updatedTask = {
-				...taskComplete,
-				completed: stateValue
-			};
-			
-			// Construir payload usando el método auxiliar
-			const payload = this._buildUnifiedUpdatePayload(updatedTask);
-			if (!payload) {
-				console.warn("[ReminderService] updateState — failed to build payload, falling back to legacy endpoint");
-				// Fallback al endpoint antiguo
-				return this.postUpdate(
-					UPDATE_STATE_ENDPOINT,
-					{ P_idToDo: reminderId, P_estado: stateValue },
-					"Error al actualizar estado de recordatorio"
-				);
-			}
-			
-			try {
-				await this.postUpdate(
-					UPDATE_REMINDER_UNIFIED_ENDPOINT,
-					payload,
-					"Error al actualizar estado de recordatorio"
-				);
-				
-			} catch (error) {
-				console.error("[ReminderService] updateState — error with unified endpoint:", error);
-				throw error;
-			}
-		} else {
-			// Fallback: usar el endpoint antiguo (si el backend aún lo soporta)
-			
-			return this.postUpdate(
-				UPDATE_STATE_ENDPOINT,
-				{ P_idToDo: reminderId, P_estado: stateValue },
+		console.log("[ReminderService] updateState — payload built:", payload);
+		console.log("[ReminderService] updateState — using endpoint:", UPDATE_REMINDER_UNIFIED_ENDPOINT);
+		
+		try {
+			console.log("[ReminderService] updateState — sending request to unified endpoint...");
+			const response = await this.postUpdate(
+				UPDATE_REMINDER_UNIFIED_ENDPOINT,
+				payload,
 				"Error al actualizar estado de recordatorio"
 			);
+			console.log("[ReminderService] updateState — SUCCESS, response:", response);
+			return response;
+			
+		} catch (error) {
+			console.error("[ReminderService] updateState — FAILED with error:", error);
+			console.error("[ReminderService] updateState — error message:", error.message);
+			console.error("[ReminderService] updateState — error stack:", error.stack);
+			throw error;
 		}
 	}
 
