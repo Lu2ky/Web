@@ -13,18 +13,6 @@ async function LDAPservice(userId, password) {
             console.error("LDAP endpoint no configurado");
             return null;
         }
-
-        console.log("[LDAP] Request prepared:", {
-            url: baseUrl,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: {
-                user: userId,
-                pass: password ? "[PROTECTED]" : ""
-            }
-        });
         
         const response = await fetch(`${baseUrl}`, {
             method: "POST", 
@@ -35,12 +23,6 @@ async function LDAPservice(userId, password) {
                 user: userId,
                 pass: password
             }), // Convierte el objeto a JSON
-        });
-
-        console.log("[LDAP] Response received:", {
-            status: response.status,
-            ok: response.ok,
-            contentType: response.headers.get("content-type") || ""
         });
 
         const contentType = response.headers.get("content-type") || "";
@@ -55,10 +37,7 @@ async function LDAPservice(userId, password) {
                 keys: Object.keys(rawBody),
                 hasSuccess: Object.prototype.hasOwnProperty.call(rawBody, "success"),
                 hasToken: Object.prototype.hasOwnProperty.call(rawBody, "token")
-                    || Object.prototype.hasOwnProperty.call(rawBody, "jwt_token")
-                    || Object.prototype.hasOwnProperty.call(rawBody, "accessToken")
-                    || Object.prototype.hasOwnProperty.call(rawBody, "access_token")
-                    || Object.prototype.hasOwnProperty.call(rawBody, "key"),
+                    || Object.prototype.hasOwnProperty.call(rawBody, "jwt_token"),
                 hasRole: Object.prototype.hasOwnProperty.call(rawBody, "role")
                     || Object.prototype.hasOwnProperty.call(rawBody, "roles")
             }
@@ -93,11 +72,7 @@ async function LDAPservice(userId, password) {
         console.error("[LDAP] Unexpected HTTP error:", response.status);
         throw new Error(`Error HTTP: ${response.status}`);
     } catch (error) {
-        console.error("[LDAP] Request failed before completing:", {
-            name: error?.name,
-            message: error?.message,
-            stack: error?.stack
-        });
+        console.error("Error al validar usuario:", error);
         return null;
     }
 }
