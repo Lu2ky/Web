@@ -13,6 +13,18 @@ async function LDAPservice(userId, password) {
             console.error("LDAP endpoint no configurado");
             return null;
         }
+
+        console.log("[LDAP] Request prepared:", {
+            url: baseUrl,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: {
+                user: userId,
+                pass: password ? "[PROTECTED]" : ""
+            }
+        });
         
         const response = await fetch(`${baseUrl}`, {
             method: "POST", 
@@ -25,10 +37,37 @@ async function LDAPservice(userId, password) {
             }), // Convierte el objeto a JSON
         });
 
+        console.log("[LDAP] Response received:", {
+            status: response.status,
+            ok: response.ok,
+            contentType: response.headers.get("content-type") || ""
+        });
+
         const contentType = response.headers.get("content-type") || "";
         const rawBody = contentType.includes("application/json")
             ? await response.json()
             : await response.text();
+
+        console.log("[LDAP] Raw response body:", rawBody);
+
+        const normalizedBody = typeof rawBody === "object" && rawBody !== null
+            ? {
+                keys: Object.keys(rawBody),
+                hasSuccess: Object.prototype.hasOwnProperty.call(rawBody, "success"),
+                hasToken: Object.prototype.hasOwnProperty.call(rawBody, "token")
+                    || Object.prototype.hasOwnProperty.call(rawBody, "jwt_token")
+                    || Object.prototype.hasOwnProperty.call(rawBody, "accessToken")
+                    || Object.prototype.hasOwnProperty.call(rawBody, "access_token")
+                    || Object.prototype.hasOwnProperty.call(rawBody, "key"),
+                hasRole: Object.prototype.hasOwnProperty.call(rawBody, "role")
+                    || Object.prototype.hasOwnProperty.call(rawBody, "roles")
+            }
+            : {
+                type: typeof rawBody,
+                length: String(rawBody || "").length
+            };
+
+        console.log("[LDAP] Normalized response shape:", normalizedBody);
 
         if (response.ok) {
             return rawBody;
@@ -40,15 +79,25 @@ async function LDAPservice(userId, password) {
                 ? rawBody?.message
                 : String(rawBody || "").trim();
 
+            console.warn("[LDAP] Auth rejected by backend:", {
+                status: response.status,
+                message: backendMessage || "Usuario o contraseña incorrectos"
+            });
+
             return {
                 success: false,
                 message: backendMessage || "Usuario o contraseña incorrectos"
             };
         }
 
+        console.error("[LDAP] Unexpected HTTP error:", response.status);
         throw new Error(`Error HTTP: ${response.status}`);
     } catch (error) {
-        console.error("Error al validar usuario:", error);
+        console.error("[LDAP] Request failed before completing:", {
+            name: error?.name,
+            message: error?.message,
+            stack: error?.stack
+        });
         return null;
     }
 }
