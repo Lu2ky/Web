@@ -3,6 +3,7 @@
 // ============================================================================
 // Obtiene, crea, actualiza y elimina períodos académicos.
 // ============================================================================
+import { getSessionCodUsuario } from "./authSession";
 
 const PERIOD_NAME_KEYS = [
   "nombre",
@@ -315,6 +316,7 @@ export const fetchAcademicPeriods = async () => {
 
 export const createAcademicPeriod = async ({ idUsuario, nombre, fechaInicio, fechaFinal }) => {
   const endpoint = import.meta.env.VITE_API_ADD_ACADEMIC_PERIOD;
+  const codUsuario = getSessionCodUsuario();
 
   if (!endpoint) {
     return {
@@ -336,6 +338,12 @@ export const createAcademicPeriod = async ({ idUsuario, nombre, fechaInicio, fec
   }
 
   const requestBody = {
+    idUsuario: safeUserId,
+    nombre: safeName,
+    fechaInicio: safeStart,
+    fechaFinal: safeEnd,
+    codUsuario
+  };
 
   if (!Number.isInteger(userIdAsInt)) {
     logAcademicPeriodsError("createAcademicPeriod: invalid user ID", { 
