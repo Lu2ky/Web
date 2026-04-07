@@ -17,14 +17,17 @@ export default defineConfig({
     webServer: {
         command: "npm run dev -- --host 127.0.0.1 --port 4173",
         url: "http://127.0.0.1:4173",
-        reuseExistingServer: true,
+        reuseExistingServer: false,
         timeout: 120000,
         env: {
+            VITE_API_URL_LDAP: "/LDAPservice",
             VITE_API_URL_OFICIAL_SCHEDULE: "/api/oficial/",
             VITE_API_URL_PERSONAL_SCHEDULE: "/api/personal/",
             VITE_API_URL_COURSE_TYPES: "/api/categories",
             VITE_API_URL_REMINDERS_TAGS_USER: "/api/reminders",
             VITE_API_URL_NOTIFICATIONS: "/api/notifications/",
+            VITE_API_NOTIFICATIONS_SILENCE: "/api/stop-all-notifications",
+            VITE_API_NOTIFICATIONS_ACTIVATE: "/api/restore-notifications",
             VITE_API_GET_USER_DATA: "/api/get-user/",
             VITE_API_CHANGE_PASSWORD: "/api/auth/changepassword",
             VITE_API_URL_TAGS_USER: "/api/tags-by-user/",
