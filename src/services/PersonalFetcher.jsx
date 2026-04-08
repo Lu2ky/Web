@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import LoadingModal from "./LoadingModal";
+import LoadingModal from "./loadingModal";
 import { getUserData } from "./userService";
 import { getSessionCodUsuario } from "./authSession";
 
