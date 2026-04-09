@@ -8,7 +8,14 @@ export async function getCategories() {
 
     try { // Llama a la API 
         const baseUrl = import.meta.env.VITE_API_URL_COURSE_TYPES;
-        const response = await fetch(baseUrl);
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
+
+        const response = await fetch(baseUrl, {
+            headers: {
+                "Authorization": token,
+            },
+        });
 
         if (!response.ok) {
             //console.error(baseUrl); // Log de la URL para depuración

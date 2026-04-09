@@ -11,7 +11,7 @@ Props:
  */
 function LoadingModal({
     isOpen, 
-    title = "Cargando información",
+    title = "cargando información",
 }) {
     const [simulatedProgress, setSimulatedProgress] = useState(0); // Progreso simulado para animación
 
@@ -42,7 +42,6 @@ function LoadingModal({
     useEffect(() => {
         if (!isOpen) {
             setSimulatedProgress(0);
-            setCurrentStep(0);
         }
     }, [isOpen]);
 

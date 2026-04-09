@@ -32,7 +32,16 @@ function normalizeTag(tag) {
 export async function getTagsByUserAndCourse(userId, courseId) {
     if (!userId || !courseId) return [];
     const url = `${TAGS_USER_AND_COURSE_URL}${userId}/${courseId}`;
-    const res = await fetch(url);
+    // Cabecera Authorization.
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
+    const res = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": token,
+        },
+    });
     if (!res.ok) {
         console.error("getTagsByUserAndCourse failed", res.status);
         return [];
@@ -46,9 +55,17 @@ export async function deleteTag(tagId, userId) {
     if (!tagId) return;
     const codUsuario = getSessionCodUsuario();
     const payload = { idTag: tagId, codUsuario };
+
+    // Cabecera Authorization.
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const res = await fetch(DELETE_TAG_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token,
+        },
         body: JSON.stringify(payload),
     });
     if (!res.ok) {
@@ -61,7 +78,16 @@ export async function deleteTag(tagId, userId) {
 export async function getTagsByReminder(userId, reminderId) {
     if (!userId || !reminderId) return [];
     const url = `${TAGS_REMINDER_URL}${userId}/${reminderId}`;
-    const res = await fetch(url);
+    // Cabecera Authorization.
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
+    const res = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": token,
+        },
+    });
     if (!res.ok) {
         console.error("getTagsByReminder failed", res.status);
         return [];
@@ -75,9 +101,17 @@ export async function deleteTagsForReminder(reminderId) {
     if (!reminderId) return;
     // La convención del body depende del backend; se envía un objeto simple
     const payload = { N_idRecordatorio: reminderId };
+
+    // Cabecera Authorization.
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const res = await fetch(DELETE_TAGS_REMINDER_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token,
+        },
         body: JSON.stringify(payload),
     });
     if (!res.ok) {
@@ -89,7 +123,16 @@ export async function deleteTagsForReminder(reminderId) {
 
 export async function getTagsByUser(userId) {
     if (!userId || !TAGS_USER_URL) return [];
-    const res = await fetch(`${TAGS_USER_URL}${userId}`);
+    // Cabecera Authorization.
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
+    const res = await fetch(`${TAGS_USER_URL}${userId}`, {
+        method: "GET",
+        headers: {
+            "Authorization": token,
+        },
+    });
     if (!res.ok) {
         console.error("getTagsByUser failed", res.status);
         return [];

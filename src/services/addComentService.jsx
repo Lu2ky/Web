@@ -44,9 +44,15 @@ export default async function addComment({ scheduleId, userId, courseId, courseN
         // depuración: ayuda a rastrear solicitudes fallidas en logs del navegador/servidor
         console.debug("addComment POST", ADD_COMMENT_ENDPOINT, payload);
 
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
+
         const res = await fetch(ADD_COMMENT_ENDPOINT, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token,
+            },
             body: JSON.stringify(payload),
         });
 

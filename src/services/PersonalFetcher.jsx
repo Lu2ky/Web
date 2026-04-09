@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import LoadingModal from "./loadingModal";
+import LoadingModal from "./LoadingModal";
 import { getUserData } from "./userService";
 import { getSessionCodUsuario } from "./authSession";
 
@@ -292,7 +292,14 @@ function PersonalFetcher({ onDataLoaded, userId, academicPeriod }) {
       
       console.log("Fetching personal schedule:", url);
       try {
-        const response = await fetch(url);
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
+
+        const response = await fetch(url, {
+          headers: {
+            "Authorization": token,
+          },
+        });
         
         // Verificar si la respuesta fue exitosa
         if (!response.ok) {
@@ -422,10 +429,14 @@ export const addPersonalActivity = async (userId, activityData) => {
 
     console.log("Enviando actividad a la API:", payload);
 
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const response = await fetch(baseUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": token,
       },
       body: JSON.stringify(payload)
     });
@@ -491,10 +502,14 @@ export const deletePersonalActivity = async (userId, activityId) => {
 
     // Log de payload removido
 
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const response = await fetch(baseUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": token,
       },
       body: JSON.stringify(payload)
     });
@@ -578,10 +593,14 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
 
     console.log("Actualizando actividad:", payload);
 
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const response = await fetch(baseUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": token,
       },
       body: JSON.stringify(payload)
     });

@@ -118,11 +118,14 @@ export async function getNotifications(userId) {
         try {
             const url = `${NOTIFICATIONS_BASE}${userId}`;
             console.log("[NotificationService] GET", url);
+            const tokenLocalStore = localStorage.getItem("token") || "";
+            const token = `Bearer ${tokenLocalStore}`;
             const res = await fetch(url, {
                 cache: "no-store",
                 headers: {
                     "Cache-Control": "no-cache",
                     Pragma: "no-cache",
+                    Authorization: token,
                 },
             });
             if (!res.ok) {
@@ -183,9 +186,15 @@ export async function addNotification({ todoId, name, description, issueDate }) 
         Dt_fechaEmision: issueDate
     };
 
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const res = await fetch(ADD_NOTIFICATION_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+        },
         body: JSON.stringify(payload),
     });
 
@@ -218,9 +227,15 @@ export async function addEmail({ todoId, issue, content, issueDate }) {
         Dt_fechaEmision: issueDate
     };
 
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const res = await fetch(ADD_EMAIL_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+        },
         body: JSON.stringify(payload),
     });
 
@@ -271,6 +286,9 @@ export async function acknowledgeNotifications(ids, userId) {
     const responses = [];
     const codUsuario = getSessionCodUsuario() || String(userId || "").trim();
 
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     for (const batch of batches) {
         const idsCsv = batch.join(",");
         // Mantener el payload exactamente igual al caso validado en Postman.
@@ -278,7 +296,10 @@ export async function acknowledgeNotifications(ids, userId) {
 
         const res = await fetch(DELETE_NOTIFICATIONS_ENDPOINT, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: token,
+            },
             body: JSON.stringify(payload),
         });
 

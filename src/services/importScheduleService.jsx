@@ -103,9 +103,15 @@ export async function importSchedule(rawRows) {
   for (const row of rows) {
     console.log('Enviando fila:', JSON.stringify(row, null, 2));
 
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token,
+      },
       body: JSON.stringify(row),
     });
 

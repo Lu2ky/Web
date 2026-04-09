@@ -49,9 +49,15 @@ export async function silenceNotifications(userId) {
             codUsuario: String(userId)
         };
 
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
+
         const res = await fetch(SILENCE_ENDPOINT, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token,
+            },
             body: JSON.stringify(payload)
         });
 
@@ -116,9 +122,15 @@ export async function activateNotifications(userId) {
             codUsuario: String(userId)
         };
 
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
+
         const res = await fetch(ACTIVATE_ENDPOINT, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token,
+            },
             body: JSON.stringify(payload)
         });
 

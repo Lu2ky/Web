@@ -107,7 +107,16 @@ export async function getUserData(userId) {
 
     try {
         const url = `${GET_USER_DATA_ENDPOINT}${userId}`;
-        const res = await fetch(url);
+        // Cabecera Authorization.
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
+
+        const res = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": token,
+            },
+        });
 
         if (!res.ok) {
             console.error(`getUserData failed: ${res.status}`);
@@ -185,10 +194,15 @@ export async function updateUserEmail(userId, newEmail) {
         console.log("Updating email with payload:", payload);
         console.log("Endpoint:", UPDATE_USER_EMAIL_ENDPOINT);
 
+        // Cabecera Authorization.
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
+
         const res = await fetch(UPDATE_USER_EMAIL_ENDPOINT, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": token,
             },
             body: JSON.stringify(payload),
         });
@@ -353,10 +367,15 @@ export async function updateReminderAnticipation(userId, minutes) {
         console.log("Updating reminder anticipation with payload:", payload);
         console.log("Endpoint:", UPDATE_REMINDER_ANTICIPATION_ENDPOINT);
 
+        // Cabecera Authorization.
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
+
         const res = await fetch(UPDATE_REMINDER_ANTICIPATION_ENDPOINT, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": token,
             },
             body: JSON.stringify(payload),
         });

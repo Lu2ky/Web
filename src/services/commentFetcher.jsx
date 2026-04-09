@@ -112,7 +112,14 @@ const dedupeComments = (comments) => {
 };
 
 const fetchJson = async (url) => {
-    const response = await fetch(url);
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
+    const response = await fetch(url, {
+        headers: {
+            "Authorization": token,
+        },
+    });
     if (!response.ok) {
         const text = await response.text();
         const error = new Error(`fetchComments failed: ${response.status} ${text}`);

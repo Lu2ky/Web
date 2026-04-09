@@ -40,6 +40,8 @@ export async function getColorPalette(userId) {
         const payload = {
             userId: normalizeUserId(userId),
         };
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
 
         const endpoints = buildEndpointCandidates(GET_COLORS_ENDPOINT);
         let response = null;
@@ -49,6 +51,7 @@ export async function getColorPalette(userId) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": token,
                 },
                 body: JSON.stringify(payload),
             });
@@ -94,6 +97,8 @@ export async function saveColorPalette(userId, paletteName) {
             userId: normalizeUserId(userId),
             palette: paletteName,
         };
+        const tokenLocalStore = localStorage.getItem("token") || "";
+        const token = `Bearer ${tokenLocalStore}`;
 
         const endpoints = buildEndpointCandidates(SAVE_COLORS_ENDPOINT);
         let response = null;
@@ -103,6 +108,7 @@ export async function saveColorPalette(userId, paletteName) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": token,
                 },
                 body: JSON.stringify(payload),
             });

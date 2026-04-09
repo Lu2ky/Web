@@ -14,9 +14,15 @@ export default async function deleteComment(id, courseId, codUsuarioInput) {
         codUsuario,
     };
 
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const res = await fetch(DELETE_COMMENT_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token,
+        },
         body: JSON.stringify(payload),
     });
 

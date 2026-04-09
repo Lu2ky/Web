@@ -53,7 +53,16 @@ function ToDoListTagFetcher({ onDataLoaded, userId }) {
 
             try {
                 const baseUrl = import.meta.env.VITE_API_URL_TAGS_USER;
-                const response = await fetch(`${baseUrl}${userId}`);
+                // Cabecera Authorization.
+                const tokenLocalStore = localStorage.getItem("token") || "";
+                const token = `Bearer ${tokenLocalStore}`;
+
+                const response = await fetch(`${baseUrl}${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": token,
+                    },
+                });
                 const json = await response.json();
                 const rawData = Array.isArray(json?.data)
                     ? json.data

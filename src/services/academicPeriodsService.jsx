@@ -202,10 +202,14 @@ const postJson = async ({ endpoint, requestBody, defaultError }) => {
   logAcademicPeriodsDebug("POST request", { endpoint, requestBody });
 
   try {
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": token
       },
       body: JSON.stringify(requestBody)
     });
@@ -270,7 +274,14 @@ export const fetchAcademicPeriods = async () => {
   }
 
   try {
-    const response = await fetch(endpoint);
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
+    const response = await fetch(endpoint, {
+      headers: {
+        "Authorization": token
+      }
+    });
     if (!response.ok) {
       console.error(`Error fetching academic periods: ${response.status}`);
       return [];
@@ -477,4 +488,3 @@ export const deleteAcademicPeriod = async ({ idUsuario, idPeriodo }) => {
     data: result.data
   };
 };
-

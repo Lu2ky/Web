@@ -7,15 +7,9 @@
 // ============================================================================
 
 // Variables de entorno para endpoints API (cargadas dinámicamente)
-import { getSessionCodUsuario } from "./authSession";
-
-// Variables de entorno para endpoints API (cargadas dinámicamente)
 const REMINDERS_TAGS_API_BASE = import.meta.env.VITE_API_URL_REMINDERS_TAGS_USER;
 const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER;
 const DELETE_REMINDER_ENDPOINT = import.meta.env.VITE_API_DELETE_REMINDER;
-const DELETE_MULTIPLE_REMINDERS_ENDPOINT = import.meta.env.VITE_API_DELETE_MULTIPLE_REMINDERS;
-const UPDATE_REMINDER_UNIFIED_ENDPOINT = import.meta.env.VITE_API_UPDATE_REMINDER_UNIFIED;
-// DEPRECATED: Los siguientes endpoints se reemplazan por UPDATE_REMINDER_UNIFIED_ENDPOINT
 const UPDATE_NAME_ENDPOINT = import.meta.env.VITE_API_UPDATE_REMINDER;
 const UPDATE_DESC_ENDPOINT = import.meta.env.VITE_API_UPDATE_DESCRIPTION_REMINDER;
 const UPDATE_DATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_DATE_REMINDER;
@@ -24,117 +18,31 @@ const UPDATE_STATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_STATE_REMINDER;
 const UPDATE_TAGS_ENDPOINT = import.meta.env.VITE_API_UPDATE_TAGS_REMINDER;
 
 class ReminderService {
-	static _buildEndpointCandidates(endpoint) {
-		const normalized = String(endpoint ?? "").trim();
-		if (!normalized) return [];
+	static async postUpdate(endpoint, payload, errorContext) {
+		console.log(`[ReminderService] POST ${endpoint}`, JSON.stringify(payload, null, 2));
 
-		const candidates = [normalized];
-		if (normalized.endsWith("/")) {
-			candidates.push(normalized.slice(0, -1));
-		} else {
-			candidates.push(`${normalized}/`);
+		// Cabecera Authorization.
+		const tokenLocalStore = localStorage.getItem("token") || "";
+		const token = `Bearer ${tokenLocalStore}`;
+
+		const response = await fetch(endpoint, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": token,
+			},
+			body: JSON.stringify(payload),
+		});
+
+		const responseText = await response.text();
+		console.log(`[ReminderService] Response ${response.status} from ${endpoint}:`, responseText);
+
+		if (!response.ok) {
+			const suffix = responseText ? ` - ${responseText}` : "";
+			throw new Error(`${errorContext}: ${response.status}${suffix}`);
 		}
 
-		return Array.from(new Set(candidates.filter(Boolean)));
-	}
-
-	static async postUpdate(endpoint, payload, errorContext, options = {}) {
-		const { suppressExceptionLogs = false } = options;
-		const endpointCandidates = this._buildEndpointCandidates(endpoint);
-		if (endpointCandidates.length === 0) {
-			throw new Error(`${errorContext}: endpoint no configurado`);
-		}
-
-		console.log(`[ReminderService] postUpdate starting — endpoint: ${endpointCandidates[0]}`);
-		console.log(`[ReminderService] postUpdate — context: ${errorContext}`);
-		console.log(`[ReminderService] postUpdate — payload:`, payload);
-
-		let lastError = null;
-
-		for (let index = 0; index < endpointCandidates.length; index += 1) {
-			const endpointCandidate = endpointCandidates[index];
-			const hasMoreCandidates = index < endpointCandidates.length - 1;
-
-			try {
-				console.log(`[ReminderService] postUpdate — fetching from: ${endpointCandidate}`);
-				const response = await fetch(endpointCandidate, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(payload),
-				});
-
-				console.log(`[ReminderService] postUpdate — response status: ${response.status}`);
-				const responseText = await response.text();
-				console.log(`[ReminderService] postUpdate — response text:`, responseText);
-
-				if (!response.ok) {
-					const suffix = responseText ? ` - ${responseText}` : "";
-					const errorMsg = `${errorContext}: ${response.status}${suffix}`;
-					const endpointError = new Error(errorMsg);
-
-					if (response.status === 404 && hasMoreCandidates) {
-						console.warn(`[ReminderService] postUpdate — 404 en ${endpointCandidate}, reintentando con variante de ruta`);
-						lastError = endpointError;
-						continue;
-					}
-
-					throw endpointError;
-				}
-
-				// Parsear y devolver el JSON, no el objeto Response
-				try {
-					const parsedResponse = JSON.parse(responseText);
-					if (parsedResponse?.success === false) {
-						const backendMessage =
-							parsedResponse?.message ??
-							parsedResponse?.error ??
-							"success=false";
-						throw new Error(`${errorContext}: ${backendMessage}`);
-					}
-					console.log(`[ReminderService] postUpdate — SUCCESS, parsed response:`, parsedResponse);
-					return parsedResponse;
-				} catch (e) {
-					if (e instanceof Error && e.message.startsWith(`${errorContext}:`)) {
-						throw e;
-					}
-					console.warn(`[ReminderService] postUpdate — Could not parse JSON response:`, e);
-					return { success: response.ok, responseText };
-				}
-			} catch (error) {
-				lastError = error;
-				if (suppressExceptionLogs) {
-					console.warn(`[ReminderService] postUpdate — fallback candidate failed:`, error?.message);
-				} else {
-					console.error(`[ReminderService] postUpdate — EXCEPTION in fetch:`, error);
-					console.error(`[ReminderService] postUpdate — error message:`, error?.message);
-				}
-
-				if (!hasMoreCandidates) {
-					throw error;
-				}
-			}
-		}
-
-		if (lastError) {
-			throw lastError;
-		}
-
-		throw new Error(`${errorContext}: no se pudo completar la solicitud`);
-	}
-
-	static getUnifiedUpdateEndpoint() {
-		const unified = String(UPDATE_REMINDER_UNIFIED_ENDPOINT ?? "").trim();
-		if (unified) return unified;
-
-		const legacy = String(UPDATE_NAME_ENDPOINT ?? "").trim();
-		if (legacy) {
-			console.warn("[ReminderService] VITE_API_UPDATE_REMINDER_UNIFIED vacio; usando endpoint legacy de update reminder");
-			return legacy;
-		}
-
-		return "";
+		return response;
 	}
 
 	// Crea una copia de un recordatorio existente con nombre modificado
@@ -210,11 +118,7 @@ class ReminderService {
 	static normalizeReminder(reminder, index) {
 		const priority = this.normalizePriority(
 			this.getNullableString(
-				reminder.T_Prioridad ?? 
-				reminder.P_prioridad ?? 
-				reminder.priority ?? 
-				reminder.level ?? 
-				reminder.importance
+				reminder.T_Prioridad ?? reminder.priority ?? reminder.level ?? reminder.importance
 			)
 		);
 
@@ -285,28 +189,14 @@ class ReminderService {
 			// N_idRecordatorio es la PK que espera el endpoint de eliminación
 			recordatorioId: reminder.N_idRecordatorio ?? null,
 			name: this.getNullableString(
-				reminder.T_nombre ?? 
-				reminder.P_nombre ?? 
-				reminder.name ?? 
-				reminder.title ?? 
-				reminder.reminder ?? 
-				"Recordatorio"
+				reminder.T_nombre ?? reminder.name ?? reminder.title ?? reminder.reminder ?? "Recordatorio"
 			),
 			description: this.getNullableString(
-				reminder.T_descripcion ?? 
-				reminder.P_descripcion ?? 
-				reminder.description ?? 
-				reminder.details ?? 
-				""
+				reminder.T_descripcion ?? reminder.description ?? reminder.details ?? ""
 			),
 			completed,
 			dueDate: this.getNullableString(
-				reminder.Dt_fechaVencimiento ?? 
-				reminder.P_fecha ?? 
-				reminder.dueDate ?? 
-				reminder.endDay ?? 
-				reminder.date ?? 
-				""
+				reminder.Dt_fechaVencimiento ?? reminder.dueDate ?? reminder.endDay ?? reminder.date ?? ""
 			),
 			isDeleted: this.getBoolean(reminder.B_isDeleted),
 			priority,
@@ -320,13 +210,23 @@ class ReminderService {
 		if (!userId) return [];
 
 		const url = `${REMINDERS_TAGS_API_BASE}/${userId}`;
-		const response = await fetch(url);
+		console.log("[ReminderService] getByUser URL:", url);
+
+		// Cabecera Authorization.
+		const tokenLocalStore = localStorage.getItem("token") || "";
+		const token = `Bearer ${tokenLocalStore}`;
+
+		const response = await fetch(url, {
+			method: "GET",
+			headers: {
+				"Authorization": token,
+			},
+		});
 		if (!response.ok) {
 			throw new Error(`Error al cargar recordatorios: ${response.status}`);
 		}
 
 		const payload = await response.json();
-		
 		const reminders = Array.isArray(payload)
 			? payload
 			: Array.isArray(payload?.data)
@@ -341,25 +241,9 @@ class ReminderService {
 								? [payload.data]
 								: [];
 
-		
-
-		const normalized = reminders
-			.map((reminder, index) => {
-				const norm = this.normalizeReminder(reminder, index);
-				return norm;
-			})
-			.filter((reminder, index, arr) => {
-				// Filtrar duplicados: mantener solo el primero de cada ID
-				const firstIndex = arr.findIndex(r => r.id === reminder.id);
-				if (firstIndex !== index) {
-					console.warn(`[ReminderService] Duplicate reminder ID detected: ${reminder.id}, skipping`, reminder);
-					return false;
-				}
-				return !reminder.isDeleted;
-			});
-		
-		
-		return normalized;
+		return reminders
+			.map((reminder, index) => this.normalizeReminder(reminder, index))
+			.filter(reminder => !reminder.isDeleted);
 	}
 
 	static async updateName(reminderId, name) {
@@ -367,14 +251,12 @@ class ReminderService {
 
 		const P_nombre = name;
 		const P_idToDo = reminderId;
-		const codUsuario = getSessionCodUsuario();
 
 		return this.postUpdate(
 			UPDATE_NAME_ENDPOINT,
 			{
 				P_idToDo,
 				P_nombre,
-				codUsuario,
 			},
 			"Error al actualizar nombre de recordatorio"
 		);
@@ -385,14 +267,12 @@ class ReminderService {
 
 		const P_descripcion = description;
 		const P_idToDo = reminderId;
-		const codUsuario = getSessionCodUsuario();
 
 		return this.postUpdate(
 			UPDATE_DESC_ENDPOINT,
 			{
 				P_idToDo,
 				P_descripcion,
-				codUsuario,
 			},
 			"Error al actualizar descripción de recordatorio"
 		);
@@ -474,16 +354,14 @@ class ReminderService {
 
 		const P_fecha = this.toDateTimeString(dueDate);
 		const P_idToDo = reminderId;
-		const codUsuario = getSessionCodUsuario();
 
-		
+		console.log(`[ReminderService] updateDueDate — raw: "${dueDate}" → P_fecha: "${P_fecha}"`);
 
 		return this.postUpdate(
 			UPDATE_DATE_ENDPOINT,
 			{
 				P_idToDo,
 				P_fecha,
-				codUsuario,
 			},
 			"Error al actualizar fecha de recordatorio"
 		);
@@ -495,175 +373,24 @@ class ReminderService {
 
 		const P_prioridad = priorityNumber;
 		const P_idToDo = reminderId;
-		const codUsuario = getSessionCodUsuario();
 
 		return this.postUpdate(
 			UPDATE_PRIORITY_ENDPOINT,
 			{
 				P_idToDo,
 				P_prioridad,
-				codUsuario,
 			},
 			"Error al actualizar prioridad de recordatorio"
 		);
 	}
 
-	// Constructor de payload para el endpoint unificado de actualización
-	// Extrae todos los campos relevantes de un recordatorio normalizado
-	static _buildUnifiedUpdatePayload(reminder) {
-		const reminderId = reminder?.recordatorioId ?? reminder?.id;
-
-		if (!reminderId) {
-			console.warn("[ReminderService] _buildUnifiedUpdatePayload: missing reminder id");
-			return null;
-		}
-
-		const codUsuario = getSessionCodUsuario();
-
-		// Extraer etiquetas custom (filtrar tags sintéticos de prioridad)
-		const tags = Array.isArray(reminder.tags)
-			? reminder.tags
-				.filter(t => typeof t !== "string" ? !String(t?.type ?? "").startsWith("priority-") : true)
-				.map(t => typeof t === "string" ? t : (t?.label ?? t?.name ?? ""))
-				.filter(Boolean)
-			: [];
-
-		const priorityNumber = this.priorityToNumber(reminder.priority);
-
-		return {
-			P_idToDo: reminderId,
-			P_nombre: String(reminder.name ?? ""),
-			P_descripcion: String(reminder.description ?? ""),
-			P_fecha: this.toDateTimeString(reminder.dueDate ?? ""),
-			P_prioridad: priorityNumber ?? 2,
-			P_estado: reminder.completed === true,
-			P_tag1: tags[0] ?? null,
-			P_tag2: tags[1] ?? null,
-			P_tag3: tags[2] ?? null,
-			P_tag4: tags[3] ?? null,
-			P_tag5: tags[4] ?? null,
-			codUsuario,
-		};
-	}
-
-	static _normalizeEditableText(value) {
-		return String(value ?? "").trim();
-	}
-
-	static _extractCustomTagLabels(reminder) {
-		const rawTags = Array.isArray(reminder?.tags) ? reminder.tags : [];
-		return rawTags
-			.filter(tag => {
-				if (typeof tag === "string") return true;
-				return !String(tag?.type ?? "").startsWith("priority-");
-			})
-			.map(tag => (typeof tag === "string" ? tag : (tag?.label ?? tag?.name ?? "")))
-			.map(label => String(label).trim())
-			.filter(Boolean)
-			.slice(0, 5);
-	}
-
-	static _areTagSetsEqual(tagsA = [], tagsB = []) {
-		if (tagsA.length !== tagsB.length) return false;
-		const normalize = tags => tags.map(t => t.toLowerCase()).sort();
-		const a = normalize(tagsA);
-		const b = normalize(tagsB);
-		return a.every((item, index) => item === b[index]);
-	}
-
-	static _isHttp404Error(error) {
-		const message = String(error?.message ?? "");
-		return /\b404\b/.test(message);
-	}
-
-	static _hasEditableChanges(previousReminder, updatedReminder) {
-		const previousName = this._normalizeEditableText(previousReminder?.name);
-		const updatedName = this._normalizeEditableText(updatedReminder?.name);
-		if (previousName !== updatedName) return true;
-
-		const previousDescription = this._normalizeEditableText(previousReminder?.description);
-		const updatedDescription = this._normalizeEditableText(updatedReminder?.description);
-		if (previousDescription !== updatedDescription) return true;
-
-		const previousDueDate = this.toDateTimeString(previousReminder?.dueDate ?? "");
-		const updatedDueDate = this.toDateTimeString(updatedReminder?.dueDate ?? "");
-		if (previousDueDate !== updatedDueDate) return true;
-
-		const previousPriority = this.normalizePriority(previousReminder?.priority);
-		const updatedPriority = this.normalizePriority(updatedReminder?.priority);
-		if (previousPriority !== updatedPriority) return true;
-
-		const previousTags = this._extractCustomTagLabels(previousReminder);
-		const updatedTags = this._extractCustomTagLabels(updatedReminder);
-		return !this._areTagSetsEqual(previousTags, updatedTags);
-	}
-
-	static async _fallbackUpdateFromEdit(previousReminder, updatedReminder, reminderId) {
-		const steps = [];
-
-		const previousName = this._normalizeEditableText(previousReminder?.name);
-		const updatedName = this._normalizeEditableText(updatedReminder?.name);
-		if (previousName !== updatedName && String(UPDATE_NAME_ENDPOINT ?? "").trim()) {
-			steps.push({ kind: "name", execute: () => this.updateName(reminderId, updatedName) });
-		}
-
-		const previousDescription = this._normalizeEditableText(previousReminder?.description);
-		const updatedDescription = this._normalizeEditableText(updatedReminder?.description);
-		if (previousDescription !== updatedDescription && String(UPDATE_DESC_ENDPOINT ?? "").trim()) {
-			steps.push({ kind: "description", execute: () => this.updateDescription(reminderId, updatedDescription) });
-		}
-
-		const previousDueDate = this.toDateTimeString(previousReminder?.dueDate ?? "");
-		const updatedDueDate = this.toDateTimeString(updatedReminder?.dueDate ?? "");
-		if (previousDueDate !== updatedDueDate && String(UPDATE_DATE_ENDPOINT ?? "").trim()) {
-			steps.push({ kind: "dueDate", execute: () => this.updateDueDate(reminderId, updatedReminder?.dueDate ?? "") });
-		}
-
-		const previousPriority = this.normalizePriority(previousReminder?.priority);
-		const updatedPriority = this.normalizePriority(updatedReminder?.priority);
-		if (previousPriority !== updatedPriority && String(UPDATE_PRIORITY_ENDPOINT ?? "").trim()) {
-			steps.push({ kind: "priority", execute: () => this.updatePriority(reminderId, updatedPriority) });
-		}
-
-		const previousTags = this._extractCustomTagLabels(previousReminder);
-		const updatedTags = this._extractCustomTagLabels(updatedReminder);
-		if (!this._areTagSetsEqual(previousTags, updatedTags) && String(UPDATE_TAGS_ENDPOINT ?? "").trim()) {
-			steps.push({ kind: "tags", execute: () => this.updateTags(reminderId, updatedTags) });
-		}
-
-		if (steps.length === 0) {
-			return;
-		}
-
-		let completedNonTagSteps = 0;
-
-		for (const step of steps) {
-			try {
-				await step.execute();
-				if (step.kind !== "tags") {
-					completedNonTagSteps += 1;
-				}
-			} catch (error) {
-				// Si el backend no tiene endpoint de tags (404), no bloquear cambios ya aplicados.
-				if (step.kind === "tags" && this._isHttp404Error(error) && completedNonTagSteps > 0) {
-					console.warn("[ReminderService] fallback update — tags endpoint unavailable (404), preserving other successful changes");
-					continue;
-				}
-
-				throw error;
-			}
-		}
-	}
-
 	static async updateFromEdit(previousReminder, updatedReminder) {
-		
+		console.log("[ReminderService] updateFromEdit called");
+		console.log("  previous:", JSON.stringify(previousReminder, null, 2));
+		console.log("  updated :", JSON.stringify(updatedReminder, null, 2));
 
 		if (!previousReminder?.id || !updatedReminder) {
 			console.warn("[ReminderService] updateFromEdit aborted — missing id or updatedReminder", { id: previousReminder?.id });
-			return;
-		}
-
-		if (!this._hasEditableChanges(previousReminder, updatedReminder)) {
 			return;
 		}
 
@@ -672,45 +399,64 @@ class ReminderService {
 			console.warn("[ReminderService] ID looks synthetic (reminder-N), backend may reject it:", previousReminder.id);
 		}
 
-		// Construir payload único con todos los campos usando el recordatorio actualizado
-		const payload = this._buildUnifiedUpdatePayload({
-			...updatedReminder,
-			recordatorioId:
-				updatedReminder?.recordatorioId ??
-				previousReminder?.recordatorioId ??
-				null,
-		});
-		if (!payload) {
-			console.warn("[ReminderService] updateFromEdit — failed to build payload");
+		const updates = [];
+
+		const namePrev = previousReminder.name ?? "";
+		const nameNext = updatedReminder.name ?? "";
+		console.log(`  name: "${namePrev}" → "${nameNext}" — changed: ${namePrev !== nameNext}`);
+		if (nameNext !== namePrev) {
+			updates.push(this.updateName(previousReminder.id, nameNext));
+		}
+
+		const descPrev = previousReminder.description ?? "";
+		const descNext = updatedReminder.description ?? "";
+		console.log(`  description: "${descPrev}" → "${descNext}" — changed: ${descPrev !== descNext}`);
+		if (descNext !== descPrev) {
+			updates.push(this.updateDescription(previousReminder.id, descNext));
+		}
+
+		// Normalizar ambos lados al mismo formato antes de comparar para que
+		// "2026-03-02T14:30:00Z" (servidor) y "2026-03-02 14:30:00" (modal) no
+		// parezcan distintos falsamente cuando el usuario no cambió la fecha.
+		const datePrev = this.toDateTimeString(previousReminder.dueDate ?? "");
+		const dateNext = this.toDateTimeString(updatedReminder.dueDate ?? "");
+		console.log(`  dueDate: "${datePrev}" → "${dateNext}" — changed: ${datePrev !== dateNext}`);
+		if (dateNext !== datePrev) {
+			updates.push(this.updateDueDate(previousReminder.id, updatedReminder.dueDate ?? ""));
+		}
+
+		const prevPriority = this.normalizePriority(previousReminder.priority ?? "");
+		const nextPriority = this.normalizePriority(updatedReminder.priority ?? "");
+		console.log(`  priority: "${prevPriority}" → "${nextPriority}" — changed: ${prevPriority !== nextPriority}`);
+		if (nextPriority !== prevPriority) {
+			updates.push(this.updatePriority(previousReminder.id, nextPriority));
+		}
+
+		// ── Tags ──
+		// Excluir etiquetas sintéticas de prioridad (tipo: "priority-*") — se derivan
+		// del campo de prioridad y no deben enviarse al servidor como etiquetas reales.
+		const extractLabels = (tags) =>
+			(Array.isArray(tags) ? tags : [])
+				.filter(t => typeof t !== "string" ? !String(t?.type ?? "").startsWith("priority-") : true)
+				.map(t => typeof t === "string" ? t : (t?.label ?? t?.name ?? ""))
+				.filter(Boolean).sort();
+
+		const prevLabels = extractLabels(previousReminder.tags);
+		const nextLabels = extractLabels(updatedReminder.tags);
+		const tagsChanged = prevLabels.join(",") !== nextLabels.join(",");
+		console.log(`  tags: [${prevLabels}] → [${nextLabels}] — changed: ${tagsChanged}`);
+		if (tagsChanged) {
+			updates.push(this.updateTags(previousReminder.id, nextLabels));
+		}
+
+		if (updates.length === 0) {
+			console.log("[ReminderService] No fields changed — no API calls made");
 			return;
 		}
 
-		
-
-		const reminderId =
-			updatedReminder?.recordatorioId ??
-			previousReminder?.recordatorioId ??
-			updatedReminder?.id ??
-			previousReminder?.id;
-
-		try {
-			const unifiedEndpoint = this.getUnifiedUpdateEndpoint();
-			await this.postUpdate(
-				unifiedEndpoint,
-				payload,
-				"Error al actualizar recordatorio",
-				{ suppressExceptionLogs: true }
-			);
-			
-		} catch (error) {
-			console.warn("[ReminderService] updateFromEdit — unified endpoint failed, trying fallback:", error?.message || error);
-			try {
-				await this._fallbackUpdateFromEdit(previousReminder, updatedReminder, reminderId);
-			} catch (fallbackError) {
-				console.error("[ReminderService] updateFromEdit — fallback failed:", fallbackError);
-				throw fallbackError;
-			}
-		}
+		console.log(`[ReminderService] Sending ${updates.length} update(s)...`);
+		await Promise.all(updates);
+		console.log("[ReminderService] All updates done");
 	}
 
 	/* Agrega un nuevo recordatorio mediante POST */
@@ -747,131 +493,30 @@ class ReminderService {
 	}
 
 	/* Elimina un recordatorio por ID */
-	static async deleteReminder(reminderId, userId = null) {
+	static async deleteReminder(reminderId) {
 		if (!reminderId) return;
-
-		const codUsuario = getSessionCodUsuario();
-		const idUsuario = userId ?? codUsuario ?? null;
-
-		const payloadCandidates = [
-			{ N_idRecordatorio: reminderId, codUsuario },
-			{ N_idRecordatorio: reminderId, idUsuario, codUsuario },
-			{ P_idToDo: reminderId, codUsuario },
-			{ P_idToDo: reminderId, idUsuario, codUsuario },
-			{ idRecordatorio: reminderId, codUsuario },
-			{ idRecordatorio: reminderId, idUsuario, codUsuario },
-		].map(candidate => {
-			if (candidate.idUsuario == null || candidate.idUsuario === "") {
-				const { idUsuario: _ignored, ...rest } = candidate;
-				return rest;
-			}
-			return candidate;
-		});
-
-		let lastError = null;
-		for (const payload of payloadCandidates) {
-			try {
-				return await this.postUpdate(
-					DELETE_REMINDER_ENDPOINT,
-					payload,
-					"Error al eliminar recordatorio",
-					{ suppressExceptionLogs: true }
-				);
-			} catch (error) {
-				lastError = error;
-			}
-		}
-
-		throw lastError || new Error("Error al eliminar recordatorio: no se pudo confirmar eliminacion");
-	}
-
-	/* Elimina múltiples recordatorios por ID en una sola llamada */
-	static async deleteMultipleReminders(userId, reminderIds) {
-		console.log("[deleteMultipleReminders] userId:", userId, "reminderIds:", reminderIds);
-		
-		if (!userId) {
-			console.error("[deleteMultipleReminders] ERROR: userId is required but got:", userId);
-			throw new Error("userId is required for bulk delete");
-		}
-		
-		if (!reminderIds || reminderIds.length === 0) {
-			console.warn("[deleteMultipleReminders] No reminder IDs to delete");
-			return;
-		}
-		
-		const ids = Array.isArray(reminderIds) 
-			? reminderIds 
-			: [reminderIds];
-		
-		// Filtrar undefined/null IDs para evitar errores en el servidor
-		const validIds = ids.filter(id => id != null);
-		
-		if (validIds.length === 0) {
-			console.warn("[deleteMultipleReminders] No valid reminder IDs after filtering");
-			return;
-		}
-		
-		console.log("[deleteMultipleReminders] Sending payload:", { idRecordatorios: validIds, idUsuario: userId });
-		const codUsuario = getSessionCodUsuario();
-		const idsCsv = validIds.join(",");
-		
 		return this.postUpdate(
-			DELETE_MULTIPLE_REMINDERS_ENDPOINT,
-			{ 
-				idRecordatorios: idsCsv,
-				idUsuario: userId,
-				codUsuario
-			},
-			"Error al eliminar recordatorios múltiples"
+			DELETE_REMINDER_ENDPOINT,
+			{ N_idRecordatorio: reminderId },
+			"Error al eliminar recordatorio"
 		);
 	}
 
 	/* Actualiza el estado (completado/no completado) de un recordatorio */
-	/* Construye un payload con solo el estado y los demás campos en null
-	   para usar el endpoint unificado de editar recordatorio */
-	static async updateState(reminderId, state, taskComplete = null) {
-		console.log("[ReminderService] updateState called with:", { reminderId, state, taskComplete });
-		
-		if (!reminderId) {
-			console.warn("[ReminderService] updateState — reminderId is empty, aborting");
-			return;
-		}
-		
-		// Convertir booleano al formato apropiado
+	static async updateState(reminderId, state) {
+		if (!reminderId) return;
+		// Convertir booleano al formato apropiado (el servidor espera booleano o 0/1)
 		const stateValue = typeof state === 'boolean' ? state : Boolean(state);
-		console.log("[ReminderService] updateState — stateValue converted to:", stateValue);
-		
-		// Construir payload con solo el ID y el estado (sin campos null)
-		const payload = {
-			P_idToDo: reminderId,
-			P_estado: stateValue
-		};
-		
-		console.log("[ReminderService] updateState — payload built:", payload);
-		const unifiedEndpoint = this.getUnifiedUpdateEndpoint();
-		console.log("[ReminderService] updateState — using endpoint:", unifiedEndpoint);
-		
-		try {
-			console.log("[ReminderService] updateState — sending request to unified endpoint...");
-			const response = await this.postUpdate(
-				unifiedEndpoint,
-				payload,
-				"Error al actualizar estado de recordatorio"
-			);
-			console.log("[ReminderService] updateState — SUCCESS, response:", response);
-			return response;
-			
-		} catch (error) {
-			console.error("[ReminderService] updateState — FAILED with error:", error);
-			console.error("[ReminderService] updateState — error message:", error.message);
-			console.error("[ReminderService] updateState — error stack:", error.stack);
-			throw error;
-		}
+		return this.postUpdate(
+			UPDATE_STATE_ENDPOINT,
+			{ P_idToDo: reminderId, P_estado: stateValue },
+			"Error al actualizar estado de recordatorio"
+		);
 	}
 
 	/* Actualiza etiquetas de un recordatorio */
 	static async updateTags(reminderId, tags = []) {
-		
+		console.log(`[ReminderService] updateTags called — reminderId: ${reminderId}, tags:`, tags);
 
 		if (!reminderId) {
 			console.warn("[ReminderService] updateTags aborted — no reminderId");
@@ -884,19 +529,19 @@ class ReminderService {
 			P_tag2: null,
 			P_tag3: null,
 			P_tag4: null,
-			P_tag5: null,
-			codUsuario: getSessionCodUsuario()
+			P_tag5: null
 		};
 
 		if (Array.isArray(tags)) {
 			tags.slice(0, 5).forEach((t, ix) => {
 				payload[`P_tag${ix + 1}`] = t || null;
+				console.log(`[ReminderService] updateTags — P_tag${ix + 1}:`, t || null);
 			});
 		} else {
 			console.warn("[ReminderService] updateTags — tags is not an array:", tags);
 		}
 
-		
+		console.log("[ReminderService] updateTags — final payload:", JSON.stringify(payload, null, 2));
 
 		return this.postUpdate(
 			UPDATE_TAGS_ENDPOINT,

@@ -25,7 +25,7 @@ function normalizeTag(tag, index) {
 }
 
 import { useEffect, useState } from "react";
-import LoadingModal from "./loadingModal";
+import LoadingModal from "./LoadingModal";
 
 function ToDoListFetcher({ onDataLoaded, userId }) {
     const [loading, setLoading] = useState(true);
@@ -44,7 +44,16 @@ function ToDoListFetcher({ onDataLoaded, userId }) {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${baseUrl}${userId}`);
+                // Cabecera Authorization.
+                const tokenLocalStore = localStorage.getItem("token") || "";
+                const token = `Bearer ${tokenLocalStore}`;
+
+                const response = await fetch(`${baseUrl}${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": token,
+                    },
+                });
 
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);

@@ -16,9 +16,16 @@ export default async function updateComment(id, newText, courseId, codUsuarioInp
         codUsuario,
     };
 
+    // Cabecera Authorization.
+    const tokenLocalStore = localStorage.getItem("token") || "";
+    const token = `Bearer ${tokenLocalStore}`;
+
     const res = await fetch(UPDATE_COMMENT_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token,
+        },
         body: JSON.stringify(payload),
     });
 
