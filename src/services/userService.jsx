@@ -9,6 +9,7 @@
 // - Configurar notificaciones (anticipación)
 // ============================================================================
 import { getSessionCodUsuario } from "./authSession";
+import LDAPservice from "./LDAPservice";
 
 const GET_USER_DATA_ENDPOINT = import.meta.env.VITE_API_GET_USER_DATA;
 const UPDATE_USER_EMAIL_ENDPOINT = import.meta.env.VITE_API_UPDATE_USER_EMAIL || import.meta.env.VITE_API_UPDATE_REMINDER_ANTICIPATION;
@@ -83,6 +84,21 @@ function validatePasswordComplexity(password) {
     }
 
     return null;
+}
+
+function isAuthResponseSuccessful(response) {
+    if (!response || typeof response !== "object") {
+        return false;
+    }
+
+    return Boolean(
+        response.success
+        || response.status === "success"
+        || response.valid === true
+        || response.authenticated === true
+        || response.isAuthenticated === true
+        || response.data
+    );
 }
 
 // Registrar endpoints para depuración
@@ -266,6 +282,23 @@ export async function changePassword(userId, currentPassword, newPassword) {
     const methodCandidates = ["POST", "PUT"];
 
     try {
+        const authUserId = getSessionCodUsuario() || String(userId || "").trim();
+        const authResult = await LDAPservice(authUserId, currentPassword);
+
+        if (!authResult) {
+            return {
+                success: false,
+                message: "No se pudo validar la contraseña actual. Intenta nuevamente."
+            };
+        }
+
+        if (!isAuthResponseSuccessful(authResult)) {
+            return {
+                success: false,
+                message: "La contraseña actual es incorrecta"
+            };
+        }
+
         for (const endpoint of endpointCandidates) {
             for (const method of methodCandidates) {
                 const res = await fetch(endpoint, {
