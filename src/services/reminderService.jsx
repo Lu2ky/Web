@@ -6,16 +6,21 @@
 // validación de estados, conversión de fechas y sincronización con API.
 // ============================================================================
 
+import { getSessionCodUsuario } from "./authSession";
+import { getUserData } from "./userService";
+
 // Variables de entorno para endpoints API (cargadas dinámicamente)
 const REMINDERS_TAGS_API_BASE = import.meta.env.VITE_API_URL_REMINDERS_TAGS_USER;
 const ADD_REMINDER_ENDPOINT = import.meta.env.VITE_API_ADD_REMINDER;
 const DELETE_REMINDER_ENDPOINT = import.meta.env.VITE_API_DELETE_REMINDER;
+const UPDATE_REMINDER_UNIFIED = import.meta.env.VITE_API_UPDATE_REMINDER_UNIFIED;
 const UPDATE_NAME_ENDPOINT = import.meta.env.VITE_API_UPDATE_REMINDER;
 const UPDATE_DESC_ENDPOINT = import.meta.env.VITE_API_UPDATE_DESCRIPTION_REMINDER;
 const UPDATE_DATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_DATE_REMINDER;
 const UPDATE_PRIORITY_ENDPOINT = import.meta.env.VITE_API_UPDATE_PRIORITY_REMINDER;
 const UPDATE_STATE_ENDPOINT = import.meta.env.VITE_API_UPDATE_STATE_REMINDER;
 const UPDATE_TAGS_ENDPOINT = import.meta.env.VITE_API_UPDATE_TAGS_REMINDER;
+const GET_USER_DATA_ENDPOINT = import.meta.env.VITE_API_GET_USER_DATA;
 
 class ReminderService {
 	static async postUpdate(endpoint, payload, errorContext) {
@@ -113,6 +118,41 @@ class ReminderService {
 		return null;
 	}
 
+	// Construye el payload unificado para el endpoint de actualización
+	static _buildUnifiedUpdatePayload(reminder) {
+		if (!reminder?.idTodo) {
+			console.warn("[ReminderService] _buildUnifiedUpdatePayload: missing idTodo");
+			return null;
+		}
+
+		const priorityNumber = this.priorityToNumber(reminder.priority);
+
+		// Extraer solo etiquetas custom (excluir tags sintéticos de prioridad)
+		const tags = Array.isArray(reminder.tags)
+			? reminder.tags
+				.filter(t => typeof t !== "string" ? !String(t?.type ?? "").startsWith("priority-") : true)
+				.map(t => typeof t === "string" ? t : (t?.label ?? t?.name ?? ""))
+				.filter(Boolean)
+			: [];
+
+		const payload = {
+			P_idToDo: reminder.idTodo,
+			P_nombre: String(reminder.name ?? ""),
+			P_descripcion: String(reminder.description ?? ""),
+			P_fecha: this.toDateTimeString(reminder.dueDate ?? ""),
+			P_prioridad: priorityNumber ?? 2,
+			P_estado: reminder.completed === true,
+			P_tag1: tags[0] ?? null,
+			P_tag2: tags[1] ?? null,
+			P_tag3: tags[2] ?? null,
+			P_tag4: tags[3] ?? null,
+			P_tag5: tags[4] ?? null,
+			codUsuario: getSessionCodUsuario(),
+		};
+
+		return payload;
+	}
+
 	// Normaliza un recordatorio desde formato API al formato estándar interno
 	// Maneja múltiples variantes de nombres de campo de diferentes endpoints
 	static normalizeReminder(reminder, index) {
@@ -186,6 +226,8 @@ class ReminderService {
 				reminder._id ??
 				reminder.reminder_id ??
 				`reminder-${index}`,
+			// ID específico del ToDo
+			idTodo: reminder.idToDo ?? reminder.N_idToDoList ?? reminder.P_idToDo,
 			// N_idRecordatorio es la PK que espera el endpoint de eliminación
 			recordatorioId: reminder.N_idRecordatorio ?? null,
 			name: this.getNullableString(
@@ -252,12 +294,14 @@ class ReminderService {
 		const P_nombre = name;
 		const P_idToDo = reminderId;
 
+		const payload = {
+			P_idToDo,
+			P_nombre,
+		};
+
 		return this.postUpdate(
 			UPDATE_NAME_ENDPOINT,
-			{
-				P_idToDo,
-				P_nombre,
-			},
+			payload,
 			"Error al actualizar nombre de recordatorio"
 		);
 	}
@@ -268,12 +312,14 @@ class ReminderService {
 		const P_descripcion = description;
 		const P_idToDo = reminderId;
 
+		const payload = {
+			P_idToDo,
+			P_descripcion,
+		};
+
 		return this.postUpdate(
 			UPDATE_DESC_ENDPOINT,
-			{
-				P_idToDo,
-				P_descripcion,
-			},
+			payload,
 			"Error al actualizar descripción de recordatorio"
 		);
 	}
@@ -355,14 +401,14 @@ class ReminderService {
 		const P_fecha = this.toDateTimeString(dueDate);
 		const P_idToDo = reminderId;
 
-		console.log(`[ReminderService] updateDueDate — raw: "${dueDate}" → P_fecha: "${P_fecha}"`);
+		const payload = {
+			P_idToDo,
+			P_fecha,
+		};
 
 		return this.postUpdate(
 			UPDATE_DATE_ENDPOINT,
-			{
-				P_idToDo,
-				P_fecha,
-			},
+			payload,
 			"Error al actualizar fecha de recordatorio"
 		);
 	}
@@ -374,89 +420,78 @@ class ReminderService {
 		const P_prioridad = priorityNumber;
 		const P_idToDo = reminderId;
 
+		const payload = {
+			P_idToDo,
+			P_prioridad,
+		};
+
 		return this.postUpdate(
 			UPDATE_PRIORITY_ENDPOINT,
-			{
-				P_idToDo,
-				P_prioridad,
-			},
+			payload,
 			"Error al actualizar prioridad de recordatorio"
 		);
 	}
 
 	static async updateFromEdit(previousReminder, updatedReminder) {
-		console.log("[ReminderService] updateFromEdit called");
-		console.log("  previous:", JSON.stringify(previousReminder, null, 2));
-		console.log("  updated :", JSON.stringify(updatedReminder, null, 2));
-
 		if (!previousReminder?.id || !updatedReminder) {
-			console.warn("[ReminderService] updateFromEdit aborted — missing id or updatedReminder", { id: previousReminder?.id });
 			return;
 		}
 
-		// Advertir si el ID parece sintético (generado de respaldo, no un ID real del servidor)
-		if (String(previousReminder.id).startsWith("reminder-")) {
-			console.warn("[ReminderService] ID looks synthetic (reminder-N), backend may reject it:", previousReminder.id);
+		// Verificar si hay cambios
+		const hasChanges = this._hasEditableChanges(previousReminder, updatedReminder);
+
+		if (!hasChanges) {
+			return;
 		}
 
-		const updates = [];
+		// Construir payload unificado con todos los campos del recordatorio actualizado
+		const payload = this._buildUnifiedUpdatePayload(updatedReminder);
 
-		const namePrev = previousReminder.name ?? "";
-		const nameNext = updatedReminder.name ?? "";
-		console.log(`  name: "${namePrev}" → "${nameNext}" — changed: ${namePrev !== nameNext}`);
-		if (nameNext !== namePrev) {
-			updates.push(this.updateName(previousReminder.id, nameNext));
+		if (!payload) {
+			return;
 		}
 
-		const descPrev = previousReminder.description ?? "";
-		const descNext = updatedReminder.description ?? "";
-		console.log(`  description: "${descPrev}" → "${descNext}" — changed: ${descPrev !== descNext}`);
-		if (descNext !== descPrev) {
-			updates.push(this.updateDescription(previousReminder.id, descNext));
-		}
+		console.log("[ReminderService] updateFromEdit payload:", payload);
 
-		// Normalizar ambos lados al mismo formato antes de comparar para que
-		// "2026-03-02T14:30:00Z" (servidor) y "2026-03-02 14:30:00" (modal) no
-		// parezcan distintos falsamente cuando el usuario no cambió la fecha.
-		const datePrev = this.toDateTimeString(previousReminder.dueDate ?? "");
-		const dateNext = this.toDateTimeString(updatedReminder.dueDate ?? "");
-		console.log(`  dueDate: "${datePrev}" → "${dateNext}" — changed: ${datePrev !== dateNext}`);
-		if (dateNext !== datePrev) {
-			updates.push(this.updateDueDate(previousReminder.id, updatedReminder.dueDate ?? ""));
+		try {
+			return await this.postUpdate(
+				UPDATE_REMINDER_UNIFIED,
+				payload,
+				"Error al actualizar recordatorio"
+			);
+		} catch (error) {
+			throw error;
 		}
+	}
 
-		const prevPriority = this.normalizePriority(previousReminder.priority ?? "");
-		const nextPriority = this.normalizePriority(updatedReminder.priority ?? "");
-		console.log(`  priority: "${prevPriority}" → "${nextPriority}" — changed: ${prevPriority !== nextPriority}`);
-		if (nextPriority !== prevPriority) {
-			updates.push(this.updatePriority(previousReminder.id, nextPriority));
-		}
+	// Verifica si hay cambios editables entre dos recordatorios
+	static _hasEditableChanges(previousReminder, updatedReminder) {
+		const prevName = (previousReminder?.name ?? "").trim();
+		const nextName = (updatedReminder?.name ?? "").trim();
+		if (prevName !== nextName) return true;
 
-		// ── Tags ──
-		// Excluir etiquetas sintéticas de prioridad (tipo: "priority-*") — se derivan
-		// del campo de prioridad y no deben enviarse al servidor como etiquetas reales.
+		const prevDesc = (previousReminder?.description ?? "").trim();
+		const nextDesc = (updatedReminder?.description ?? "").trim();
+		if (prevDesc !== nextDesc) return true;
+
+		const prevDate = this.toDateTimeString(previousReminder?.dueDate ?? "");
+		const nextDate = this.toDateTimeString(updatedReminder?.dueDate ?? "");
+		if (prevDate !== nextDate) return true;
+
+		const prevPriority = this.normalizePriority(previousReminder?.priority ?? "");
+		const nextPriority = this.normalizePriority(updatedReminder?.priority ?? "");
+		if (prevPriority !== nextPriority) return true;
+
+		// Verificar cambios de tags
 		const extractLabels = (tags) =>
 			(Array.isArray(tags) ? tags : [])
 				.filter(t => typeof t !== "string" ? !String(t?.type ?? "").startsWith("priority-") : true)
 				.map(t => typeof t === "string" ? t : (t?.label ?? t?.name ?? ""))
 				.filter(Boolean).sort();
 
-		const prevLabels = extractLabels(previousReminder.tags);
-		const nextLabels = extractLabels(updatedReminder.tags);
-		const tagsChanged = prevLabels.join(",") !== nextLabels.join(",");
-		console.log(`  tags: [${prevLabels}] → [${nextLabels}] — changed: ${tagsChanged}`);
-		if (tagsChanged) {
-			updates.push(this.updateTags(previousReminder.id, nextLabels));
-		}
-
-		if (updates.length === 0) {
-			console.log("[ReminderService] No fields changed — no API calls made");
-			return;
-		}
-
-		console.log(`[ReminderService] Sending ${updates.length} update(s)...`);
-		await Promise.all(updates);
-		console.log("[ReminderService] All updates done");
+		const prevLabels = extractLabels(previousReminder?.tags);
+		const nextLabels = extractLabels(updatedReminder?.tags);
+		return prevLabels.join(",") !== nextLabels.join(",");
 	}
 
 	/* Agrega un nuevo recordatorio mediante POST */
@@ -493,33 +528,79 @@ class ReminderService {
 	}
 
 	/* Elimina un recordatorio por ID */
-	static async deleteReminder(reminderId) {
+	static async deleteReminder(reminderId, codUsuario = null) {
 		if (!reminderId) return;
+
+		// Obtener codUsuario si no se proporciona
+		const userCode = codUsuario ?? getSessionCodUsuario();
+
+		// Obtener idUsuario desde userService - usa el que retorna la BD
+		const userData = await getUserData(userCode);
+		const currentUser = Array.isArray(userData) ? userData[0] : userData;
+
+		if (!currentUser) {
+			console.error("[ReminderService] No user data found for codUsuario:", userCode);
+			return null;
+		}
+
+		// Usar el idUsuario real de la base de datos (no es de 6 dígitos como codUsuario)
+		const idUsuario = currentUser.idUsuario || currentUser.id;
+
+		if (!idUsuario) {
+			console.error("[ReminderService] Could not obtain idUsuario from user data");
+			return null;
+		}
+
+		const payload = {
+			N_idRecordatorio: reminderId,
+			idUsuario: idUsuario,
+			codUsuario: userCode
+		};
+
+		console.log("[ReminderService] deleteReminder payload:", payload);
+
 		return this.postUpdate(
 			DELETE_REMINDER_ENDPOINT,
-			{ N_idRecordatorio: reminderId },
+			payload,
 			"Error al eliminar recordatorio"
 		);
 	}
 
 	/* Actualiza el estado (completado/no completado) de un recordatorio */
-	static async updateState(reminderId, state) {
+	static async updateState(reminderId, state, fullReminder = null) {
 		if (!reminderId) return;
-		// Convertir booleano al formato apropiado (el servidor espera booleano o 0/1)
+
 		const stateValue = typeof state === 'boolean' ? state : Boolean(state);
+
+		// Si tenemos el recordatorio completo, usa el endpoint unificado con payload completo
+		if (fullReminder) {
+			const payload = this._buildUnifiedUpdatePayload(fullReminder);
+			payload.P_estado = stateValue;
+			console.log("[ReminderService] updateState payload:", payload);
+			return this.postUpdate(
+				UPDATE_REMINDER_UNIFIED,
+				payload,
+				"Error al actualizar estado de recordatorio"
+			);
+		}
+
+		// Fallback: payload mínimo usando idTodo
+		const payload = {
+			P_idToDo: reminderId,
+			P_estado: stateValue,
+			codUsuario: getSessionCodUsuario()
+		};
+		console.log("[ReminderService] updateState payload (fallback):", payload);
 		return this.postUpdate(
 			UPDATE_STATE_ENDPOINT,
-			{ P_idToDo: reminderId, P_estado: stateValue },
+			payload,
 			"Error al actualizar estado de recordatorio"
 		);
 	}
 
 	/* Actualiza etiquetas de un recordatorio */
 	static async updateTags(reminderId, tags = []) {
-		console.log(`[ReminderService] updateTags called — reminderId: ${reminderId}, tags:`, tags);
-
 		if (!reminderId) {
-			console.warn("[ReminderService] updateTags aborted — no reminderId");
 			return;
 		}
 
@@ -535,19 +616,57 @@ class ReminderService {
 		if (Array.isArray(tags)) {
 			tags.slice(0, 5).forEach((t, ix) => {
 				payload[`P_tag${ix + 1}`] = t || null;
-				console.log(`[ReminderService] updateTags — P_tag${ix + 1}:`, t || null);
 			});
-		} else {
-			console.warn("[ReminderService] updateTags — tags is not an array:", tags);
 		}
-
-		console.log("[ReminderService] updateTags — final payload:", JSON.stringify(payload, null, 2));
 
 		return this.postUpdate(
 			UPDATE_TAGS_ENDPOINT,
 			payload,
 			"Error al actualizar etiquetas de recordatorio"
 		);
+	}
+
+	/* Elimina múltiples recordatorios en una sola operación */
+	static async deleteMultipleReminders(idUsuario, apiIds) {
+		if (!idUsuario || !Array.isArray(apiIds) || apiIds.length === 0) {
+			console.warn("[ReminderService] deleteMultipleReminders: invalid parameters");
+			return null;
+		}
+
+		console.log("[ReminderService] deleteMultipleReminders - idUsuario:", idUsuario, "apiIds:", apiIds);
+
+		// Intenta usar un endpoint de eliminación en masa si existe
+		const BULK_DELETE_ENDPOINT = import.meta.env.VITE_API_DELETE_REMINDERS_BULK;
+
+		if (BULK_DELETE_ENDPOINT) {
+			const payload = {
+				idUsuario: idUsuario,
+				reminderIds: apiIds,
+				codUsuario: getSessionCodUsuario()
+			};
+			return this.postUpdate(
+				BULK_DELETE_ENDPOINT,
+				payload,
+				"Error al eliminar recordatorios en masa"
+			);
+		}
+
+		// Fallback: elimina cada recordatorio individualmente
+		console.log("[ReminderService] No bulk delete endpoint found, deleting individually...");
+		const results = [];
+		const userCode = getSessionCodUsuario();
+
+		for (const reminderId of apiIds) {
+			try {
+				const result = await this.deleteReminder(reminderId, userCode);
+				results.push(result);
+			} catch (error) {
+				console.error(`[ReminderService] Error deleting reminder ${reminderId}:`, error);
+				throw error;
+			}
+		}
+
+		return { success: true, deleted: apiIds.length, results };
 	}
 }
 

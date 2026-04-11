@@ -332,22 +332,19 @@ function ToDoList({ userId = "" }) {
 
     const handleDelete = async () => {
         if (userId && taskToDelete) {
-            const apiId = taskToDelete.recordatorioId ?? taskToDelete.id;
+            const apiId = taskToDelete.recordatorioId ?? taskToDelete.idTodo ?? taskToDelete.id;
             try {
-                const userData = await getUserData(userId);
-                const userObj = Array.isArray(userData) ? userData[0] : userData;
-                const actualUserId = userObj?.idUsuario || userObj?.id || userId;
-
-                await ReminderService.deleteReminder(apiId, actualUserId);
+                await ReminderService.deleteReminder(apiId, userId);
+                // Reloading de recordatorios después de eliminar
+                await loadReminderTasks();
             } catch (err) {
                 console.error("Error al eliminar recordatorio en servidor:", err);
             }
         }
 
-        setTasks(prev => prev.filter(task => task.id !== taskToDelete?.id));
         setIsDeleteModalOpen(false);
         setTaskToDelete(null);
-        
+
         // Disparar evento de onboarding después de eliminar
         window.dispatchEvent(new CustomEvent("onboarding:todo-deleted"));
     };
