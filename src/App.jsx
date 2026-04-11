@@ -375,11 +375,54 @@ function App() {
 		setThemeId(newThemeId);
 	};
 
+	// Calcula el weekOffset basado en una fecha de inicio de período
+	const calculateWeekOffsetForDate = (dateString) => {
+		if (!dateString) return 0;
+
+		try {
+			const targetDate = new Date(dateString);
+			const today = new Date();
+
+			// Obtener el lunes de la semana del targetDate
+			const targetDay = targetDate.getDay();
+			const daysFromMonday = targetDay === 0 ? 6 : targetDay - 1;
+			const targetMonday = new Date(targetDate);
+			targetMonday.setDate(targetDate.getDate() - daysFromMonday);
+			targetMonday.setHours(0, 0, 0, 0);
+
+			// Obtener el lunes de la semana actual
+			const currentDay = today.getDay();
+			const currentDaysFromMonday = currentDay === 0 ? 6 : currentDay - 1;
+			const todayMonday = new Date(today);
+			todayMonday.setDate(today.getDate() - currentDaysFromMonday);
+			todayMonday.setHours(0, 0, 0, 0);
+
+			// Calcular la diferencia en semanas
+			const timeDiff = targetMonday - todayMonday;
+			const weekOffset = Math.round(timeDiff / (7 * 24 * 60 * 60 * 1000));
+
+			return weekOffset;
+		} catch (error) {
+			console.error("Error calculando weekOffset para fecha:", dateString, error);
+			return 0;
+		}
+	};
+
 	// Manejador para cambio de período académico
 	// Recibe { id, nombre } del período o null para "Todos"
 	const handlePeriodChange = (periodObj) => {
 		console.log("Período académico seleccionado:", periodObj);
 		setSelectedAcademicPeriod(periodObj);
+
+		// Si se selecciona un período específico con fecha de inicio, cambiar a esa semana
+		if (periodObj && periodObj.start_date) {
+			const weekOffset = calculateWeekOffsetForDate(periodObj.start_date);
+			setWeekOffset(weekOffset);
+			console.log("Semana actualizada al inicio del período:", weekOffset);
+		} else {
+			// Si se selecciona "Todos", volver a la semana actual
+			setWeekOffset(0);
+		}
 		// Los fetchers se re-ejecutarán automáticamente cuando cambien sus dependencias
 	};
 
