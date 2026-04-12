@@ -230,7 +230,6 @@ function App() {
 
 		// Normalizar datos del API
 		const normalizedApiData = normalizePersonalEvents(data);
-		console.log("Datos personales normalizados:", normalizedApiData);
 		setPersonalEvents(normalizedApiData);
 	}, []);
 

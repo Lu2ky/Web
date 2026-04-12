@@ -117,7 +117,6 @@ export async function getNotifications(userId) {
     if (NOTIFICATIONS_BASE) {
         try {
             const url = `${NOTIFICATIONS_BASE}${userId}`;
-            console.log("[NotificationService] GET", url);
             const tokenLocalStore = localStorage.getItem("token") || "";
             const token = `Bearer ${tokenLocalStore}`;
             const res = await fetch(url, {
@@ -133,7 +132,6 @@ export async function getNotifications(userId) {
                 return [];
             }
             const data = await res.json();
-            console.log("[NotificationService] Response:", data);
             
             let items = [];
             if (Array.isArray(data)) items = data;

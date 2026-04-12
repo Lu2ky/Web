@@ -392,10 +392,7 @@ function ToDoList({ userId = "" }) {
     };
 
     const handleBulkDelete = async () => {
-        console.log("[handleBulkDelete] Starting bulk delete. userId from URL:", userId, "selectedTaskIds:", Array.from(selectedTaskIds));
-        
         if (selectedTaskIds.size === 0) {
-            console.log("[handleBulkDelete] No tasks selected");
             return;
         }
 
@@ -404,34 +401,24 @@ function ToDoList({ userId = "" }) {
             tasks.find(t => t.id === id)
         ).filter(Boolean);
 
-        console.log("[handleBulkDelete] tasksToDelete:", tasksToDelete);
-
         // Extraer los IDs de API (recordatorioId o id)
         const apiIds = tasksToDelete.map(task => task.recordatorioId ?? task.id);
-        
-        console.log("[handleBulkDelete] apiIds to send:", apiIds);
 
         try {
             // Obtener datos del usuario desde el endpoint para obtener el idUsuario real de BD
-            console.log("[handleBulkDelete] Getting user data from endpoint with userId:", userId);
             const userData = await getUserData(userId);
-            console.log("[handleBulkDelete] User data from endpoint:", userData);
-            
+
             // Extraer el idUsuario real de la BD (puede ser array o objeto)
             const userObj = Array.isArray(userData) ? userData[0] : userData;
             const actualUserId = userObj?.idUsuario || userObj?.id || userId;
-            
-            console.log("[handleBulkDelete] Extracted idUsuario from API response:", actualUserId);
-            
+
             if (!actualUserId) {
                 throw new Error("No se pudo obtener el ID del usuario");
             }
-            
+
             // Llamada única a la API para eliminar múltiples recordatorios
             const result = await ReminderService.deleteMultipleReminders(actualUserId, apiIds);
-            console.log("[handleBulkDelete] Success! Result:", result);
         } catch (err) {
-            console.error("[handleBulkDelete] Error en eliminación en masa:", err);
             return; // No actualizar la UI si hay error
         }
 

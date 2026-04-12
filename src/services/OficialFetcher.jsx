@@ -40,8 +40,7 @@ function OficialFetcher({ onDataLoaded, userId, academicPeriod }) {
         if (academicPeriod && academicPeriod.id) {
           url += `?academicPeriod=${encodeURIComponent(academicPeriod.id)}`;
         }
-        
-        console.log("Fetching official schedule:", url);
+
         // Cabecera Authorization.
         const tokenLocalStore = localStorage.getItem("token") || "";
         const token = `Bearer ${tokenLocalStore}`;

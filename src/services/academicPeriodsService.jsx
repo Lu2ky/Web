@@ -313,11 +313,6 @@ export const fetchAcademicPeriods = async () => {
       .filter(Boolean)
       .filter((period, index, self) => index === self.findIndex((p) => p.id === period.id));
 
-    logAcademicPeriodsDebug("Períodos académicos normalizados", {
-      totalRaw: rawItems.length,
-      totalNormalized: periods.length,
-      periods
-    });
     return periods;
   } catch (error) {
     logAcademicPeriodsError("Error al cargar períodos académicos", error);

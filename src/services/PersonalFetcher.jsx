@@ -289,8 +289,7 @@ function PersonalFetcher({ onDataLoaded, userId, academicPeriod }) {
       if (academicPeriod && academicPeriod.id) {
         url += `?academicPeriod=${encodeURIComponent(academicPeriod.id)}`;
       }
-      
-      console.log("Fetching personal schedule:", url);
+
       try {
         const tokenLocalStore = localStorage.getItem("token") || "";
         const token = `Bearer ${tokenLocalStore}`;
@@ -334,12 +333,9 @@ function PersonalFetcher({ onDataLoaded, userId, academicPeriod }) {
             onDataLoaded([]);
           }
         } else {
-              console.log("Datos personales cargados:", json); // Mostrar datos en consola
-          
           // Normalizar datos antes de almacenarlos
           const normalizedData = normalizePersonalData(json);
-          console.log("Datos personales normalizados:", normalizedData);
-          
+
           setApiData(normalizedData); // Almacenar datos normalizados
           if (onDataLoaded) {
             onDataLoaded(normalizedData); // Enviar datos normalizados al padre
@@ -347,7 +343,6 @@ function PersonalFetcher({ onDataLoaded, userId, academicPeriod }) {
         }
       } catch (error) {
         //Manejo de errores
-        console.log(`URL solicitada: ${url}`);
         console.error("Error al cargar datos personales:", error); // Mostrar error en consola
         setApiData([]); // Limpiar datos en caso de error
         if (onDataLoaded) {

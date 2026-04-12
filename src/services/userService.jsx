@@ -320,7 +320,6 @@ export async function changePassword(userId, currentPassword, newPassword) {
                     continue;
                 }
 
-                console.error(`changePassword failed: ${res.status} (${method} ${endpoint})`, body);
                 if (typeof body === "string") {
                     return { success: false, message: `HTTP ${res.status} - ${body}` };
                 }

@@ -24,8 +24,6 @@ const GET_USER_DATA_ENDPOINT = import.meta.env.VITE_API_GET_USER_DATA;
 
 class ReminderService {
 	static async postUpdate(endpoint, payload, errorContext) {
-		console.log(`[ReminderService] POST ${endpoint}`, JSON.stringify(payload, null, 2));
-
 		// Cabecera Authorization.
 		const tokenLocalStore = localStorage.getItem("token") || "";
 		const token = `Bearer ${tokenLocalStore}`;
@@ -40,7 +38,6 @@ class ReminderService {
 		});
 
 		const responseText = await response.text();
-		console.log(`[ReminderService] Response ${response.status} from ${endpoint}:`, responseText);
 
 		if (!response.ok) {
 			const suffix = responseText ? ` - ${responseText}` : "";
@@ -252,7 +249,6 @@ class ReminderService {
 		if (!userId) return [];
 
 		const url = `${REMINDERS_TAGS_API_BASE}/${userId}`;
-		console.log("[ReminderService] getByUser URL:", url);
 
 		// Cabecera Authorization.
 		const tokenLocalStore = localStorage.getItem("token") || "";
@@ -451,8 +447,6 @@ class ReminderService {
 			return;
 		}
 
-		console.log("[ReminderService] updateFromEdit payload:", payload);
-
 		try {
 			return await this.postUpdate(
 				UPDATE_REMINDER_UNIFIED,
@@ -557,8 +551,6 @@ class ReminderService {
 			codUsuario: userCode
 		};
 
-		console.log("[ReminderService] deleteReminder payload:", payload);
-
 		return this.postUpdate(
 			DELETE_REMINDER_ENDPOINT,
 			payload,
@@ -576,7 +568,6 @@ class ReminderService {
 		if (fullReminder) {
 			const payload = this._buildUnifiedUpdatePayload(fullReminder);
 			payload.P_estado = stateValue;
-			console.log("[ReminderService] updateState payload:", payload);
 			return this.postUpdate(
 				UPDATE_REMINDER_UNIFIED,
 				payload,
@@ -590,7 +581,6 @@ class ReminderService {
 			P_estado: stateValue,
 			codUsuario: getSessionCodUsuario()
 		};
-		console.log("[ReminderService] updateState payload (fallback):", payload);
 		return this.postUpdate(
 			UPDATE_STATE_ENDPOINT,
 			payload,
@@ -629,11 +619,8 @@ class ReminderService {
 	/* Elimina múltiples recordatorios en una sola operación */
 	static async deleteMultipleReminders(idUsuario, apiIds) {
 		if (!idUsuario || !Array.isArray(apiIds) || apiIds.length === 0) {
-			console.warn("[ReminderService] deleteMultipleReminders: invalid parameters");
 			return null;
 		}
-
-		console.log("[ReminderService] deleteMultipleReminders - idUsuario:", idUsuario, "apiIds:", apiIds);
 
 		// Intenta usar un endpoint de eliminación en masa si existe
 		const BULK_DELETE_ENDPOINT = import.meta.env.VITE_API_DELETE_REMINDERS_BULK;
@@ -652,7 +639,6 @@ class ReminderService {
 		}
 
 		// Fallback: elimina cada recordatorio individualmente
-		console.log("[ReminderService] No bulk delete endpoint found, deleting individually...");
 		const results = [];
 		const userCode = getSessionCodUsuario();
 
@@ -661,7 +647,6 @@ class ReminderService {
 				const result = await this.deleteReminder(reminderId, userCode);
 				results.push(result);
 			} catch (error) {
-				console.error(`[ReminderService] Error deleting reminder ${reminderId}:`, error);
 				throw error;
 			}
 		}
