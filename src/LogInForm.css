@@ -143,10 +143,34 @@ body {
 }
 
 .rememberForgot label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    display: block;
     color: #555;
+}
+
+.termsConsentLabel {
+    line-height: 1.45;
+}
+
+.termsConsentLabel input {
+    margin-right: 6px;
+    vertical-align: text-top;
+}
+
+.termsConsentText {
+    display: inline;
+}
+
+.termsConsentText--compact {
+    display: none;
+}
+
+.termsConsentLabel a {
+    color: #a855f7;
+    font-weight: 600;
+}
+
+.termsConsentLabel a:hover {
+    text-decoration: underline;
 }
 
 .rememberForgot a {
@@ -199,6 +223,14 @@ body {
 
     .btn {
         font-size: 14px;
+    }
+
+    .termsConsentText--full {
+        display: none;
+    }
+
+    .termsConsentText--compact {
+        display: inline;
     }
 }
 

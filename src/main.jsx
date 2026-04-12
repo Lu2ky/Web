@@ -8,6 +8,7 @@ import RecoverPassword from "./RecoverPassword";
 import AdminView from "./AdminView";
 import RestorePassword from "./RestorePassword";
 import TokenPassword from "./TokenPassword";
+import LegalDocumentsView from "./LegalDocumentsView";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicOnlyRoute from "./routes/PublicOnlyRoute";
 import { SessionTimeoutManager } from "./components/SessionTimeoutManager";
@@ -50,6 +51,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 				</Route>
 				{/* Públicas: recuperación y restauración de contraseña */}
 				<Route path="/RecoverPassword" element={<RecoverPassword />} />
+				<Route path="/legal" element={<LegalDocumentsView />} />
 				{/* Protegida solo para Usuarios: sesión + userId URL debe coincidir */}
 				<Route element={<ProtectedRoute requireMatchingUser={true} allowedRoles={[ROLE_USUARIOS]} />}>
 					<Route path="/App/:userId" element={<AppWithOnboarding />} />
