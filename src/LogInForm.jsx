@@ -116,7 +116,15 @@ const LogInForm = () => {
                     )}
                     <div className="rememberForgot">
                         <Link to="/RecoverPassword">Olvidé mi contraseña</Link>
-                        <label><input type="checkbox" required /> Acepto los términos y condiciones</label> {/*Poner la politica de términos y condiciones*/}
+                        <label className="termsConsentLabel">
+                            <input type="checkbox" required />
+                            <span className="termsConsentText termsConsentText--full">
+                                Acepto <Link to="/legal">los términos y condiciones y la política de tratamiento de datos.</Link>
+                            </span>
+                            <span className="termsConsentText termsConsentText--compact">
+                                Acepto <Link to="/legal">términos y condiciones</Link>.
+                            </span>
+                        </label>
                     </div>
                     <button type="submit" className="btn">Iniciar Sesión</button>
                 </form>
