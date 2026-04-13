@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash, FaCheckCircle, FaRegCircle, FaExclamationCircle } from "react-icons/fa";
 import * as userService from "../../services/userService";
+import LDAPservice from "../../services/LDAPservice";
 import "./UserProfile.css";
 
 function validatePasswordComplexity(password) {
@@ -145,6 +146,20 @@ export default function UserProfile({ userId, onClose }) {
         setIsChangingPassword(true);
 
         try {
+            const authResult = await LDAPservice(String(userId || "").trim(), currentPassword);
+            const isCurrentPasswordValid = authResult
+                && (
+                    authResult.success
+                    || authResult.status === "success"
+                    || authResult.valid === true
+                    || Boolean(authResult.data)
+                );
+
+            if (!isCurrentPasswordValid) {
+                setError(authResult?.message || "La contraseña actual es incorrecta");
+                return;
+            }
+
             const result = await userService.changePassword(
                 userId,
                 currentPassword,

@@ -3,10 +3,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserProfile from "./UserProfile";
 import * as userService from "../../services/userService";
+import LDAPservice from "../../services/LDAPservice";
 
 vi.mock("../../services/userService", () => ({
     getUserData: vi.fn(),
     changePassword: vi.fn(),
+}));
+
+vi.mock("../../services/LDAPservice", () => ({
+    default: vi.fn(),
 }));
 
 describe("UserProfile - cambio de contrasena", () => {
@@ -17,6 +22,7 @@ describe("UserProfile - cambio de contrasena", () => {
             semestreActual: "7",
             programa: "Ingenieria",
         });
+        LDAPservice.mockResolvedValue({ success: true });
     });
 
     afterEach(() => {
@@ -150,6 +156,25 @@ describe("UserProfile - cambio de contrasena", () => {
         expect(await screen.findByText(/Error al cambiar la contrase.a/i)).toBeInTheDocument();
     });
 
+    it("valida con LDAP y bloquea cambio si la contrasena actual es incorrecta", async () => {
+        LDAPservice.mockResolvedValue({ success: false, message: "Usuario o contraseña incorrectos" });
+
+        const user = userEvent.setup();
+        render(<UserProfile userId={123} onClose={() => {}} />);
+
+        await screen.findByRole("button", { name: /Cambiar Contrase.a/i });
+
+        await completarFormularioContrasena(user, {
+            current: "Incorrecta#123",
+            newPassword: "Nueva#123",
+            confirm: "Nueva#123",
+        });
+
+        expect(LDAPservice).toHaveBeenCalledWith("123", "Incorrecta#123");
+        expect(userService.changePassword).not.toHaveBeenCalled();
+        expect(await screen.findByText(/Usuario o contrase.a incorrectos/i)).toBeInTheDocument();
+    });
+
     it("muestra validacion cuando falta la contrasena actual", async () => {
         const user = userEvent.setup();
         render(<UserProfile userId={123} onClose={() => {}} />);
@@ -211,7 +236,9 @@ describe("UserProfile - cambio de contrasena", () => {
             confirm: "Nueva#123",
         });
 
-        expect(screen.getByRole("button", { name: /Actualizando/i })).toBeDisabled();
+        const submitButton = screen.getByRole("button", { name: /Cambiar contrase.a/i });
+        expect(submitButton).toBeDisabled();
+        expect(submitButton).toHaveTextContent(/Actualizando/i);
         expect(screen.getByLabelText(/Contrase.a Actual/i)).toBeDisabled();
         expect(screen.getByLabelText(/^Nueva Contrase.a$/i)).toBeDisabled();
         expect(screen.getByLabelText(/^Confirmar Nueva Contrase.a$/i)).toBeDisabled();
