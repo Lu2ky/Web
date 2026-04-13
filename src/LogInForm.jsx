@@ -104,7 +104,7 @@ const LogInForm = () => {
                         />
                         <FaLock />
                         <span className="togglePassword" onClick={() => setShowPassword(!showPassword)} // 👈 cambia el estado
-                            style={{ cursor: "pointer", marginLeft: "8px" }}
+                            style={{ cursor: "pointer" }}
                         >
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </span>
