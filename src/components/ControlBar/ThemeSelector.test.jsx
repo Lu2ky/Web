@@ -21,6 +21,7 @@ describe('ThemeSelector - Pruebas Unitarias', () => {
     beforeEach(() => {
         mockOnThemeChange.mockClear();
         vi.clearAllMocks();
+        window.localStorage.clear();
         categoriesService.getCategories.mockResolvedValue([
             'Math',
             'Physics',

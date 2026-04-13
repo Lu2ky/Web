@@ -6,6 +6,7 @@ import ReminderService from "../../services/reminderService";
 import { addNotification } from "../../services/notificationService";
 import { getUserData } from "../../services/userService";
 import TaskAddModal from "./TaskAddModal";
+import { isReminderDateInPast } from "./reminderDateValidation";
 
 function AddButton({ onToDoSaved, userId, availableTags = [] }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -25,18 +26,10 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
     const handleAddSave = async (data) => {
         // Validación: Si no hay dueDate o es inválida, no guardar
         const { dueDate } = data || {};
-        if (dueDate && dueDate.trim()) {
-            try {
-                const selectedDate = new Date(String(dueDate).replace(" ", "T"));
-                const now = new Date();
-                if (selectedDate <= now) {
-                    // NO hacer nada - el error ya se mostró en TaskAddModal
-                    // NO cerrar el modal
-                    return;
-                }
-            } catch (e) {
-                // Error validando fecha
-            }
+        if (isReminderDateInPast(dueDate)) {
+            // NO hacer nada - el error ya se mostró en TaskAddModal
+            // NO cerrar el modal
+            return;
         }
 
         // data: { name, description, dueDate, tags, priority }

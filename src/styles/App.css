@@ -135,7 +135,7 @@ header {
     .mainContent {
         grid-template-columns: 0.85fr 2.15fr;
         grid-template-rows: 1fr;
-        overflow: hidden; /* Cambiado a dos columnas para pantallas más grandes */
+        overflow: hidden;
     }
 
     .ToDoSection {

@@ -4,6 +4,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import '../../styles/addButton.css';
 import { getTagsByUser } from '../../services/tagsService';
+import { isReminderDateInPast, PAST_REMINDER_DATE_MESSAGE } from "./reminderDateValidation";
 
 export default function TaskEditModal({
     isOpen,
@@ -147,6 +148,7 @@ export default function TaskEditModal({
 
     useEffect(() => {
         if (isOpen) {
+            setError('');
             setTagLabel('');
             setTagType('custom');
             setFormData({
@@ -167,6 +169,16 @@ export default function TaskEditModal({
     const handleSave = () => {
         if (!formData.name.trim()) {
             setError('El nombre es obligatorio');
+            return;
+        }
+
+        if (!formData.dueDate || !String(formData.dueDate).trim()) {
+            setError('La fecha es obligatoria. Selecciona una fecha y hora.');
+            return;
+        }
+
+        if (isReminderDateInPast(formData.dueDate)) {
+            setError(PAST_REMINDER_DATE_MESSAGE);
             return;
         }
 
@@ -220,7 +232,11 @@ export default function TaskEditModal({
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const selectedDate = `${year}-${month}-${day}`;
-        setFormData(prev => ({ ...prev, dueDate: buildDueDate(selectedDate, timeText) }));
+        const nextDueDate = buildDueDate(selectedDate, timeText);
+        setFormData(prev => ({ ...prev, dueDate: nextDueDate }));
+        if (!isReminderDateInPast(nextDueDate)) {
+            setError('');
+        }
         setShowCalendar(false);
     };
 
@@ -295,7 +311,11 @@ export default function TaskEditModal({
                                 const mo = String(parsed.getMonth() + 1).padStart(2, '0');
                                 const d = String(parsed.getDate()).padStart(2, '0');
                                 const datePart = `${y}-${mo}-${d}`;
-                                setFormData(prev => ({ ...prev, dueDate: buildDueDate(datePart, timeText) }));
+                                const nextDueDate = buildDueDate(datePart, timeText);
+                                setFormData(prev => ({ ...prev, dueDate: nextDueDate }));
+                                if (!isReminderDateInPast(nextDueDate)) {
+                                    setError('');
+                                }
                             }
                         }}
                         onBlur={() => {
@@ -323,7 +343,11 @@ export default function TaskEditModal({
                         setTimeText(nextTime);
                         const datePart = getDatePart(formData.dueDate);
                         if (datePart) {
-                            setFormData(prev => ({ ...prev, dueDate: buildDueDate(datePart, nextTime) }));
+                            const nextDueDate = buildDueDate(datePart, nextTime);
+                            setFormData(prev => ({ ...prev, dueDate: nextDueDate }));
+                            if (!isReminderDateInPast(nextDueDate)) {
+                                setError('');
+                            }
                         }
                     }}
                 />

@@ -6,6 +6,7 @@ import { getColorPalette, saveColorPalette } from "../../services/colorService";
 import { THEME_OPTIONS } from "./ThemeOptions";
 
 // Temas disponibles, por Id, nombre y paleta según etiqueta de la materia (o tema)
+const THEME_CACHE_PREFIX = "theme-palette-cache";
 
 // Componente selector de temas
 export const ThemeSelector = ({ userId, onThemeChange }) => {
@@ -27,6 +28,26 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
         const lowered = value.toLowerCase();
         const byName = THEME_OPTIONS.find((theme) => String(theme.name || "").toLowerCase() === lowered);
         return byName ? byName.id : null;
+    };
+
+    const getCacheKey = (id) => `${THEME_CACHE_PREFIX}:${id || "anonymous"}`;
+
+    const readCachedThemeId = (id) => {
+        try {
+            const cached = localStorage.getItem(getCacheKey(id));
+            return resolveThemeId(cached);
+        } catch {
+            return null;
+        }
+    };
+
+    const writeCachedThemeId = (id, themeId) => {
+        if (!themeId) return;
+        try {
+            localStorage.setItem(getCacheKey(id), themeId);
+        } catch {
+            // Ignorar errores de almacenamiento local
+        }
     };
 
     const unwrapApiScalar = (value) => {
@@ -66,6 +87,7 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
     const handle_theme_change = (theme_id) => {
         const ANIM_DURATION = 150; // ms
         set_current_theme(theme_id);
+        writeCachedThemeId(userId, theme_id);
 
         // Cerrar modal con animación
         set_is_modal_closing(true);
@@ -134,6 +156,15 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
     useEffect(() => {
         let is_mounted = true;
 
+        // Aplicar cache
+        const cachedThemeId = readCachedThemeId(userId);
+        if (cachedThemeId && THEME_OPTIONS.find((theme) => theme.id === cachedThemeId)) {
+            set_current_theme(cachedThemeId);
+            if (onThemeChange) {
+                onThemeChange(cachedThemeId);
+            }
+        }
+
         if (userId) {
             // Cargar la paleta guardada del usuario
             getColorPalette(userId)
@@ -153,6 +184,7 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
                         // Verificar que el ID existe en THEME_OPTIONS
                         if (paletteId && THEME_OPTIONS.find(t => t.id === paletteId)) {
                             set_current_theme(paletteId);
+                            writeCachedThemeId(userId, paletteId);
                             if (onThemeChange) {
                                 onThemeChange(paletteId);
                             }
