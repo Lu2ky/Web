@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { legalDocumentsContent } from "./config/legalDocumentsContent";
-import Image from "./assets/ImageLogIn.jpeg";
+import Image from "./assets/ImageLogIn.webp";
 import "./styles/LegalDocumentsView.css";
 
 const DOC_TYPES = {
