@@ -35,19 +35,19 @@ function LegalDocumentsView() {
           <nav className="legal-view__tabs" aria-label="Seleccion de documento">
             <button
               type="button"
-              aria-label="Terminos y Condiciones"
+              aria-label="Términos y Condiciones"
               className={`legal-view__tab ${selectedDoc === DOC_TYPES.terms ? "is-active" : ""}`}
               onClick={() => setSelectedDoc(DOC_TYPES.terms)}
             >
-              Terminos y Condiciones
+              Términos y Condiciones
             </button>
             <button
               type="button"
-              aria-label="Politica de Tratamiento de Datos"
+              aria-label="Política de Tratamiento de Datos"
               className={`legal-view__tab ${selectedDoc === DOC_TYPES.dataPolicy ? "is-active" : ""}`}
               onClick={() => setSelectedDoc(DOC_TYPES.dataPolicy)}
             >
-              Politica de datos
+              Política de datos
             </button>
           </nav>
         </header>
@@ -55,7 +55,7 @@ function LegalDocumentsView() {
         <header className="legal-view__header legal-view__header--mobile">
           <div className="legal-view__mobile-top">
             <p className="legal-view__eyebrow">Informacion legal</p>
-            <p className="legal-view__current">Terminos y Politica</p>
+            <p className="legal-view__current">Términos y Política</p>
           </div>
         </header>
 
@@ -101,7 +101,7 @@ function LegalDocumentsView() {
             Documento oficial de referencia para consulta de condiciones de uso y tratamiento de datos del sistema Horarios UPB.
           </p>
           <Link className="legal-view__back" to="/">
-            Volver al inicio de sesion
+            Volver al inicio de sesión
           </Link>
         </footer>
       </section>
@@ -110,3 +110,5 @@ function LegalDocumentsView() {
 }
 
 export default LegalDocumentsView;
+
+
