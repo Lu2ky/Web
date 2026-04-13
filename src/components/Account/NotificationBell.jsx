@@ -56,6 +56,7 @@ export default function NotificationBell({ userId }) {
     async function refreshNotifications() {
         if (!userId) {
             setNotifications([]);
+            setIsMuted(false);
             return [];
         }
 
@@ -63,36 +64,21 @@ export default function NotificationBell({ userId }) {
             const items = await NotificationService.getNotifications(userId);
             const normalized = Array.isArray(items) ? items : [];
             setNotifications(normalized);
+
+            const muteStatus = NotificationsSilenceService.getMuteStatus();
+            setIsMuted(muteStatus !== null);
+
             return normalized;
         } catch (err) {
             console.error("Error cargando notificaciones:", err);
             setNotifications([]);
+            setIsMuted(false);
             return [];
         }
     }
 
-    // Carga notificaciones inmediatamente y luego cada 10 segundos (polling)
-    // También verifica el estado de silenciamiento
+    // Carga notificaciones inmediatamente y luego cada 20 segundos (polling)
     useEffect(() => {
-        async function load() {
-            if (!userId) {
-                setNotifications([]);
-                setIsMuted(false);
-                return;
-            }
-            try {
-                const items = await NotificationService.getNotifications(userId);
-                setNotifications(Array.isArray(items) ? items : []);
-                
-                // Verificar si las notificaciones están silenciadas
-                const muteStatus = NotificationsSilenceService.getMuteStatus();
-                setIsMuted(muteStatus !== null);
-            } catch (err) {
-                console.error("Error cargando notificaciones:", err);
-                setNotifications([]);
-            }
-        }
-        
         // Cargar de inmediato
         refreshNotifications();
         
