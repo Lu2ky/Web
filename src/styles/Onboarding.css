@@ -186,6 +186,7 @@
 	box-shadow: none !important;
 }
 
+
 @keyframes onboardingFadeIn {
 	from {
 		opacity: 0;
@@ -240,4 +241,5 @@
 	.onboarding-btn {
 		width: 100%;
 	}
+
 }

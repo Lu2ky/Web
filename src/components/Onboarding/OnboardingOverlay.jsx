@@ -17,7 +17,18 @@ const getElementRect = (element) => {
 };
 
 function OnboardingOverlay() {
-	const { isLoading, isOpen, steps, currentStep, totalSteps, canContinue, validationMessage, nextStep, prevStep, skip } = useOnboarding();
+	const {
+		isLoading,
+		isOpen,
+		steps,
+		currentStep,
+		totalSteps,
+		canContinue,
+		validationMessage,
+		nextStep,
+		prevStep,
+		skip
+	} = useOnboarding();
 	const [layoutTick, setLayoutTick] = useState(0);
 
 	const current = useMemo(() => steps[currentStep] ?? null, [steps, currentStep]);
@@ -47,7 +58,10 @@ function OnboardingOverlay() {
 		};
 	}, [targetElement]);
 
-	if (isLoading || !isOpen || !current) return null;
+	if (isLoading) return null;
+	if (!isOpen) return null;
+
+	if (!current) return null;
 
 	return (
 		<div className="onboarding-overlay" aria-hidden="false">

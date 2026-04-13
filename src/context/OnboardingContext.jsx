@@ -1,4 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+	getOnboardingCompletionStatus,
+	resetOnboardingCompletion,
+	saveOnboardingCompletion
+} from "../services/onboardingService";
 
 const ONBOARDING_STORAGE_PREFIX = "onboarding_visited:";
 const ONBOARDING_VERSION = 1;
@@ -394,47 +399,57 @@ const writeOnboardingState = (userId, value) => {
 	localStorage.setItem(getStorageKey(userId), JSON.stringify(value));
 };
 
+const clearOnboardingState = (userId) => {
+	if (!userId) return;
+	localStorage.removeItem(getStorageKey(userId));
+};
+
+const getInitialCompletedActions = () => ({
+	dropdownOpened: false,
+	preferencesOpened: false,
+	emailEditOpened: false,
+	emailTyped: false,
+	emailSaved: false,
+	notificationsOpened: false,
+	todoAddOpened: false,
+	todoAddSaved: false,
+	todoEditSaved: false,
+	todoDuplicateSaved: false,
+	todoDeleted: false,
+	todoFilterOpened: false,
+	todoFilterApplied: false,
+	todoCardEditClicked: false,
+	todoCardDuplicateClicked: false,
+	todoCardDeleteClicked: false,
+	calendarClicked: false,
+	viewChanged: false,
+	academicPeriodOpened: false,
+	academicPeriodSelected: false,
+	themeSelectorOpened: false,
+	themeSelected: false,
+	addActivityOpened: false,
+	addActivityTitleTyped: false,
+	calendarFilterOpened: false,
+	calendarFilterOptionSelected: false,
+	officialCardOpened: false,
+	officialCommentOpened: false,
+	officialCommentSaved: false
+});
+
 export function OnboardingProvider({ children, userId }) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isOpen, setIsOpen] = useState(false);
 	const [currentStep, setCurrentStep] = useState(0);
-	const [completedActions, setCompletedActions] = useState({
-		dropdownOpened: false,
-		preferencesOpened: false,
-		emailEditOpened: false,
-		emailTyped: false,
-		emailSaved: false,
-		notificationsOpened: false,
-		todoAddOpened: false,
-		todoAddSaved: false,
-		todoEditSaved: false,
-		todoDuplicateSaved: false,
-		todoDeleted: false,
-		todoFilterOpened: false,
-		todoFilterApplied: false,
-		todoCardEditClicked: false,
-		todoCardDuplicateClicked: false,
-		todoCardDeleteClicked: false,
-		calendarClicked: false,
-		viewChanged: false,
-		academicPeriodOpened: false,
-		academicPeriodSelected: false,
-		themeSelectorOpened: false,
-		themeSelected: false,
-		addActivityOpened: false,
-		addActivityTitleTyped: false,
-		calendarFilterOpened: false,
-		calendarFilterOptionSelected: false,
-		officialCardOpened: false,
-		officialCommentOpened: false,
-		officialCommentSaved: false
-	});
+	const [completedActions, setCompletedActions] = useState(getInitialCompletedActions);
 	const [validationMessage, setValidationMessage] = useState("");
 
 	const steps = ONBOARDING_STEPS;
 	const totalSteps = steps.length;
 
 	useEffect(() => {
+		let isDisposed = false;
+
+		const initializeOnboarding = async () => {
 		const trimmedUserId = String(userId || "").trim();
 		if (!trimmedUserId) {
 			setIsOpen(false);
@@ -443,44 +458,38 @@ export function OnboardingProvider({ children, userId }) {
 			return;
 		}
 
+		setIsLoading(true);
+
 		const savedState = readOnboardingState(trimmedUserId);
-		const isCompleted = savedState?.completed === true && savedState?.version === ONBOARDING_VERSION;
+		let isCompleted = savedState?.completed === true && savedState?.version === ONBOARDING_VERSION;
+		const remoteStatus = await getOnboardingCompletionStatus(trimmedUserId);
+		const remoteCompleted = remoteStatus === true || Number(remoteStatus) === 1;
+		const hasRemoteStatus = remoteStatus !== null && remoteStatus !== undefined;
+		if (hasRemoteStatus) {
+			isCompleted = remoteCompleted;
+			if (remoteCompleted) {
+				writeOnboardingState(trimmedUserId, {
+					completed: true,
+					version: ONBOARDING_VERSION,
+					completedAt: Date.now()
+				});
+			}
+		}
+
+		if (isDisposed) return;
 
 		setCurrentStep(0);
-		setCompletedActions({
-			dropdownOpened: false,
-			preferencesOpened: false,
-			emailEditOpened: false,
-			emailTyped: false,
-			emailSaved: false,
-			notificationsOpened: false,
-			todoAddOpened: false,
-			todoAddSaved: false,
-			todoEditSaved: false,
-			todoDuplicateSaved: false,
-			todoDeleted: false,
-			todoFilterOpened: false,
-			todoFilterApplied: false,
-			todoCardEditClicked: false,
-			todoCardDuplicateClicked: false,
-			todoCardDeleteClicked: false,
-			calendarClicked: false,
-			viewChanged: false,
-			academicPeriodOpened: false,
-			academicPeriodSelected: false,
-			themeSelectorOpened: false,
-			themeSelected: false,
-			addActivityOpened: false,
-			addActivityTitleTyped: false,
-			calendarFilterOpened: false,
-			calendarFilterOptionSelected: false,
-			officialCardOpened: false,
-			officialCommentOpened: false,
-			officialCommentSaved: false
-		});
+		setCompletedActions(getInitialCompletedActions());
 		setValidationMessage("");
 		setIsOpen(!isCompleted);
 		setIsLoading(false);
+		};
+
+		void initializeOnboarding();
+
+		return () => {
+			isDisposed = true;
+		};
 	}, [userId]);
 
 	useEffect(() => {
@@ -709,12 +718,46 @@ export function OnboardingProvider({ children, userId }) {
 
 	const complete = useCallback(() => {
 		const trimmedUserId = String(userId || "").trim();
+		if (!trimmedUserId) {
+			setIsOpen(false);
+			return;
+		}
+
 		writeOnboardingState(trimmedUserId, {
 			completed: true,
 			version: ONBOARDING_VERSION,
 			completedAt: Date.now()
 		});
 		setIsOpen(false);
+
+		void (async () => {
+			await saveOnboardingCompletion(trimmedUserId);
+			const refreshedRemoteStatus = await getOnboardingCompletionStatus(trimmedUserId);
+			const hasRemoteStatus = refreshedRemoteStatus !== null && refreshedRemoteStatus !== undefined;
+
+			if (!hasRemoteStatus) {
+				return;
+			}
+
+			const refreshedRemoteCompleted =
+				refreshedRemoteStatus === true || Number(refreshedRemoteStatus) === 1;
+
+			if (refreshedRemoteCompleted) {
+				writeOnboardingState(trimmedUserId, {
+					completed: true,
+					version: ONBOARDING_VERSION,
+					completedAt: Date.now()
+				});
+				setIsOpen(false);
+				return;
+			}
+
+			clearOnboardingState(trimmedUserId);
+			setCurrentStep(0);
+			setCompletedActions(getInitialCompletedActions());
+			setValidationMessage("");
+			setIsOpen(true);
+		})();
 	}, [userId]);
 
 	const nextStep = useCallback(() => {
@@ -761,6 +804,22 @@ export function OnboardingProvider({ children, userId }) {
 		complete();
 	}, [complete]);
 
+	const reset = useCallback(() => {
+		const trimmedUserId = String(userId || "").trim();
+		setValidationMessage("");
+		setCurrentStep(0);
+		setCompletedActions(getInitialCompletedActions());
+
+		if (!trimmedUserId) {
+			setIsOpen(true);
+			return;
+		}
+
+		clearOnboardingState(trimmedUserId);
+		setIsOpen(true);
+		void resetOnboardingCompletion(trimmedUserId);
+	}, [userId]);
+
 	const value = useMemo(
 		() => ({
 			isLoading,
@@ -773,7 +832,8 @@ export function OnboardingProvider({ children, userId }) {
 			nextStep,
 			prevStep,
 			skip,
-			complete
+			complete,
+			reset
 		}),
 		[
 			isLoading,
@@ -786,7 +846,8 @@ export function OnboardingProvider({ children, userId }) {
 			nextStep,
 			prevStep,
 			skip,
-			complete
+			complete,
+			reset
 		]
 	);
 
