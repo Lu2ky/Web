@@ -5,8 +5,7 @@ import FilterButton from "./FilterButton";
 import ThemeSelect from "./ThemeSelector";
 import AcademicPeriodSelect from "./AcademicPeriodSelect";
 
-function ControlBar({viewMode, setViewMode, userId, onActivityAdd, onThemeChange, selectedTag, setSelectedTag, onPeriodChange, weekOffset, setWeekOffset}) {
-
+function ControlBar({viewMode, setViewMode, userId, idCourse, onActivityAdd, onThemeChange, selectedTag, setSelectedTag, onPeriodChange, weekOffset, setWeekOffset}) {
     return (
         <div className="ControlBar" data-onboarding-id="controlbar">
             <div className="Left">
@@ -16,7 +15,7 @@ function ControlBar({viewMode, setViewMode, userId, onActivityAdd, onThemeChange
             </div>
             <div className="Right">
                 <AcademicPeriodSelect onPeriodChange={onPeriodChange} />
-                <AddButton userId={userId} onActivityAdd={onActivityAdd} />
+                <AddButton userId={userId} idCourse={idCourse} onActivityAdd={onActivityAdd} />
                 <FilterButton selectedTag={selectedTag} setSelectedTag={setSelectedTag} />
                 <ThemeSelect userId={userId} onThemeChange={onThemeChange} />
             </div>

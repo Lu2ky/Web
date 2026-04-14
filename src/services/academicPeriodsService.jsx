@@ -266,7 +266,6 @@ const postJson = async ({ endpoint, requestBody, defaultError }) => {
 
 export const fetchAcademicPeriods = async () => {
   const endpoint = import.meta.env.VITE_API_URL_ACADEMIC_PERIODS;
-  logAcademicPeriodsDebug("fetchAcademicPeriods called", { endpoint });
 
   if (!endpoint) {
     console.warn("VITE_API_URL_ACADEMIC_PERIODS no configurado");

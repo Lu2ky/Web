@@ -81,8 +81,6 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
     if (error) setError("");
   };
 
-  // Valida que el formulario cumpla con todas las restricciones
-  // Verifica: título, día, horas, coherencia de horarios y fechas
   const validate = () => {
     if (!formData.title.trim()) return "El título es obligatorio.";
     if (!formData.day) return "Debes seleccionar un día.";
@@ -96,9 +94,43 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
     return "";
   };
 
+  // ✅ Verifica si hay cambios comparando formData con activity original
+  const hasChanges = () => {
+    const originalData = {
+      title: activity.name || activity.activity_name || activity.subject_name || "",
+      description: activity.description || "",
+      day: activity.day || "",
+      startHour: normalizeTimeForInput(activity.start_time || activity.start_hour || ""),
+      endHour: normalizeTimeForInput(activity.end_time || activity.end_hour || ""),
+      dateStart: normalizeDateForInput(activity.date_start || ""),
+      dateEnd: normalizeDateForInput(activity.date_end || "")
+    };
+
+    const changes = {
+      title: formData.title !== originalData.title,
+      description: formData.description !== originalData.description,
+      day: formData.day !== originalData.day,
+      startHour: formData.startHour !== originalData.startHour,
+      endHour: formData.endHour !== originalData.endHour,
+      dateStart: formData.dateStart !== originalData.dateStart,
+      dateEnd: formData.dateEnd !== originalData.dateEnd
+    };
+
+    const hasAnyChange = Object.values(changes).some(change => change);
+    
+    return hasAnyChange;
+  };
+
   const handleSave = async () => {
     const v = validate();
     if (v) { setError(v); return; }
+    
+    // ✅ Verificar si hay cambios antes de enviar
+    if (!hasChanges()) {
+      setError("No hay cambios para guardar.");
+      return;
+    }
+    
     setLoading(true);
     try {
       const payload = {
@@ -130,7 +162,7 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
       onUpdated(updated);
       onClose();
     } catch (err) {
-      console.error("Error updating activity:", err);
+      console.error("Error actualizando actividad:", err);
       setError(err.message || "Error al actualizar actividad.");
     } finally {
       setLoading(false);
@@ -178,8 +210,8 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
           <button 
             className="saveButton" 
             onClick={handleSave} 
-            disabled={loading}
-            title="Guardar cambios de actividad"
+            disabled={loading || !hasChanges()}
+            title={!hasChanges() ? "No hay cambios para guardar" : "Guardar cambios de actividad"}
             aria-label="Guardar cambios"
           >
             {loading ? "Guardando..." : "Guardar"}

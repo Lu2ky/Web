@@ -101,10 +101,6 @@ function isAuthResponseSuccessful(response) {
     );
 }
 
-// Registrar endpoints para depuración
-console.log("Update User Email Endpoint:", UPDATE_USER_EMAIL_ENDPOINT);
-console.log("Update Reminder Anticipation Endpoint:", UPDATE_REMINDER_ANTICIPATION_ENDPOINT);
-
 /**
  * Obtiene datos del usuario por su ID
  * @param {number|string} userId - ID del usuario

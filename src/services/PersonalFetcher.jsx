@@ -395,23 +395,12 @@ export const addPersonalActivity = async (userId, activityData) => {
     const formattedDateStart = formatApiDateTime(activityData.dateStart);
     const formattedDateEnd = formatApiDateTime(activityData.dateEnd);
     const idUsuario = await resolveIdUsuario(userId);
-    
-    console.log("Formato de fechas:");
-    console.log("  - dateStart entrada:", activityData.dateStart);
-    console.log("  - dateStart formateada:", formattedDateStart);
-    console.log("  - dateEnd entrada:", activityData.dateEnd);
-    console.log("  - dateEnd formateada:", formattedDateEnd);
-    console.log("Formato de horas:");
-    console.log("  - startHour entrada:", activityData.startHour);
-    console.log("  - startHour formateada:", formatTimeWithColons(activityData.startHour));
-    console.log("  - endHour entrada:", activityData.endHour);
-    console.log("  - endHour formateada:", formatTimeWithColons(activityData.endHour));
-    console.log("Día:", activityData.day, "->", dayMap[activityData.day]);
 
     // Preparar los datos en el formato que espera la API
     const payload = {
       id_user: idUsuario,
       id_academic_per: 1,
+      id_course: activityData.idCourse || null,  // ✅ AGREGAR id_course al payload
       subject_name: activityData.title,
       description: activityData.description || "",
       date_start: formattedDateStart,
@@ -421,8 +410,6 @@ export const addPersonalActivity = async (userId, activityData) => {
       day: dayMap[activityData.day] || 1,
       codUsuario
     };
-
-    console.log("Enviando actividad a la API:", payload);
 
     const tokenLocalStore = localStorage.getItem("token") || "";
     const token = `Bearer ${tokenLocalStore}`;
@@ -450,8 +437,8 @@ export const addPersonalActivity = async (userId, activityData) => {
         errorDetails = bodyText || `HTTP ${response.status}`;
       }
       
-      console.error("❌ Error " + response.status + " - Detalles completos:", errorDetails);
-      console.error("❌ Payload enviado:", JSON.stringify(payload, null, 2));
+      console.error("Error " + response.status + " - Detalles completos:", errorDetails);
+      console.error("Payload enviado:", JSON.stringify(payload, null, 2));
       throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorDetails}`);
     }
 
@@ -465,7 +452,6 @@ export const addPersonalActivity = async (userId, activityData) => {
       console.error("Respuesta recibida:", bodyText);
       throw new Error(`Error al parsear respuesta: ${parseError.message}`);
     }
-    // respuesta recibida (log emoji removed)
     
     return data;
   } catch (error) {

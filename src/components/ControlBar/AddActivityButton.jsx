@@ -12,7 +12,7 @@ const INITIAL_FORM_DATA = {
     dateEnd: ""
 };
 
-function AddActivityButton({ userId, onActivityAdd }) {
+function AddActivityButton({ userId, idCourse, onActivityAdd }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     const [error, setError] = useState("");
@@ -105,12 +105,12 @@ function AddActivityButton({ userId, onActivityAdd }) {
                 startHour: formData.startHour,
                 endHour: formData.endHour,
                 dateStart: dateStartISO,
-                dateEnd: dateEndISO
+                dateEnd: dateEndISO,
+                idCourse: idCourse || null  // ✅ Agregar idCourse aquí
             };
 
             // Enviar a la API
             const response = await addPersonalActivity(userId, activityData);
-            console.log("Actividad agregada exitosamente:", response);
 
             // Crear objeto con el formato esperado por BlockPersonal y PopUpPersonal
             const newActivity = {
@@ -126,7 +126,8 @@ function AddActivityButton({ userId, onActivityAdd }) {
                 location: "",
                 classroom: "",
                 date_start: dateStartISO,
-                date_end: dateEndISO
+                date_end: dateEndISO,
+                id_course: idCourse || null  // ✅ Incluir también en la actividad local
             };
 
             // Notificar al padre con la nueva actividad

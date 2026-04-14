@@ -407,8 +407,6 @@ function App() {
 		}
 	};
 
-	// Manejador para cambio de período académico
-	// Recibe { id, nombre } del período o null para "Todos"
 	const handlePeriodChange = (periodObj) => {
 		console.log("Período académico seleccionado:", periodObj);
 		setSelectedAcademicPeriod(periodObj);
@@ -529,8 +527,7 @@ function App() {
 					<ControlBar
 						viewMode={viewMode}
 						setViewMode={setViewMode}
-						userId={userId}
-						onActivityAdd={handleActivityAdd}
+						userId={userId}					idCourse={selectedAcademicPeriod?.id || null}						onActivityAdd={handleActivityAdd}
 						onThemeChange={handleThemeChange}
 						onPeriodChange={handlePeriodChange}
 						selectedTag={selectedTag}
