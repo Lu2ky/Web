@@ -284,11 +284,6 @@ export default function TaskAddModal({
             className="modalOverlay"
             role="dialog"
             aria-modal="true"
-            onClick={() => {
-                setShowCalendar(false);
-                setShowTagDropdown(false);
-                onClose();
-            }}
         >
             <div
                 className="modalContainer"

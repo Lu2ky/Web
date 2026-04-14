@@ -59,7 +59,6 @@ const Modal = ({ isOpen, onClose, title, children, onConfirm = null, confirmLabe
     return ( 
         <div
             className="modal-overlay" 
-            onClick={onClose}
             role="presentation"
         >
             {/*Contenedor principal, accesibilidad y evita que al dar clic dentro se cierre*/}

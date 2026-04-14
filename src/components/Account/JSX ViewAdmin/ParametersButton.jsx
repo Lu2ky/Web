@@ -26,7 +26,6 @@ function ParametersButton() {
                     className="parametersModalOverlay"
                     role="dialog"
                     aria-modal="true"
-                    onClick={() => setIsOpen(false)}
                 >
                     <div
                         className="parametersModalContainer"

@@ -28,7 +28,6 @@ function PrivilegesButton() {
                     className="privilegesModalOverlay"
                     role="dialog"
                     aria-modal="true"
-                    onClick={() => setIsOpen(false)}
                 >
                     <div
                         className="privilegesModalContainer"

@@ -78,7 +78,7 @@ export const PopUpPersonal = ({
   }
 
   return (
-    <div className="popup-overlay" onClick={handle_close}>
+    <div className="popup-overlay">
       <div className="popup-container" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="popup-header">

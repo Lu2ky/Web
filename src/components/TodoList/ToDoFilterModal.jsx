@@ -39,7 +39,6 @@ function ToDoFilterModal({ isOpen, onClose, onApply, initialFilters = defaultFil
             className="modalOverlay"
             role="dialog"
             aria-modal="true"
-            onClick={onClose}
         >
             <div className="modalContainer" onClick={e => e.stopPropagation()} data-onboarding-id="todo-filter-modal">
                 <h2>Filtrar tareas</h2>

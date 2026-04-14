@@ -250,11 +250,6 @@ export default function TaskEditModal({
             className="modalOverlay"
             role="dialog"
             aria-modal="true"
-            onClick={() => {
-                setShowCalendar(false);
-                setShowTagDropdown(false);
-                onClose();
-            }}
         >
             <div className="modalContainer" onClick={(e) => e.stopPropagation()} data-onboarding-id="todo-edit-modal">
                 <h2>{title}</h2>

@@ -231,7 +231,6 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
             {
                 is_modal_open && (
                     <div className={`themeModalOverlay ${is_modal_closing ? "hide" : "show"}`}
-                        onClick={toggle_modal}
                     >
                         <div className="themeModal" data-onboarding-id="theme-selector-modal">
                             <h2>Paleta de temas</h2>

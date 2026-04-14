@@ -188,7 +188,6 @@ function AddActivityButton({ userId, onActivityAdd }) {
                     className="modalOverlay"
                     role="dialog"
                     aria-modal="true"
-                    onClick={() => closeModal()}
                 >
                     <div
                         className="modalContainer"

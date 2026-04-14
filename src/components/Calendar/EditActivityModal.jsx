@@ -138,7 +138,7 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
   };
 
   return (
-    <div className="modalOverlay" role="dialog" aria-modal="true" onClick={onClose}>
+    <div className="modalOverlay" role="dialog" aria-modal="true">
       <div className="modalContainer" onClick={(e) => e.stopPropagation()}>
         <h2>Editar Actividad</h2>
         <button className="modalClose" onClick={onClose} title="Cerrar" aria-label="Cerrar" type="button">X</button>

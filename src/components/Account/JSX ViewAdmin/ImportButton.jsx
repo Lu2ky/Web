@@ -27,7 +27,6 @@ function ImportButton() {
                     className="importModalOverlay"
                     role="dialog"
                     aria-modal="true"
-                    onClick={() => setIsOpen(false)}
                 >
                     <div
                         className="importModalContainer"

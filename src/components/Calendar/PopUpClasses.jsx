@@ -269,7 +269,7 @@ export const PopUpClasses = ({
 
   return (
     <>
-      <div className="popup-overlay" onClick={handle_close}>
+      <div className="popup-overlay">
       <div className="popup-container" onClick={(e) => e.stopPropagation()} data-onboarding-id="official-card-modal">
         {/* Header */}
         <div className="popup-header">

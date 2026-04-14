@@ -52,7 +52,7 @@ export default function MessageConfirmation({
     );
 
     return (
-        <div className="confirmacion-message-overlay" onClick={onClose}>
+        <div className="confirmacion-message-overlay">
             <div className="confirmacion-message-container" onClick={(e) => e.stopPropagation()} data-onboarding-id="todo-delete-modal">
                 {/* Barra decorativa */}
                 <div className="confirmacion-message-gradient-bar" />
