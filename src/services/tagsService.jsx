@@ -1,5 +1,6 @@
 // Utilidad de servicio para varios endpoints relacionados con etiquetas
 import { getSessionCodUsuario } from "./authSession";
+import { getUserData } from "./userService";
 
 const TAGS_USER_URL = import.meta.env.VITE_API_URL_TAGS_USER;
 
@@ -29,6 +30,17 @@ function normalizeTag(tag) {
     return null;
 }
 
+function resolveInternalUserId(rawUser) {
+    return (
+        rawUser?.N_idUsuario ??
+        rawUser?.idUsuario ??
+        rawUser?.id_user ??
+        rawUser?.ID_USER ??
+        rawUser?.id ??
+        null
+    );
+}
+
 export async function getTagsByUserAndCourse(userId, courseId) {
     if (!userId || !courseId) return [];
     const url = `${TAGS_USER_AND_COURSE_URL}${userId}/${courseId}`;
@@ -53,8 +65,22 @@ export async function getTagsByUserAndCourse(userId, courseId) {
 
 export async function deleteTag(tagId, userId) {
     if (!tagId) return;
-    const codUsuario = getSessionCodUsuario();
-    const payload = { idTag: tagId, codUsuario };
+    const codUsuario = String(getSessionCodUsuario() || userId || "").trim();
+    let idUsuario = null;
+
+    try {
+        const userData = await getUserData(codUsuario || userId);
+        const rawUser = Array.isArray(userData) ? userData[0] : userData;
+        idUsuario = resolveInternalUserId(rawUser);
+    } catch {
+        idUsuario = null;
+    }
+
+    const payload = {
+        idTag: tagId,
+        ...(idUsuario != null && idUsuario !== "" ? { idUsuario } : {}),
+        ...(codUsuario ? { codUsuario } : {})
+    };
 
     // Cabecera Authorization.
     const tokenLocalStore = localStorage.getItem("token") || "";

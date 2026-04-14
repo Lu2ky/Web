@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import '../../styles/addButton.css';
-import { getTagsByUser } from '../../services/tagsService';
+import { deleteTag, getTagsByUser } from '../../services/tagsService';
 import { isReminderDateInPast, PAST_REMINDER_DATE_MESSAGE } from "./reminderDateValidation";
 
 export default function TaskAddModal({
@@ -261,6 +261,23 @@ export default function TaskAddModal({
         }));
     };
 
+    const handleDeleteTag = async (tagToDelete) => {
+        handleRemoveTag(tagToDelete);
+
+        if (!tagToDelete?.id || !userId) {
+            return;
+        }
+
+        try {
+            await deleteTag(tagToDelete.id, userId);
+            setFetchedTags((prev) => prev.filter((tag) => String(tag.id) !== String(tagToDelete.id)));
+            setError('');
+        } catch (deleteError) {
+            console.error('Error eliminando etiqueta:', deleteError);
+            setError('No se pudo eliminar la etiqueta del sistema. Se quitó solo del recordatorio.');
+        }
+    };
+
     const handleDateFromCalendar = (date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -430,7 +447,9 @@ export default function TaskAddModal({
                                     <button
                                         type="button"
                                         className="tagChipRemove"
-                                        onClick={() => handleRemoveTag(tag)}
+                                        onClick={() => {
+                                            void handleDeleteTag(tag);
+                                        }}
                                         aria-label={`Quitar ${tag.label}`}                                        title={`Quitar etiqueta ${tag.label}`}                                    >
                                         ✕
                                     </button>
@@ -560,11 +579,12 @@ export default function TaskAddModal({
                                     </button>
                                     <button
                                         className="tagActionBtn tagActionDelete"
-                                        title="Eliminar de la tarea"
+                                        title="Eliminar etiqueta"
+                                        aria-label="Eliminar etiqueta"
                                         onMouseDown={(e) => {
                                             e.stopPropagation();
                                             e.preventDefault();
-                                            handleRemoveTag(t);
+                                            void handleDeleteTag(t);
                                             setShowTagDropdown(false);
                                         }}
                                     >

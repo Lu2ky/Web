@@ -24,6 +24,54 @@ header {
     gap: 1rem;
 }
 
+.helpInstructionsButton {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.helpInstructionsButton:hover {
+    color: #111827;
+    border-color: #c026d3;
+    box-shadow: 0 4px 12px rgba(192, 38, 211, 0.2);
+    transform: translateY(-1px);
+}
+
+.helpInstructionsButton:focus-visible {
+    outline: 2px solid #c026d3;
+    outline-offset: 2px;
+}
+
+.helpInstructionsContent {
+    color: #374151;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.helpInstructionsContent p {
+    margin: 0 0 0.75rem;
+}
+
+.helpInstructionsContent ol {
+    margin: 0 0 0.75rem;
+    padding-left: 1.25rem;
+}
+
+.helpInstructionsContent li {
+    margin-bottom: 0.45rem;
+}
+
 /* Logo */
 
 header img {

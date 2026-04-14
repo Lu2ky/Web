@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
 	getOnboardingCompletionStatus,
 	resetOnboardingCompletion,
@@ -442,6 +442,7 @@ export function OnboardingProvider({ children, userId }) {
 	const [currentStep, setCurrentStep] = useState(0);
 	const [completedActions, setCompletedActions] = useState(getInitialCompletedActions);
 	const [validationMessage, setValidationMessage] = useState("");
+	const preventAutoAdvanceOnceRef = useRef(false);
 
 	const steps = ONBOARDING_STEPS;
 	const totalSteps = steps.length;
@@ -761,6 +762,8 @@ export function OnboardingProvider({ children, userId }) {
 	}, [userId]);
 
 	const nextStep = useCallback(() => {
+		preventAutoAdvanceOnceRef.current = false;
+
 		if (!canContinue) {
 			setValidationMessage(currentStepData?.requirementText || "Completa la acción indicada para continuar.");
 			return;
@@ -781,6 +784,11 @@ export function OnboardingProvider({ children, userId }) {
 			return;
 		}
 
+		if (preventAutoAdvanceOnceRef.current) {
+			preventAutoAdvanceOnceRef.current = false;
+			return;
+		}
+
 		const timerId = setTimeout(() => {
 			setValidationMessage("");
 			setCurrentStep((prev) => {
@@ -797,6 +805,7 @@ export function OnboardingProvider({ children, userId }) {
 
 	const prevStep = useCallback(() => {
 		setValidationMessage("");
+		preventAutoAdvanceOnceRef.current = true;
 		setCurrentStep((prev) => Math.max(0, prev - 1));
 	}, []);
 

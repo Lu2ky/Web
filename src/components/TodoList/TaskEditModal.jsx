@@ -3,8 +3,15 @@ import { createPortal } from 'react-dom';
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import '../../styles/addButton.css';
-import { getTagsByUser } from '../../services/tagsService';
-import { isReminderDateInPast, PAST_REMINDER_DATE_MESSAGE } from "./reminderDateValidation";
+import { deleteTag, getTagsByUser } from '../../services/tagsService';
+import {
+    stringToDate,
+    formatDateDMY,
+    parseDateDMY,
+    getDatePart,
+    getTimePart,
+    buildDateTime
+} from '../../utils/dateTimeFormatter';
 
 export default function TaskEditModal({
     isOpen,
@@ -39,100 +46,12 @@ export default function TaskEditModal({
     const [error, setError] = useState('');
     const [fetchedTags, setFetchedTags] = useState([]);
 
-    const stringToDate = (dateValue) => {
-        if (!dateValue) return new Date();
-        if (dateValue instanceof Date) return dateValue;
-
-        const raw = String(dateValue).trim();
-        if (!raw) return new Date();
-
-        const yyyyMmDd = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-        if (yyyyMmDd) {
-            const year = Number(yyyyMmDd[1]);
-            const month = Number(yyyyMmDd[2]) - 1;
-            const day = Number(yyyyMmDd[3]);
-            return new Date(year, month, day);
-        }
-
-        const dateTime = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
-        if (dateTime) {
-            const year = Number(dateTime[1]);
-            const month = Number(dateTime[2]) - 1;
-            const day = Number(dateTime[3]);
-            const hour = Number(dateTime[4]);
-            const minute = Number(dateTime[5]);
-            const second = Number(dateTime[6] || 0);
-            return new Date(year, month, day, hour, minute, second);
-        }
-
-        const parsed = new Date(raw.replace(' ', 'T'));
-        return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
-    };
-
-    const formatDate = (date) => {
-        if (!date) return '';
-        const d = new Date(date);
-        const day = String(d.getDate()).padStart(2, "0");
-        const month = String(d.getMonth() + 1).padStart(2, "0");
-        const year = d.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
-
-    const parseDDMMYYYY = (str) => {
-        if (!str) return null;
-        const m = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-        if (!m) return null;
-        const day = Number(m[1]);
-        const month = Number(m[2]) - 1;
-        const year = Number(m[3]);
-        const d = new Date(year, month, day);
-        if (d.getFullYear() !== year || d.getMonth() !== month || d.getDate() !== day) return null;
-        return d;
-    };
-
-    const getDatePart = (dateValue) => {
-        if (!dateValue) return '';
-        if (typeof dateValue === 'string') {
-            const raw = dateValue.trim();
-            const dateOnly = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-            if (dateOnly) return `${dateOnly[1]}-${dateOnly[2]}-${dateOnly[3]}`;
-
-            const dateTime = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::\d{2})?$/);
-            if (dateTime) return `${dateTime[1]}-${dateTime[2]}-${dateTime[3]}`;
-        }
-
-        const parsed = stringToDate(dateValue);
-        const year = parsed.getFullYear();
-        const month = String(parsed.getMonth() + 1).padStart(2, '0');
-        const day = String(parsed.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    const getTimePart = (dateValue) => {
-        if (!dateValue) return '';
-        if (typeof dateValue === 'string') {
-            const raw = dateValue.trim();
-            const dateTime = raw.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::\d{2})?$/);
-            if (dateTime) return `${dateTime[4]}:${dateTime[5]}`;
-        }
-
-        const parsed = stringToDate(dateValue);
-        if (Number.isNaN(parsed.getTime())) return '';
-        const hours = String(parsed.getHours()).padStart(2, '0');
-        const minutes = String(parsed.getMinutes()).padStart(2, '0');
-        return `${hours}:${minutes}`;
-    };
-
-    const buildDueDate = (datePart, timePart) => {
-        if (!datePart) return '';
-        if (!timePart) return datePart;
-        return `${datePart} ${timePart}:00`;
-    };
-
     useEffect(() => {
         if (formData.dueDate) {
-            setDateText(formatDate(stringToDate(formData.dueDate)));
-            setTimeText(getTimePart(formData.dueDate));
+            const dateObj = stringToDate(formData.dueDate);
+            setDateText(formatDateDMY(dateObj));
+            const timeFull = getTimePart(formData.dueDate);
+            setTimeText(timeFull.slice(0, 5));
         } else {
             setDateText('');
             setTimeText('');
@@ -172,14 +91,15 @@ export default function TaskEditModal({
             return;
         }
 
-        if (!formData.dueDate || !String(formData.dueDate).trim()) {
-            setError('La fecha es obligatoria. Selecciona una fecha y hora.');
-            return;
-        }
-
-        if (isReminderDateInPast(formData.dueDate)) {
-            setError(PAST_REMINDER_DATE_MESSAGE);
-            return;
+        // Validar que la fecha/hora no sea anterior a la actual
+        if (formData.dueDate) {
+            const dueDateObj = stringToDate(formData.dueDate);
+            const now = new Date();
+            
+            if (dueDateObj < now) {
+                setError('La fecha y hora no pueden ser anteriores a la actual');
+                return;
+            }
         }
 
         // Incluir automáticamente cualquier etiqueta pendiente que quede en el input
@@ -189,8 +109,11 @@ export default function TaskEditModal({
             finalTags = [...finalTags, { label: pending, type: tagType }];
         }
 
-        onSave({ ...formData, tags: finalTags });
-        
+        const saveData = { ...formData, tags: finalTags };
+        console.log("[handleSave] Payload:", saveData);
+
+        onSave(saveData);
+
         // Disparar evento de onboarding después de guardar
         window.dispatchEvent(new CustomEvent("onboarding:todo-edit-saved"));
         
@@ -227,16 +150,29 @@ export default function TaskEditModal({
         }));
     };
 
+    const handleDeleteTag = async (tagToDelete) => {
+        handleRemoveTag(tagToDelete);
+
+        if (!tagToDelete?.id || !userId) {
+            return;
+        }
+
+        try {
+            await deleteTag(tagToDelete.id, userId);
+            setFetchedTags((prev) => prev.filter((tag) => String(tag.id) !== String(tagToDelete.id)));
+            setError('');
+        } catch (deleteError) {
+            console.error('Error eliminando etiqueta:', deleteError);
+            setError('No se pudo eliminar la etiqueta del sistema. Se quitó solo del recordatorio.');
+        }
+    };
+
     const handleDateFromCalendar = (date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const selectedDate = `${year}-${month}-${day}`;
-        const nextDueDate = buildDueDate(selectedDate, timeText);
-        setFormData(prev => ({ ...prev, dueDate: nextDueDate }));
-        if (!isReminderDateInPast(nextDueDate)) {
-            setError('');
-        }
+        setFormData(prev => ({ ...prev, dueDate: buildDateTime(selectedDate, timeText) }));
         setShowCalendar(false);
     };
 
@@ -300,22 +236,18 @@ export default function TaskEditModal({
                             if (v.length >= 5) v = v.slice(0, 5) + '/' + v.slice(5);
                             v = v.slice(0, 10);
                             setDateText(v);
-                            const parsed = parseDDMMYYYY(v);
+                            const parsed = parseDateDMY(v);
                             if (parsed) {
-                                const y = parsed.getFullYear();
-                                const mo = String(parsed.getMonth() + 1).padStart(2, '0');
-                                const d = String(parsed.getDate()).padStart(2, '0');
-                                const datePart = `${y}-${mo}-${d}`;
-                                const nextDueDate = buildDueDate(datePart, timeText);
-                                setFormData(prev => ({ ...prev, dueDate: nextDueDate }));
-                                if (!isReminderDateInPast(nextDueDate)) {
-                                    setError('');
-                                }
+                                const datePart = `${parsed.year}-${parsed.month}-${parsed.day}`;
+                                setFormData(prev => ({ ...prev, dueDate: buildDateTime(datePart, timeText) }));
                             }
                         }}
                         onBlur={() => {
-                            const parsed = parseDDMMYYYY(dateText);
-                            if (!parsed) setDateText(formatDate(stringToDate(formData.dueDate)));
+                            const parsed = parseDateDMY(dateText);
+                            if (!parsed) {
+                                const dateObj = stringToDate(formData.dueDate);
+                                setDateText(formatDateDMY(dateObj));
+                            }
                         }}
                     />
                     <button
@@ -338,11 +270,7 @@ export default function TaskEditModal({
                         setTimeText(nextTime);
                         const datePart = getDatePart(formData.dueDate);
                         if (datePart) {
-                            const nextDueDate = buildDueDate(datePart, nextTime);
-                            setFormData(prev => ({ ...prev, dueDate: nextDueDate }));
-                            if (!isReminderDateInPast(nextDueDate)) {
-                                setError('');
-                            }
+                            setFormData(prev => ({ ...prev, dueDate: buildDateTime(datePart, nextTime) }));
                         }
                     }}
                 />
@@ -388,7 +316,9 @@ export default function TaskEditModal({
                                     <button
                                         type="button"
                                         className="tagChipRemove"
-                                        onClick={() => handleRemoveTag(tag)}
+                                        onClick={() => {
+                                            void handleDeleteTag(tag);
+                                        }}
                                         aria-label={`Quitar ${tag.label}`}                                        title={`Quitar etiqueta ${tag.label}`}                                    >
                                         ✕
                                     </button>
@@ -518,12 +448,12 @@ export default function TaskEditModal({
                                     </button>
                                     <button
                                         className="tagActionBtn tagActionDelete"
-                                        title="Eliminar de la tarea"
+                                        title="Eliminar etiqueta"
                                         aria-label="Eliminar etiqueta"
                                         onMouseDown={(e) => {
                                             e.stopPropagation();
                                             e.preventDefault();
-                                            handleRemoveTag(t);
+                                            void handleDeleteTag(t);
                                             setShowTagDropdown(false);
                                         }}
                                     >
