@@ -176,6 +176,8 @@ function AddActivityButton({ userId, onActivityAdd }) {
                 }}
                 type="button"
                 data-onboarding-id="add-activity-button"
+                title="Agregar actividad"
+                aria-label="Agregar actividad"
             >
                 Agregar actividad
             </button>
