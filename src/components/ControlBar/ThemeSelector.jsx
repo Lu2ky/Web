@@ -269,6 +269,16 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
                                     </button>
                                 ))}
                             </div>
+                            <p className="themeProposalText">
+                                ¿Quieres proponer tu propia paleta de colores?{" "}
+                                <a
+                                    className="themeProposalDownloadLink"
+                                    href="/plantillaColores.xlsx"
+                                    download
+                                >
+                                    Descarga Aquí
+                                </a>
+                            </p>
                         </div>
                     </div>
                 )

@@ -115,6 +115,24 @@
   gap: 0.9rem;
 }
 
+.themeProposalText {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+  color: #1b1b1b;
+  text-align: center;
+}
+
+.themeProposalDownloadLink {
+  color: #7d0053;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.themeProposalDownloadLink:hover {
+  color: #a1006b;
+}
+
 /* Cards */
 
 .themeCard {
