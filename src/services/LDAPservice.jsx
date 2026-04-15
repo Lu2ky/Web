@@ -30,8 +30,6 @@ async function LDAPservice(userId, password) {
             ? await response.json()
             : await response.text();
 
-        console.log("[LDAP] Raw response body:", rawBody);
-
         const normalizedBody = typeof rawBody === "object" && rawBody !== null
             ? {
                 keys: Object.keys(rawBody),
@@ -45,8 +43,6 @@ async function LDAPservice(userId, password) {
                 type: typeof rawBody,
                 length: String(rawBody || "").length
             };
-
-        console.log("[LDAP] Normalized response shape:", normalizedBody);
 
         if (response.ok) {
             return rawBody;

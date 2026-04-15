@@ -183,7 +183,6 @@ function ToDoList({ userId = "" }) {
     }, [tasks, activeFilters]);
 
     const toggleTask = async (id) => {
-        console.log("[ToDoList] toggleTask called with id:", id);
         const task = tasks.find(t => t.id === id);
         
         if (!task) {
@@ -191,10 +190,7 @@ function ToDoList({ userId = "" }) {
             return;
         }
         
-        console.log("[ToDoList] toggleTask — found task:", task);
-
         const newCompletedState = !task.completed;
-        console.log("[ToDoList] toggleTask — toggling to newCompletedState:", newCompletedState);
 
         // Actualizar la UI de forma optimista
         setTasks((prev) =>
@@ -202,13 +198,10 @@ function ToDoList({ userId = "" }) {
                 t.id === id ? { ...t, completed: newCompletedState } : t
             )
         );
-        console.log("[ToDoList] toggleTask — UI updated optimistically");
 
         // Actualizar en servidor, pasando el task completo para que use el nuevo endpoint unificado
         try {
-            console.log("[ToDoList] toggleTask — calling ReminderService.updateState...");
             await ReminderService.updateState(id, newCompletedState, task);
-            console.log("[ToDoList] toggleTask — SUCCESS, state updated on server");
         } catch (error) {
             console.error("[ToDoList] toggleTask — ERROR updating state:", error);
             console.error("[ToDoList] toggleTask — reverting optimistic update...");

@@ -55,14 +55,12 @@ function OficialFetcher({ onDataLoaded, userId, academicPeriod }) {
         const json = await response.json(); // Convierte respuesta en un json
         if (!json || json.length === 0) {
           // Si no tiene datos:
-          console.log("No hay datos"); // Mostrar mensaje en consola
           setApiData([]); // Limpiar datos
           if (onDataLoaded) {
             // Notifica al padre que no hay datos
             onDataLoaded([]);
           }
         } else {
-          console.log("Datos cargados:", json); // Mostrar datos en consola
           setApiData(json); // Si hay datos se almacenan en el estado
           if (onDataLoaded) {
             onDataLoaded(json); // Enviar datos al padre

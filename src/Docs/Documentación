@@ -9,7 +9,6 @@
 // Api de Fetcher 
 	// Los datos de la API se cargan a través del componente ApiFetcher, que llama a handleDataLoaded cuando los datos están listos
 	{/*const handleDataLoaded = useCallback(data => {
-		console.log("Datos recibidos en App.jsx", data) // Verificar la estructura de los datos recibidos (Quitar)
 		const normalized = normalizeApiData(data);
 		setClassEvents(normalized);
 	}, []);*/}

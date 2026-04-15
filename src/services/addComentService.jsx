@@ -41,9 +41,6 @@ export default async function addComment({ scheduleId, userId, courseId, courseN
     }
 
     try {
-        // depuración: ayuda a rastrear solicitudes fallidas en logs del navegador/servidor
-        console.debug("addComment POST", ADD_COMMENT_ENDPOINT, payload);
-
         const tokenLocalStore = localStorage.getItem("token") || "";
         const token = `Bearer ${tokenLocalStore}`;
 

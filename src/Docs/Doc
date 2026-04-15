@@ -84,19 +84,16 @@ function App() {
 
 	// Los datos de la API se cargan a través del componente ApiFetcher, que llama a handleDataLoaded cuando los datos están listos
 	{/*const handleDataLoaded = useCallback(data => {
-		console.log("Datos recibidos en App.jsx", data) // Verificar la estructura de los datos recibidos (Quitar)
 		const normalized = normalizeApiData(data);
 		setClassEvents(normalized);
 	}, []);*/}
 { /*
 	const handleDataLoaded = useCallback((data) => {
-		console.log("Datos recibidos en App:", data);
 		if (!Array.isArray(data)) {
 			console.error("La API no devolvió un array:", data);
 			return;
 		}
 		const normalized = normalizeApiData(data);
-		console.log("Datos normalizados:", normalized);
 		setClassEvents(normalized);
 	}, []);
 
@@ -183,8 +180,6 @@ function App() {
 		selectedTag === "Todos" || selectedTag === "Personal" ?
 			personalEvents :
 			[];
-	console.log(userId)
-
 	return (
 
 		<div className="App">
@@ -195,7 +190,7 @@ function App() {
 				</div>
 				<div className="CalendarSection">
 					<ApiFetcher
-						url={`http://209.25.140.20:3380/api/official-schedule/${userId}`}
+						url={import.meta.env.VITE_API_OFFICIAL_SCHEDULE}
 						onDataLoaded={handleDataLoaded}
 					/>
 

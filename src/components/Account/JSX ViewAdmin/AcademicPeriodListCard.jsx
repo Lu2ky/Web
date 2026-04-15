@@ -15,11 +15,6 @@ const isAcademicPeriodsUiDebugEnabled = () => {
   return import.meta.env.DEV || rawValue === "1" || rawValue === "true";
 };
 
-const logAcademicPeriodsUiDebug = (...args) => {
-  if (!isAcademicPeriodsUiDebugEnabled()) return;
-  console.log("[AcademicPeriodsUI]", ...args);
-};
-
 const logAcademicPeriodsUiWarn = (...args) => {
   if (!isAcademicPeriodsUiDebugEnabled()) return;
   console.warn("[AcademicPeriodsUI]", ...args);

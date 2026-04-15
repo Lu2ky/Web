@@ -50,9 +50,6 @@ function TokenFetcher({ onDataLoaded, passwordResetToken, userId }) {
                     token: passwordResetToken,
                     userId: userId
                 };
-                console.log("Enviando token:", passwordResetToken); // Log para debugging
-                console.log("Enviando userID:", userId); // Log para debugging
-                console.log("Request body:", requestBody); // Log del body ANTES de enviar
 
                 const response = await fetch(RESET_TOKEN_ENDPOINT, {
                     method: "POST",
@@ -68,17 +65,12 @@ function TokenFetcher({ onDataLoaded, passwordResetToken, userId }) {
                     ? await response.json()
                     : await response.text();
 
-                console.log("Response body recibido:", responseBody); // Log de la respuesta
-                console.log("Response status:", response.status); // Log del status HTTP
-
                 const normalizedResponse = response.ok
                     ? (typeof responseBody === "string" ? { success: true, message: responseBody } : responseBody)
                     : {
                         success: false,
                         message: typeof responseBody === "string" ? responseBody : (responseBody?.message || `HTTP ${response.status}`)
                     };
-
-                console.log("Response normalizada:", normalizedResponse); // Log final
 
                 // Notificar al padre el resultado normalizado
                 if (onDataLoaded) {

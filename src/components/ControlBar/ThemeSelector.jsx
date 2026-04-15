@@ -112,9 +112,6 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
             const paletteToSave = selectedTheme?.name || theme_id;
 
             saveColorPalette(userId, paletteToSave)
-                .then((result) => {
-                    console.log("[ThemeSelector] Color palette saved:", result);
-                })
                 .catch((error) => {
                     console.error("[ThemeSelector] Error saving color palette:", error);
                 });
@@ -188,13 +185,10 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
                             if (onThemeChange) {
                                 onThemeChange(paletteId);
                             }
-                            console.log("[ThemeSelector] Loaded saved palette:", paletteId);
                         }
                     }
                 })
-                .catch((error) => {
-                    console.log("[ThemeSelector] Could not load saved palette (expected on first load):", error);
-                });
+                .catch(() => {});
         }
 
         return () => {

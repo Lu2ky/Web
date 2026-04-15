@@ -16,7 +16,6 @@ function ApiFetcher({ url, method = "GET", payload = null, onDataLoaded }) { // 
                         undefined, // Si el método no es GET y hay payload, convertirlo a JSON, de lo contrario no enviar body
                 }); 
                 const json = await response.json(); // Convertir la respuesta a JSON
-                console.log("Respuesta cruda de la API:", json);
                 setApiData(json); // Almacenar los datos obtenidos en el estado
                 if (onDataLoaded) onDataLoaded(json); // Si se proporcionó la función onDataLoaded, llamarla con los datos obtenidos    
             } catch (error) { // Manejo de errores en caso de que la petición falle

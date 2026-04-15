@@ -408,14 +408,12 @@ function App() {
 	};
 
 	const handlePeriodChange = (periodObj) => {
-		console.log("Período académico seleccionado:", periodObj);
 		setSelectedAcademicPeriod(periodObj);
 
 		// Si se selecciona un período específico con fecha de inicio, cambiar a esa semana
 		if (periodObj && periodObj.start_date) {
 			const weekOffset = calculateWeekOffsetForDate(periodObj.start_date);
 			setWeekOffset(weekOffset);
-			console.log("Semana actualizada al inicio del período:", weekOffset);
 		} else {
 			// Si se selecciona "Todos", volver a la semana actual
 			setWeekOffset(0);

@@ -65,7 +65,6 @@ export async function getColorPalette(userId) {
         }
 
         const data = await response.json();
-        console.log("[ColorService] Color palette fetched:", data);
 
         // El servidor puede retornar { success: boolean, data: {...} } o directamente la paleta
         if (data.success && data.data) {
@@ -91,8 +90,6 @@ export async function saveColorPalette(userId, paletteName) {
     }
 
     try {
-        console.log("[ColorService] saveColorPalette - userId:", userId, "paletteName:", paletteName);
-
         const payload = {
             userId: normalizeUserId(userId),
             palette: paletteName,
@@ -124,7 +121,6 @@ export async function saveColorPalette(userId, paletteName) {
         }
 
         const data = await response.json();
-        console.log("[ColorService] Color palette saved successfully:", data);
 
         return data;
     } catch (error) {

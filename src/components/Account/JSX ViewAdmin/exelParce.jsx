@@ -54,7 +54,6 @@ const excelParce = () => {
       .then((data) => {
         setJsonData(data);
         downloadJson(data);
-        console.log('Datos importados:', data);
       })
       .catch((err) => {
         console.error('No se pudo procesar el archivo', err);

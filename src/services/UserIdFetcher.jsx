@@ -41,8 +41,6 @@ function UserIdFetcher({ onDataLoaded, userCode }) {
 
                 // Preparar el body antes de enviarlo
                 const requestBody = { "codUsuario": userCode };
-                console.log("Enviando codUsuario:", userCode); // Log para debugging
-                console.log("Request body:", requestBody); // Log del body ANTES de enviar
 
                 const response = await fetch(RESET_USER_ID_ENDPOINT, {
                     method: "POST",
@@ -58,17 +56,12 @@ function UserIdFetcher({ onDataLoaded, userCode }) {
                     ? await response.json()
                     : await response.text();
 
-                console.log("Response body recibido:", responseBody); // Log de la respuesta
-                console.log("Response status:", response.status); // Log del status HTTP
-
                 const normalizedResponse = response.ok
                     ? (typeof responseBody === "string" ? { success: true, message: responseBody } : responseBody)
                     : {
                         success: false,
                         message: typeof responseBody === "string" ? responseBody : (responseBody?.message || `HTTP ${response.status}`)
                     };
-
-                console.log("Response normalizada:", normalizedResponse); // Log final
 
                 if (onDataLoaded) {
                     onDataLoaded(normalizedResponse);

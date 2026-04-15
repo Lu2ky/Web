@@ -18,7 +18,6 @@ export async function getCategories() {
         });
 
         if (!response.ok) {
-            //console.error(baseUrl); // Log de la URL para depuración
             //console.error(`Error al cargar categorías: ${response.statusText}`); // Log del error específico
             throw new Error(`Error HTTP: ${response.status}`);
         } // Error si la respuesta no es exitosa
@@ -29,7 +28,6 @@ export async function getCategories() {
         cachedCategories = data;
         return data; // Devuelve las categorías obtenidas de la API
     } catch (error) {
-        //console.error(baseUrl); // Log de la URL para depuración
         //console.error(`Error al cargar categorías: ${error.message}`); // Manejo de errores, muestra el error en consola
 
         // Respaldo: devolver lista estática si falla la API

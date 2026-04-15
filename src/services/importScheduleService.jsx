@@ -55,8 +55,6 @@ function normalizeRows(rawRows) {
   const [headerRow, ...dataRows] = rawRows;
   const headers = headerRow.map((h) => String(h ?? '').trim().toLowerCase());
 
-  console.log('Headers detectados:', headers);
-
   // Construye un índice: campo API -> índice de columna en el Excel
   const colIndex = {};
   for (const [field, variants] of Object.entries(HEADER_MAP)) {
@@ -66,7 +64,6 @@ function normalizeRows(rawRows) {
       console.warn(`⚠️ Campo "${field}" no encontrado. Variantes esperadas:`, variants);
     }
   }
-  console.log('Column Index:', colIndex);
 
   return dataRows
     .filter((row) => row.some((cell) => cell !== undefined && cell !== ''))
@@ -97,12 +94,8 @@ function normalizeRows(rawRows) {
 export async function importSchedule(rawRows) {
   const rows = normalizeRows(rawRows);
 
-  console.log('Filas a importar:', rows.length);
-
   const results = [];
   for (const row of rows) {
-    console.log('Enviando fila:', JSON.stringify(row, null, 2));
-
     const tokenLocalStore = localStorage.getItem("token") || "";
     const token = `Bearer ${tokenLocalStore}`;
 

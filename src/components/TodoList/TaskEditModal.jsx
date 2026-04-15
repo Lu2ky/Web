@@ -110,7 +110,6 @@ export default function TaskEditModal({
         }
 
         const saveData = { ...formData, tags: finalTags };
-        console.log("[handleSave] Payload:", saveData);
 
         onSave(saveData);
 

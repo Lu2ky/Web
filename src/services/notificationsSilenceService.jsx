@@ -43,8 +43,6 @@ export async function silenceNotifications(userId) {
     }
 
     try {
-        console.log("[NotificationsSilenceService] Silencing notifications for user:", userId);
-        
         const payload = {
             codUsuario: String(userId)
         };
@@ -71,7 +69,6 @@ export async function silenceNotifications(userId) {
         }
 
         const data = await tryParseJson(res);
-        console.log("[NotificationsSilenceService] Silence response:", data);
 
         // Guardar estado en localStorage
         const now = Date.now();
@@ -116,8 +113,6 @@ export async function activateNotifications(userId) {
     }
 
     try {
-        console.log("[NotificationsSilenceService] Activating notifications for user:", userId);
-        
         const payload = {
             codUsuario: String(userId)
         };
@@ -144,7 +139,6 @@ export async function activateNotifications(userId) {
         }
 
         const data = await tryParseJson(res);
-        console.log("[NotificationsSilenceService] Activate response:", data);
 
         // Limpiar estado del localStorage
         localStorage.removeItem(STORAGE_KEY);

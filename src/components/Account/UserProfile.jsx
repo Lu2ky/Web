@@ -92,7 +92,6 @@ export default function UserProfile({ userId, onClose }) {
             if (data) {
                 // Backend puede devolver un array o un objeto
                 const userData = Array.isArray(data) ? data[0] : data;
-                console.log("[UserProfile] userData procesado:", userData); // DEPURACIÓN
                 setUserData(userData);
                 setError("");
             } else {

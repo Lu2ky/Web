@@ -18,13 +18,6 @@ function AddAcademicPeriodCard({ userId = null, onCreated = () => {} }) {
 
   // Log inicial para diagnosticar el userId recibido de props
   useEffect(() => {
-    if (isDebug) {
-      console.log("[AddAcademicPeriodCard] Initialized with userId from props:", {
-        userId: userId,
-        typeOfUserId: typeof userId,
-        isDevelopment: import.meta.env.DEV
-      });
-    }
   }, [isDebug, userId]);
 
   const resetForm = () => {
@@ -63,11 +56,7 @@ function AddAcademicPeriodCard({ userId = null, onCreated = () => {} }) {
     // Obtener datos del usuario desde userService para extraer idUsuario numérico
     let resolvedUserId = null;
     try {
-      if (isDebug) console.log("[AddAcademicPeriodCard] Fetching user data from userService for userId:", userId);
-      
       const userData = await getUserData(userId);
-      if (isDebug) console.log("[AddAcademicPeriodCard] getUserData response from VITE_API_GET_USER_DATA:", userData);
-      
       if (!userData) {
         throw new Error("No se encontraron datos del usuario en el servicio");
       }
@@ -93,8 +82,6 @@ function AddAcademicPeriodCard({ userId = null, onCreated = () => {} }) {
       if (!Number.isInteger(resolvedUserId)) {
         throw new Error(`idUsuario inválido: ${extracted} (no se puede convertir a número)`);
       }
-      
-      if (isDebug) console.log("[AddAcademicPeriodCard] Successfully resolved idUsuario:", { extracted, resolvedUserId, type: typeof resolvedUserId });
     } catch (err) {
       if (isDebug) console.error("[AddAcademicPeriodCard] Error fetching/resolving user data:", err?.message || err);
       setIsSubmitting(false);
@@ -112,17 +99,11 @@ function AddAcademicPeriodCard({ userId = null, onCreated = () => {} }) {
     };
     
     if (isDebug) {
-      console.log("[AddAcademicPeriodCard] Creating academic period with payload:", {
-        ...payload,
-        resolvedUserIdType: typeof resolvedUserId,
-        isResolvedUserIdInteger: Number.isInteger(resolvedUserId)
-      });
       setLastRequest(payload);
     }
 
     const result = await createAcademicPeriod(payload);
     if (isDebug) {
-      console.log("[AddAcademicPeriodCard] createAcademicPeriod result:", result);
       setLastResponse(result || null);
     }
 

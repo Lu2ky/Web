@@ -169,10 +169,8 @@ export async function updateUserEmail(userId, newEmail) {
 
     // Obtener datos actuales para recuperar antelacionNotis e idUsuario real desde BD
     const currentData = await getUserData(userId);
-    console.log("Current user data received:", currentData);
 
     const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
-    console.log("Current user object:", currentUser);
 
     if (!currentUser) {
         console.error("No user data found for userId:", userId);
@@ -181,15 +179,12 @@ export async function updateUserEmail(userId, newEmail) {
 
     // Usar el idUsuario real de la base de datos, no el pasado por parámetro
     const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
-    console.log("Using actualUserId from DB:", actualUserId);
 
     // Obtener antelacionNotis intentando multiples nombres de campo heredados
     let currentAnticipation = currentUser?.antelacionNotis ||
         currentUser?.tiempoMute ||
         currentUser?.anticipationTime ||
         "00:00:00";
-
-    console.log("Current antelacionNotis:", currentAnticipation);
 
     // Normaliza formato de tiempoMute (HH:MM:SS) incluso si llega como minutos u objeto.
     currentAnticipation = toTimeMuteValue(currentAnticipation);
@@ -203,9 +198,6 @@ export async function updateUserEmail(userId, newEmail) {
     };
 
     try {
-        console.log("Updating email with payload:", payload);
-        console.log("Endpoint:", UPDATE_USER_EMAIL_ENDPOINT);
-
         // Cabecera Authorization.
         const tokenLocalStore = localStorage.getItem("token") || "";
         const token = `Bearer ${tokenLocalStore}`;
@@ -219,10 +211,8 @@ export async function updateUserEmail(userId, newEmail) {
             body: JSON.stringify(payload),
         });
 
-        console.log("Response status:", res.status);
         const contentType = res.headers.get("content-type") || "";
         const body = contentType.includes("application/json") ? await res.json() : await res.text();
-        console.log("Response body:", body);
 
         // Verificar si el servidor retornó success: false en el cuerpo (incluso con status 200)
         if (typeof body === 'object' && body.success === false) {
@@ -327,7 +317,7 @@ export async function changePassword(userId, currentPassword, newPassword) {
             }
         }
 
-        console.error("changePassword failed: endpoint not found", endpointCandidates);
+        console.error("changePassword failed: endpoint not found");
         return {
             success: false,
             message: "No se encontro endpoint de cambio de contrasena (404/405 en variantes conocidas)."
@@ -366,10 +356,8 @@ export async function updateReminderAnticipation(userId, minutes) {
 
     // Obtener datos actuales para recuperar correo e idUsuario real desde BD
     const currentData = await getUserData(userId);
-    console.log("Current user data received:", currentData);
 
     const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
-    console.log("Current user object:", currentUser);
 
     if (!currentUser) {
         console.error("No user data found for userId:", userId);
@@ -378,10 +366,8 @@ export async function updateReminderAnticipation(userId, minutes) {
 
     // Usar el idUsuario real de la base de datos, no el pasado por parámetro
     const actualUserId = currentUser.idUsuario || currentUser.id || Number(userId);
-    console.log("Using actualUserId from DB:", actualUserId);
 
     const currentEmail = (currentUser?.correo || currentUser?.email || "").trim();
-    console.log("Current email:", currentEmail);
     const codUsuario = getSessionCodUsuario() || String(userId || "").trim();
 
     const payload = {
@@ -392,9 +378,6 @@ export async function updateReminderAnticipation(userId, minutes) {
     };
 
     try {
-        console.log("Updating reminder anticipation with payload:", payload);
-        console.log("Endpoint:", UPDATE_REMINDER_ANTICIPATION_ENDPOINT);
-
         // Cabecera Authorization.
         const tokenLocalStore = localStorage.getItem("token") || "";
         const token = `Bearer ${tokenLocalStore}`;
@@ -408,10 +391,8 @@ export async function updateReminderAnticipation(userId, minutes) {
             body: JSON.stringify(payload),
         });
 
-        console.log("Response status:", res.status);
         const contentType = res.headers.get("content-type") || "";
         const body = contentType.includes("application/json") ? await res.json() : await res.text();
-        console.log("Response body:", body);
 
         // Verificar si el servidor retornó success: false en el cuerpo (incluso con status 200)
         if (typeof body === 'object' && body.success === false) {

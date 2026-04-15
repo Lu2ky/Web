@@ -36,11 +36,9 @@ const TokenPassword = () => {
             try {
                 // Se usa userService para obtener el idUsuario real de BD.
                 const currentData = await getUserData(recoveryUserCode);
-                console.log('Current user data received:', currentData);
 
                 const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
                 const actualUserId = currentUser?.idUsuario || currentUser?.id || Number(recoveryUserCode);
-                console.log('Using actualUserId from DB:', actualUserId);
 
                 if (isMounted) {
                     setDbUserId(actualUserId ? String(actualUserId) : '');

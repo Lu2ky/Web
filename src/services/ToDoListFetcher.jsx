@@ -67,8 +67,6 @@ function ToDoListFetcher({ onDataLoaded, userId }) {
                         ? json
                         : [];
 
-                console.log("ToDo datos cargados:", data);
-
                 setApiData(data);
                 if (onDataLoaded) onDataLoaded(data);
 

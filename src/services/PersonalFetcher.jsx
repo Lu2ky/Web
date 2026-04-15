@@ -278,7 +278,7 @@ function PersonalFetcher({ onDataLoaded, userId, academicPeriod }) {
       return;
     }
     
-    const baseUrl = import.meta.env.VITE_API_URL_PERSONAL_SCHEDULE; // URL base de la API
+    const baseUrl = "/api/personal-schedule/"; // Ruta relativa para evitar exponer la IP del backend
 
     const fetchData = async () => {
       // Función asincrona para cargar datos
@@ -326,7 +326,6 @@ function PersonalFetcher({ onDataLoaded, userId, academicPeriod }) {
         
         if (!json || json.length === 0) {
           // Si no tiene datos:
-          console.log("No hay datos personales"); // Mostrar mensaje en consola
           setApiData([]); // Limpiar datos
           if (onDataLoaded) {
             // Notifica al padre que no hay datos
@@ -572,8 +571,6 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
       codUsuario
     };
 
-    console.log("Actualizando actividad:", payload);
-
     const tokenLocalStore = localStorage.getItem("token") || "";
     const token = `Bearer ${tokenLocalStore}`;
 
@@ -615,7 +612,6 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
     if (data?.success === false) {
       throw new Error(data?.message || "El servidor rechazo la actualizacion de la actividad personal");
     }
-    console.log("Actividad actualizada:", data);
     
     return data;
   } catch (error) {

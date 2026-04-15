@@ -27,7 +27,6 @@ function AdminView() {
 
     try {
       const parsed = await parseExcelFile(first);
-      console.log('Archivo parseado:', parsed);
 
       setImportStatus('enviando');
       await importSchedule(parsed);
