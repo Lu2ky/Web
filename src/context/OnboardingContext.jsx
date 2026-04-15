@@ -1,12 +1,9 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
 	getOnboardingCompletionStatus,
 	resetOnboardingCompletion,
 	saveOnboardingCompletion
 } from "../services/onboardingService";
-
-const ONBOARDING_STORAGE_PREFIX = "onboarding_visited:";
-const ONBOARDING_VERSION = 1;
 
 const ONBOARDING_STEPS = [
 	{
@@ -311,8 +308,8 @@ const ONBOARDING_STEPS = [
 		description:
 			"En este modal defines título, horario y rango de fechas para registrar actividades personales.",
 		targetSelector: "[data-onboarding-id='add-activity-modal']",
-		requiredAction: "addActivityTitleTyped",
-		requirementText: "Escribe un título en el modal de actividad.",
+		requiredAction: "addActivitySaved",
+		requirementText: "Guarda la actividad haciendo clic en el botón Guardar.",
 		autoAdvance: true,
 		panelPosition: "top-right",
 		allowOpenUi: ["modal-add-activity"]
@@ -376,34 +373,6 @@ const ONBOARDING_STEPS = [
 
 const OnboardingContext = createContext(null);
 
-const getStorageKey = (userId) => `${ONBOARDING_STORAGE_PREFIX}${String(userId || "").trim()}`;
-
-const readOnboardingState = (userId) => {
-	if (!userId) return null;
-
-	try {
-		const rawValue = localStorage.getItem(getStorageKey(userId));
-		if (!rawValue) return null;
-
-		const parsed = JSON.parse(rawValue);
-		if (!parsed || typeof parsed !== "object") return null;
-
-		return parsed;
-	} catch {
-		return null;
-	}
-};
-
-const writeOnboardingState = (userId, value) => {
-	if (!userId) return;
-	localStorage.setItem(getStorageKey(userId), JSON.stringify(value));
-};
-
-const clearOnboardingState = (userId) => {
-	if (!userId) return;
-	localStorage.removeItem(getStorageKey(userId));
-};
-
 const getInitialCompletedActions = () => ({
 	dropdownOpened: false,
 	preferencesOpened: false,
@@ -442,7 +411,6 @@ export function OnboardingProvider({ children, userId }) {
 	const [currentStep, setCurrentStep] = useState(0);
 	const [completedActions, setCompletedActions] = useState(getInitialCompletedActions);
 	const [validationMessage, setValidationMessage] = useState("");
-	const preventAutoAdvanceOnceRef = useRef(false);
 
 	const steps = ONBOARDING_STEPS;
 	const totalSteps = steps.length;
@@ -461,21 +429,8 @@ export function OnboardingProvider({ children, userId }) {
 
 		setIsLoading(true);
 
-		const savedState = readOnboardingState(trimmedUserId);
-		let isCompleted = savedState?.completed === true && savedState?.version === ONBOARDING_VERSION;
 		const remoteStatus = await getOnboardingCompletionStatus(trimmedUserId);
-		const remoteCompleted = remoteStatus === true || Number(remoteStatus) === 1;
-		const hasRemoteStatus = remoteStatus !== null && remoteStatus !== undefined;
-		if (hasRemoteStatus) {
-			isCompleted = remoteCompleted;
-			if (remoteCompleted) {
-				writeOnboardingState(trimmedUserId, {
-					completed: true,
-					version: ONBOARDING_VERSION,
-					completedAt: Date.now()
-				});
-			}
-		}
+		const isCompleted = remoteStatus === true || Number(remoteStatus) === 1;
 
 		if (isDisposed) return;
 
@@ -609,8 +564,8 @@ export function OnboardingProvider({ children, userId }) {
 			setValidationMessage("");
 		};
 
-		const handleAddActivityTitleTyped = () => {
-			setCompletedActions((prev) => ({ ...prev, addActivityTitleTyped: true }));
+		const handleAddActivitySaved = () => {
+			setCompletedActions((prev) => ({ ...prev, addActivitySaved: true }));
 			setValidationMessage("");
 		};
 
@@ -662,7 +617,7 @@ export function OnboardingProvider({ children, userId }) {
 		window.addEventListener("onboarding:theme-selector-opened", handleThemeSelectorOpened);
 		window.addEventListener("onboarding:theme-selected", handleThemeSelected);
 		window.addEventListener("onboarding:add-activity-opened", handleAddActivityOpened);
-		window.addEventListener("onboarding:add-activity-title-typed", handleAddActivityTitleTyped);
+		window.addEventListener("onboarding:add-activity-saved", handleAddActivitySaved);
 		window.addEventListener("onboarding:calendar-filter-opened", handleCalendarFilterOpened);
 		window.addEventListener("onboarding:calendar-filter-option-selected", handleCalendarFilterOptionSelected);
 		window.addEventListener("onboarding:official-card-opened", handleOfficialCardOpened);
@@ -693,7 +648,7 @@ export function OnboardingProvider({ children, userId }) {
 			window.removeEventListener("onboarding:theme-selector-opened", handleThemeSelectorOpened);
 			window.removeEventListener("onboarding:theme-selected", handleThemeSelected);
 			window.removeEventListener("onboarding:add-activity-opened", handleAddActivityOpened);
-			window.removeEventListener("onboarding:add-activity-title-typed", handleAddActivityTitleTyped);
+			window.removeEventListener("onboarding:add-activity-saved", handleAddActivitySaved);
 			window.removeEventListener("onboarding:calendar-filter-opened", handleCalendarFilterOpened);
 			window.removeEventListener("onboarding:calendar-filter-option-selected", handleCalendarFilterOptionSelected);
 			window.removeEventListener("onboarding:official-card-opened", handleOfficialCardOpened);
@@ -724,11 +679,6 @@ export function OnboardingProvider({ children, userId }) {
 			return;
 		}
 
-		writeOnboardingState(trimmedUserId, {
-			completed: true,
-			version: ONBOARDING_VERSION,
-			completedAt: Date.now()
-		});
 		setIsOpen(false);
 
 		void (async () => {
@@ -744,26 +694,15 @@ export function OnboardingProvider({ children, userId }) {
 				refreshedRemoteStatus === true || Number(refreshedRemoteStatus) === 1;
 
 			if (refreshedRemoteCompleted) {
-				writeOnboardingState(trimmedUserId, {
-					completed: true,
-					version: ONBOARDING_VERSION,
-					completedAt: Date.now()
-				});
 				setIsOpen(false);
 				return;
 			}
 
-			clearOnboardingState(trimmedUserId);
-			setCurrentStep(0);
-			setCompletedActions(getInitialCompletedActions());
-			setValidationMessage("");
 			setIsOpen(true);
 		})();
 	}, [userId]);
 
 	const nextStep = useCallback(() => {
-		preventAutoAdvanceOnceRef.current = false;
-
 		if (!canContinue) {
 			setValidationMessage(currentStepData?.requirementText || "Completa la acción indicada para continuar.");
 			return;
@@ -784,11 +723,6 @@ export function OnboardingProvider({ children, userId }) {
 			return;
 		}
 
-		if (preventAutoAdvanceOnceRef.current) {
-			preventAutoAdvanceOnceRef.current = false;
-			return;
-		}
-
 		const timerId = setTimeout(() => {
 			setValidationMessage("");
 			setCurrentStep((prev) => {
@@ -805,7 +739,6 @@ export function OnboardingProvider({ children, userId }) {
 
 	const prevStep = useCallback(() => {
 		setValidationMessage("");
-		preventAutoAdvanceOnceRef.current = true;
 		setCurrentStep((prev) => Math.max(0, prev - 1));
 	}, []);
 
@@ -824,7 +757,6 @@ export function OnboardingProvider({ children, userId }) {
 			return;
 		}
 
-		clearOnboardingState(trimmedUserId);
 		setIsOpen(true);
 		void resetOnboardingCompletion(trimmedUserId);
 	}, [userId]);

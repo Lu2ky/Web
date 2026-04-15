@@ -27,7 +27,8 @@ function OnboardingOverlay() {
 		validationMessage,
 		nextStep,
 		prevStep,
-		skip
+		skip,
+		reset
 	} = useOnboarding();
 	const [layoutTick, setLayoutTick] = useState(0);
 
@@ -59,7 +60,18 @@ function OnboardingOverlay() {
 	}, [targetElement]);
 
 	if (isLoading) return null;
-	if (!isOpen) return null;
+
+	if (!isOpen) {
+		return (
+			<button
+				type="button"
+				className="onboarding-reset-trigger"
+				onClick={reset}
+			>
+				Reiniciar onboarding
+			</button>
+		);
+	}
 
 	if (!current) return null;
 

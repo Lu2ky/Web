@@ -135,6 +135,9 @@ function AddActivityButton({ userId, idCourse, onActivityAdd }) {
                 onActivityAdd(newActivity);
             }
 
+            // Disparar evento de onboarding que la actividad fue guardada
+            window.dispatchEvent(new CustomEvent("onboarding:add-activity-saved"));
+
             closeModal({ clearForm: true });
         } catch (err) {
             console.error("Error al guardar actividad:", err);
@@ -207,12 +210,7 @@ function AddActivityButton({ userId, idCourse, onActivityAdd }) {
                             name="title"
                             placeholder="Título"
                             value={formData.title}
-                            onChange={(e) => {
-                                handleChange(e);
-                                if (String(e.target.value || "").trim()) {
-                                    window.dispatchEvent(new CustomEvent("onboarding:add-activity-title-typed"));
-                                }
-                            }}
+                            onChange={handleChange}
                             required
                         />
 
