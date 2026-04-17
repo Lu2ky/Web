@@ -278,7 +278,7 @@ function PersonalFetcher({ onDataLoaded, userId, academicPeriod }) {
       return;
     }
     
-    const baseUrl = "/api/personal-schedule/"; // Ruta relativa para evitar exponer la IP del backend
+    const baseUrl = import.meta.env.VITE_API_URL_PERSONAL_SCHEDULE; // Ruta relativa para evitar exponer la IP del backend
 
     const fetchData = async () => {
       // Función asincrona para cargar datos
