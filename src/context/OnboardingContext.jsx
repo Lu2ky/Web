@@ -770,6 +770,30 @@ export function OnboardingProvider({ children, userId }) {
 	const canContinue = !requiredAction || Boolean(completedActions[requiredAction]);
 
 	useEffect(() => {
+		const emitState = () => {
+			window.dispatchEvent(
+				new CustomEvent("onboarding:state-changed", {
+					detail: {
+						isOpen,
+						currentStepId: currentStepData?.id ?? null
+					}
+				})
+			);
+		};
+
+		const handleStateRequest = () => {
+			emitState();
+		};
+
+		emitState();
+		window.addEventListener("onboarding:state-request", handleStateRequest);
+
+		return () => {
+			window.removeEventListener("onboarding:state-request", handleStateRequest);
+		};
+	}, [isOpen, currentStepData]);
+
+	useEffect(() => {
 		if (!isOpen) return;
 
 		window.dispatchEvent(

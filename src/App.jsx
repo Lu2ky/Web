@@ -15,6 +15,7 @@ import OnboardingOverlay from "./components/Onboarding/OnboardingOverlay";
 import { PopUpClasses } from "./components/Calendar/PopUpClasses";
 import { PopUpPersonal } from "./components/Calendar/PopUpPersonal";
 import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
+import { hasAnyRole, ROLE_ADMIN_UPB_PLANNER } from "./services/authSession";
 // Servicios para interactuar con la API 
 // Calendario
 // Horario oficial 
@@ -210,6 +211,7 @@ function App() {
 	const [selectedTag, setSelectedTag] = useState("Todos"); // Etiqueta seleccionada para filtrar actividades en el calendario
 	const [selectedAcademicPeriod, setSelectedAcademicPeriod] = useState(null); // { id, nombre } del período académico seleccionado, null = "Todos"
 	const [academicPeriods, setAcademicPeriods] = useState([]); // Array de períodos académicos con { id, nombre, start_date, end_date }
+	const isAdminUser = hasAnyRole([ROLE_ADMIN_UPB_PLANNER]);
 
 	// Log actual de sincronización de datos
 
@@ -464,7 +466,7 @@ function App() {
 	return (
 
 		<div className="App">
-			<OnboardingOverlay />
+			{!isAdminUser && <OnboardingOverlay />}
 			<div data-onboarding-id="header">
 				<Header userId={userId} />
 			</div>

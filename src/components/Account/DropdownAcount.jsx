@@ -5,7 +5,6 @@ import UserProfile from "./UserProfile";
 import UserPreferences from "./UserPreferences";
 import "./DropdownAcount.css";
 import { clearAuthSession } from "../../services/authSession";
-import useOnboarding from "../../hooks/useOnboarding";
 
 const OPTIONS = [
     { id: "acount", label: "Mi Perfil" },
@@ -16,10 +15,9 @@ const OPTIONS = [
 export default function DropdownAcount({ userId }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeModal, setActiveModal] = useState(null);
+    const [onboardingState, setOnboardingState] = useState({ isOpen: false, currentStepId: null });
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
-    const { isOpen: isOnboardingOpen, steps, currentStep } = useOnboarding();
-    const currentOnboardingStepId = steps?.[currentStep]?.id;
 
     const emitProfileOpenedForOnboarding = () => {
         window.dispatchEvent(new CustomEvent("onboarding:profile-opened"));
@@ -70,6 +68,23 @@ export default function DropdownAcount({ userId }) {
     }, []);
 
     useEffect(() => {
+        const handleOnboardingStateChanged = (event) => {
+            const detail = event?.detail || {};
+            setOnboardingState({
+                isOpen: Boolean(detail.isOpen),
+                currentStepId: detail.currentStepId || null
+            });
+        };
+
+        window.addEventListener("onboarding:state-changed", handleOnboardingStateChanged);
+        window.dispatchEvent(new CustomEvent("onboarding:state-request"));
+
+        return () => {
+            window.removeEventListener("onboarding:state-changed", handleOnboardingStateChanged);
+        };
+    }, []);
+
+    useEffect(() => {
         if (activeModal === "acount") {
             // Fallback: ensure step "Abre tu perfil" advances when profile modal is open.
             emitProfileOpenedForOnboarding();
@@ -82,9 +97,7 @@ export default function DropdownAcount({ userId }) {
             if (nextState) {
                 window.dispatchEvent(new CustomEvent("onboarding:account-dropdown-opened"));
 
-                // During onboarding step "open-password-change", clicking avatar should
-                // open "Mi Perfil" directly to avoid selecting a different option by mistake.
-                if (isOnboardingOpen && currentOnboardingStepId === "open-password-change") {
+                if (onboardingState.isOpen && onboardingState.currentStepId === "open-password-change") {
                     emitProfileOpenedForOnboarding();
                     setActiveModal("acount");
                     return false;
@@ -96,11 +109,9 @@ export default function DropdownAcount({ userId }) {
 
     const handleOptionClick = (optionId) => {
         if (optionId === "prefer") {
-            console.log("[DropdownAccount] Dispatching onboarding:preferences-opened");
             window.dispatchEvent(new CustomEvent("onboarding:preferences-opened"));
         }
         if (optionId === "acount") {
-            console.log("[DropdownAccount] Dispatching onboarding:profile-opened");
             emitProfileOpenedForOnboarding();
         }
         setActiveModal(optionId);
