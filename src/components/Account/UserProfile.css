@@ -361,27 +361,27 @@
     font-size: 0.875rem;
     font-weight: 600;
     color: #fff;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #f6047b 0%, #c820c5 100%);
     border: none;
     border-radius: 0.75rem;
     cursor: pointer;
     transition: all 0.2s ease;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.15),
-        0 2px 4px -1px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(246, 4, 123, 0.25),
+        0 2px 4px -1px rgba(200, 32, 197, 0.15);
 }
 
 .profile-reset-onboarding-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.25),
-        0 3px 6px -1px rgba(37, 99, 235, 0.15);
+    background: linear-gradient(135deg, #e60373 0%, #b01aaf 100%);
+    box-shadow: 0 6px 12px -2px rgba(246, 4, 123, 0.35),
+        0 3px 6px -1px rgba(200, 32, 197, 0.25);
     transform: translateY(-1px);
 }
 
 .profile-reset-onboarding-btn:active:not(:disabled) {
     transform: translateY(0) scale(0.98);
-    box-shadow: 0 2px 4px -1px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 2px 4px -1px rgba(246, 4, 123, 0.25);
 }
 
 .profile-reset-onboarding-btn:disabled {

@@ -37,8 +37,7 @@ const ONBOARDING_STEPS = [
 		requiredAction: "emailEditOpened",
 		requirementText: "Haz clic en el botón editar correo.",
 		autoAdvance: true,
-		allowOpenUi: ["modal-preferences"],
-		panelPosition: "top-right"
+		allowOpenUi: ["modal-preferences"]
 	},
 	{
 		id: "type-email-preferences",
@@ -108,7 +107,8 @@ const ONBOARDING_STEPS = [
 		title: "¿Qué es tu To-Do List?",
 		description:
 			"La To-Do List es tu panel de seguimiento diario: sirve para crear tareas, marcar progreso, priorizar pendientes y no olvidar entregas importantes.",
-		targetSelector: "[data-onboarding-id='todo']"
+		targetSelector: "[data-onboarding-id='todo']",
+		panelPosition: "top"
 	},
 	{
 		id: "todo-add-reminder",
@@ -119,7 +119,8 @@ const ONBOARDING_STEPS = [
 		requiredAction: "todoAddOpened",
 		requirementText: "Haz clic en agregar tarea.",
 		autoAdvance: true,
-		allowOpenUi: ["modal-todo-add"]
+		allowOpenUi: ["modal-todo-add"],
+		panelPosition: "top"
 	},
 	{
 		id: "todo-add-reminder-modal",
@@ -142,7 +143,8 @@ const ONBOARDING_STEPS = [
 		requiredAction: "todoFilterOpened",
 		requirementText: "Haz clic en el botón de filtro del To-Do List.",
 		autoAdvance: true,
-		allowOpenUi: ["modal-todo-filter"]
+		allowOpenUi: ["modal-todo-filter"],
+		panelPosition: "top"
 	},
 	{
 		id: "todo-filter-modal",
@@ -165,7 +167,8 @@ const ONBOARDING_STEPS = [
 		requiredAction: "todoCardEditClicked",
 		requirementText: "Haz clic en editar de una card.",
 		autoAdvance: true,
-		allowOpenUi: ["modal-todo-edit"]
+		allowOpenUi: ["modal-todo-edit"],
+		panelPosition: "top"
 	},
 	{
 		id: "todo-edit-modal",
@@ -188,7 +191,8 @@ const ONBOARDING_STEPS = [
 		requiredAction: "todoCardDuplicateClicked",
 		requirementText: "Haz clic en duplicar de una card.",
 		autoAdvance: true,
-		allowOpenUi: ["modal-todo-duplicate"]
+		allowOpenUi: ["modal-todo-duplicate"],
+		panelPosition: "top"
 	},
 	{
 		id: "todo-duplicate-modal",
@@ -211,7 +215,8 @@ const ONBOARDING_STEPS = [
 		requiredAction: "todoCardDeleteClicked",
 		requirementText: "Haz clic en eliminar de una card.",
 		autoAdvance: true,
-		allowOpenUi: ["modal-todo-delete"]
+		allowOpenUi: ["modal-todo-delete"],
+		panelPosition: "top"
 	},
 	{
 		id: "todo-delete-modal",
@@ -287,7 +292,8 @@ const ONBOARDING_STEPS = [
 		targetSelector: "[data-onboarding-id='view-toggle']",
 		requiredAction: "viewChanged",
 		requirementText: "Haz clic en Semanal o Diario para cambiar la vista.",
-		autoAdvance: true
+		autoAdvance: true,
+		panelPosition: "top-right"
 	},
 	{
 		id: "academic-period-button",
@@ -802,6 +808,30 @@ export function OnboardingProvider({ children, userId }) {
 			})
 		);
 	}, [isOpen, currentStep, allowOpenUi]);
+
+	// Abrir drawer del TodoList automáticamente en paso 10 en móvil
+	useEffect(() => {
+		if (!isOpen) return;
+
+		const currentStepData = steps[currentStep];
+		if (currentStepData?.id === "todo-overview" && window.innerWidth <= 768) {
+			window.dispatchEvent(
+				new CustomEvent("onboarding:open-todo-drawer")
+			);
+		}
+	}, [isOpen, currentStep, steps]);
+
+	// Cerrar drawer del TodoList en paso 21 en móvil
+	useEffect(() => {
+		if (!isOpen) return;
+
+		const currentStepData = steps[currentStep];
+		if (currentStepData?.id === "calendar-explore" && window.innerWidth <= 768) {
+			window.dispatchEvent(
+				new CustomEvent("onboarding:close-todo-drawer")
+			);
+		}
+	}, [isOpen, currentStep, steps]);
 
 	const complete = useCallback(() => {
 		const trimmedUserId = String(userId || "").trim();

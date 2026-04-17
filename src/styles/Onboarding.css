@@ -46,6 +46,13 @@
 	bottom: auto;
 }
 
+.onboarding-panel.top {
+	top: 1rem;
+	bottom: auto;
+	left: 1rem;
+	right: auto;
+}
+
 .onboarding-step-card {
 	background: white;
 	border-radius: 1rem;
@@ -224,22 +231,149 @@
 		left: 0.5rem;
 		bottom: 0.5rem;
 		width: auto;
-		max-width: unset;
+		max-width: 330px;
+		max-height: 70vh;
+		overflow-y: auto;
+		animation: onboardingSlideUp 0.3s ease-out;
+	}
+
+	.onboarding-panel.top-right {
+		top: 0.5rem;
+		bottom: auto;
+		max-height: 70vh;
+	}
+
+	.onboarding-panel.top {
+		top: 0.5rem;
+		bottom: auto;
+		left: 0.5rem;
+		right: 0.5rem;
+		max-height: 70vh;
+	}
+
+	.onboarding-step-card {
+		padding: 0.75rem;
+		border-radius: 0.8rem;
+		box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+	}
+
+	.onboarding-step-header {
+		gap: 0.25rem;
+		margin-bottom: 0.35rem;
+	}
+
+	.onboarding-step-header h3 {
+		font-size: 0.95rem;
+		line-height: 1.3;
+	}
+
+	.onboarding-step-badge {
+		padding: 0.15rem 0.45rem;
+		font-size: 0.7rem;
+	}
+
+	.onboarding-step-description {
+		margin: 0.3rem 0 0;
+		font-size: 0.85rem;
+		line-height: 1.4;
+	}
+
+	.onboarding-step-requirement {
+		margin: 0.5rem 0 0;
+		padding: 0.4rem 0.6rem;
+		font-size: 0.75rem;
+	}
+
+	.onboarding-step-note {
+		margin: 0.5rem 0 0;
+		padding: 0.4rem 0.6rem;
+		font-size: 0.75rem;
+	}
+
+	.onboarding-step-progress {
+		margin: 0.65rem 0 0;
+		height: 5px;
 	}
 
 	.onboarding-step-actions {
 		flex-direction: column;
 		align-items: stretch;
+		gap: 0.4rem;
+		margin-top: 0.6rem;
 	}
 
 	.onboarding-step-actions-right {
 		margin-left: 0;
 		display: grid;
 		grid-template-columns: 1fr 1fr;
+		gap: 0.4rem;
 	}
 
 	.onboarding-btn {
 		width: 100%;
+		padding: 0.5rem 0.7rem;
+		font-size: 0.78rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.onboarding-panel {
+		max-width: 280px;
+		right: 0.4rem;
+		left: 0.4rem;
+		bottom: 0.4rem;
 	}
 
+	.onboarding-panel.top-right {
+		top: 0.4rem;
+	}
+
+	.onboarding-panel.top {
+		top: 0.4rem;
+		left: 0.4rem;
+		right: 0.4rem;
+	}
+
+	.onboarding-step-card {
+		padding: 0.6rem;
+		border-radius: 0.7rem;
+	}
+
+	.onboarding-step-header {
+		gap: 0.15rem;
+		margin-bottom: 0.25rem;
+	}
+
+	.onboarding-step-header h3 {
+		font-size: 0.85rem;
+		line-height: 1.25;
+	}
+
+	.onboarding-step-badge {
+		padding: 0.12rem 0.35rem;
+		font-size: 0.65rem;
+	}
+
+	.onboarding-step-description {
+		margin: 0.2rem 0 0;
+		font-size: 0.75rem;
+		line-height: 1.35;
+	}
+
+	.onboarding-step-requirement,
+	.onboarding-step-note {
+		margin: 0.4rem 0 0;
+		padding: 0.35rem 0.5rem;
+		font-size: 0.7rem;
+	}
+
+	.onboarding-step-actions {
+		gap: 0.3rem;
+		margin-top: 0.5rem;
+	}
+
+	.onboarding-btn {
+		padding: 0.45rem 0.6rem;
+		font-size: 0.72rem;
+	}
 }

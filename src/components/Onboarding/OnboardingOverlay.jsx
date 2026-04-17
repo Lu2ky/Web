@@ -85,6 +85,43 @@ function OnboardingOverlay() {
 	}, [isOpen, current]);
 	const targetRect = useMemo(() => getElementRect(targetElement), [targetElement, layoutTick]);
 
+	// Detectar si debe cambiar a posición top por colisión
+	const shouldForceTop = useMemo(() => {
+		if (!targetRect || !current) return false;
+		
+		// Solo aplicar collision detection a pasos del TodoList
+		const todoListSteps = [
+			"todo-overview",
+			"todo-add-reminder",
+			"todo-filter",
+			"todo-card-edit",
+			"todo-card-duplicate",
+			"todo-card-delete"
+		];
+		
+		// Si no es un paso del TodoList, no forzar top
+		if (!todoListSteps.includes(current.id)) return false;
+		
+		// En pantallas pequeñas (móvil), si el elemento está en la mitad inferior de la pantalla,
+		// forzar posición top para evitar sobreposición con TodoList drawer
+		const isMobile = window.innerWidth <= 768;
+		if (!isMobile) return false;
+
+		// Si el elemento está por debajo del 50% de la altura de la pantalla, forzar top
+		const elementCenter = targetRect.top + targetRect.height / 2;
+		const screenMidpoint = window.innerHeight * 0.5;
+		
+		return elementCenter > screenMidpoint;
+	}, [targetRect, current]);
+
+	// Determinar posición final del panel
+	const panelPosition = useMemo(() => {
+		// Si hay colisión detectada, usar top
+		if (shouldForceTop) return "top-right";
+		// Sino, usar la posición definida en el step
+		return current?.panelPosition || "bottom-right";
+	}, [shouldForceTop, current]);
+
 	useEffect(() => {
 		if (!targetElement) {
 			return;
@@ -135,7 +172,7 @@ function OnboardingOverlay() {
 				/>
 			)}
 
-			<div className={`onboarding-panel ${current.panelPosition === "top-right" ? "top-right" : ""}`}>
+			<div className={`onboarding-panel ${panelPosition === "top-right" ? "top-right" : ""} ${panelPosition === "top" ? "top" : ""}`}>
 				<OnboardingStep
 					title={current.title}
 					description={current.description}

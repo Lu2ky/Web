@@ -147,8 +147,22 @@ function ToDoList({ userId = "" }) {
             }
         };
 
+        const handleOpenTodoDrawer = () => {
+            setIsDrawerOpen(true);
+        };
+
+        const handleCloseTodoDrawer = () => {
+            setIsDrawerOpen(false);
+        };
+
         window.addEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
-        return () => window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+        window.addEventListener("onboarding:open-todo-drawer", handleOpenTodoDrawer);
+        window.addEventListener("onboarding:close-todo-drawer", handleCloseTodoDrawer);
+        return () => {
+            window.removeEventListener("onboarding:close-unrelated-ui", handleCloseUnrelatedUi);
+            window.removeEventListener("onboarding:open-todo-drawer", handleOpenTodoDrawer);
+            window.removeEventListener("onboarding:close-todo-drawer", handleCloseTodoDrawer);
+        };
     }, []);
 
     const [availableTags, setAvailableTags] = useState([]);
