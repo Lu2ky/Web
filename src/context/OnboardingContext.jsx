@@ -66,10 +66,10 @@ const ONBOARDING_STEPS = [
 		id: "open-password-change",
 		title: "Abre tu perfil",
 		description:
-			"Haz clic en Mi Perfil para actualizar tu contraseña y asegurar tu cuenta.",
-		targetSelector: "[data-onboarding-id='profile-modal']",
+			"Haz clic en el avatar y luego selecciona Mi Perfil para actualizar tu contraseña y asegurar tu cuenta.",
+		targetSelector: "[data-onboarding-id='avatar-button']",
 		requiredAction: "profileOpened",
-		requirementText: "Haz clic en Mi Perfil del menú de cuenta.",
+		requirementText: "Abre el dropdown de cuenta y haz clic en Mi Perfil.",
 		autoAdvance: true,
 		allowOpenUi: ["dropdown-account", "modal-account"]
 	},
@@ -853,10 +853,7 @@ export function OnboardingProvider({ children, userId }) {
 		preventAutoAdvanceOnceRef.current = true;
 		setValidationMessage("");
 		setCurrentStep((prev) => {
-			const newStep = Math.max(0, prev - 1);
-			// Disparar evento para que el overlay se actualice
-			window.dispatchEvent(new CustomEvent("onboarding:step-changed", { detail: { step: newStep } }));
-			return newStep;
+			return Math.max(0, prev - 1);
 		});
 	}, []);
 

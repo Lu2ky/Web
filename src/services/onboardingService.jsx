@@ -2,7 +2,6 @@ import { getUserData } from "./userService";
 
 const COMPLETE_ONBOARDING_ENDPOINT = import.meta.env.VITE_API_COMPLETE_ONBOARDING;
 const ONBOARDING_STATUS_ENDPOINT = import.meta.env.VITE_API_ONBOARDING_STATUS;
-const ONBOARDING_LOG_PREFIX = "[onboarding-service]";
 
 const resolveBackendUserId = async (rawUserId) => {
 	const safeUserId = String(rawUserId || "").trim();
@@ -41,7 +40,6 @@ export async function getOnboardingCompletionStatus(userId) {
 	}
 
 	const payload = { userId: backendUserId };
-	console.info(`${ONBOARDING_LOG_PREFIX} get-onboarding payload`, payload);
 
 	try {
 		const response = await fetch(ONBOARDING_STATUS_ENDPOINT, {
@@ -56,7 +54,6 @@ export async function getOnboardingCompletionStatus(userId) {
 
 		const contentType = response.headers.get("content-type") || "";
 		const body = contentType.includes("application/json") ? await response.json() : null;
-		console.info(`${ONBOARDING_LOG_PREFIX} get-onboarding return`, body?.status ?? null);
 		return body?.status ?? null;
 	} catch {
 		return null;
@@ -91,7 +88,6 @@ export async function saveOnboardingStatus(userId, status) {
 		userId: backendUserId,
 		status: normalizedStatus
 	};
-	console.info(`${ONBOARDING_LOG_PREFIX} save-onboarding payload`, payload);
 
 	try {
 		const response = await fetch(COMPLETE_ONBOARDING_ENDPOINT, {

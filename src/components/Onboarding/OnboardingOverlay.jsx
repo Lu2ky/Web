@@ -4,16 +4,63 @@ import OnboardingStep from "./OnboardingStep";
 import "../../styles/Onboarding.css";
 
 const getElementRect = (element) => {
-	if (!element) return null;
+	if (!element) {
+		return null;
+	}
 	const rect = element.getBoundingClientRect();
-	if (rect.width <= 0 || rect.height <= 0) return null;
+	
+	if (rect.width <= 0 || rect.height <= 0) {
+		return null;
+	}
 
-	return {
-		top: Math.max(0, rect.top + window.scrollY - 8),
-		left: Math.max(0, rect.left + window.scrollX - 8),
+	// Buscar el modal parent para entender su posición
+	let currentParent = element.parentElement;
+	let modalContainer = null;
+	while (currentParent) {
+		if (currentParent.className?.includes("modal-container")) {
+			modalContainer = currentParent;
+			break;
+		}
+		currentParent = currentParent.parentElement;
+	}
+
+	if (modalContainer) {
+		const modalRect = modalContainer.getBoundingClientRect();
+
+		// Si el elemento está dentro del modal pero fuera de los límites del viewport
+		// recalcular usando las coordenadas del modal como referencia
+		if (rect.left > modalRect.right || rect.right < modalRect.left) {
+			// El elemento debería estar dentro del modal, así que usar las coordenadas del modal
+			const elementOffsetLeft = rect.left - modalRect.left;
+			const elementOffsetTop = rect.top - modalRect.top;
+			
+			// Si el elemento está dentro del modal visualmente, pero sus coordenadas globales son incorrectas,
+			// usar el offset dentro del modal para posicionar el spotlight en el modal
+			if (elementOffsetLeft >= 0 && elementOffsetLeft <= modalRect.width &&
+				elementOffsetTop >= 0 && elementOffsetTop <= modalRect.height) {
+				// El elemento está dentro del modal, usar las coordenadas relativas al modal
+				const result = {
+					top: modalRect.top + elementOffsetTop - 8,
+					left: modalRect.left + elementOffsetLeft - 8,
+					width: rect.width + 16,
+					height: rect.height + 16
+				};
+				return result;
+			}
+		}
+	}
+
+	// Por defecto, usar coordenadas relativas al viewport
+	const top = Math.max(0, rect.top - 8);
+	const left = Math.max(0, rect.left - 8);
+
+	const result = {
+		top,
+		left,
 		width: rect.width + 16,
 		height: rect.height + 16
 	};
+	return result;
 };
 
 function OnboardingOverlay() {
@@ -39,20 +86,17 @@ function OnboardingOverlay() {
 	const targetRect = useMemo(() => getElementRect(targetElement), [targetElement, layoutTick]);
 
 	useEffect(() => {
-		const handleStepChanged = () => {
-			setLayoutTick((prev) => prev + 1);
-		};
-
-		window.addEventListener("onboarding:step-changed", handleStepChanged);
-		return () => window.removeEventListener("onboarding:step-changed", handleStepChanged);
-	}, []);
-
-	useEffect(() => {
 		if (!targetElement) {
 			return;
 		}
 
+		// Scroll el elemento en el viewport
 		targetElement.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+
+		// Recalcular el layout después del scroll con delay para smooth scroll
+		const scrollUpdateTimeout = setTimeout(() => {
+			setLayoutTick((prev) => prev + 1);
+		}, 600);
 
 		const updateLayout = () => {
 			setLayoutTick((prev) => prev + 1);
@@ -62,6 +106,7 @@ function OnboardingOverlay() {
 		window.addEventListener("scroll", updateLayout, true);
 
 		return () => {
+			clearTimeout(scrollUpdateTimeout);
 			window.removeEventListener("resize", updateLayout);
 			window.removeEventListener("scroll", updateLayout, true);
 		};
