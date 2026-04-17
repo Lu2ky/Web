@@ -27,8 +27,7 @@ function OnboardingOverlay() {
 		validationMessage,
 		nextStep,
 		prevStep,
-		skip,
-		reset
+		skip
 	} = useOnboarding();
 	const [layoutTick, setLayoutTick] = useState(0);
 
@@ -38,6 +37,15 @@ function OnboardingOverlay() {
 		return document.querySelector(current.targetSelector);
 	}, [isOpen, current]);
 	const targetRect = useMemo(() => getElementRect(targetElement), [targetElement, layoutTick]);
+
+	useEffect(() => {
+		const handleStepChanged = () => {
+			setLayoutTick((prev) => prev + 1);
+		};
+
+		window.addEventListener("onboarding:step-changed", handleStepChanged);
+		return () => window.removeEventListener("onboarding:step-changed", handleStepChanged);
+	}, []);
 
 	useEffect(() => {
 		if (!targetElement) {
@@ -62,15 +70,7 @@ function OnboardingOverlay() {
 	if (isLoading) return null;
 
 	if (!isOpen) {
-		return (
-			<button
-				type="button"
-				className="onboarding-reset-trigger"
-				onClick={reset}
-			>
-				Reiniciar onboarding
-			</button>
-		);
+		return null;
 	}
 
 	if (!current) return null;

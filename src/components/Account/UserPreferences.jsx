@@ -300,7 +300,7 @@ export default function UserPreferences({ userId, onClose }) {
 
     if (loading) {
         return (
-            <div className="user-preferences">
+            <div className="user-preferences" data-onboarding-id="preferences-modal">
                 <p className="loading">Cargando datos...</p>
             </div>
         );
@@ -317,7 +317,7 @@ export default function UserPreferences({ userId, onClose }) {
     };
 
     return (
-        <div className="user-preferences">
+        <div className="user-preferences" data-onboarding-id="preferences-modal">
             {error && <div className="alert alert-error">{error}</div>}
             {success && <div className="alert alert-success">{success}</div>}
 

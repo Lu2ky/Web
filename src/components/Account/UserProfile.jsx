@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash, FaCheckCircle, FaRegCircle, FaExclamationCircle } from "react-icons/fa";
 import * as userService from "../../services/userService";
 import LDAPservice from "../../services/LDAPservice";
+import useOnboarding from "../../hooks/useOnboarding";
 import "./UserProfile.css";
 
 function validatePasswordComplexity(password) {
@@ -59,6 +60,7 @@ export default function UserProfile({ userId, onClose }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const { reset: resetOnboarding } = useOnboarding();
     
     // Estado del formulario de cambio de contraseña
     const [currentPassword, setCurrentPassword] = useState("");
@@ -171,6 +173,9 @@ export default function UserProfile({ userId, onClose }) {
                 setNewPassword("");
                 setConfirmPassword("");
                 
+                // Disparar evento del onboarding
+                window.dispatchEvent(new CustomEvent("onboarding:password-changed"));
+                
                 // Limpiar mensaje de éxito después de 3 segundos
                 setTimeout(() => setSuccess(""), 3000);
             } else {
@@ -193,7 +198,7 @@ export default function UserProfile({ userId, onClose }) {
     }
 
     return (
-        <div className="user-profile">
+        <div className="user-profile" data-onboarding-id="profile-modal">
             {error && <div className="alert alert-error">{error}</div>}
             {success && <div className="alert alert-success">{success}</div>}
 
@@ -224,7 +229,7 @@ export default function UserProfile({ userId, onClose }) {
             </section>
 
             {/* Change Password Section */}
-            <section className="profile-section">
+            <section className="profile-section" data-onboarding-id="password-change-section">
                 <h3 className="profile-section-title">Cambiar Contraseña</h3>
                 
                 <form onSubmit={handleChangePassword} className="password-form">
@@ -356,6 +361,23 @@ export default function UserProfile({ userId, onClose }) {
                         {isChangingPassword ? "Actualizando..." : "Cambiar Contraseña"}
                     </button>
                 </form>
+            </section>
+
+            {/* Reset Onboarding Section */}
+            <section className="profile-section">
+                <h3 className="profile-section-title">Guía de Inicio</h3>
+                <p className="profile-section-description">
+                    Reinicia la guía de inicio para repasar todas las funciones disponibles.
+                </p>
+                <button
+                    type="button"
+                    className="profile-reset-onboarding-btn"
+                    onClick={resetOnboarding}
+                    title="Reiniciar guía de inicio"
+                    aria-label="Reiniciar guía de inicio"
+                >
+                    Reiniciar Guía
+                </button>
             </section>
         </div>
     );

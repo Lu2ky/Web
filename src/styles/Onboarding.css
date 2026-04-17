@@ -186,28 +186,6 @@
 	box-shadow: none !important;
 }
 
-.onboarding-reset-trigger {
-	position: fixed;
-	right: 1rem;
-	bottom: 1rem;
-	z-index: 9998;
-	border: 1px solid #d1d5db;
-	border-radius: 0.75rem;
-	padding: 0.55rem 0.9rem;
-	background: white;
-	color: #374151;
-	font-size: 0.82rem;
-	font-weight: 600;
-	cursor: pointer;
-	box-shadow: 0 10px 22px rgba(0, 0, 0, 0.15);
-	transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.onboarding-reset-trigger:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
-}
-
 
 @keyframes onboardingFadeIn {
 	from {
@@ -262,11 +240,6 @@
 
 	.onboarding-btn {
 		width: 100%;
-	}
-
-	.onboarding-reset-trigger {
-		right: 0.5rem;
-		bottom: 0.5rem;
 	}
 
 }

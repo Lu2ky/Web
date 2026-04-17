@@ -73,6 +73,9 @@ export default function DropdownAcount({ userId }) {
         if (optionId === "prefer") {
             window.dispatchEvent(new CustomEvent("onboarding:preferences-opened"));
         }
+        if (optionId === "acount") {
+            window.dispatchEvent(new CustomEvent("onboarding:profile-opened"));
+        }
         setActiveModal(optionId);
         setIsDropdownOpen(false);
     };
@@ -93,6 +96,7 @@ export default function DropdownAcount({ userId }) {
             <div className="dropdown-container" ref={dropdownRef} data-onboarding-id="account-dropdown">
                 <button
                     className="dropdown-image-button"
+                    data-onboarding-id="avatar-button"
                     onClick={toggleDropdown}
                     aria-haspopup="true"
                     aria-expanded={isDropdownOpen}
@@ -112,7 +116,7 @@ export default function DropdownAcount({ userId }) {
                             <li key={option.id} role="menuitem">
                                 <button
                                     className="dropdown-menu-item"
-                                    data-onboarding-id={option.id === "prefer" ? "open-preferences-button" : undefined}
+                                    data-onboarding-id={option.id === "acount" ? "profile-menu-button" : option.id === "prefer" ? "open-preferences-button" : undefined}
                                     onClick={() => handleOptionClick(option.id)}
                                     title={option.label}
                                     type="button"

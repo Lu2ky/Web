@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
 	getOnboardingCompletionStatus,
 	resetOnboardingCompletion,
@@ -11,7 +11,7 @@ const ONBOARDING_STEPS = [
 		title: "Abre tu cuenta",
 		description:
 			"Haz clic en el avatar de la esquina superior derecha para abrir el menú de cuenta y continuar.",
-		targetSelector: "[data-onboarding-id='account-dropdown']",
+		targetSelector: "[data-onboarding-id='avatar-button']",
 		requiredAction: "dropdownOpened",
 		requirementText: "Abre el menú de cuenta desde el avatar.",
 		autoAdvance: true,
@@ -37,7 +37,8 @@ const ONBOARDING_STEPS = [
 		requiredAction: "emailEditOpened",
 		requirementText: "Haz clic en el botón editar correo.",
 		autoAdvance: true,
-		allowOpenUi: ["modal-preferences"]
+		allowOpenUi: ["modal-preferences"],
+		panelPosition: "top-right"
 	},
 	{
 		id: "type-email-preferences",
@@ -60,6 +61,28 @@ const ONBOARDING_STEPS = [
 		requirementText: "Haz clic en guardar correo.",
 		autoAdvance: true,
 		allowOpenUi: ["modal-preferences"]
+	},
+	{
+		id: "open-password-change",
+		title: "Abre tu perfil",
+		description:
+			"Haz clic en Mi Perfil para actualizar tu contraseña y asegurar tu cuenta.",
+		targetSelector: "[data-onboarding-id='profile-modal']",
+		requiredAction: "profileOpened",
+		requirementText: "Haz clic en Mi Perfil del menú de cuenta.",
+		autoAdvance: true,
+		allowOpenUi: ["dropdown-account", "modal-account"]
+	},
+	{
+		id: "change-password-modal",
+		title: "Cambia tu contraseña",
+		description:
+			"En este modal puedes actualizar tu contraseña. Ingresa tu contraseña actual, luego la nueva contraseña con los requisitos indicados.",
+		targetSelector: "[data-onboarding-id='password-change-section']",
+		requiredAction: "passwordChanged",
+		requirementText: "Cambia tu contraseña completando el formulario.",
+		autoAdvance: true,
+		allowOpenUi: ["modal-account"]
 	},
 	{
 		id: "notifications",
@@ -379,6 +402,8 @@ const getInitialCompletedActions = () => ({
 	emailEditOpened: false,
 	emailTyped: false,
 	emailSaved: false,
+	profileOpened: false,
+	passwordChanged: false,
 	notificationsOpened: false,
 	todoAddOpened: false,
 	todoAddSaved: false,
@@ -411,6 +436,7 @@ export function OnboardingProvider({ children, userId }) {
 	const [currentStep, setCurrentStep] = useState(0);
 	const [completedActions, setCompletedActions] = useState(getInitialCompletedActions);
 	const [validationMessage, setValidationMessage] = useState("");
+	const preventAutoAdvanceOnceRef = useRef(false);
 
 	const steps = ONBOARDING_STEPS;
 	const totalSteps = steps.length;
@@ -449,149 +475,226 @@ export function OnboardingProvider({ children, userId }) {
 	}, [userId]);
 
 	useEffect(() => {
+		// Helper to defer state updates to avoid "setState during render" error
+		const deferStateUpdate = (callback) => {
+			Promise.resolve().then(callback);
+		};
+
 		const handleDropdownOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, dropdownOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, dropdownOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleEmailSaved = () => {
-			setCompletedActions((prev) => ({ ...prev, emailSaved: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, emailSaved: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleEmailTyped = () => {
-			setCompletedActions((prev) => ({ ...prev, emailTyped: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, emailTyped: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleEmailEditOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, emailEditOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, emailEditOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleNotificationsOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, notificationsOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, notificationsOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleTodoAddOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, todoAddOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, todoAddOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleTodoAddSaved = () => {
-			setCompletedActions((prev) => ({ ...prev, todoAddSaved: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, todoAddSaved: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleTodoEditSaved = () => {
-			setCompletedActions((prev) => ({ ...prev, todoEditSaved: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, todoEditSaved: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleTodoDuplicateSaved = () => {
-			setCompletedActions((prev) => ({ ...prev, todoDuplicateSaved: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, todoDuplicateSaved: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleTodoDeleted = () => {
-			setCompletedActions((prev) => ({ ...prev, todoDeleted: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, todoDeleted: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handlePreferencesOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, preferencesOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, preferencesOpened: true }));
+				setValidationMessage("");
+			});
+		};
+
+		const handleProfileOpened = () => {
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, profileOpened: true }));
+				setValidationMessage("");
+			});
+		};
+
+		const handlePasswordChanged = () => {
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, passwordChanged: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleTodoFilterOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, todoFilterOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, todoFilterOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleTodoFilterApplied = () => {
-			setCompletedActions((prev) => ({ ...prev, todoFilterApplied: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, todoFilterApplied: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleTodoCardEditClicked = () => {
-			setCompletedActions((prev) => ({ ...prev, todoCardEditClicked: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, todoCardEditClicked: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleTodoCardDuplicateClicked = () => {
-			setCompletedActions((prev) => ({ ...prev, todoCardDuplicateClicked: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, todoCardDuplicateClicked: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleTodoCardDeleteClicked = () => {
-			setCompletedActions((prev) => ({ ...prev, todoCardDeleteClicked: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, todoCardDeleteClicked: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleCalendarClicked = () => {
-			setCompletedActions((prev) => ({ ...prev, calendarClicked: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, calendarClicked: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleViewChanged = () => {
-			setCompletedActions((prev) => ({ ...prev, viewChanged: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, viewChanged: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleAcademicPeriodOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, academicPeriodOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, academicPeriodOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleAcademicPeriodSelected = () => {
-			setCompletedActions((prev) => ({ ...prev, academicPeriodSelected: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, academicPeriodSelected: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleThemeSelectorOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, themeSelectorOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, themeSelectorOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleThemeSelected = () => {
-			setCompletedActions((prev) => ({ ...prev, themeSelected: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, themeSelected: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleAddActivityOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, addActivityOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, addActivityOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleAddActivitySaved = () => {
-			setCompletedActions((prev) => ({ ...prev, addActivitySaved: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, addActivitySaved: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleCalendarFilterOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, calendarFilterOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, calendarFilterOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleCalendarFilterOptionSelected = () => {
-			setCompletedActions((prev) => ({ ...prev, calendarFilterOptionSelected: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, calendarFilterOptionSelected: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleOfficialCardOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, officialCardOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, officialCardOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleOfficialCommentOpened = () => {
-			setCompletedActions((prev) => ({ ...prev, officialCommentOpened: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, officialCommentOpened: true }));
+				setValidationMessage("");
+			});
 		};
 
 		const handleOfficialCommentSaved = () => {
-			setCompletedActions((prev) => ({ ...prev, officialCommentSaved: true }));
-			setValidationMessage("");
+			deferStateUpdate(() => {
+				setCompletedActions((prev) => ({ ...prev, officialCommentSaved: true }));
+				setValidationMessage("");
+			});
 		};
 
 		window.addEventListener("onboarding:account-dropdown-opened", handleDropdownOpened);
@@ -599,6 +702,8 @@ export function OnboardingProvider({ children, userId }) {
 		window.addEventListener("onboarding:preferences-email-saved", handleEmailSaved);
 		window.addEventListener("onboarding:preferences-email-edit-opened", handleEmailEditOpened);
 		window.addEventListener("onboarding:preferences-opened", handlePreferencesOpened);
+		window.addEventListener("onboarding:profile-opened", handleProfileOpened);
+		window.addEventListener("onboarding:password-changed", handlePasswordChanged);
 		window.addEventListener("onboarding:notifications-opened", handleNotificationsOpened);
 		window.addEventListener("onboarding:todo-add-opened", handleTodoAddOpened);
 		window.addEventListener("onboarding:todo-add-saved", handleTodoAddSaved);
@@ -630,6 +735,8 @@ export function OnboardingProvider({ children, userId }) {
 			window.removeEventListener("onboarding:preferences-email-saved", handleEmailSaved);
 			window.removeEventListener("onboarding:preferences-email-edit-opened", handleEmailEditOpened);
 			window.removeEventListener("onboarding:preferences-opened", handlePreferencesOpened);
+			window.removeEventListener("onboarding:profile-opened", handleProfileOpened);
+			window.removeEventListener("onboarding:password-changed", handlePasswordChanged);
 			window.removeEventListener("onboarding:notifications-opened", handleNotificationsOpened);
 			window.removeEventListener("onboarding:todo-add-opened", handleTodoAddOpened);
 			window.removeEventListener("onboarding:todo-add-saved", handleTodoAddSaved);
@@ -723,6 +830,11 @@ export function OnboardingProvider({ children, userId }) {
 			return;
 		}
 
+		if (preventAutoAdvanceOnceRef.current) {
+			preventAutoAdvanceOnceRef.current = false;
+			return;
+		}
+
 		const timerId = setTimeout(() => {
 			setValidationMessage("");
 			setCurrentStep((prev) => {
@@ -738,8 +850,14 @@ export function OnboardingProvider({ children, userId }) {
 	}, [isOpen, currentStepData, requiredAction, canContinue, totalSteps, complete]);
 
 	const prevStep = useCallback(() => {
+		preventAutoAdvanceOnceRef.current = true;
 		setValidationMessage("");
-		setCurrentStep((prev) => Math.max(0, prev - 1));
+		setCurrentStep((prev) => {
+			const newStep = Math.max(0, prev - 1);
+			// Disparar evento para que el overlay se actualice
+			window.dispatchEvent(new CustomEvent("onboarding:step-changed", { detail: { step: newStep } }));
+			return newStep;
+		});
 	}, []);
 
 	const skip = useCallback(() => {

@@ -53,8 +53,14 @@ const PERIOD_END_DATE_KEYS = [
   "close_date"
 ];
 
+const isAcademicPeriodsDebugEnabled = () => {
+  const rawValue = String(import.meta.env.VITE_DEBUG_ACADEMIC_PERIODS || "").trim().toLowerCase();
+  return import.meta.env.DEV || rawValue === "1" || rawValue === "true";
+};
+
 const logAcademicPeriodsDebug = (...args) => {
-  void args;
+  if (!isAcademicPeriodsDebugEnabled()) return;
+  console.log("[AcademicPeriods]", ...args);
 };
 
 const logAcademicPeriodsWarn = (...args) => {

@@ -91,6 +91,14 @@
     letter-spacing: -0.01em;
 }
 
+/* Descripción de sección */
+.profile-section-description {
+    margin: 0 0 1rem 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
 /* Info perfil */
 .info-group {
     margin-bottom: 14px;
@@ -341,6 +349,42 @@
 }
 
 .profile-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Botón Reiniciar Onboarding */
+.profile-reset-onboarding-btn {
+    padding: 12px 20px;
+    margin-top: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.15),
+        0 2px 4px -1px rgba(37, 99, 235, 0.1);
+}
+
+.profile-reset-onboarding-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.25),
+        0 3px 6px -1px rgba(37, 99, 235, 0.15);
+    transform: translateY(-1px);
+}
+
+.profile-reset-onboarding-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 4px -1px rgba(59, 130, 246, 0.15);
+}
+
+.profile-reset-onboarding-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
