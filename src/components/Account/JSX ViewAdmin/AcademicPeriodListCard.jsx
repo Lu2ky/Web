@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import EditButton from "../../TodoList/EditButton";
+
 import MessageConfirmation from "../../TodoList/MessageConfirmation";
 import {
   deleteAcademicPeriod,
@@ -276,12 +276,6 @@ function AcademicPeriodListCard({ userId = null, refreshToken = 0 }) {
                     </div>
 
                     <div className="academicPeriodListCard__actions">
-                      <EditButton
-                        onClick={() => startEdit(period)}
-                        title="Editar periodo"
-                        className="academicPeriodListCard__edit"
-                      />
-
                       <button
                         className="remindcard-delete"
                         onClick={() => setDeleteTarget(period)}

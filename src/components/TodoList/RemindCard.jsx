@@ -1,4 +1,3 @@
-import EditButton from "./EditButton";
 import DuplicateButton from "./DuplicateButton";
 import "../../styles/Reminder.css";
 
@@ -81,14 +80,6 @@ function RemindCard({ task, priority = "", onToggle, onEdit, onDelete, onDuplica
                 </div>
 
                 <div className="remindcard-actions">
-                    <EditButton
-                        onClick={() => {
-                            window.dispatchEvent(new CustomEvent("onboarding:todo-card-edit-clicked"));
-                            onEdit(task.id);
-                        }}
-                        className="todo-card-edit-btn"
-                        dataOnboardingId="todo-card-edit-button"
-                    />
                     <DuplicateButton
                         onClick={() => {
                             window.dispatchEvent(new CustomEvent("onboarding:todo-card-duplicate-clicked"));
