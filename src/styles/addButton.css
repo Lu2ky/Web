@@ -548,14 +548,6 @@
     background: transparent;
 }
 
-.tagActionEdit {
-    color: #3b82f6;
-}
-
-.tagActionEdit:hover {
-    background: #dbeafe;
-}
-
 .tagActionDelete {
     color: #ef4444;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-
+import EditButton from "../../TodoList/EditButton";
 import MessageConfirmation from "../../TodoList/MessageConfirmation";
 import {
   deleteAcademicPeriod,
@@ -13,6 +13,11 @@ import "../CSS ViewAdmin/AcademicPeriodListCard.css";
 const isAcademicPeriodsUiDebugEnabled = () => {
   const rawValue = String(import.meta.env.VITE_DEBUG_ACADEMIC_PERIODS || "").trim().toLowerCase();
   return import.meta.env.DEV || rawValue === "1" || rawValue === "true";
+};
+
+const logAcademicPeriodsUiDebug = (...args) => {
+  if (!isAcademicPeriodsUiDebugEnabled()) return;
+  console.log("[AcademicPeriodsUI]", ...args);
 };
 
 const logAcademicPeriodsUiWarn = (...args) => {
@@ -276,6 +281,12 @@ function AcademicPeriodListCard({ userId = null, refreshToken = 0 }) {
                     </div>
 
                     <div className="academicPeriodListCard__actions">
+                      <EditButton
+                        onClick={() => startEdit(period)}
+                        title="Editar periodo"
+                        className="academicPeriodListCard__edit"
+                      />
+
                       <button
                         className="remindcard-delete"
                         onClick={() => setDeleteTarget(period)}
