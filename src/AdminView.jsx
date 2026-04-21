@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import Header from "./components/Navegation/Header";
+import Header from "./components/Header/Header";
 import DropArea from "./components/Account/JSX ViewAdmin/DropArea";
 import ModalArchivo from "./components/Account/JSX ViewAdmin/ModalArchivo";
 import AddAcademicPeriodCard from "./components/Account/JSX ViewAdmin/AddAcademicPeriodCard";

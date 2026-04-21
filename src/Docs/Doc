@@ -7,7 +7,7 @@ import { useCallback } from "react";
 // Id de LogIn
 import { useParams } from "react-router-dom";
 // Componentes Primarios
-import Header from "./components/Navegation/Header";
+import Header from "./components/Header/Header";
 import ControlBar from "./components/ControlBar/ControlBar";
 import Calendar from "./components/Calendar/Calendar";
 import ToDoList from "./components/TodoList/ToDoList";

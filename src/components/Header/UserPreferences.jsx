@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FaEdit, FaTimes, FaCheck } from "react-icons/fa";
 import * as userService from "../../services/userService";
 import * as notificationsSilenceService from "../../services/notificationsSilenceService";
-import Modal from "./Modal";
+import Modal from "../Account/Modal";
 import "./UserPreferences.css";
 
 function parseAnticipationMinutes(userData) {

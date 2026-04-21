@@ -1,0 +1,220 @@
+COMPARACION DE CAMBIOS - MODAL BASE
+
+Fecha: 2026-04-20
+Archivo comparado: src/components/Account/Modal.jsx
+Criterio solicitado: lineas 1-176 = nueva implementacion
+Baseline de comparacion: implementacion inicial historica del mismo archivo (componente Modal previo, actualmente conservado debajo de la nueva seccion)
+
+====================================================================
+1) RESUMEN EJECUTIVO
+====================================================================
+
+La nueva seccion (lineas 1-176) introduce una evolucion importante del modal:
+- Pasa de un modal simple a un modal base mas configurable.
+- Agrega soporte de modales apilados (stack) y contador de scroll lock.
+- Agrega IDs unicos para accesibilidad.
+- Agrega opciones nuevas para controlar comportamiento.
+
+Sin embargo, en el estado actual tambien introduce regresiones de implementacion que deben corregirse antes de considerarlo estable:
+- Doble export default en el mismo archivo.
+- Interpolaciones de className mal escritas (quedan literales, no aplican clases dinamicas).
+- Inconsistencia de clase de boton primario (modal-primary-btn vs modal-action-btn existente en estilos previos).
+
+
+====================================================================
+2) CAMBIOS REALIZADOS (NUEVO VS INICIAL)
+====================================================================
+
+2.1 Firma del componente y API
+
+ANTES (inicial):
+- Props: isOpen, onClose, title, children, onConfirm, confirmLabel, closeLabel.
+- Contrato acotado y menos configurable.
+
+AHORA (nuevo 1-176):
+- Mantiene props anteriores.
+- Agrega:
+  - closeOnOverlayClick
+  - closeOnEscape
+  - showFooter
+  - initialFocusRef
+  - restoreFocusRef
+  - ariaLabel
+  - ariaDescribedBy
+  - className
+  - bodyClassName
+  - footerClassName
+
+Impacto:
+- Mejora de extensibilidad y reuso en distintos contextos (perfil, controlbar, modales de confirmacion).
+
+
+2.2 Manejo de multiples modales
+
+ANTES (inicial):
+- No habia stack de modales.
+- Cualquier Escape podia afectar cierres sin distinguir modal superior.
+- Scroll lock del body era binario por modal (hidden al abrir, reset al cerrar), potencialmente conflictivo en anidados.
+
+AHORA (nuevo 1-176):
+- Se agrega stackModal para identificar modal activo superior.
+- Se agrega lockCount para scroll lock por contador.
+- Solo el modal top de stack atiende Escape y ciclo de foco.
+
+Impacto:
+- Soluciona casos de nesting y evita liberar scroll antes de tiempo en escenarios con varios modales.
+
+
+2.3 Accesibilidad y ARIA
+
+ANTES (inicial):
+- aria-labelledby fijo: "modal-title".
+- Riesgo de IDs duplicados con mas de un modal.
+
+AHORA (nuevo 1-176):
+- Se usa useId para generar IDs unicos por instancia.
+- titleId y descriptionId dinamicos.
+- Soporte para ariaLabel y ariaDescribedBy.
+
+Impacto:
+- Mejor semantica ARIA y menor riesgo de colision de identificadores.
+
+
+2.4 Foco y teclado
+
+ANTES (inicial):
+- Focus inicial al boton de cerrar.
+- Focus trap con Tab/Shift+Tab.
+- Escape cerraba sin control de modal superior.
+- No restauraba foco al elemento previo.
+
+AHORA (nuevo 1-176):
+- Focus inicial configurable via initialFocusRef.
+- Focus trap se mantiene.
+- Escape configurable (closeOnEscape) y restringido al top modal.
+- Restore focus al cerrar via restoreFocusRef o elemento previamente enfocado.
+
+Impacto:
+- Mejora UX y accesibilidad, especialmente para flujos complejos.
+
+
+2.5 Overlay y footer
+
+ANTES (inicial):
+- No cerraba por click en overlay.
+- Footer siempre presente.
+
+AHORA (nuevo 1-176):
+- closeOnOverlayClick configurable.
+- showFooter configurable para modales de contenido libre.
+
+Impacto:
+- Mayor flexibilidad de comportamiento por tipo de dialogo.
+
+
+====================================================================
+3) DIFERENCIAS PUNTUALES IMPORTANTES
+====================================================================
+
+3.1 Exportaciones
+- Nuevo bloque define: export default function ModalBase(...)
+- Al final del archivo persiste: export default Modal;
+
+Resultado actual:
+- Dos export default en el mismo archivo.
+- Esto rompe compilacion en JavaScript/ESM.
+
+
+3.2 className dinamico mal interpolado
+En el nuevo bloque aparecen expresiones como:
+- className={'modal-container ${className}'.trim()}
+- className={'modal-body ${bodyClassName}'.trim()}
+- className={'modal-footer ${footerClassName}'.trim()}
+
+Problema:
+- Se usan comillas simples en vez de template literal con backticks.
+- La interpolacion ${...} no ocurre y queda texto literal.
+- Se pierde la extensibilidad visual esperada.
+
+
+3.3 Clase de boton principal
+- Nuevo bloque usa modal-primary-btn en boton de confirmacion.
+- Version inicial usaba modal-action-btn.
+
+Riesgo:
+- Si modal-primary-btn no existe en CSS cargado, el boton pierde estilo esperado.
+
+
+3.4 Consistencia de naming
+- Documento de propuesta usa closeOnEsc.
+- Implementacion nueva usa closeOnEscape.
+
+Nota:
+- No es bug funcional si se usa de forma consistente, pero conviene estandarizar nombre para evitar confusion.
+
+
+====================================================================
+4) TABLA DE CAMBIO (ANTES -> AHORA)
+====================================================================
+
+1) IDs ARIA
+- Antes: fijo (modal-title)
+- Ahora: dinamico por instancia (useId + useMemo)
+
+2) Escape
+- Antes: siempre cerraba el modal abierto
+- Ahora: configurable y solo aplica al top modal
+
+3) Scroll lock
+- Antes: set/reset directo por apertura/cierre individual
+- Ahora: contador lockCount para escenarios anidados
+
+4) Overlay click
+- Antes: no configurable
+- Ahora: closeOnOverlayClick
+
+5) Footer
+- Antes: siempre visible
+- Ahora: showFooter configurable
+
+6) Restore focus
+- Antes: no explicito
+- Ahora: restoreFocusRef o elemento previamente activo
+
+7) Extensibilidad de estilos
+- Antes: clases fijas
+- Ahora: className/bodyClassName/footerClassName (con bug actual de interpolacion)
+
+
+====================================================================
+5) ESTADO ACTUAL RESPECTO A LA PROPUESTA DEL DOCUMENTO
+====================================================================
+
+Coincidencias con la propuesta:
+- Stack de modal + lockCount: SI
+- IDs unicos ARIA: SI
+- Props de configuracion avanzadas: SI (mayormente)
+- Restore focus: SI
+- Overlay configurable: SI
+
+Desviaciones / pendientes:
+- Nombre de prop: closeOnEsc (propuesta) vs closeOnEscape (implementado)
+- className dinamico no funcional por sintaxis
+- Doble export default
+- Cambio de clase CSS de boton (validar disponibilidad)
+
+
+====================================================================
+6) CONCLUSION
+====================================================================
+
+El nuevo bloque 1-176 de Modal.jsx representa una mejora arquitectonica clara sobre el modal inicial.
+A nivel de diseno, esta alineado con la propuesta del documento y habilita que modales de Header/Perfil y ControlBar se comporten como hijos del modal base.
+
+No obstante, el archivo aun contiene errores de integracion/sintaxis que impiden considerarlo finalizado:
+1) resolver doble export default,
+2) corregir interpolaciones className con template literals reales,
+3) unificar clase del boton primario con CSS existente,
+4) estandarizar nombre de prop closeOnEsc/closeOnEscape.
+
+Fin del reporte.

@@ -5,7 +5,7 @@
 // Alterna entre vista semanal y diaria con indicador visual.
 // ============================================================================
 
-import "../../styles/ViewButton.css";
+import "../../styles/ControlBar/ViewButton.css";
 
 const options = ["Semanal", "Diario"];
 

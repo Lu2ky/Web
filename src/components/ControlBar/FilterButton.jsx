@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef} from "react";
 import {FaFilter} from "react-icons/fa";
-import "../../styles/FilterButton.css";
+import "../../styles/ControlBar/FilterButton.css";
 import {getCategories} from "../../services/categoriesService";
 
 function FilterButton({selectedTag, setSelectedTag}) {

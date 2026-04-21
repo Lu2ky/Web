@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
-import UserProfile from "./UserProfile";
-import UserPreferences from "./UserPreferences";
+import UserProfile from "../Header/UserProfile";
+import UserPreferences from "../Header/UserPreferences";
 import "./DropdownAcount.css";
 import { clearAuthSession } from "../../services/authSession";
 

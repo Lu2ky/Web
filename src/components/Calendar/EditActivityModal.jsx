@@ -6,7 +6,7 @@
 // ============================================================================
 
 import { useState, useEffect } from "react";
-import "../../styles/AddActivityButton.css";
+import "../../styles/ControlBar/AddActivityButton.css";
 import { updatePersonalActivity } from "../../services/PersonalFetcher";
 
 const normalizeDateForInput = (value) => {

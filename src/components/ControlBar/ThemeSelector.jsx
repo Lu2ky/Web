@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../../styles/ThemeSelector.css";
+import "../../styles/ControlBar/ThemeSelector.css";
 import { IoColorPalette } from "react-icons/io5";
 import { getCategories } from "../../services/categoriesService";
 import { getColorPalette, saveColorPalette } from "../../services/colorService";

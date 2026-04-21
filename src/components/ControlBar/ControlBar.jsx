@@ -1,4 +1,4 @@
-import "../../styles/ControlBar.css";
+import "../../styles/ControlBar/ControlBar.css";
 import ViewButton from "./ViewButton";
 import AddButton from "./AddActivityButton";
 import FilterButton from "./FilterButton";

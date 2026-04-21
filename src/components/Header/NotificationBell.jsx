@@ -10,7 +10,7 @@
 import { useState, useEffect, useRef } from "react";
 import * as NotificationService from "../../services/notificationService";
 import * as NotificationsSilenceService from "../../services/notificationsSilenceService";
-import "../../styles/NotificationBell.css";
+import "../../styles/Header/NotificationBell.css";
 
 export default function NotificationBell({ userId }) {
     const [isOpen, setIsOpen] = useState(false);

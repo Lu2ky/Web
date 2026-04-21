@@ -1,9 +1,9 @@
 import { useState } from "react";
 import logo from "../../assets/logo.png";
-import "../../styles/Header.css";
+import "../../styles/Header/Header.css";
 import "../Account/DropdownAcount";
 import DropdownAcount from "../Account/DropdownAcount";
-import NotificationBell from "../Account/NotificationBell";
+import NotificationBell from "./NotificationBell";
 import Modal from "../Account/Modal";
 
 

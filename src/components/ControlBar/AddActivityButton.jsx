@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../../styles/AddActivityButton.css";
+import "../../styles/ControlBar/AddActivityButton.css";
 import { addPersonalActivity } from "../../services/PersonalFetcher";
 
 const INITIAL_FORM_DATA = {

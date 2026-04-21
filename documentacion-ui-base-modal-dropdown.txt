@@ -1,0 +1,1001 @@
+DOCUMENTO DE IMPLEMENTACION
+Estandarizacion de Modales (Header/Perfil + ControlBar) y Dropdown Base Reutilizable
+
+Fecha: 2026-04-20
+Proyecto: Web
+Alcance de este documento: SOLO Header/Perfil y ControlBar
+
+====================================================================
+1) OBJETIVO
+====================================================================
+
+Unificar comportamiento, accesibilidad y API de los modales y dropdowns para:
+- Reducir duplicacion de logica (Escape, foco, click afuera, cierre por eventos globales).
+- Hacer que los modales de Header/Perfil y ControlBar sean practicamente hijos funcionales del Modal base.
+- Tener un DropdownBase unico que se importe en los componentes que lo requieran.
+
+Resultado esperado:
+- Un contrato comun (API) para modales.
+- Un contrato comun (API) para dropdowns.
+- Migracion incremental sin romper estilos actuales.
+
+
+====================================================================
+2) BASE ACTUAL Y COMPONENTES A MIGRAR
+====================================================================
+
+Modal base actual:
+- src/components/Account/Modal.jsx
+- src/components/Account/Modal.css
+
+Header/Perfil (objetivo):
+- src/components/Header/Header.jsx
+- src/components/Account/DropdownAcount.jsx
+- src/components/Header/NotificationBell.jsx
+- src/components/Header/UserProfile.jsx
+- src/components/Header/UserPreferences.jsx
+
+ControlBar (objetivo):
+- src/components/ControlBar/AddActivityButton.jsx
+- src/components/ControlBar/ThemeSelector.jsx
+- src/components/ControlBar/FilterButton.jsx
+- src/components/ControlBar/AcademicPeriodSelect.jsx
+
+
+====================================================================
+3) COMPARACION TECNICA (MODAL BASE VS HEADER/PERFIL Y CONTROLBAR)
+====================================================================
+
+3.1 Modal base actual (Account/Modal.jsx)
+- Ya tiene rol dialog y aria-modal.
+- Ya maneja Escape para cerrar.
+- Ya hace focus trap con Tab/Shift+Tab.
+- Ya bloquea scroll del body al abrir.
+- Ya permite footer simple o confirm/cancel via onConfirm.
+
+Puntos a reforzar del base actual:
+- aria-labelledby usa id fijo (modal-title), lo que puede duplicarse si hay mas de un modal abierto.
+- No tiene opcion explicita para cerrar por click en overlay (actualmente no cierra).
+- En modales anidados, conviene manejar stack para que solo el modal superior procese Escape y el scroll lock no se libere antes de tiempo.
+
+
+3.2 Header/Perfil
+
+A) DropdownAcount.jsx
+- Es dropdown/menu, no modal.
+- Tiene click afuera y semantica de menu.
+- Lanza modales (Profile, Preferences, Logout) usando el Modal base.
+Conclusion:
+- Correcto usar Modal base para dialogs.
+- El dropdown debe migrar a DropdownBase, no a Modal.
+
+B) NotificationBell.jsx
+- Es dropdown/menu de notificaciones.
+- Tiene click afuera y apertura/cierre propios.
+Conclusion:
+- Debe usar DropdownBase para eliminar duplicacion y mantener menu accesible.
+
+C) Header.jsx
+- Compone NotificationBell, DropdownAcount y un modal de ayuda.
+Conclusion:
+- Debe consumir wrappers estandar (MenuDropdown, DialogModal) sin logica duplicada en el contenedor.
+
+
+3.3 ControlBar
+
+A) AddActivityButton.jsx
+- Tiene modal propio (estructura de overlay/dialog personalizada).
+- Tiene Escape, pero no toda la paridad de foco y manejo centralizado del base.
+Conclusion:
+- Debe migrar a Modal base (o wrapper hijo) conservando su contenido/estilos internos.
+
+B) ThemeSelector.jsx
+- Tiene panel tipo popup/modal, pero no contrato de dialog tan robusto como el base.
+Conclusion:
+- Si UX lo considera dialog, migrar a Modal base.
+- Si UX lo considera panel flotante, migrar a DropdownBase con roleMode="panel".
+
+C) FilterButton.jsx y AcademicPeriodSelect.jsx
+- Son dropdowns con patron repetido (state + outside click + toggle + cierre por eventos externos).
+Conclusion:
+- Deben migrar a DropdownBase.
+
+
+====================================================================
+4) ESTRATEGIA: HACERLOS "HIJOS" DEL MODAL BASE
+====================================================================
+
+La idea no es forzar un solo JSX identico para todos, sino heredar comportamiento base.
+
+Regla:
+- "Hijo del Modal base" = componente que delega apertura/cierre, accesibilidad y teclado al base.
+- Conserva layout y estilos del dominio (Add Activity, Preferences, etc.), pero sin reimplementar la mecanica modal.
+
+Patron recomendado:
+1) Mantener un ModalBase robusto (evolucionando src/components/Account/Modal.jsx).
+2) Crear wrappers por dominio:
+   - ProfileDialog
+   - PreferencesDialog
+   - AddActivityDialog
+   - ThemeDialog (si aplica)
+3) Cada wrapper solo define:
+   - Titulo
+   - Contenido
+   - Botoneria/acciones
+   - Clases de estilo propias
+4) Todo lo demas (Escape, trap, ARIA, scroll lock, restore focus) queda centralizado.
+
+
+====================================================================
+5) API OBJETIVO PARA MODAL BASE (PROPUESTA)
+====================================================================
+
+Props minimas:
+- isOpen: boolean
+- onClose: function
+- title: string
+- children: node
+
+Props opcionales recomendadas:
+- onConfirm: function | null
+- confirmLabel: string
+- closeLabel: string
+- closeOnOverlayClick: boolean (default false para compatibilidad actual)
+- closeOnEsc: boolean (default true)
+- showFooter: boolean (default true)
+- initialFocusRef: ref opcional
+- restoreFocusRef: ref opcional
+- ariaLabel: string opcional (si no hay title visible)
+- ariaDescribedBy: string opcional
+- className, bodyClassName, footerClassName (extensibilidad visual)
+
+Comportamiento obligatorio:
+- Solo modal superior responde a Escape (si hay stacking).
+- Scroll lock por contador de modales abiertos.
+- id unico para titulo/descripcion ARIA.
+- Focus trap robusto.
+
+
+====================================================================
+6) CODIGO PROPUESTO (TEXTO PLANO) - MODAL BASE CASI COPIABLE
+====================================================================
+
+Archivo sugerido:
+src/components/common/ModalBase.jsx
+
+import { useEffect, useId, useMemo, useRef } from "react";
+import "./ModalBase.css";
+
+const modalStack = [];
+let lockCount = 0;
+
+function lockBodyScroll() {
+  lockCount += 1;
+  if (lockCount === 1) {
+    document.body.style.overflow = "hidden";
+  }
+}
+
+function unlockBodyScroll() {
+  lockCount = Math.max(0, lockCount - 1);
+  if (lockCount === 0) {
+    document.body.style.overflow = "";
+  }
+}
+
+function getFocusableElements(container) {
+  if (!container) return [];
+  return Array.from(
+    container.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter((el) => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden"));
+}
+
+export default function ModalBase({
+  isOpen,
+  onClose,
+  title,
+  children,
+  onConfirm = null,
+  confirmLabel = "Confirmar",
+  closeLabel = "Cerrar",
+  closeOnOverlayClick = false,
+  closeOnEsc = true,
+  showFooter = true,
+  initialFocusRef,
+  restoreFocusRef,
+  ariaLabel,
+  ariaDescribedBy,
+  className = "",
+  bodyClassName = "",
+  footerClassName = "",
+}) {
+  const containerRef = useRef(null);
+  const closeBtnRef = useRef(null);
+  const instanceId = useId();
+
+  const titleId = useMemo(() => `modal-title-${instanceId}`, [instanceId]);
+  const descriptionId = useMemo(() => `modal-desc-${instanceId}`, [instanceId]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousFocus = document.activeElement;
+    modalStack.push(instanceId);
+    lockBodyScroll();
+
+    const focusTarget = initialFocusRef?.current || closeBtnRef.current;
+    focusTarget?.focus();
+
+    const onKeyDown = (e) => {
+      const isTopMost = modalStack[modalStack.length - 1] === instanceId;
+      if (!isTopMost) return;
+
+      if (e.key === "Escape" && closeOnEsc) {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const items = getFocusableElements(containerRef.current);
+        if (items.length === 0) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      const i = modalStack.lastIndexOf(instanceId);
+      if (i >= 0) modalStack.splice(i, 1);
+      unlockBodyScroll();
+
+      const restoreEl = restoreFocusRef?.current || previousFocus;
+      if (restoreEl && typeof restoreEl.focus === "function") {
+        restoreEl.focus();
+      }
+    };
+  }, [
+    isOpen,
+    onClose,
+    closeOnEsc,
+    initialFocusRef,
+    restoreFocusRef,
+    instanceId,
+  ]);
+
+  if (!isOpen) return null;
+
+  const handleOverlayClick = () => {
+    if (closeOnOverlayClick) onClose();
+  };
+
+  return (
+    <div className="modal-overlay" role="presentation" onClick={handleOverlayClick}>
+      <div
+        className={`modal-container ${className}`.trim()}
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        aria-label={title ? undefined : ariaLabel}
+        aria-describedby={ariaDescribedBy || descriptionId}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <header className="modal-header">
+          {title ? (
+            <h2 id={titleId} className="modal-title">
+              {title}
+            </h2>
+          ) : (
+            <span className="sr-only">Dialog</span>
+          )}
+
+          <button
+            ref={closeBtnRef}
+            className="modal-close-btn"
+            onClick={onClose}
+            aria-label="Cerrar modal"
+          >
+            x
+          </button>
+        </header>
+
+        <div id={descriptionId} className={`modal-body ${bodyClassName}`.trim()}>
+          {children}
+        </div>
+
+        {showFooter && (
+          <footer className={`modal-footer ${footerClassName}`.trim()}>
+            {onConfirm ? (
+              <>
+                <button className="modal-secondary-btn" onClick={onClose}>
+                  {closeLabel}
+                </button>
+                <button className="modal-action-btn" onClick={onConfirm}>
+                  {confirmLabel}
+                </button>
+              </>
+            ) : (
+              <button className="modal-action-btn" onClick={onClose}>
+                {closeLabel}
+              </button>
+            )}
+          </footer>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+Explicacion clave del codigo ModalBase:
+- modalStack + lockCount evita fallos tipicos en modales anidados.
+- useId elimina colisiones de ids ARIA.
+- closeOnOverlayClick configurable permite compatibilidad hacia atras.
+- restoreFocus mejora UX y accesibilidad al cerrar.
+
+
+====================================================================
+7) EJEMPLOS DE "HIJOS" DE MODAL BASE
+====================================================================
+
+7.1 AddActivityDialog (ControlBar)
+
+Archivo sugerido:
+src/components/ControlBar/AddActivityDialog.jsx
+
+import ModalBase from "../common/ModalBase";
+import AddActivityForm from "./AddActivityForm";
+
+export default function AddActivityDialog({ isOpen, onClose, onSaved }) {
+  return (
+    <ModalBase
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Agregar actividad"
+      closeLabel="Cerrar"
+      showFooter={false}
+      className="add-activity-modal"
+    >
+      <AddActivityForm onSaved={onSaved} onCancel={onClose} />
+    </ModalBase>
+  );
+}
+
+7.2 ProfileDialog (Header/Perfil)
+
+Archivo sugerido:
+src/components/Account/ProfileDialog.jsx
+
+import ModalBase from "../common/ModalBase";
+
+export default function ProfileDialog({ isOpen, onClose, user }) {
+  return (
+    <ModalBase
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Perfil"
+      closeLabel="Cerrar"
+      showFooter={true}
+    >
+      <p><strong>Nombre:</strong> {user?.name || "N/A"}</p>
+      <p><strong>Correo:</strong> {user?.email || "N/A"}</p>
+    </ModalBase>
+  );
+}
+
+
+====================================================================
+8) DROPDOWN BASE REUTILIZABLE (PROPUESTA)
+====================================================================
+
+Objetivo:
+- Reemplazar patrones repetidos de dropdown en:
+  - FilterButton
+  - AcademicPeriodSelect
+  - NotificationBell
+  - DropdownAcount (solo capa dropdown/menu)
+
+API propuesta:
+- open (controlado) o defaultOpen (no controlado)
+- onOpenChange(nextOpen, reason)
+- closeOnOutsideClick (default true)
+- closeOnEscape (default true)
+- closeOnSelect (default false)
+- roleMode: "menu" | "listbox" | "panel"
+- trigger(renderProps)
+- children(renderProps)
+
+
+====================================================================
+9) CODIGO PROPUESTO (TEXTO PLANO) - DROPDOWN BASE CASI COPIABLE
+====================================================================
+
+Archivo sugerido:
+src/components/DropdownBase/DropdownBase.jsx
+
+import { useEffect, useId, useRef, useState } from "react";
+
+function isControlled(open) {
+  return typeof open === "boolean";
+}
+
+export default function DropdownBase({
+  open,
+  defaultOpen = false,
+  onOpenChange,
+  closeOnOutsideClick = true,
+  closeOnEscape = true,
+  closeOnSelect = false,
+  roleMode = "menu",
+  className = "",
+  menuClassName = "",
+  trigger,
+  children,
+}) {
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  const rootRef = useRef(null);
+  const buttonRef = useRef(null);
+  const menuRef = useRef(null);
+  const id = useId();
+
+  const currentOpen = isControlled(open) ? open : internalOpen;
+
+  const setOpen = (next, reason) => {
+    if (!isControlled(open)) setInternalOpen(next);
+    onOpenChange?.(next, reason);
+  };
+
+  const toggle = () => setOpen(!currentOpen, "trigger");
+  const close = (reason = "programmatic") => setOpen(false, reason);
+
+  useEffect(() => {
+    if (!currentOpen) return;
+
+    const onDocMouseDown = (e) => {
+      if (!closeOnOutsideClick) return;
+      if (!rootRef.current?.contains(e.target)) {
+        close("outside-click");
+      }
+    };
+
+    const onDocKeyDown = (e) => {
+      if (e.key === "Escape" && closeOnEscape) {
+        e.preventDefault();
+        close("escape");
+        buttonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("mousedown", onDocMouseDown);
+    document.addEventListener("keydown", onDocKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onDocMouseDown);
+      document.removeEventListener("keydown", onDocKeyDown);
+    };
+  }, [currentOpen, closeOnOutsideClick, closeOnEscape]);
+
+  const roleByMode = roleMode === "listbox" ? "listbox" : roleMode === "menu" ? "menu" : undefined;
+
+  return (
+    <div ref={rootRef} className={className}>
+      {trigger({
+        ref: buttonRef,
+        isOpen: currentOpen,
+        onClick: toggle,
+        "aria-haspopup": roleMode === "panel" ? "dialog" : "menu",
+        "aria-expanded": currentOpen,
+        "aria-controls": `dropdown-${id}`,
+      })}
+
+      {currentOpen && (
+        <div
+          id={`dropdown-${id}`}
+          ref={menuRef}
+          className={menuClassName}
+          role={roleByMode}
+        >
+          {children({
+            isOpen: currentOpen,
+            close,
+            select: () => {
+              if (closeOnSelect) close("item-select");
+            },
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+Explicacion clave del codigo DropdownBase:
+- Un solo punto para click afuera + Escape.
+- Permite controlado/no controlado para no forzar refactors grandes de una sola vez.
+- reason en onOpenChange facilita telemetria y debugging de cierres.
+- roleMode evita usar la misma semantica para todos los casos.
+
+
+====================================================================
+10) CSS BASE REUTILIZABLE (MODAL Y DROPDOWN)
+====================================================================
+
+Objetivo de esta seccion:
+- Definir una base visual comun para que Modal y Dropdown se usen en multiples espacios.
+- Evitar que cada modulo vuelva a crear estilos de overlay, panel, focus ring y botones.
+
+Estructura sugerida de archivos CSS base:
+- src/styles/BaseModal/ModalBase.css
+- src/styles/BaseDropdown/DropdownBase.css
+
+
+10.1 CSS BASE MODAL (TEXTO PLANO)
+
+Archivo sugerido:
+src/styles/BaseModal/ModalBase.css
+
+:root {
+  --ui-surface: #ffffff;
+  --ui-surface-soft: #f9fafb;
+  --ui-border: #e5e7eb;
+  --ui-text: #111827;
+  --ui-text-muted: #6b7280;
+  --ui-accent-1: #f6047b;
+  --ui-accent-2: #c820c5;
+  --ui-shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.18);
+  --ui-focus-ring: 0 0 0 3px rgba(246, 4, 123, 0.2);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(17, 24, 39, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.modal-container {
+  width: min(100%, 560px);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: 16px;
+  box-shadow: var(--ui-shadow-lg);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--ui-border);
+  background: var(--ui-surface);
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ui-text);
+}
+
+.modal-close-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ui-text-muted);
+  cursor: pointer;
+}
+
+.modal-close-btn:hover {
+  color: var(--ui-accent-1);
+  background: #fdf2f8;
+}
+
+.modal-close-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ui-focus-ring);
+}
+
+.modal-body {
+  padding: 1.25rem;
+  overflow-y: auto;
+  background: var(--ui-surface);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid var(--ui-border);
+  background: var(--ui-surface-soft);
+}
+
+.modal-secondary-btn,
+.modal-action-btn,
+.modal-primary-btn {
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.65rem 1.1rem;
+}
+
+.modal-secondary-btn {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+}
+
+.modal-secondary-btn:hover {
+  background: #f9fafb;
+}
+
+.modal-action-btn,
+.modal-primary-btn {
+  color: #fff;
+  background: linear-gradient(135deg, var(--ui-accent-1), var(--ui-accent-2));
+}
+
+.modal-action-btn:hover,
+.modal-primary-btn:hover {
+  filter: brightness(0.95);
+}
+
+.modal-secondary-btn:focus-visible,
+.modal-action-btn:focus-visible,
+.modal-primary-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ui-focus-ring);
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0.75rem;
+  }
+
+  .modal-container {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 14px 14px 10px 10px;
+  }
+
+  .modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .modal-secondary-btn,
+  .modal-action-btn,
+  .modal-primary-btn {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+
+10.2 CSS BASE DROPDOWN (TEXTO PLANO)
+
+Archivo sugerido:
+src/styles/BaseDropdown/DropdownBase.css
+
+.dropdown-root {
+  position: relative;
+  display: inline-flex;
+}
+
+.dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background: #fff;
+  color: #111827;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.dropdown-trigger:hover {
+  border-color: #f6047b;
+}
+
+.dropdown-trigger[aria-expanded="true"] {
+  border-color: #f6047b;
+  box-shadow: 0 0 0 3px rgba(246, 4, 123, 0.14);
+}
+
+.dropdown-trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(246, 4, 123, 0.2);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  max-width: min(90vw, 360px);
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+  padding: 0.35rem;
+  z-index: 1200;
+}
+
+.dropdown-listbox {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+  padding: 0.35rem;
+  z-index: 1200;
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(92vw, 420px);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
+  padding: 0.75rem;
+  z-index: 1200;
+}
+
+.dropdown-item {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #111827;
+  text-align: left;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #fdf2f8;
+}
+
+.dropdown-item.active {
+  background: linear-gradient(135deg, #f6047b, #c820c5);
+  color: #fff;
+}
+
+.dropdown-item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(246, 4, 123, 0.18);
+}
+
+@media (max-width: 768px) {
+  .dropdown-menu,
+  .dropdown-listbox,
+  .dropdown-panel {
+    right: 0;
+    left: auto;
+    max-width: 92vw;
+  }
+}
+
+
+====================================================================
+11) GUIA DE IMPORTACION POR COMPONENTE (CODIGO LISTO)
+====================================================================
+
+Regla general de importacion base:
+- Modal base actual: src/components/Account/Modal.jsx
+- Dropdown base actual: src/components/DropdownBase/DropdownBase.jsx
+- CSS base sugerido: src/styles/BaseModal/ModalBase.css y src/styles/BaseDropdown/DropdownBase.css
+
+
+11.1 Imports base reutilizables
+
+// Modal base
+import ModalBase from "../Account/Modal";
+import "../../styles/BaseModal/ModalBase.css";
+
+// Dropdown base
+import DropdownBase from "../DropdownBase/DropdownBase";
+import "../../styles/BaseDropdown/DropdownBase.css";
+
+
+11.2 Header / Perfil
+
+A) Header.jsx (usa NotificationBell + DropdownAcount)
+import NotificationBell from "./NotificationBell";
+import DropdownAcount from "../Account/DropdownAcount";
+
+B) NotificationBell.jsx (migracion a DropdownBase)
+import DropdownBase from "../DropdownBase/DropdownBase";
+import "../../styles/BaseDropdown/DropdownBase.css";
+import "../../styles/Header/NotificationBell.css"; // skin especifico del modulo
+
+C) DropdownAcount.jsx (menu account)
+import DropdownBase from "../DropdownBase/DropdownBase";
+import ModalBase from "./Modal";
+import "../../styles/BaseDropdown/DropdownBase.css";
+import "./DropdownAcount.css"; // skin especifico
+
+D) UserProfile.jsx y UserPreferences.jsx (contenido dentro de modal)
+// No requieren DropdownBase.
+// Se renderizan dentro de ModalBase abierto por DropdownAcount.
+
+
+11.3 ControlBar
+
+A) FilterButton.jsx
+import DropdownBase from "../DropdownBase/DropdownBase";
+import "../../styles/BaseDropdown/DropdownBase.css";
+import "../../styles/ControlBar/FilterButton.css";
+
+B) AcademicPeriodSelect.jsx
+import DropdownBase from "../DropdownBase/DropdownBase";
+import "../../styles/BaseDropdown/DropdownBase.css";
+import "../../styles/ControlBar/ControlBar.css"; // estilos del selector viven aqui
+
+C) ThemeSelector.jsx (si se usa como panel)
+import DropdownBase from "../DropdownBase/DropdownBase";
+import "../../styles/BaseDropdown/DropdownBase.css";
+import "../../styles/ControlBar/ThemeSelector.css";
+
+D) AddActivityButton.jsx (si se migra a modal base)
+import ModalBase from "../Account/Modal";
+import "../../styles/BaseModal/ModalBase.css";
+import "../../styles/ControlBar/AddActivityButton.css";
+
+E) WeekMover.jsx y ViewButton.jsx
+// No requieren ModalBase ni DropdownBase directamente.
+// Conservan sus imports actuales:
+import "../../styles/ControlBar/WeekMover.css";
+import "../../styles/ControlBar/ViewButton.css";
+
+
+11.4 Notas de compatibilidad de props (importante)
+
+En el codigo actual de referencia aparecen nombres que conviene normalizar:
+- Usar closeOnOutsideClick (canonico) en lugar de coloseOnOutsideClick.
+- Usar template literals reales en ids/clases: `dropdown-${id}` y `modal-container ${className}`.
+- Definir un nombre canonico para Escape en modal y mantenerlo en todo el proyecto:
+  - closeOnEscape (si sigues tu implementacion actual), o
+  - closeOnEsc (si prefieres version corta).
+
+
+====================================================================
+12) EJEMPLO DE ADOPCION EN COMPONENTES REALES
+====================================================================
+
+12.1 FilterButton (ControlBar)
+
+Patron de uso:
+- Mover estado abierto al DropdownBase (controlado o no controlado).
+- Dejar render de opciones dentro de children.
+- Cuando se selecciona filtro, invocar select() para cerrar (si closeOnSelect=true).
+
+Ejemplo:
+
+<DropdownBase
+  closeOnOutsideClick={true}
+  closeOnEscape={true}
+  closeOnSelect={true}
+  roleMode="menu"
+  menuClassName="filter-dropdown-menu"
+>
+  {({ isOpen, close, select }) => (
+    ...opciones de filtro...
+  )}
+</DropdownBase>
+
+
+12.2 NotificationBell (Header/Perfil)
+
+Patron de uso:
+- Trigger = boton campana.
+- Content = lista de notificaciones.
+- roleMode = menu si son acciones directas, panel si es contenido mixto.
+
+
+====================================================================
+13) ORDEN DE MIGRACION (SOLO ALCANCE PEDIDO)
+====================================================================
+
+Lote A: Header/Perfil
+1) NotificationBell -> DropdownBase
+2) DropdownAcount (solo menu) -> DropdownBase
+3) Dialogos lanzados desde DropdownAcount -> wrappers hijos de ModalBase
+
+Lote B: ControlBar
+1) FilterButton -> DropdownBase
+2) AcademicPeriodSelect -> DropdownBase
+3) AddActivityButton -> wrapper hijo de ModalBase
+4) ThemeSelector -> decidir dialog (ModalBase) o panel (DropdownBase)
+
+Razon del orden:
+- Primero migrar piezas con menor acoplamiento visual y logica repetida mas simple.
+- Luego migrar modales de formularios para minimizar regresiones funcionales.
+
+
+====================================================================
+14) CHECKLIST DE VALIDACION
+====================================================================
+
+Modales:
+- Abre con foco inicial correcto.
+- Tab/Shift+Tab no escapa del dialog.
+- Escape cierra solo el modal superior.
+- Scroll de body bloqueado mientras exista al menos un modal abierto.
+- aria-labelledby/aria-describedby validos y sin ids duplicados.
+
+Dropdowns:
+- Trigger alterna apertura/cierre.
+- Click afuera cierra.
+- Escape cierra y retorna foco al trigger.
+- aria-expanded y aria-controls correctos.
+- Si closeOnSelect=true, una seleccion cierra el dropdown.
+
+Integracion Header/Perfil + ControlBar:
+- No hay listeners duplicados por componente para outside click/Escape.
+- Se mantiene el estilo visual actual de cada modulo.
+- Se conserva compatibilidad con onboarding/eventos globales existentes.
+
+
+====================================================================
+15) NOTAS FINALES DE IMPLEMENTACION
+====================================================================
+
+- Este documento define arquitectura y codigo base casi copiable.
+- La migracion real debe ser incremental por lotes.
+- Mantener CSS existente al principio acelera adopcion y reduce riesgo.
+- Si se requiere, se puede agregar una segunda fase para unificar tambien estilos (no solo comportamiento).
+
+Fin del documento.
