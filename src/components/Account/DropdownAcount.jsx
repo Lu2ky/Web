@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
 import UserProfile from "../Header/UserProfile";
 import UserPreferences from "../Header/UserPreferences";
+import DropdownBase from "../DropdownBase/DropdownBase";
 import "./DropdownAcount.css";
 import { clearAuthSession } from "../../services/authSession";
 
@@ -16,23 +17,11 @@ export default function DropdownAcount({ userId }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeModal, setActiveModal] = useState(null);
     const [onboardingState, setOnboardingState] = useState({ isOpen: false, currentStepId: null });
-    const dropdownRef = useRef(null);
     const navigate = useNavigate();
 
     const emitProfileOpenedForOnboarding = () => {
         window.dispatchEvent(new CustomEvent("onboarding:profile-opened"));
     };
-
-
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsDropdownOpen(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
 
     useEffect(() => {
         const handleCloseUnrelatedUi = (event) => {
@@ -131,40 +120,50 @@ export default function DropdownAcount({ userId }) {
     return (
         <div>
             {/* Dropdown */}
-            <div className="dropdown-container" ref={dropdownRef} data-onboarding-id="account-dropdown">
-                <button
-                    className="dropdown-image-button"
-                    data-onboarding-id="avatar-button"
-                    onClick={toggleDropdown}
-                    aria-haspopup="true"
-                    aria-expanded={isDropdownOpen}
-                    title="Abrir menú de usuario"
-                    type="button"
+            <div className="dropdown-container" data-onboarding-id="account-dropdown">
+                <DropdownBase
+                    open={isDropdownOpen}
+                    onOpenChange={(nextState) => setIsDropdownOpen(nextState)}
+                    roleMode="menu"
+                    className="dropdown-account-root"
+                    menuClassName="dropdown-account-host"
+                    trigger={({ ref, isOpen }) => (
+                        <button
+                            ref={ref}
+                            className="dropdown-image-button"
+                            data-onboarding-id="avatar-button"
+                            onClick={toggleDropdown}
+                            aria-haspopup="menu"
+                            aria-expanded={isOpen}
+                            title="Abrir menú de usuario"
+                            type="button"
+                        >
+                            <img
+                                src="https://i.pinimg.com/1200x/4a/18/f7/4a18f79fa10516601b7ab9a6ae0af0f7.jpg"
+                                alt="Avatar"
+                                className="dropdown-avatar"
+                            />
+                        </button>
+                    )}
                 >
-                    <img
-                        src="https://i.pinimg.com/1200x/4a/18/f7/4a18f79fa10516601b7ab9a6ae0af0f7.jpg"
-                        alt="Avatar"
-                        className="dropdown-avatar"
-                    />
-                </button>
-
-                {isDropdownOpen && (
-                    <ul className="dropdown-menu" role="menu">
-                        {OPTIONS.map((option) => (
-                            <li key={option.id} role="menuitem">
-                                <button
-                                    className="dropdown-menu-item"
-                                    data-onboarding-id={option.id === "acount" ? "profile-menu-button" : option.id === "prefer" ? "open-preferences-button" : undefined}
-                                    onClick={() => handleOptionClick(option.id)}
-                                    title={option.label}
-                                    type="button"
-                                >
-                                    <span>{option.label}</span>
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
+                    {() => (
+                        <ul className="dropdown-menu" role="menu">
+                            {OPTIONS.map((option) => (
+                                <li key={option.id} role="menuitem">
+                                    <button
+                                        className="dropdown-menu-item"
+                                        data-onboarding-id={option.id === "acount" ? "profile-menu-button" : option.id === "prefer" ? "open-preferences-button" : undefined}
+                                        onClick={() => handleOptionClick(option.id)}
+                                        title={option.label}
+                                        type="button"
+                                    >
+                                        <span>{option.label}</span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </DropdownBase>
             </div>
 
             <Modal

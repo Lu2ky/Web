@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaEye, FaEyeSlash, FaCheckCircle, FaRegCircle, FaExclamationCircle } from "react-icons/fa";
 import * as userService from "../../services/userService";
 import LDAPservice from "../../services/LDAPservice";
@@ -55,7 +55,7 @@ function getPasswordChecklist(password, currentPassword) {
     ];
 }
 
-export default function UserProfile({ userId, onClose }) {
+export default function UserProfile({ userId }) {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -70,6 +70,7 @@ export default function UserProfile({ userId, onClose }) {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const transientTimersRef = useRef([]);
 
     const passwordChecklist = getPasswordChecklist(newPassword, currentPassword);
     const metCriteriaCount = passwordChecklist.filter((criteria) => criteria.met).length;
@@ -81,6 +82,22 @@ export default function UserProfile({ userId, onClose }) {
     useEffect(() => {
         loadUserData();
     }, [userId]);
+
+    useEffect(() => {
+        return () => {
+            transientTimersRef.current.forEach((timerId) => clearTimeout(timerId));
+            transientTimersRef.current = [];
+        };
+    }, []);
+
+    const scheduleTransientUpdate = (callback, delayMs) => {
+        const timerId = setTimeout(() => {
+            callback();
+            transientTimersRef.current = transientTimersRef.current.filter((id) => id !== timerId);
+        }, delayMs);
+
+        transientTimersRef.current.push(timerId);
+    };
 
     const loadUserData = async () => {
         if (!userId) {
@@ -177,7 +194,7 @@ export default function UserProfile({ userId, onClose }) {
                 window.dispatchEvent(new CustomEvent("onboarding:password-changed"));
                 
                 // Limpiar mensaje de éxito después de 3 segundos
-                setTimeout(() => setSuccess(""), 3000);
+                scheduleTransientUpdate(() => setSuccess(""), 3000);
             } else {
                 setError(result?.message || "Error al cambiar la contraseña");
             }

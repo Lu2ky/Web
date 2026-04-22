@@ -48,6 +48,12 @@ header {
     transform: translateY(-1px);
 }
 
+.helpInstructionsButton[aria-expanded="true"] {
+    color: #111827;
+    border-color: #c026d3;
+    box-shadow: 0 4px 12px rgba(192, 38, 211, 0.2);
+}
+
 .helpInstructionsButton:focus-visible {
     outline: 2px solid #c026d3;
     outline-offset: 2px;
@@ -132,6 +138,10 @@ header nav ul li a:hover {
         padding: 0.8rem 1rem;
     }
 
+    .headerRight {
+        gap: 0.65rem;
+    }
+
     header h1 {
         font-size: 1.1rem;
     }
@@ -172,5 +182,62 @@ header nav ul li a:hover {
 
     header nav ul li a {
         font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 360px) {
+    header {
+        padding: 0.65rem 0.55rem;
+        gap: 0.35rem;
+    }
+
+    .headerLeft {
+        gap: 0.45rem;
+        min-width: 0;
+    }
+
+    header img {
+        height: 2.15rem;
+    }
+
+    header h1 {
+        font-size: 0.92rem;
+        line-height: 1.1;
+    }
+
+    .headerRight {
+        gap: 0.42rem;
+        flex-shrink: 0;
+    }
+
+    .headerRight .notification-bell-button {
+        padding: 2px;
+    }
+
+    .headerRight .notification-bell-button svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .headerRight .notification-bell-badge {
+        width: 14px;
+        height: 14px;
+        font-size: 0.52rem;
+    }
+
+    .helpInstructionsButton {
+        width: 30px;
+        height: 30px;
+        font-size: 0.92rem;
+    }
+
+    .headerRight .dropdown-image-button {
+        border-width: 1.5px;
+        padding: 1px;
+    }
+
+    .headerRight .dropdown-avatar {
+        width: 32px;
+        height: 32px;
     }
 }

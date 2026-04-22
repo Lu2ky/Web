@@ -3,6 +3,11 @@
     display: inline-block;
 }
 
+.notification-bell-dropdown-root {
+    position: relative;
+    display: inline-block;
+}
+
 .notification-bell-button {
     background: none;
     border: none;
@@ -34,17 +39,20 @@
     justify-content: center;
 }
 
-.notification-dropdown {
+.notification-dropdown-host {
     position: absolute;
     right: 0;
     top: 100%;
     margin-top: 8px;
+    z-index: 1000;
+}
+
+.notification-dropdown {
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 4px;
     min-width: 220px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
     list-style: none;
     padding: 0;
     max-height: 300px;
