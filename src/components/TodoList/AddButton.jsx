@@ -35,7 +35,8 @@ function AddButton({ onToDoSaved, userId, availableTags = [] }) {
         // data: { name, description, dueDate, tags, priority }
         const { name, description, tags = [], priority = "" } = data || {};
 
-        // Convertir dueDate ("YYYY-MM-DD" o "YYYY-MM-DD HH:MM:SS") a Date
+        // Convertir dueDate ("YYYY-MM-DD HH:MM:SS") a Date
+        // TaskAddModal asegura que siempre haya hora (00:00:00 por defecto si no la especifica)
         let endDay = null;
         try {
             endDay = dueDate ? new Date(String(dueDate).replace(" ", "T")) : new Date();

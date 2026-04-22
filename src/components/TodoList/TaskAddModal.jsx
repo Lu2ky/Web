@@ -122,7 +122,8 @@ export default function TaskAddModal({
 
     const buildDueDate = (datePart, timePart) => {
         if (!datePart) return '';
-        if (!timePart) return datePart;
+        // Si no hay hora, usar default 00:00:00 para consistencia
+        if (!timePart) return `${datePart} 00:00:00`;
         return `${datePart} ${timePart}:00`;
     };
 
@@ -202,7 +203,14 @@ export default function TaskAddModal({
             return;
         }
 
-        if (isReminderDateInPast(formData.dueDate)) {
+        // Si la fecha no tiene hora, agregar hora default 00:00:00
+        let finalDueDate = formData.dueDate;
+        const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(finalDueDate);
+        if (dateOnly) {
+            finalDueDate = finalDueDate + " 00:00:00";
+        }
+
+        if (isReminderDateInPast(finalDueDate)) {
             setError(PAST_REMINDER_DATE_MESSAGE);
             return;
         }
@@ -214,7 +222,7 @@ export default function TaskAddModal({
             finalTags = [...finalTags, { label: pending, type: tagType }];
         }
 
-        const dataToSend = { ...formData, tags: finalTags };
+        const dataToSend = { ...formData, dueDate: finalDueDate, tags: finalTags };
         try {
             await onSave(dataToSend);
             

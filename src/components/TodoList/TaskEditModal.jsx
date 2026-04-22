@@ -91,9 +91,18 @@ export default function TaskEditModal({
             return;
         }
 
+        // Si la fecha no tiene hora, agregar hora default 00:00:00
+        let finalDueDate = formData.dueDate;
+        if (finalDueDate) {
+            const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(finalDueDate);
+            if (dateOnly) {
+                finalDueDate = finalDueDate + " 00:00:00";
+            }
+        }
+
         // Validar que la fecha/hora no sea anterior a la actual
-        if (formData.dueDate) {
-            const dueDateObj = stringToDate(formData.dueDate);
+        if (finalDueDate) {
+            const dueDateObj = stringToDate(finalDueDate);
             const now = new Date();
             
             if (dueDateObj < now) {
@@ -109,7 +118,7 @@ export default function TaskEditModal({
             finalTags = [...finalTags, { label: pending, type: tagType }];
         }
 
-        const saveData = { ...formData, tags: finalTags };
+        const saveData = { ...formData, dueDate: finalDueDate, tags: finalTags };
 
         onSave(saveData);
 
