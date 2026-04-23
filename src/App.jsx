@@ -72,7 +72,7 @@ function normalizeApiData(apiData) {
 			academicPeriod: academicPeriod, // Período académico de la materia
 			// Datos para PopUp
 			campus: item.campus,
-			credits: item.Credits?.Float64 || 0,
+			credits: item.credits,
 			//tagColour: item.tagColour, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 			// Datos originales
 			apiData: item
