@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import "../../styles/DayView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
@@ -151,7 +151,11 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
     };
 
     // Filtrar eventos solo del día seleccionado
-    const dayEvents = [...events, ...personalEvents].filter(e => e.day === selectedDay);
+    const dayEvents = useMemo(() => {
+        return [...events, ...personalEvents].filter(e => e.day === selectedDay);
+    }, [events, personalEvents, selectedDay]);
+
+    const classEventIds = useMemo(() => new Set(events.map((event) => event.id)), [events]);
 
     return (
         <div className="dayViewContainer">
@@ -195,7 +199,7 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
                         const top = startMinutes * pxPerMinute;
                         const height = (endMinutes - startMinutes) * pxPerMinute;
                         const { width, left } = getEventDimensions(event, dayEvents);
-                        const isClass = events.some((e) => e.id === event.id);
+                        const isClass = classEventIds.has(event.id);
 
                         const commonProps = {
                             style: {
@@ -253,4 +257,4 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
         </div>
     );
 }
-export default DayView; 
+export default memo(DayView); 

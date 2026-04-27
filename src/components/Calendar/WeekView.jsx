@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import "../../styles/WeekView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
@@ -71,11 +71,16 @@ function WeekView({ events = [], personalEvents = [], weekOffset = 0, setWeekOff
   };
 
   // Agrupar eventos por día
-  const eventsByDay = {};
-  [...events, ...personalEvents].forEach((event) => {
-    if (!eventsByDay[event.day]) eventsByDay[event.day] = [];
-    eventsByDay[event.day].push(event);
-  });
+  const eventsByDay = useMemo(() => {
+    const groupedEvents = {};
+    [...events, ...personalEvents].forEach((event) => {
+      if (!groupedEvents[event.day]) groupedEvents[event.day] = [];
+      groupedEvents[event.day].push(event);
+    });
+    return groupedEvents;
+  }, [events, personalEvents]);
+
+  const classEventIds = useMemo(() => new Set(events.map((event) => event.id)), [events]);
 
   const formatHour = (hour) => {
     const period = hour < 12 ? "AM" : "PM";
@@ -140,7 +145,7 @@ function WeekView({ events = [], personalEvents = [], weekOffset = 0, setWeekOff
                   const pxPerMinute = effectiveHourPx / MINUTES_IN_HOUR;
                   const top = startMinutes * pxPerMinute;
                   const height = (endMinutes - startMinutes) * pxPerMinute;
-                  const isClass = events.some((e) => e.id === event.id);
+                  const isClass = classEventIds.has(event.id);
 
                   const commonProps = {
                     style: {
@@ -195,4 +200,4 @@ function WeekView({ events = [], personalEvents = [], weekOffset = 0, setWeekOff
   );
 }
 
-export default WeekView;
+export default memo(WeekView);
