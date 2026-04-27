@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import ModalBase from "../Account/Modal";
+import ModalBase from "../Templates/Modal";
 import "../../styles/ControlBar/AddActivityButton.css";
 import { addPersonalActivity } from "../../services/PersonalFetcher";
 

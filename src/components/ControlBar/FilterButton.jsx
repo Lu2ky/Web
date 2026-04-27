@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaFilter } from "react-icons/fa";
 import "../../styles/ControlBar/FilterButton.css";
-import DropdownBase from "../DropdownBase/DropdownBase";
+import DropdownBase from "../Templates/DropdownBase";
 import { getCategories } from "../../services/categoriesService";
 
 function FilterButton({ selectedTag, setSelectedTag }) {

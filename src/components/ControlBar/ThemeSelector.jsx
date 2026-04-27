@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "../../styles/ControlBar/ThemeSelector.css";
 import { IoColorPalette } from "react-icons/io5";
-import ModalBase from "../Account/Modal";
+import ModalBase from "../Templates/Modal";
 import { getCategories } from "../../services/categoriesService";
 import { getColorPalette, saveColorPalette } from "../../services/colorService";
 import { THEME_OPTIONS } from "./ThemeOptions";

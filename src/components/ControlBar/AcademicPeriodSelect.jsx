@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import DropdownBase from "../DropdownBase/DropdownBase";
+import DropdownBase from "../Templates/DropdownBase";
 import { fetchAcademicPeriods } from "../../services/academicPeriodsService";
 
 const NotebookIcon = () => (
