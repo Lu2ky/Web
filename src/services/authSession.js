@@ -11,8 +11,8 @@
 
 const AUTH_STORAGE_KEY = "auth_session";
 
-export const ROLE_ADMIN_UPB_PLANNER = "admin_upb_planner";
-export const ROLE_USUARIOS = "Usuarios";
+export const ROLE_ADMIN = import.meta.env.VITE_ROLE_ADMIN;
+export const ROLE_USUARIOS = import.meta.env.VITE_ROLE_USUARIOS;
 
 const readSession = () => {
     try {
@@ -88,12 +88,12 @@ export const getHomeRouteByRole = () => {
     const roles = normalizeRoles(session?.roles || []);
     const userId = String(session?.userId || "").trim();
 
-    if (roles.includes(ROLE_ADMIN_UPB_PLANNER)) {
-        return "/AdminView";
+    if (roles.includes(ROLE_ADMIN)) {
+        return "/Admin";
     }
 
     if (roles.includes(ROLE_USUARIOS) && userId) {
-        return `/app/${userId}`;
+        return `/Estudiante/${userId}`;
     }
 
     return "/";

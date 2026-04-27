@@ -3,7 +3,7 @@ import logo from "../../assets/logo.png";
 import "../../styles/Header/Header.css";
 import DropdownAcount from "../Account/DropdownAcount";
 import NotificationBell from "./NotificationBell";
-import Modal from "../Account/Modal";
+import Modal from "../Templates/Modal";
 
 
 function Header({ userId }) {

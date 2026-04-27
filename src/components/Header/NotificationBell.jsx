@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
 import * as NotificationService from "../../services/notificationService";
 import * as NotificationsSilenceService from "../../services/notificationsSilenceService";
 import "../../styles/Header/NotificationBell.css";
-import DropdownBase from "../DropdownBase/DropdownBase";
+import DropdownBase from "../Templates/DropdownBase";
 
 
 export default function NotificationBell({ userId }) {
