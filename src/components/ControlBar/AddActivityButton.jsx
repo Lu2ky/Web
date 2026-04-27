@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import ModalBase from "../Account/Modal";
 import "../../styles/ControlBar/AddActivityButton.css";
 import { addPersonalActivity } from "../../services/PersonalFetcher";
 
@@ -17,6 +18,8 @@ function AddActivityButton({ userId, idCourse, onActivityAdd }) {
     const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const triggerRef = useRef(null);
+    const titleInputRef = useRef(null);
 
     // Convierte hora militar a formato AM/PM para mostrar
     const formatHour = (hour, minutes = 0) => {
@@ -147,17 +150,6 @@ function AddActivityButton({ userId, idCourse, onActivityAdd }) {
         }
     };
 
-    // Cerrar modal con tecla Esc
-    useEffect(() => {
-        const handleEsc = (e) => {
-            if (e.key === "Escape" && isOpen) {
-                closeModal();
-            }
-        };
-        document.addEventListener("keydown", handleEsc);
-        return () => document.removeEventListener("keydown", handleEsc);
-    }, [isOpen]);
-
     useEffect(() => {
         const handleCloseUnrelatedUi = (event) => {
             const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
@@ -173,6 +165,7 @@ function AddActivityButton({ userId, idCourse, onActivityAdd }) {
     return (
         <>
             <button
+                ref={triggerRef}
                 className="addButton"
                 onClick={() => {
                     setIsOpen(true);
@@ -186,26 +179,22 @@ function AddActivityButton({ userId, idCourse, onActivityAdd }) {
                 Agregar actividad
             </button>
 
-
-            {isOpen && (
-                <div
-                    className="modalOverlay"
-                    role="dialog"
-                    aria-modal="true"
-                >
-                    <div
-                        className="modalContainer"
-                        data-onboarding-id="add-activity-modal"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <h2>Nueva Actividad</h2>
-
-                        <button className="modalClose" onClick={() => closeModal()} title="Cerrar" aria-label="Cerrar" type="button">
-                            X
-                        </button>
+            <ModalBase
+                isOpen={isOpen}
+                onClose={() => closeModal()}
+                title="Nueva Actividad"
+                closeOnOverlayClick={true}
+                showFooter={false}
+                initialFocusRef={titleInputRef}
+                restoreFocusRef={triggerRef}
+                className="controlBarModal controlBarModal--addActivity"
+                bodyClassName="controlBarModalBody controlBarModalBody--addActivity"
+            >
+                <div className="addActivityModalContent" data-onboarding-id="add-activity-modal">
                         {error && <p className="errorMessage">{error}</p>}
 
                         <input
+                            ref={titleInputRef}
                             type="text"
                             name="title"
                             placeholder="Título"
@@ -308,9 +297,8 @@ function AddActivityButton({ userId, idCourse, onActivityAdd }) {
                                 {loading ? "Guardando..." : "Guardar"}
                             </button>
                         </div>
-                    </div>
                 </div>
-            )}
+            </ModalBase>
         </>
     );
 }

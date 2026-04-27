@@ -1,4 +1,4 @@
-import {use, useEffect, useId, useRef, useState} from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 function isControlled(open) {
     return typeof open === "boolean";
@@ -8,7 +8,7 @@ export default function DropdownBase({
     open,
     defaultOpen = false,
     onOpenChange,
-    coloseOnOutsideClick = true,
+    closeOnOutsideClick = true,
     closeOnEscape = true,
     closeOnSelect = true,
     roleMode = "menu",
@@ -37,7 +37,7 @@ export default function DropdownBase({
         if (!currentOpen) return;
 
         const onDocMouseDown = (e) => {
-            if (!coloseOnOutsideClick) return;
+            if (!closeOnOutsideClick) return;
             if (!rootRef.current?.contains(e.target)) {
                 close("outside-click");
             }
@@ -57,7 +57,7 @@ export default function DropdownBase({
             document.removeEventListener("mousedown", onDocMouseDown);
             document.removeEventListener("keydown", onDocKeyDown);
         };
-    }, [currentOpen, coloseOnOutsideClick, closeOnEscape]);
+    }, [currentOpen, closeOnOutsideClick, closeOnEscape]);
 
     const roleByMode = roleMode === "listbox" ? "listbox" : roleMode === "menu" ? "menu" : undefined;
 
@@ -66,14 +66,15 @@ export default function DropdownBase({
             {trigger({
                 ref: buttonRef,
                 isOpen: currentOpen,
-                "aria-haspopup": roleByMode === "panel" ? "dialog" : "menu",
+                onClick: toggle,
+                "aria-haspopup": roleMode === "panel" ? "dialog" : "menu",
                 "aria-expanded": currentOpen,
-                "aria-controls": 'dropdowwn-${id}',
+                "aria-controls": `dropdown-${id}`,
             })}
 
             {currentOpen && (
                 <div
-                    id={'dropdown-${id}'}
+                    id={`dropdown-${id}`}
                     ref={menuRef}
                     className={menuClassName}
                     role={roleByMode}
@@ -82,11 +83,11 @@ export default function DropdownBase({
                         isOpen: currentOpen,
                         close,
                         select: () => {
-                            if(closeOnSelect) close("select");
+                            if (closeOnSelect) close("select");
                         },
                     })}
                 </div>
-            )}    
+            )}
         </div>
     );
 

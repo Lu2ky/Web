@@ -1,10 +1,11 @@
 /* Modal Base*/
 :root {
     --ui-surface: #ffffff;
+    --ui-surface-soft: #f9fafb;
     --ui-surface-hover: #f9fafb;
     --ui-border: #f3f4f6;
     --ui-text: #111827;
-    --ui-test-muted: #6b7280;
+    --ui-text-muted: #6b7280;
     --ui-accent-1: #f6047b;
     --ui-accent-2: #c820c5;
     --ui-shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.18);
@@ -46,6 +47,15 @@
     border-radius: 16px;
     box-shadow: var(--ui-shadow-lg);
     overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--ui-border);
 }
 
 /*titulo*/

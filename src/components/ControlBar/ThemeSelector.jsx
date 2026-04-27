@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "../../styles/ControlBar/ThemeSelector.css";
 import { IoColorPalette } from "react-icons/io5";
+import ModalBase from "../Account/Modal";
 import { getCategories } from "../../services/categoriesService";
 import { getColorPalette, saveColorPalette } from "../../services/colorService";
 import { THEME_OPTIONS } from "./ThemeOptions";
@@ -13,10 +14,7 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
     const [is_modal_open, set_is_modal_open] = useState(false);
     const [current_theme, set_current_theme] = useState("default");
     const [is_saved_anim, set_is_saved_anim] = useState(false);
-    const [is_modal_closing, set_is_modal_closing] = useState(false);
     const [categories, set_categories] = useState([]); // Carga de categorias 
-
-    const MODAL_CLOSE_DURATION = 150; // ms, debe coincidir con App.css
 
     const resolveThemeId = (paletteValue) => {
         const value = String(paletteValue || "").trim();
@@ -71,12 +69,7 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
     // Alternar visibilidad del desplegable
     const toggle_modal = () => {
         if (is_modal_open) {
-            // Activar animación de cierre
-            set_is_modal_closing(true);
-            window.setTimeout(() => {
-                set_is_modal_open(false);
-                set_is_modal_closing(false);
-            }, MODAL_CLOSE_DURATION);
+            set_is_modal_open(false);
         } else {
             set_is_modal_open(true);
             window.dispatchEvent(new CustomEvent("onboarding:theme-selector-opened"));
@@ -89,12 +82,7 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
         set_current_theme(theme_id);
         writeCachedThemeId(userId, theme_id);
 
-        // Cerrar modal con animación
-        set_is_modal_closing(true);
-        window.setTimeout(() => {
-            set_is_modal_open(false);
-            set_is_modal_closing(false);
-        }, MODAL_CLOSE_DURATION);
+        set_is_modal_open(false);
 
         // Reinicia/reproduce la animación de guardado en el botón
         set_is_saved_anim(false);
@@ -201,7 +189,6 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
             const allowOpenUi = Array.isArray(event?.detail?.allowOpenUi) ? event.detail.allowOpenUi : [];
             if (!allowOpenUi.includes("modal-theme-selector")) {
                 set_is_modal_open(false);
-                set_is_modal_closing(false);
             }
         };
 
@@ -222,60 +209,61 @@ export const ThemeSelector = ({ userId, onThemeChange }) => {
                 <IoColorPalette />
             </button>
 
-            {
-                is_modal_open && (
-                    <div className={`themeModalOverlay ${is_modal_closing ? "hide" : "show"}`}
-                    >
-                        <div className="themeModal" data-onboarding-id="theme-selector-modal">
-                            <h2>Paleta de temas</h2>
-                            <button className="closeModal" onClick={toggle_modal} title="Cerrar" aria-label="Cerrar" type="button">X</button>
-                            <div className="themeGrid">
-                                {THEME_OPTIONS.map((theme) => (
-                                    <button
-                                        key={theme.id}
-                                        className={`themeCard ${current_theme === theme.id ? "active" : ""}`}
-                                        onClick={() => {
-                                            handle_theme_change(theme.id);
-                                            window.dispatchEvent(new CustomEvent("onboarding:theme-selected"));
-                                        }}
-                                        type="button"
-                                        title={`Seleccionar ${theme.name}`}
-                                        aria-label={`Seleccionar tema ${theme.name}`}
-                                    >
-                                        <h3 className="themeTitle">{theme.name}</h3>
-                                        <div className="themePreview">
-                                            {categories.map((subject, index) => {
-                                                const bgColor = theme.colors[index % theme.colors.length];
-                                                const textColor = getContrastColor(bgColor);
-                                                return (
-                                                    <span
-                                                        key={index}
-                                                        className="subjectChip"
-                                                        style={{ backgroundColor: bgColor, color: textColor }}
-                                                    >
-                                                        {subject}
-                                                    </span>
-                                                );
-                                            }
-                                            )}
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                            <p className="themeProposalText">
-                                ¿Quieres proponer tu propia paleta de colores?{" "}
-                                <a
-                                    className="themeProposalDownloadLink"
-                                    href="/plantillaColores.xlsx"
-                                    download
-                                >
-                                    Descarga Aquí
-                                </a>
-                            </p>
-                        </div>
+            <ModalBase
+                isOpen={is_modal_open}
+                onClose={() => set_is_modal_open(false)}
+                title="Paleta de temas"
+                closeOnOverlayClick={true}
+                showFooter={false}
+                className="controlBarModal controlBarModal--themeSelector"
+                bodyClassName="controlBarModalBody controlBarModalBody--themeSelector"
+            >
+                <div className="themeModalContent" data-onboarding-id="theme-selector-modal">
+                    <div className="themeGrid">
+                        {THEME_OPTIONS.map((theme) => (
+                            <button
+                                key={theme.id}
+                                className={`themeCard ${current_theme === theme.id ? "active" : ""}`}
+                                onClick={() => {
+                                    handle_theme_change(theme.id);
+                                    window.dispatchEvent(new CustomEvent("onboarding:theme-selected"));
+                                }}
+                                type="button"
+                                title={`Seleccionar ${theme.name}`}
+                                aria-label={`Seleccionar tema ${theme.name}`}
+                            >
+                                <h3 className="themeTitle">{theme.name}</h3>
+                                <div className="themePreview">
+                                    {categories.map((subject, index) => {
+                                        const bgColor = theme.colors[index % theme.colors.length];
+                                        const textColor = getContrastColor(bgColor);
+                                        return (
+                                            <span
+                                                key={index}
+                                                className="subjectChip"
+                                                style={{ backgroundColor: bgColor, color: textColor }}
+                                            >
+                                                {subject}
+                                            </span>
+                                        );
+                                    }
+                                    )}
+                                </div>
+                            </button>
+                        ))}
                     </div>
-                )
-            }
+                    <p className="themeProposalText">
+                        ¿Quieres proponer tu propia paleta de colores?{" "}
+                        <a
+                            className="themeProposalDownloadLink"
+                            href="/plantillaColores.xlsx"
+                            download
+                        >
+                            Descarga Aquí
+                        </a>
+                    </p>
+                </div>
+            </ModalBase>
         </div >
     );
 };

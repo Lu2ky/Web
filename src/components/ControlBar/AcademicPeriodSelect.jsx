@@ -1,13 +1,5 @@
-// ============================================================================
-// Componente AcademicPeriodSelect
-// ============================================================================
-// Dropdown de selección de períodos académicos.
-// Carga períodos desde API (con ID y nombre) y notifica cambios al padre
-// mediante onPeriodChange, pasando el objeto completo { id, nombre }.
-// Cierra dropdown al hacer click fuera (click-outside pattern).
-// ============================================================================
-
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import DropdownBase from "../DropdownBase/DropdownBase";
 import { fetchAcademicPeriods } from "../../services/academicPeriodsService";
 
 const NotebookIcon = () => (
@@ -25,7 +17,6 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
     const [periods, setPeriods] = useState([]); // Array de { id, nombre }
     const [selectedPeriod, setSelectedPeriod] = useState(null); // { id, nombre } o null para "Todos"
     const [isOpen, setIsOpen] = useState(false);
-    const wrapperRef = useRef(null);
 
     // Carga períodos académicos desde API en montaje
     useEffect(() => {
@@ -40,17 +31,6 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
             }
         };
         loadPeriods();
-    }, []);
-
-    // Cierra el dropdown cuando se hace click fuera del componente
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     useEffect(() => {
@@ -76,56 +56,69 @@ function AcademicPeriodSelect({ onPeriodChange = () => {} }) {
     const displayText = selectedPeriod ? selectedPeriod.nombre : "Período Académico";
 
     return (
-        <div className="academicPeriodSelectWrapper" ref={wrapperRef}>
-            <button
-                className="academicPeriodButton"
-                onClick={() => {
-                    setIsOpen((prev) => {
-                        const nextState = !prev;
-                        if (nextState) {
-                            window.dispatchEvent(new CustomEvent("onboarding:academic-period-opened"));
-                        }
-                        return nextState;
-                    });
-                }}
-                title={displayText}
-                aria-label="Seleccionar período académico"
-                type="button"
-                data-onboarding-id="academic-period-button"
-            >
-                <NotebookIcon />
-                <span>{displayText}</span>
-            </button>
-
-            {isOpen && (
-                <div className="academicPeriodMenu" data-onboarding-id="academic-period-menu">
-                    {/* Opción "Todos" */}
-                    <button
-                        className={`academicPeriodOption ${selectedPeriod === null ? "selected" : ""}`}
-                        onClick={() => handleSelectPeriod(null)}
-                        type="button"
-                        title="Mostrar todos los períodos"
-                        aria-label="Todos los períodos"
-                    >
-                        Todos los períodos
-                    </button>
-                    
-                    {/* Períodos cargados desde API */}
-                    {periods.map((period) => (
-                        <button
-                            key={period.id}
-                            className={`academicPeriodOption ${selectedPeriod?.id === period.id ? "selected" : ""}`}
-                            onClick={() => handleSelectPeriod(period)}
-                            type="button"
-                            title={`Seleccionar período ${period.nombre}`}
-                            aria-label={`Período ${period.nombre}`}
-                        >
-                            {period.nombre}
-                        </button>
-                    ))}
-                </div>
+        <DropdownBase
+            open={isOpen}
+            onOpenChange={(nextState, reason) => {
+                setIsOpen(nextState);
+                if (nextState && reason === "trigger") {
+                    window.dispatchEvent(new CustomEvent("onboarding:academic-period-opened"));
+                }
+            }}
+            roleMode="menu"
+            className="controlBarDropdownRoot controlBarDropdownRoot--academicPeriod"
+            menuClassName="controlBarDropdownMenu controlBarDropdownMenu--academicPeriod"
+            trigger={({ ref, onClick, ...triggerProps }) => (
+                <button
+                    ref={ref}
+                    className="controlBarDropdownTrigger controlBarDropdownTrigger--academicPeriod"
+                    onClick={onClick}
+                    title={displayText}
+                    aria-label="Seleccionar período académico"
+                    type="button"
+                    data-onboarding-id="academic-period-button"
+                    {...triggerProps}
+                >
+                    <NotebookIcon />
+                    <span>{displayText}</span>
+                </button>
             )}
-        </div>
+        >
+            {({ select }) => (
+                <ul className="controlBarDropdownList" data-onboarding-id="academic-period-menu">
+                    <li>
+                        <button
+                            className={`controlBarDropdownOption ${selectedPeriod === null ? "is-selected" : ""}`}
+                            onClick={() => {
+                                handleSelectPeriod(null);
+                                select();
+                            }}
+                            type="button"
+                            title="Mostrar todos los períodos"
+                            aria-label="Todos los períodos"
+                        >
+                            Todos los períodos
+                        </button>
+                    </li>
+
+                    {periods.map((period) => (
+                        <li key={period.id}>
+                            <button
+                                className={`controlBarDropdownOption ${selectedPeriod?.id === period.id ? "is-selected" : ""}`}
+                                onClick={() => {
+                                    handleSelectPeriod(period);
+                                    select();
+                                }}
+                                type="button"
+                                title={`Seleccionar período ${period.nombre}`}
+                                aria-label={`Período ${period.nombre}`}
+                            >
+                                {period.nombre}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </DropdownBase>
     );
 }
 
