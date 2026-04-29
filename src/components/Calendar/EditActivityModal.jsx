@@ -6,6 +6,7 @@
 // ============================================================================
 
 import { useState, useEffect } from "react";
+import ModalBase from "../Templates/Modal";
 import "../../styles/ControlBar/AddActivityButton.css";
 import { updatePersonalActivity } from "../../services/PersonalFetcher";
 
@@ -125,7 +126,7 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
     const v = validate();
     if (v) { setError(v); return; }
     
-    // ✅ Verificar si hay cambios antes de enviar
+    //Verificar si hay cambios antes de enviar
     if (!hasChanges()) {
       setError("No hay cambios para guardar.");
       return;
@@ -170,12 +171,17 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
   };
 
   return (
-    <div className="modalOverlay" role="dialog" aria-modal="true">
-      <div className="modalContainer" onClick={(e) => e.stopPropagation()}>
-        <h2>Editar Actividad</h2>
-        <button className="modalClose" onClick={onClose} title="Cerrar" aria-label="Cerrar" type="button">X</button>
-        {error && <p className="errorMessage">{error}</p>}
+    <ModalBase
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Editar Actividad"
+      showFooter={false}
+      className="controlBarModal--addActivity"
+      bodyClassName="controlBarModalBody--addActivity"
+    >
+      {error && <p className="errorMessage">{error}</p>}
 
+      <div className="addActivityModalContent">
         <label>Título</label>
         <input name="title" value={formData.title} onChange={handleChange} />
 
@@ -207,17 +213,17 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
         <input type="date" name="dateEnd" value={formData.dateEnd} onChange={handleChange} />
 
         <div className="modalActions">
-          <button 
-            className="saveButton" 
-            onClick={handleSave} 
+          <button
+            className="saveButton"
+            onClick={handleSave}
             disabled={loading || !hasChanges()}
             title={!hasChanges() ? "No hay cambios para guardar" : "Guardar cambios de actividad"}
             aria-label="Guardar cambios"
           >
             {loading ? "Guardando..." : "Guardar"}
           </button>
-          <button 
-            className="close-button" 
+          <button
+            className="cancelButton"
             onClick={onClose}
             title="Cancelar y descartar cambios"
             aria-label="Cancelar"
@@ -226,7 +232,7 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
           </button>
         </div>
       </div>
-    </div>
+    </ModalBase>
   );
 }
 

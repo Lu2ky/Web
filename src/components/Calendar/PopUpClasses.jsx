@@ -4,6 +4,7 @@ import fetchComments from "../../services/commentFetcher";
 import addComment from "../../services/addComentService";
 import updateComment from "../../services/updateComentService";
 import deleteComment from "../../services/removeComentService";
+import ModalBase from "../Templates/Modal";
 import "../../styles/PopUpClasses.css";
 
 export const PopUpClasses = ({
@@ -268,192 +269,178 @@ export const PopUpClasses = ({
   }
 
   return (
-    <>
-      <div className="popup-overlay">
-      <div className="popup-container" onClick={(e) => e.stopPropagation()} data-onboarding-id="official-card-modal">
-        {/* Header */}
-        <div className="popup-header">
-          <h2>Detalle de Asignatura</h2>
-        </div>
-
-        {/* Contenido */}
-        <div className="popup-content">
-          {/* Título y código */}
-          <div className="subject-header">
-            <h1 className="subject-name">{data.subject_name}</h1>
-            <div className="subject-meta">
-              <span className="subject-date">{data.date_range}</span>
-            </div>
-          </div>
-
-          {/* Información General */}
-          <div className="info-section">
-            <h3 className="section-title">Información General</h3>
-            <div className="info-grid">
-              <div className="info-item">
-                <span className="info-icon">👤</span>
-                <div className="info-text">
-                  <p className="info-label">Instructor</p>
-                  <p className="info-value">{data.instructor_name}</p>
-                </div>
-              </div>
-              <div className="info-item">
-                <span className="info-icon">#</span>
-                <div className="info-text">
-                  <p className="info-label">NRC</p>
-                  <p className="info-value">{data.nrc}</p>
-                </div>
-              </div>
-              <div className="info-item">
-                <span className="info-icon">📚</span>
-                <div className="info-text">
-                  <p className="info-label">Créditos</p>
-                  <p className="info-value">{data.credits}</p>
-                </div>
-              </div>
-              <div className="info-item">
-                <span className="info-icon">📍</span>
-                <div className="info-text">
-                  <p className="info-label">Campus</p>
-                  <p className="info-value">{data.campus}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Horario Programado */}
-          {data.schedule && data.schedule.length > 0 && (
-            <div className="info-section">
-              <h3 className="section-title">Horario Programado</h3>
-              <div className="schedule-list">
-                {data.schedule.map((item, index) => (
-                  <div key={index} className="schedule-item">
-                    <div className="schedule-day-badge">
-                      <p className="schedule-day">{item.day || "Día"}</p>
-                      {item.type && <span className="schedule-type">{item.type}</span>}
-                    </div>
-                    <div className="schedule-details">
-                      <div className="schedule-detail">
-                        <span className="detail-label">HORA</span>
-                        <p className="detail-value">
-                          {item.start_time || "00:00"} - {item.end_time || "00:00"}
-                        </p>
-                      </div>
-                      <div className="schedule-detail">
-                        <span className="detail-label">AULA</span>
-                        <p className="detail-value">{item.classroom || "N/A"}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Comentarios */}
-          <div className="info-section">
-            <h3 className="section-title">Comentarios y Observaciones</h3>
-            <CommentButton
-              on_add_comment={handle_add_comment}
-              onboardingButtonId="official-comment-button"
-              onboardingModalId="official-comment-modal"
-              isDisabled={isCommentsBusy}
-            />
-
-            {comments.length > 0 && (
-              <div className="comments-list">
-                {comments.map((comment) => {
-                  const isEditingThis = editingId === comment.id;
-                  const isSavingThis = savingCommentId === comment.id;
-                  const isDeletingThis = deletingCommentId === comment.id;
-
-                  return (
-                  <div key={comment.id} className="comment-item">
-                    <div className="comment-header">
-                      <span className="comment-timestamp">{comment.timestamp}</span>
-                      <div className="comment-header-actions">
-                        <button
-                          className={`edit-comment-button${isSavingThis ? " is-loading" : ""}`}
-                          onClick={() => handle_start_edit(comment)}
-                          title="Editar comentario"
-                          aria-label="Editar comentario"
-                          type="button"
-                          disabled={isCommentsBusy && !isEditingThis}
-                        >
-                          {isSavingThis ? "..." : "✎"}
-                        </button>
-                        <button
-                          className={`delete-comment-button${isDeletingThis ? " is-loading" : ""}`}
-                          onClick={() => handle_delete_comment(comment.id)}
-                          title="Eliminar comentario"
-                          aria-label="Eliminar comentario"
-                          type="button"
-                          disabled={isCommentsBusy && !isDeletingThis}
-                        >
-                          {isDeletingThis ? "..." : "✕"}
-                        </button>
-                      </div>
-                    </div>
-                    {editingId === comment.id ? (
-                      <div className="comment-edit-area">
-                        <textarea
-                          className="add-comment-textarea"
-                          value={editText}
-                          onChange={(e) => setEditText(e.target.value)}
-                          rows={2}
-                          disabled={savingCommentId === comment.id || deletingCommentId !== null}
-                        />
-                        <div className="add-comment-actions">
-                          <button
-                            className="add-comment-action-button save"
-                            type="button"
-                            onClick={() => handle_save_edit(comment.id)}
-                            disabled={!editText.trim() || savingCommentId === comment.id || deletingCommentId !== null}
-                            title="Guardar cambios del comentario"
-                            aria-label="Guardar comentario"
-                          >
-                            {savingCommentId === comment.id ? "Guardando..." : "Guardar"}
-                          </button>
-                          <button
-                            className="add-comment-action-button cancel"
-                            type="button"
-                            onClick={handle_cancel_edit}
-                            disabled={savingCommentId === comment.id || deletingCommentId !== null}
-                            title="Cancelar edición del comentario"
-                            aria-label="Cancelar"
-                          >
-                            Cancelar
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="comment-text">{comment.text}</p>
-                    )}
-                  </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {comments.length === 0 && (
-              <p className="no-comments">Aun no hay comentarios para esta asignatura.</p>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="popup-footer">
-          <button 
-            className="close-button" 
-            onClick={handle_close}
-            title="Cerrar ventana de detalle"
-            aria-label="Cerrar"
-          >
-            Cerrar Detalle
-          </button>
+    <ModalBase isOpen={is_open} onClose={handle_close} title={"Detalle de Asignatura"} showFooter={false}>
+      <div className="subject-header">
+        <h1 className="subject-name">{data.subject_name}</h1>
+        <div className="subject-meta">
+          <span className="subject-date">{data.date_range}</span>
         </div>
       </div>
-    </div>
-    </>
+
+      {/* Información General */}
+      <div className="info-section">
+        <h3 className="section-title">Información General</h3>
+        <div className="info-grid">
+          <div className="info-item">
+            <span className="info-icon">👤</span>
+            <div className="info-text">
+              <p className="info-label">Instructor</p>
+              <p className="info-value">{data.instructor_name}</p>
+            </div>
+          </div>
+          <div className="info-item">
+            <span className="info-icon">#</span>
+            <div className="info-text">
+              <p className="info-label">NRC</p>
+              <p className="info-value">{data.nrc}</p>
+            </div>
+          </div>
+          <div className="info-item">
+            <span className="info-icon">📚</span>
+            <div className="info-text">
+              <p className="info-label">Créditos</p>
+              <p className="info-value">{data.credits}</p>
+            </div>
+          </div>
+          <div className="info-item">
+            <span className="info-icon">📍</span>
+            <div className="info-text">
+              <p className="info-label">Campus</p>
+              <p className="info-value">{data.campus}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Horario Programado */}
+      {data.schedule && data.schedule.length > 0 && (
+        <div className="info-section">
+          <h3 className="section-title">Horario Programado</h3>
+          <div className="schedule-list">
+            {data.schedule.map((item, index) => (
+              <div key={index} className="schedule-item">
+                <div className="schedule-day-badge">
+                  <p className="schedule-day">{item.day || "Día"}</p>
+                  {item.type && <span className="schedule-type">{item.type}</span>}
+                </div>
+                <div className="schedule-details">
+                  <div className="schedule-detail">
+                    <span className="detail-label">HORA</span>
+                    <p className="detail-value">
+                      {item.start_time || "00:00"} - {item.end_time || "00:00"}
+                    </p>
+                  </div>
+                  <div className="schedule-detail">
+                    <span className="detail-label">AULA</span>
+                    <p className="detail-value">{item.classroom || "N/A"}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Comentarios */}
+      <div className="info-section">
+        <h3 className="section-title">Comentarios y Observaciones</h3>
+        <CommentButton
+          on_add_comment={handle_add_comment}
+          onboardingButtonId="official-comment-button"
+          onboardingModalId="official-comment-modal"
+          isDisabled={isCommentsBusy}
+        />
+
+        {comments.length > 0 && (
+          <div className="comments-list">
+            {comments.map((comment) => {
+              const isEditingThis = editingId === comment.id;
+              const isSavingThis = savingCommentId === comment.id;
+              const isDeletingThis = deletingCommentId === comment.id;
+
+              return (
+                <div key={comment.id} className="comment-item">
+                  <div className="comment-header">
+                    <span className="comment-timestamp">{comment.timestamp}</span>
+                    <div className="comment-header-actions">
+                      <button
+                        className={`edit-comment-button${isSavingThis ? " is-loading" : ""}`}
+                        onClick={() => handle_start_edit(comment)}
+                        title="Editar comentario"
+                        aria-label="Editar comentario"
+                        type="button"
+                        disabled={isCommentsBusy && !isEditingThis}
+                      >
+                        {isSavingThis ? "..." : "✎"}
+                      </button>
+                      <button
+                        className={`delete-comment-button${isDeletingThis ? " is-loading" : ""}`}
+                        onClick={() => handle_delete_comment(comment.id)}
+                        title="Eliminar comentario"
+                        aria-label="Eliminar comentario"
+                        type="button"
+                        disabled={isCommentsBusy && !isDeletingThis}
+                      >
+                        {isDeletingThis ? "..." : "✕"}
+                      </button>
+                    </div>
+                  </div>
+                  {editingId === comment.id ? (
+                    <div className="comment-edit-area">
+                      <textarea
+                        className="add-comment-textarea"
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        rows={2}
+                        disabled={savingCommentId === comment.id || deletingCommentId !== null}
+                      />
+                      <div className="add-comment-actions">
+                        <button
+                          className="add-comment-action-button save"
+                          type="button"
+                          onClick={() => handle_save_edit(comment.id)}
+                          disabled={!editText.trim() || savingCommentId === comment.id || deletingCommentId !== null}
+                          title="Guardar cambios del comentario"
+                          aria-label="Guardar comentario"
+                        >
+                          {savingCommentId === comment.id ? "Guardando..." : "Guardar"}
+                        </button>
+                        <button
+                          className="add-comment-action-button cancel"
+                          type="button"
+                          onClick={handle_cancel_edit}
+                          disabled={savingCommentId === comment.id || deletingCommentId !== null}
+                          title="Cancelar edición del comentario"
+                          aria-label="Cancelar"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="comment-text">{comment.text}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {comments.length === 0 && (
+          <p className="no-comments">Aun no hay comentarios para esta asignatura.</p>
+        )}
+      </div>
+
+      <div className="popup-footer">
+        <button
+          className="close-button"
+          onClick={handle_close}
+          title="Cerrar ventana de detalle"
+          aria-label="Cerrar"
+        >
+          Cerrar Detalle
+        </button>
+      </div>
+    </ModalBase>
   );
 };
