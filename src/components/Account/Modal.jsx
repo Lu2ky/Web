@@ -45,12 +45,9 @@ const Modal = ({ isOpen, onClose, title, children, onConfirm = null, confirmLabe
         closeBtnRef.current?.focus();
         // Escucha las teclas mientras el modal este abierto 
         document.addEventListener("keydown", handleKeyDown);
-        // Prevenir scroll del body cuando el modal esta abierto para evitar que el fondo se mueva mientras el modal esta activo
-        document.body.style.overflow = "hidden";
-        // limpieza de eventos, elimina el listener y restaura el scroll
+        // Limpieza de eventos, elimina el listener
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
-            document.body.style.overflow = "";
         };
     }, [isOpen, onClose]);
     // si no esta abierto, no renderiza nada
