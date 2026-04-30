@@ -49,65 +49,72 @@ export default function ModalBase({
 }) {
     const containerRef = useRef(null);
     const closeBtnRef = useRef(null);
+    const hasInitializedFocusRef = useRef(false);
     const modalId = useId();
     const titleId = useMemo(() => `modal-title-${modalId}`, [modalId]);
     const descriptionId = useMemo(() => `modal-description-${modalId}`, [modalId]);
 
     useEffect(() => {
-        if (!isOpen) return;
-        const previousFocusedElement = document.activeElement;
-        stackModal.push(modalId);
-        lockBodyScroll();
+        if (isOpen) {
+            const previousFocusedElement = document.activeElement;
+            stackModal.push(modalId);
+            lockBodyScroll();
 
-        const focusTarget = initialFocusRef?.current || closeBtnRef.current;
-        focusTarget?.focus();
-
-        const onKeyDown = (e) => {
-            const isTopModal = stackModal[stackModal.length - 1] === modalId;
-            if (!isTopModal) return;
-
-            if (e.key === "Escape" && closeOnEscape) {
-                e.preventDefault();
-                onClose();
-                return;
+            // Solo establecer el focus inicial una vez
+            if (!hasInitializedFocusRef.current) {
+                const focusTarget = initialFocusRef?.current || closeBtnRef.current;
+                focusTarget?.focus();
+                hasInitializedFocusRef.current = true;
             }
 
-            if (e.key === "Tab") {
-                const items = getFocusableElements(containerRef.current);
-                if (items.length === 0) return;
-                const firstItem = items[0];
-                const lastItem = items[items.length - 1];
+            const onKeyDown = (e) => {
+                const isTopModal = stackModal[stackModal.length - 1] === modalId;
+                if (!isTopModal) return;
 
-                if (e.shiftKey && document.activeElement === firstItem) {
+                if (e.key === "Escape" && closeOnEscape) {
                     e.preventDefault();
-                    lastItem.focus();
-                } else if (!e.shiftKey && document.activeElement === lastItem) {
-                    e.preventDefault();
-                    firstItem.focus();
+                    onClose();
+                    return;
                 }
+
+                if (e.key === "Tab") {
+                    const items = getFocusableElements(containerRef.current);
+                    if (items.length === 0) return;
+                    const firstItem = items[0];
+                    const lastItem = items[items.length - 1];
+
+                    if (e.shiftKey && document.activeElement === firstItem) {
+                        e.preventDefault();
+                        lastItem.focus();
+                    } else if (!e.shiftKey && document.activeElement === lastItem) {
+                        e.preventDefault();
+                        firstItem.focus();
+                    }
+                }
+            };
+
+            document.addEventListener("keydown", onKeyDown);
+
+            return () => {
+                document.removeEventListener("keydown", onKeyDown);
+                const i = stackModal.indexOf(modalId);
+                if (i >= 0) stackModal.splice(i, 1);
+                unlockBodyScroll();
+                hasInitializedFocusRef.current = false;
+
+                const restoreEl = restoreFocusRef?.current || previousFocusedElement;
+                if (restoreEl && typeof restoreEl.focus === "function") {
+                    restoreEl.focus();
+                }
+            };
+        } else {
+            // Asegurar que si isOpen es false, se reestablece el scroll
+            if (lockCount > 0) {
+                lockCount = 0;
+                document.body.style.overflow = "";
             }
-        };
-
-        document.addEventListener("keydown", onKeyDown);
-
-        return () => {
-            document.removeEventListener("keydown", onKeyDown);
-            const i = stackModal.indexOf(modalId);
-            if (i >= 0) stackModal.splice(i, 1);
-            unlockBodyScroll();
-
-            const restoreEl = restoreFocusRef?.current || previousFocusedElement;
-            if (restoreEl && typeof restoreEl.focus === "function") {
-                restoreEl.focus();
-            }
-        };
-    }, [isOpen, 
-        onClose, 
-        modalId, 
-        initialFocusRef, 
-        restoreFocusRef, 
-        closeOnEscape
-    ]);
+        }
+    }, [isOpen, onClose, modalId, initialFocusRef, restoreFocusRef, closeOnEscape]);
 
     if (!isOpen) return null;
 
