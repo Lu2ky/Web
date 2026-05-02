@@ -30,13 +30,14 @@ function WeekView({ events = [], personalEvents = [], weekOffset = 0, setWeekOff
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       // Formatear fechas
-      const formatDate = (date) => {
+      const formatDate = (date, includeYear = false) => {
       const month = date.toLocaleDateString("es-ES", { month: "short" });
       const day = date.getDate();
-      return `${month} ${day}`;
+      const year = date.getFullYear();
+      return includeYear ? `${month} ${day}, ${year}` : `${month} ${day}`;
       };
 
-      return `${formatDate(startOfWeek)} - ${formatDate(endOfWeek)}`;
+      return `${formatDate(startOfWeek)} - ${formatDate(endOfWeek, true)}`;
   };
   // Medir la altura real de una hora (cambia con media queries/responsive)
   useLayoutEffect(() => {
