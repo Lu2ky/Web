@@ -142,6 +142,7 @@ export const PopUpPersonal = ({
               onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
               onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
+
               <svg
                 width="20"
                 height="20"
