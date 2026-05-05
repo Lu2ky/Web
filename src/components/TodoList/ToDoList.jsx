@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaFilter, FaCheckSquare, FaTimes, FaTrash } from "react-icons/fa";
 import "../../styles/ToDoList.css";
 import ToDoFilterButton from "./ToDoFilterButton";
@@ -94,6 +94,7 @@ function ToDoList({ userId = "" }) {
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedTaskIds, setSelectedTaskIds] = useState(new Set());
     const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+    const anticipationResyncInProgressRef = useRef(false);
 
     const loadReminderTasks = useCallback(async () => {
         if (!userId) {
@@ -125,6 +126,105 @@ function ToDoList({ userId = "" }) {
     useEffect(() => {
         loadReminderTasks();
     }, [loadReminderTasks]);
+
+    const isFutureTask = useCallback((task) => {
+        const dueDate = parseDueDateForFilter(task?.dueDate);
+        return Boolean(dueDate && dueDate >= new Date());
+    }, []);
+
+    const syncFutureTasksAfterAnticipationUpdate = useCallback(async (event) => {
+        if (!userId) {
+            return;
+        }
+
+        const eventUserId = String(event?.detail?.userId || "").trim();
+        if (eventUserId && eventUserId !== String(userId)) {
+            return;
+        }
+
+        if (anticipationResyncInProgressRef.current) {
+            return;
+        }
+
+        anticipationResyncInProgressRef.current = true;
+
+        const snapshotFutureTasks = tasks
+            .filter((task) => isFutureTask(task))
+            .map((task) => ({
+                ...task,
+                tags: Array.isArray(task.tags)
+                    ? task.tags.map((tag) => (typeof tag === "object" && tag !== null ? { ...tag } : tag))
+                    : []
+            }));
+
+        if (snapshotFutureTasks.length === 0) {
+            anticipationResyncInProgressRef.current = false;
+            return;
+        }
+
+        try {
+            const userData = await getUserData(userId);
+            const userObj = Array.isArray(userData) ? userData[0] : userData;
+            const actualUserId =
+                userObj?.N_idUsuario ??
+                userObj?.idUsuario ??
+                userObj?.id_user ??
+                userObj?.ID_USER ??
+                userObj?.id ??
+                userId;
+
+            const apiIds = snapshotFutureTasks
+                .map((task) => task.recordatorioId ?? task.idTodo ?? task.id)
+                .filter(Boolean);
+
+            if (apiIds.length === 0) {
+                await loadReminderTasks();
+                return;
+            }
+
+            await ReminderService.deleteMultipleReminders(actualUserId, apiIds);
+
+            for (const task of snapshotFutureTasks) {
+                const priority = getTaskPriority(task) || normalizePriority(task.priority) || "media";
+                const tagLabels = (Array.isArray(task.tags) ? task.tags : [])
+                    .filter((tag) => (typeof tag === "string" ? true : !String(tag?.type ?? "").startsWith("priority-")))
+                    .map((tag) => (typeof tag === "string" ? tag : tag?.label || ""))
+                    .filter(Boolean);
+
+                const addResult = await ReminderService.addReminder(
+                    actualUserId,
+                    task.name || "",
+                    task.description || "",
+                    task.dueDate,
+                    priority,
+                    tagLabels,
+                    userId
+                );
+
+                if (task.completed === true) {
+                    const insertedId = addResult?.data?.InsertedId;
+                    if (insertedId) {
+                        await ReminderService.updateState(insertedId, true);
+                    }
+                }
+            }
+
+            await loadReminderTasks();
+        } catch (error) {
+            console.error("Error al resincronizar tareas tras cambio de anticipación:", error);
+            await loadReminderTasks();
+        } finally {
+            anticipationResyncInProgressRef.current = false;
+        }
+    }, [isFutureTask, loadReminderTasks, tasks, userId]);
+
+    useEffect(() => {
+        window.addEventListener("preferences:anticipation-updated", syncFutureTasksAfterAnticipationUpdate);
+
+        return () => {
+            window.removeEventListener("preferences:anticipation-updated", syncFutureTasksAfterAnticipationUpdate);
+        };
+    }, [syncFutureTasksAfterAnticipationUpdate]);
 
     useEffect(() => {
         const handleCloseUnrelatedUi = (event) => {

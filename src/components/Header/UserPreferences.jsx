@@ -240,6 +240,13 @@ export default function UserPreferences({ userId }) {
                     antelacionNotis: totalMinutes,
                     tiempoMute: totalMinutes
                 });
+                window.dispatchEvent(new CustomEvent("preferences:anticipation-updated", {
+                    detail: {
+                        userId,
+                        minutes: totalMinutes,
+                        at: new Date().toISOString(),
+                    }
+                }));
                 setIsEditingAnticipation(false);
                 
                 // Limpiar mensaje de éxito después de 3 segundos

@@ -24,12 +24,6 @@
 .modal-container.controlBarModal--addActivity {
     width: min(100%, 480px);
     border-radius: 1.2rem;
-    border: 2px solid transparent;
-    background-image:
-        linear-gradient(white, white),
-        linear-gradient(135deg, #ff006e, #c026d3);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 

@@ -34,22 +34,12 @@
 .modal-container.controlBarModal--themeSelector {
   width: min(100%, 520px);
   border-radius: 1rem;
-  border: 2px solid transparent;
-  background:
-    linear-gradient(white, white) padding-box,
-    linear-gradient(135deg, #ff006e, #a100ff) border-box;
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
 }
 
 .modal-container.controlBarModal--themeSelector .modal-title {
   font-size: 1.6rem;
   font-weight: 700;
-  background: #040103;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
+  color: #ffffff;
 }
 
 .modal-body.controlBarModalBody--themeSelector {
