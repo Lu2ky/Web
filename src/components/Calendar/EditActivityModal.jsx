@@ -8,6 +8,7 @@
 import { useState, useEffect } from "react";
 import "../../styles/AddActivityButton.css";
 import { updatePersonalActivity } from "../../services/PersonalFetcher";
+import { isReminderDateInPast, PAST_REMINDER_DATE_MESSAGE } from "../TodoList/reminderDateValidation";
 
 const normalizeDateForInput = (value) => {
   if (!value) return "";
@@ -88,6 +89,14 @@ function EditActivityModal({ isOpen = false, onClose = () => {}, userId, activit
     const [sh, sm] = formData.startHour.split(":").map(Number);
     const [eh, em] = formData.endHour.split(":").map(Number);
     if (sh * 60 + sm >= eh * 60 + em) return "La hora de inicio debe ser menor que la hora de fin.";
+    // Validar que la fecha de inicio no sea en el pasado
+    if (formData.dateStart && isReminderDateInPast(formData.dateStart)) {
+      return PAST_REMINDER_DATE_MESSAGE;
+    }
+    // Validar que la fecha de fin no sea en el pasado
+    if (formData.dateEnd && isReminderDateInPast(formData.dateEnd)) {
+      return "La fecha de fin no puede ser en el pasado.";
+    }
     const ds = new Date(formData.dateStart);
     const de = new Date(formData.dateEnd);
     if (formData.dateStart && formData.dateEnd && ds > de) return "La fecha de inicio debe ser menor que la fecha de fin.";
