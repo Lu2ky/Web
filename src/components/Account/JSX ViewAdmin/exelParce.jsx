@@ -23,7 +23,11 @@ export const parseExcelFile = async (file) => {
   }
 
   const worksheet = workbook.Sheets[sheetName];
-  return XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, dateNF: 'HH:MM:SS' });
+  return XLSX.utils.sheet_to_json(worksheet, {
+    header: 1,
+    raw: true,
+    dateNF: 'HH:mm:ss'
+  });
 };
 
 const excelParce = () => {
