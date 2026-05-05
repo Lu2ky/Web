@@ -2,17 +2,15 @@
 import { Link } from 'react-router-dom';
 import './LogInForm.css';
 import LDAPservice from '../services/LDAPservice';
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaUser, FaLock } from "react-icons/fa";
 import Modal from '../components/Templates/Modal';
 
 //Imagenes y logos
 import Logo from '../assets/logo.png';
-import { FaUser } from "react-icons/fa"; //  npm install react-icons --save
-import { FaLock } from "react-icons/fa";
 import Image from '../assets/ImageLogIn.webp';
 
 // Utilidades de estado y navegación de React
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     createAuthSession,
@@ -20,6 +18,20 @@ import {
     ROLE_ADMIN,
     ROLE_USUARIOS
 } from '../services/authSession';
+
+// Componente memoizado para el Modal de feedback
+const FeedbackModal = memo(({ isOpen, onClose, title, message }) => (
+    <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={title}
+        closeLabel="Entendido"
+    >
+        <p>{message}</p>
+    </Modal>
+));
+
+FeedbackModal.displayName = 'FeedbackModal';
 
 const LogInForm = () => {
     const [userId, setUserId] = useState('');
@@ -31,11 +43,23 @@ const LogInForm = () => {
 
     const navigate = useNavigate();
 
-    const openFeedbackModal = (message, title = 'No fue posible iniciar sesión') => {
+    const openFeedbackModal = useCallback((message, title = 'No fue posible iniciar sesión') => {
         setFeedbackTitle(title);
         setFeedbackMessage(message);
         setIsFeedbackModalOpen(true);
-    };
+    }, []);
+
+    const handleTogglePassword = useCallback(() => {
+        setShowPassword(prev => !prev);
+    }, []);
+
+    const handleUserIdChange = useCallback((e) => {
+        setUserId(e.target.value);
+    }, []);
+
+    const handlePasswordChange = useCallback((e) => {
+        setPassword(e.target.value);
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -95,25 +119,33 @@ const LogInForm = () => {
                     <h1>Iniciar Sesión</h1>
                     <h2 className='subtitle'>Por favor ingresa tu información para iniciar sesión.</h2>
                     <div className="inputBox inputBox--user">
-                        <input type="text"
+                        <input 
+                            type="text"
+                            inputMode="text"
                             placeholder="Id Usuario"
                             value={userId}
-                            onChange={(e) => setUserId(e.target.value)}
+                            onChange={handleUserIdChange}
+                            autoComplete="username"
+                            spellCheck="false"
                             required
                         />
                         <FaUser className="inputBox__icon inputBox__icon--right" />
                     </div>
                     <div className="inputBox inputBox--password">
-                        <input type={showPassword ? "text" : "password"}
+                        <input 
+                            type={showPassword ? "text" : "password"}
+                            inputMode="text"
                             placeholder="Contraseña"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={handlePasswordChange}
+                            autoComplete="current-password"
+                            spellCheck="false"
                             required
                         />
                         <button
                             type="button"
                             className="togglePassword"
-                            onClick={() => setShowPassword(!showPassword)}
+                            onClick={handleTogglePassword}
                         >
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
@@ -135,14 +167,12 @@ const LogInForm = () => {
                 </form>
             </div>
 
-            <Modal
+            <FeedbackModal
                 isOpen={isFeedbackModalOpen}
                 onClose={() => setIsFeedbackModalOpen(false)}
                 title={feedbackTitle}
-                closeLabel="Entendido"
-            >
-                <p>{feedbackMessage}</p>
-            </Modal>
+                message={feedbackMessage}
+            />
         </div>
     );
 }
