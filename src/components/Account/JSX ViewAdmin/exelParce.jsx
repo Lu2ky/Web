@@ -15,7 +15,7 @@ export const parseExcelFile = async (file) => {
   }
 
   const buffer = await readFileAsArrayBuffer(file);
-  const workbook = XLSX.read(buffer, { type: 'array' });
+  const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
   const sheetName = workbook.SheetNames[0];
 
   if (!sheetName) {
@@ -23,7 +23,7 @@ export const parseExcelFile = async (file) => {
   }
 
   const worksheet = workbook.Sheets[sheetName];
-  return XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  return XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, dateNF: 'HH:MM:SS' });
 };
 
 const excelParce = () => {
