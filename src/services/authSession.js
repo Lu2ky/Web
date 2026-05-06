@@ -94,6 +94,7 @@ export const getHomeRouteByRole = () => {
 
     if (roles.includes(ROLE_USUARIOS) && userId) {
         return `/app/${userId}`;
+
     }
 
     return "/";
