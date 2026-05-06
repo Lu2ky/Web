@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import "../../styles/DayView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
@@ -103,6 +103,15 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
         return h * 60 + m;
     };
 
+    const earliestClassMinutes = useMemo(() => {
+        const classEvents = events.filter(e => e.day === selectedDay);
+        if (classEvents.length === 0) return null;
+
+        return Math.min(
+            ...classEvents.map((event) => timeToMinutes(event.start_time || "00:00"))
+        );
+    }, [events, selectedDay]);
+
     const formatHour = (hour) => {
         const period = hour < 12 ? "AM" : "PM";
         const displayHour = hour % 12 || 12;
@@ -152,6 +161,21 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
 
     // Filtrar eventos solo del día seleccionado
     const dayEvents = [...events, ...personalEvents].filter(e => e.day === selectedDay);
+
+    useEffect(() => {
+        const scrollContainer = bodyRef.current;
+        if (!scrollContainer || hourPx <= 0) return;
+
+        if (earliestClassMinutes === null) {
+            scrollContainer.scrollTop = 0;
+            return;
+        }
+
+        const pxPerMinute = hourPx / MINUTES_IN_HOUR;
+        const targetTop = Math.max(0, Math.floor(earliestClassMinutes * pxPerMinute));
+
+        scrollContainer.scrollTop = targetTop;
+    }, [earliestClassMinutes, hourPx, selectedDay]);
 
     return (
         <div className="dayViewContainer">
