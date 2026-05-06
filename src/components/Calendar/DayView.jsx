@@ -103,6 +103,15 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
         return h * 60 + m;
     };
 
+    const scrollToDefaultTime = () => {
+        if (!bodyRef.current) return;
+        const targetMinutes = 6 * MINUTES_IN_HOUR;
+        const effectiveHourPx = hourPx > 0 ? hourPx : HOUR_HEIGHT;
+        const pxPerMinute = effectiveHourPx / MINUTES_IN_HOUR;
+        const scrollPosition = targetMinutes * pxPerMinute - effectiveHourPx; // 1 hora de contexto arriba
+        bodyRef.current.scrollTop = Math.max(0, scrollPosition);
+    };
+
     const formatHour = (hour) => {
         const period = hour < 12 ? "AM" : "PM";
         const displayHour = hour % 12 || 12;
@@ -156,6 +165,13 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
     }, [events, personalEvents, selectedDay]);
 
     const classEventIds = useMemo(() => new Set(events.map((event) => event.id)), [events]);
+
+    useLayoutEffect(() => {
+        const timer = setTimeout(() => {
+            scrollToDefaultTime();
+        }, 100);
+        return () => clearTimeout(timer);
+    }, [hourPx, weekOffset, dayOffsetLocal]);
 
     return (
         <div className="dayViewContainer">
