@@ -3,14 +3,13 @@ import { Link } from 'react-router-dom';
 import './LogInForm.css';
 import LDAPservice from '../services/LDAPservice';
 import { FaEye, FaEyeSlash, FaUser, FaLock } from "react-icons/fa";
-import Modal from '../components/Templates/Modal';
 
 //Imagenes y logos
 import Logo from '../assets/logo.png';
 import Image from '../assets/ImageLogIn.webp';
 
 // Utilidades de estado y navegación de React
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, memo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     createAuthSession,
@@ -19,16 +18,23 @@ import {
     ROLE_USUARIOS
 } from '../services/authSession';
 
+// Lazy load Modal para reducir bundle inicial
+const LazyModal = lazy(() => import('../components/Templates/Modal'));
+
 // Componente memoizado para el Modal de feedback
 const FeedbackModal = memo(({ isOpen, onClose, title, message }) => (
-    <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title={title}
-        closeLabel="Entendido"
-    >
-        <p>{message}</p>
-    </Modal>
+    isOpen ? (
+        <Suspense fallback={null}>
+            <LazyModal
+                isOpen={isOpen}
+                onClose={onClose}
+                title={title}
+                closeLabel="Entendido"
+            >
+                <p>{message}</p>
+            </LazyModal>
+        </Suspense>
+    ) : null
 ));
 
 FeedbackModal.displayName = 'FeedbackModal';

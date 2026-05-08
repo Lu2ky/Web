@@ -115,25 +115,21 @@ body {
     height: 48px;
     padding: 0 48px 0 18px;
     border-radius: 26px;
-    border: 1px solid #ddd;
+    border: 2px solid #ddd;
     background: #f3f3f3;
     font-size: max(14px, 16px);
-    transition: border-color 0.25s ease, background 0.25s ease;
     touch-action: manipulation;
     -webkit-font-smoothing: antialiased;
     -webkit-appearance: none;
     appearance: none;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    will-change: border-color, background;
 }
 
 .inputBox input:focus {
     border-color: #a855f7;
     background: white;
     outline: none;
-    border-width: 2px;
-    padding: 0 47px 0 17px;
 }
 
 .inputBox input[type="password"]::-ms-reveal,
