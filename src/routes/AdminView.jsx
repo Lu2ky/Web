@@ -51,7 +51,6 @@ function AdminView() {
         <Header userId={userId} />
       </div>
       <div className="adminView">
-
         <div className="adminView__overview">
           <div className="page">
             <div className="card adminPanel--import">
@@ -69,10 +68,23 @@ function AdminView() {
                 fileName={fileName}
               />
 
-              {parseError ? <p style={{ color: 'red' }}>{parseError}</p> : null}
-              {importStatus === 'enviando' && <p style={{ color: '#888' }}>Enviando horario...</p>}
-              {importStatus === 'ok' && <p style={{ color: 'green' }}>Horario importado correctamente.</p>}
-              {importStatus === 'error' && <p style={{ color: 'red' }}>Error al enviar el horario a la API.</p>}
+              {parseError ? <p className="adminPanel_status adminPanel_status--error">{parseError}</p> : null}
+              {importStatus === 'enviando' && <p className="adminPanel_status adminPanel_status--loading">Enviando horario...</p>}
+              {importStatus === 'ok' && <p className="adminPanel_status adminPanel_status--success">Horario importado correctamente.</p>}
+              {importStatus === 'error' && <p className="adminPanel_status adminPanel_status--error">Error al enviar el horario a la API.</p>}
+
+              <div className="adminPanel_downloadSection" aria-label="Descarga de plantilla">
+                <p className="adminPanel_downloadText">
+                  ¿No tienes el archivo listo? Descarga la plantilla oficial y completa la información antes de subirla.
+                </p>
+                <a
+                  className="adminPanel_downloadLink"
+                  href="/plantillaHorarios.xlsx"
+                  download
+                >
+                  Descargar plantilla de horarios
+                </a>
+              </div>
             </div>
 
             <div className="card adminPanel--period">
