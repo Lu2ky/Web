@@ -60,7 +60,7 @@ function AdminView() {
   return (
     <div className="adminViewContainer">
       <div className="adminView__header">
-        <Header userId={userId} />
+        <Header userId={userId} variant="admin" />
       </div>
 
       <main className="adminViewMain">

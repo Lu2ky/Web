@@ -13,11 +13,15 @@ const OPTIONS = [
     { id: "close", label: "Cerrar Sesión" },
 ];
 
-export default function DropdownAcount({ userId }) {
+export default function DropdownAcount({ userId, showPreferences = true }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeModal, setActiveModal] = useState(null);
     const [onboardingState, setOnboardingState] = useState({ isOpen: false, currentStepId: null });
     const navigate = useNavigate();
+
+    const visibleOptions = showPreferences
+        ? OPTIONS
+        : OPTIONS.filter((option) => option.id !== "prefer");
 
     const emitProfileOpenedForOnboarding = () => {
         window.dispatchEvent(new CustomEvent("onboarding:profile-opened"));
@@ -148,7 +152,7 @@ export default function DropdownAcount({ userId }) {
                 >
                     {() => (
                         <ul className="dropdown-menu" role="menu">
-                            {OPTIONS.map((option) => (
+                            {visibleOptions.map((option) => (
                                 <li key={option.id} role="menuitem">
                                     <button
                                         className="dropdown-menu-item"

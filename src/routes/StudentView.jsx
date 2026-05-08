@@ -376,6 +376,15 @@ function StudentView() {
 		setThemeId(newThemeId);
 	}, []);
 
+	const academicPeriodByName = useMemo(() => {
+		return academicPeriods.reduce((accumulator, period) => {
+			if (period?.nombre) {
+				accumulator[period.nombre] = period;
+			}
+			return accumulator;
+		}, {});
+	}, [academicPeriods]);
+
 	// Calcula el weekOffset basado en una fecha de inicio de período
 	const calculateWeekOffsetForDate = useCallback((dateString) => {
 		if (!dateString) return 0;

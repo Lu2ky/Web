@@ -1,5 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import "../../styles/DayView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
@@ -168,9 +167,6 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
         
         return { width, left };
     };
-
-    // Filtrar eventos solo del día seleccionado
-    const dayEvents = [...events, ...personalEvents].filter(e => e.day === selectedDay);
 
     useEffect(() => {
         const scrollContainer = bodyRef.current;
