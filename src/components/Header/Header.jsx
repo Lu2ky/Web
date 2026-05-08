@@ -1,15 +1,17 @@
 import { useState } from "react";
 import logo from "../../assets/logo.png";
-import "../../styles/Header.css";
-import "../Account/DropdownAcount";
+import "../../styles/Header/Header.css";
 import DropdownAcount from "../Account/DropdownAcount";
-import NotificationBell from "../Account/NotificationBell";
-import Modal from "../Account/Modal";
+import NotificationBell from "./NotificationBell";
+import Modal from "../Templates/Modal";
 
 
 function Header({ userId }) {
-	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
+
+	const openInstructions = () => setIsInstructionsOpen(true);
+	const closeInstructions = () => setIsInstructionsOpen(false);
+
 	return (
 		<>
 			<header>
@@ -23,25 +25,27 @@ function Header({ userId }) {
 					<button
 						type="button"
 						className="helpInstructionsButton"
-						onClick={() => setIsInstructionsOpen(true)}
+						onClick={openInstructions}
 						title="Instrucciones para quejas o preguntas"
 						aria-label="Abrir instrucciones para quejas o preguntas"
+						aria-haspopup="dialog"
+						aria-expanded={isInstructionsOpen}
+						aria-controls="header-help-modal-content"
 					>
 						?
 					</button>
 					<DropdownAcount userId={userId} />
 				</div>
-
-				{isMenuOpen && <div className="overlay" onClick={() => setIsMenuOpen(false)} />}
 			</header>
 
 			<Modal
 				isOpen={isInstructionsOpen}
-				onClose={() => setIsInstructionsOpen(false)}
+				onClose={closeInstructions}
 				title="Quejas y preguntas"
 				closeLabel="Entendido"
+				closeOnOverlayClick
 			>
-				<div className="helpInstructionsContent">
+				<div id="header-help-modal-content" className="helpInstructionsContent">
 					<p>
 						Si tienes una queja o una pregunta, usa este flujo para recibir atencion mas rapido:
 					</p>

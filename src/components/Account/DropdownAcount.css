@@ -5,6 +5,15 @@
     justify-content: center;
 }
 
+.dropdown-account-root {
+    position: relative;
+    display: inline-flex;
+}
+
+.dropdown-account-host {
+    position: relative;
+}
+
 /* Botón de perfil */
 .dropdown-image-button {
     background: linear-gradient(#fff, #fff) padding-box,

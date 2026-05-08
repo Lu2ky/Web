@@ -87,7 +87,10 @@
     margin: 0.5rem 0 1.25rem 0;
     font-size: 1.1rem;
     font-weight: 700;
-    color: #1f2937;
+    background: linear-gradient(135deg, #f6047b 0%, #c820c5 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     letter-spacing: -0.01em;
 }
 

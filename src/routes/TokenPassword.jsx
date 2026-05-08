@@ -1,12 +1,12 @@
 // Componente para la verificación del token de recuperación de contraseña
 
 import { useEffect, useRef, useState } from "react";
-import Logo from './assets/logo.png';
-import Image from './assets/ImageRecover.webp';
+import Logo from '../assets/logo.png';
+import Image from '../assets/ImageRecover.webp';
 import './TokenPassword.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import TokenFetcher from './services/TokenFetcher';
-import { getUserData } from './services/userService';
+import TokenFetcher from '../services/TokenFetcher';
+import { getUserData } from '../services/userService';
 
 // Componente para la verificación del token de recuperación de contraseña
 const TokenPassword = () => {

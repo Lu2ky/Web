@@ -28,7 +28,15 @@
     "test:theme:e2e": "playwright test tests/e2e/theme-selector.e2e.spec.js",
     "test:theme:perf": "node tests/performance/theme-selector-performance.mjs",
     "test:theme:perf:artillery": "artillery run tests/performance/theme-selector.artillery.yml",
-    "test:theme:full": "npm run test:theme:unit && npm run test:theme:e2e && npm run test:theme:perf"
+    "test:theme:full": "npm run test:theme:unit && npm run test:theme:e2e && npm run test:theme:perf",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:todolist": "vitest run src/components/TodoList/",
+    "test:todolist:watch": "vitest src/components/TodoList/",
+    "test:admin": "vitest run src/components/Account/JSX\\ ViewAdmin/",
+    "test:admin:watch": "vitest src/components/Account/JSX\\ ViewAdmin/",
+    "test:refactor": "npm run test:todolist && npm run test:admin"
   },
   "dependencies": {
     "react": "^19.2.0",

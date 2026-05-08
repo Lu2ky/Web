@@ -967,7 +967,36 @@ export function OnboardingProvider({ children, userId }) {
 export function useOnboardingContext() {
 	const context = useContext(OnboardingContext);
 	if (!context) {
-		throw new Error("useOnboardingContext debe usarse dentro de OnboardingProvider");
+		throw new Error(
+			"useOnboardingContext debe usarse dentro de OnboardingProvider. " +
+			"Verifica que OnboardingProvider envuelva el árbol de componentes completo."
+		);
 	}
+	return context;
+}
+
+// Hook seguro que retorna valores por defecto si el contexto no está disponible
+// Útil para componentes que podrían renderizarse fuera del Provider durante desarrollo
+export function useOnboardingContextSafe() {
+	const context = useContext(OnboardingContext);
+
+	if (!context) {
+		// Retorna valores por defecto seguros
+		return {
+			isLoading: false,
+			isOpen: false,
+			steps: [],
+			totalSteps: 0,
+			currentStep: 0,
+			canContinue: false,
+			validationMessage: "",
+			nextStep: () => {},
+			prevStep: () => {},
+			skip: () => {},
+			complete: () => {},
+			reset: () => {}
+		};
+	}
+
 	return context;
 }

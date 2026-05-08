@@ -1,12 +1,12 @@
 import { useState, useCallback } from "react";
-import Header from "./components/Navegation/Header";
-import DropArea from "./components/Account/JSX ViewAdmin/DropArea";
-import ModalArchivo from "./components/Account/JSX ViewAdmin/ModalArchivo";
-import AddAcademicPeriodCard from "./components/Account/JSX ViewAdmin/AddAcademicPeriodCard";
-import { getAuthSession } from "./services/authSession";
-import AcademicPeriodListCard from "./components/Account/JSX ViewAdmin/AcademicPeriodListCard";
-import { parseExcelFile } from "./components/Account/JSX ViewAdmin/exelParce";
-import { importSchedule } from "./services/importScheduleService";
+import Header from "../components/Header/Header";
+import DropArea from "../components/Account/JSX ViewAdmin/DropArea";
+import ModalArchivo from "../components/Account/JSX ViewAdmin/ModalArchivo";
+import AddAcademicPeriodCard from "../components/Account/JSX ViewAdmin/AddAcademicPeriodCard";
+import { getAuthSession } from "../services/authSession";
+import AcademicPeriodListCard from "../components/Account/JSX ViewAdmin/AcademicPeriodListCard";
+import { parseExcelFile } from "../components/Account/JSX ViewAdmin/exelParce";
+import { importSchedule } from "../services/importScheduleService";
 import "./AdminView.css";
 
 function AdminView() {

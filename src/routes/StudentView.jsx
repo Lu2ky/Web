@@ -1,31 +1,30 @@
-
-import "./styles/App.css";
+import "./StudentView.css";
 
 // Hooks de react 
 import { useState, useEffect, useCallback, useMemo } from "react";
 // Id de LogIn
 import { useParams } from "react-router-dom";
 // Componentes Primarios
-import Header from "./components/Navegation/Header";
-import ControlBar from "./components/ControlBar/ControlBar";
-import Calendar from "./components/Calendar/Calendar";
-import ToDoList from "./components/TodoList/ToDoList"; 
-import MessageConfirmation from "./components/TodoList/MessageConfirmation";
-import OnboardingOverlay from "./components/Onboarding/OnboardingOverlay";
+import Header from "../components/Header/Header";
+import ControlBar from "../components/ControlBar/ControlBar";
+import Calendar from "../components/Calendar/Calendar";
+import ToDoList from "../components/TodoList/ToDoList"; 
+import MessageConfirmation from "../components/TodoList/MessageConfirmation";
+import OnboardingOverlay from "../components/Onboarding/OnboardingOverlay";
 // Componentes secundarios
-import { PopUpClasses } from "./components/Calendar/PopUpClasses";
-import { PopUpPersonal } from "./components/Calendar/PopUpPersonal";
-import { THEME_OPTIONS } from "./components/ControlBar/ThemeOptions";
-import { hasAnyRole, ROLE_ADMIN_UPB_PLANNER } from "./services/authSession";
+import { PopUpClasses } from "../components/Calendar/PopUpClasses";
+import { PopUpPersonal } from "../components/Calendar/PopUpPersonal";
+import { THEME_OPTIONS } from "../components/ControlBar/ThemeOptions";
+import { hasAnyRole, ROLE_ADMIN } from "../services/authSession";
 // Servicios para interactuar con la API 
 // Calendario
 // Horario oficial 
-import OficialFetcher from "./services/OficialFetcher";
-import { getCategories } from "./services/categoriesService";
-import { fetchAcademicPeriods } from "./services/academicPeriodsService";
+import OficialFetcher from "../services/OficialFetcher";
+import { getCategories } from "../services/categoriesService";
+import { fetchAcademicPeriods } from "../services/academicPeriodsService";
 
 // Actividades personales
-import PersonalFetcher, { deletePersonalActivity } from "./services/PersonalFetcher";
+import PersonalFetcher, { deletePersonalActivity } from "../services/PersonalFetcher";
 
 
 // Funciones para normalizar datos de la API 
@@ -194,7 +193,7 @@ const isActiveLaterallyInWeek = (activity, weekOffset) => {
 const getInitialView = () => {
 	return window.innerWidth <= 425 ? "Diario" : "Semanal"; // Vista inicial basada en el ancho de la pantalla (mobile chiquito vs desktop)
 };
-function App() {
+function StudentView() {
 
 	const { userId } = useParams(); // Obtener el ID del usuario desde la URL
 	const [viewMode, setViewMode] = useState(getInitialView()); // "Semanal" o "Diario"
@@ -212,13 +211,7 @@ function App() {
 	const [selectedTag, setSelectedTag] = useState("Todos"); // Etiqueta seleccionada para filtrar actividades en el calendario
 	const [selectedAcademicPeriod, setSelectedAcademicPeriod] = useState(null); // { id, nombre } del período académico seleccionado, null = "Todos"
 	const [academicPeriods, setAcademicPeriods] = useState([]); // Array de períodos académicos con { id, nombre, start_date, end_date }
-	const isAdminUser = hasAnyRole([ROLE_ADMIN_UPB_PLANNER]);
-	const academicPeriodByName = useMemo(() => {
-		return academicPeriods.reduce((map, period) => {
-			map[period.nombre] = period;
-			return map;
-		}, {});
-	}, [academicPeriods]);
+	const isAdminUser = hasAnyRole([ROLE_ADMIN]);
 
 	// Log actual de sincronización de datos
 
@@ -550,4 +543,5 @@ function App() {
 	);
 }
 
-export default App;
+export default StudentView;
+

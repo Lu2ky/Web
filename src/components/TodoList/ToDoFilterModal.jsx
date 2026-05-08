@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import "../../styles/addButton.css";
+import Modal from '../Templates/Modal';
+import FilterFormContent from './FilterFormContent';
 
 const defaultFilters = {
     status: "all",
@@ -17,8 +19,6 @@ function ToDoFilterModal({ isOpen, onClose, onApply, initialFilters = defaultFil
         }
     }, [isOpen, initialFilters]);
 
-    if (!isOpen) return null;
-
     const handleApply = () => {
         window.dispatchEvent(new CustomEvent("onboarding:todo-filter-applied"));
         onApply({
@@ -35,83 +35,43 @@ function ToDoFilterModal({ isOpen, onClose, onApply, initialFilters = defaultFil
     };
 
     return (
-        <div
-            className="modalOverlay"
-            role="dialog"
-            aria-modal="true"
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Filtrar tareas"
+            closeLabel="Cerrar"
+            showFooter={false}
+            closeOnOverlayClick={false}
+            closeOnEscape={true}
+            bodyClassName="modal-filter-body"
         >
-            <div className="modalContainer" onClick={e => e.stopPropagation()} data-onboarding-id="todo-filter-modal">
-                <h2>Filtrar tareas</h2>
+            <FilterFormContent
+                filters={filters}
+                setFilters={setFilters}
+                availableTags={availableTags}
+            />
 
-                <button className="modalClose" onClick={onClose} title="Cerrar" aria-label="Cerrar" type="button">
-                    X
+            <div className="modalActions">
+                <button 
+                    className="cancelButton" 
+                    onClick={handleClear}
+                    title="Limpiar todos los filtros"
+                    aria-label="Limpiar filtros"
+                    type="button"
+                >
+                    Limpiar
                 </button>
-
-                <label>Estado</label>
-                <select
-                    value={filters.status}
-                    onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                <button 
+                    className="saveButton" 
+                    onClick={handleApply}
+                    title="Aplicar filtros seleccionados"
+                    aria-label="Aplicar filtros"
+                    type="button"
                 >
-                    <option value="all">Todas</option>
-                    <option value="pending">Pendientes</option>
-                    <option value="completed">Completadas</option>
-                </select>
-
-                <label>Prioridad</label>
-                <select
-                    value={filters.priority}
-                    onChange={e => setFilters(prev => ({ ...prev, priority: e.target.value }))}
-                >
-                    <option value="all">Todas</option>
-                    <option value="alta">Alta</option>
-                    <option value="media">Media</option>
-                    <option value="baja">Baja</option>
-                </select>
-
-                <label>Etiqueta</label>
-                {availableTags && availableTags.length > 0 ? (
-                    <select
-                        value={filters.tag}
-                        onChange={e => setFilters(prev => ({ ...prev, tag: e.target.value }))}
-                    >
-                        <option value="">Todas</option>
-                        {availableTags.map(t => (
-                            <option key={t.id} value={t.label}>
-                                {t.label}
-                            </option>
-                        ))}
-                    </select>
-                ) : (
-                    <input
-                        type="text"
-                        placeholder="Ej: Mathematics"
-                        value={filters.tag}
-                        onChange={e => setFilters(prev => ({ ...prev, tag: e.target.value }))}
-                    />
-                )}
-
-                <div className="modalActions">
-                    <button 
-                        className="cancelButton" 
-                        onClick={handleClear}
-                        title="Limpiar todos los filtros"
-                        aria-label="Limpiar filtros"
-                        type="button"
-                    >
-                        Limpiar
-                    </button>
-                    <button 
-                        className="saveButton" 
-                        onClick={handleApply}
-                        title="Aplicar filtros seleccionados"
-                        aria-label="Aplicar filtros"
-                        type="button"
-                    >
-                        Aplicar
-                    </button>
-                </div>
+                    Aplicar
+                </button>
             </div>
-        </div>
+        </Modal>
     );
 }
 

@@ -13,12 +13,12 @@
 // ============================================================================
 
 import { useState } from 'react';
-import Logo from './assets/logo.png';
-import Image from './assets/ImageRecover.webp';
+import Logo from '../assets/logo.png';
+import Image from '../assets/ImageRecover.webp';
 import './RecoverPassword.css';
 import { MdPassword } from "react-icons/md"; //  npm install react-icons --save
 import { useNavigate } from 'react-router-dom';
-import UserIdFetcher from './services/UserIdFetcher';
+import UserIdFetcher from '../services/UserIdFetcher';
 
 const RecoverPassword = () => {
     const navigate = useNavigate();

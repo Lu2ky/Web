@@ -31,80 +31,35 @@
   transform: scale(0.96);
 }
 
-/* Overlay */
-
-.themeModalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(25, 0, 40, 0.45);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  padding: 1rem;
-  transition: opacity 0.2s ease;
+.modal-container.controlBarModal--themeSelector {
+  width: min(100%, 520px);
+  border-radius: 1rem;
 }
 
-.themeModalOverlay.hide {
-  opacity: 0;
+.modal-container.controlBarModal--themeSelector .modal-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #ffffff;
 }
 
-.themeModalOverlay.show {
-  opacity: 1;
-}
-
-/* Modal */
-
-.themeModal {
-  width: 100%;
-  max-width: 520px;
+.modal-body.controlBarModalBody--themeSelector {
   max-height: 75vh;
   overflow-y: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  border-radius: 1rem;
-  border: 2px solid transparent;
-  background:
-    linear-gradient(white, white) padding-box,
-    linear-gradient(135deg, #ff006e, #a100ff) border-box;
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
   padding: 1.6rem;
-  position: relative;
-  animation: modalFade 0.2s ease;
 }
 
-.themeModal::-webkit-scrollbar {
+.modal-body.controlBarModalBody--themeSelector::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
 }
 
-
-@keyframes modalFade {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* Titulo*/
-
-.themeModal h2 {
-  font-size: 1.6rem;
-  margin-bottom: 1.2rem;
-  background: #040103;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  font-weight: 700;
+.themeModalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 /* Grid */
@@ -181,33 +136,6 @@
   transform: scale(1.05);
 }
 
-/* Boton de cerrar */
-
-.closeModal {
-  position: absolute;
-  top: 0.8rem;
-  right: 0.8rem;
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  color: rgb(0, 0, 0);
-  border: none;
-  padding: 0.35rem 0.55rem;
-  border-radius: 0.4rem;
-  font-size: 1.05rem;
-  line-height: 1;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.closeModal:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(36, 1, 57, 0.3);
-}
-
 @media(max-width: 768px) {
   .themeSelectorButton {
     width:36px;
@@ -216,5 +144,9 @@
 
   .themeSelectorButton svg{
     font-size:16px;
+  }
+
+  .modal-body.controlBarModalBody--themeSelector {
+    padding: 1rem;
   }
 }

@@ -304,6 +304,8 @@
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
 }
 
 .activity-card-tag {
@@ -363,7 +365,7 @@
   white-space: normal;
   overflow: visible;
   text-overflow: unset;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   word-break: normal;
 }
 
@@ -424,6 +426,76 @@
 
   .dayHeaderCell {
     font-size: 0.8rem;
+  }
+
+  .weekGrid {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .dayColumn {
+    min-width: 7.25rem;
+  }
+
+  .dayHeaderCell {
+    min-width: 7.25rem;
+  }
+
+  .activity-card {
+    padding: 5px 6px;
+  }
+
+  .activity-card-content {
+    gap: 3px;
+  }
+
+  .activity-card-title {
+    font-size: 0.74rem;
+    line-height: 1.15;
+    text-transform: none;
+  }
+
+  .activity-card-time,
+  .activity-card-professor,
+  .activity-card-footer,
+  .activity-card-classroom,
+  .activity-card-nrc,
+  .activity-card-description {
+    font-size: 0.64rem;
+    line-height: 1.15;
+  }
+
+  .activity-card-description {
+    line-clamp: 1;
+    -webkit-line-clamp: 1;
+  }
+
+  .tag-label {
+    font-size: 0.58rem;
+    padding: 1px 5px;
+  }
+
+  .official-class-card .activity-card-title {
+    font-size: clamp(0.58rem, 6.2cqh, 0.74rem);
+    line-height: 1.1;
+  }
+
+  .official-class-card .activity-card-professor {
+    font-size: clamp(0.54rem, 5.2cqh, 0.64rem);
+    line-height: 1.1;
+  }
+
+  .official-class-card .activity-card-time {
+    font-size: clamp(0.52rem, 4.7cqh, 0.62rem);
+  }
+
+  .official-class-card .activity-card-header {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .official-class-card .activity-card-time {
+    align-self: flex-start;
   }
 }
 

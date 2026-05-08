@@ -2,10 +2,10 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash, FaCheckCircle, FaRegCircle, FaExclamationCircle } from "react-icons/fa";
-import { changeRecoveredPassword } from './services/passwordChangeService.jsx';
+import { changeRecoveredPassword } from '../services/passwordChangeService.jsx';
 
-import Logo from './assets/logo.png';
-import Image from './assets/ImagePassword.webp';
+import Logo from '../assets/logo.png';
+import Image from '../assets/ImagePassword.webp';
 import './RestorePassword.css';
 
 function validatePasswordComplexity(password) {

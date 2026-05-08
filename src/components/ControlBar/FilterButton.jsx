@@ -1,12 +1,12 @@
-import {useState, useEffect, useRef} from "react";
-import {FaFilter} from "react-icons/fa";
-import "../../styles/FilterButton.css";
-import {getCategories} from "../../services/categoriesService";
+import { useState, useEffect } from "react";
+import { FaFilter } from "react-icons/fa";
+import "../../styles/ControlBar/FilterButton.css";
+import DropdownBase from "../Templates/DropdownBase";
+import { getCategories } from "../../services/categoriesService";
 
-function FilterButton({selectedTag, setSelectedTag}) {
-	const [isOpen, setIsOpen] = useState(false);
+function FilterButton({ selectedTag, setSelectedTag }) {
 	const [categories, setCategories] = useState([]);
-	const dropdownRef = useRef(null);
+	const [isOpen, setIsOpen] = useState(false);
 
 	useEffect(() => {
 		const loadCategories = async () => {
@@ -16,23 +16,10 @@ function FilterButton({selectedTag, setSelectedTag}) {
 		loadCategories();
 	}, []);
 
-	const handleSelect = category => {
+	const handleSelect = (category) => {
 		window.dispatchEvent(new CustomEvent("onboarding:calendar-filter-option-selected"));
 		setSelectedTag(category);
-		setIsOpen(false);
 	};
-
-	useEffect(() => {
-		const handleClickOutside = event => {
-			if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-				setIsOpen(false);
-			}
-		};
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
-	}, []);
 
 	useEffect(() => {
 		const handleCloseUnrelatedUi = (event) => {
@@ -47,29 +34,42 @@ function FilterButton({selectedTag, setSelectedTag}) {
 	}, []);
 
 	return (
-		<div className="filterContainer" ref={dropdownRef}>
-			<button
-				className="filterButton"
-				onClick={() => {
-					setIsOpen(!isOpen);
+		<DropdownBase
+			open={isOpen}
+			onOpenChange={(nextState, reason) => {
+				setIsOpen(nextState);
+				if (nextState && reason === "trigger") {
 					window.dispatchEvent(new CustomEvent("onboarding:calendar-filter-opened"));
-				}}
-				aria-expanded={isOpen}
-				title="Filtrar actividades"
-				type="button"
-				data-onboarding-id="calendar-filter-button"
-			>
-				<FaFilter className="filterIcon" />
-				Filtrar: {selectedTag}
-			</button>
-
-			{isOpen && (
-				<ul className="filterMenu" data-onboarding-id="calendar-filter-menu">
-					{categories.map(category => (
+				}
+			}}
+			roleMode="menu"
+			className="controlBarDropdownRoot controlBarDropdownRoot--filter"
+			menuClassName="controlBarDropdownMenu controlBarDropdownMenu--filter"
+			trigger={({ ref, onClick, ...triggerProps }) => (
+				<button
+					ref={ref}
+					className="controlBarDropdownTrigger controlBarDropdownTrigger--filter"
+					onClick={onClick}
+					title="Filtrar actividades"
+					type="button"
+					data-onboarding-id="calendar-filter-button"
+					{...triggerProps}
+				>
+					<FaFilter className="controlBarDropdownIcon" />
+					<span>Filtrar: {selectedTag}</span>
+				</button>
+			)}
+		>
+			{({ select }) => (
+				<ul className="controlBarDropdownList" data-onboarding-id="calendar-filter-menu">
+					{categories.map((category) => (
 						<li key={category}>
 							<button
-								className={`filterOption ${selectedTag === category ? "selected" : ""}`}
-								onClick={() => handleSelect(category)}
+								className={`controlBarDropdownOption ${selectedTag === category ? "is-selected" : ""}`}
+								onClick={() => {
+									handleSelect(category);
+									select();
+								}}
 								title={`Filtrar por ${category}`}
 								type="button"
 							>
@@ -79,7 +79,7 @@ function FilterButton({selectedTag, setSelectedTag}) {
 					))}
 				</ul>
 			)}
-		</div>
+		</DropdownBase>
 	);
 }
 

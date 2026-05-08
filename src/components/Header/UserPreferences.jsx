@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaEdit, FaTimes, FaCheck } from "react-icons/fa";
 import * as userService from "../../services/userService";
 import * as notificationsSilenceService from "../../services/notificationsSilenceService";
-import Modal from "./Modal";
+import Modal from "../Templates/Modal";
 import "./UserPreferences.css";
 
 function parseAnticipationMinutes(userData) {
@@ -32,7 +32,7 @@ function parseAnticipationMinutes(userData) {
     return 0;
 }
 
-export default function UserPreferences({ userId, onClose }) {
+export default function UserPreferences({ userId }) {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -53,12 +53,29 @@ export default function UserPreferences({ userId, onClose }) {
     const [muteInfo, setMuteInfo] = useState(null);
     const [isSavingMute, setIsSavingMute] = useState(false);
     const [showMuteConfirmModal, setShowMuteConfirmModal] = useState(false);
+    const transientTimersRef = useRef([]);
 
     // Cargar datos del usuario al montar el componente
     useEffect(() => {
         loadUserData();
         loadMuteInfo();
     }, [userId]);
+
+    useEffect(() => {
+        return () => {
+            transientTimersRef.current.forEach((timerId) => clearTimeout(timerId));
+            transientTimersRef.current = [];
+        };
+    }, []);
+
+    const scheduleTransientUpdate = (callback, delayMs) => {
+        const timerId = setTimeout(() => {
+            callback();
+            transientTimersRef.current = transientTimersRef.current.filter((id) => id !== timerId);
+        }, delayMs);
+
+        transientTimersRef.current.push(timerId);
+    };
 
     const loadMuteInfo = () => {
         try {
@@ -158,7 +175,7 @@ export default function UserPreferences({ userId, onClose }) {
                 setIsEditingEmail(false);
                 
                 // Limpiar mensaje de éxito después de 3 segundos
-                setTimeout(() => setSuccess(""), 3000);
+                scheduleTransientUpdate(() => setSuccess(""), 3000);
             } else {
                 setError(result?.message || "Error al actualizar el correo");
             }
@@ -223,10 +240,17 @@ export default function UserPreferences({ userId, onClose }) {
                     antelacionNotis: totalMinutes,
                     tiempoMute: totalMinutes
                 });
+                window.dispatchEvent(new CustomEvent("preferences:anticipation-updated", {
+                    detail: {
+                        userId,
+                        minutes: totalMinutes,
+                        at: new Date().toISOString(),
+                    }
+                }));
                 setIsEditingAnticipation(false);
                 
                 // Limpiar mensaje de éxito después de 3 segundos
-                setTimeout(() => setSuccess(""), 3000);
+                scheduleTransientUpdate(() => setSuccess(""), 3000);
             } else {
                 setError(result?.message || "Error al actualizar el tiempo de anticipación");
             }
@@ -261,15 +285,15 @@ export default function UserPreferences({ userId, onClose }) {
             if (result.success) {
                 setMuteInfo(result.data);
                 setSuccess("Notificaciones silenciadas correctamente");
-                setTimeout(() => setSuccess(""), 3000);
+                scheduleTransientUpdate(() => setSuccess(""), 3000);
             } else {
                 setError(result.error || "Error al silenciar notificaciones");
-                setTimeout(() => setError(""), 4000);
+                scheduleTransientUpdate(() => setError(""), 4000);
             }
         } catch (err) {
             setError("Error al silenciar notificaciones");
             console.error(err);
-            setTimeout(() => setError(""), 4000);
+            scheduleTransientUpdate(() => setError(""), 4000);
         } finally {
             setIsSavingMute(false);
         }
@@ -286,7 +310,7 @@ export default function UserPreferences({ userId, onClose }) {
             if (result.success) {
                 setMuteInfo(null);
                 setSuccess("Notificaciones reactivadas correctamente");
-                setTimeout(() => setSuccess(""), 3000);
+                scheduleTransientUpdate(() => setSuccess(""), 3000);
             } else {
                 setError(result.error || "Error al reactivar notificaciones");
             }
