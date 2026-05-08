@@ -24,11 +24,7 @@ export default function RootRoutes() {
 			<Route path="/IdRestore" element={<RecoverPassword />} />
 			<Route path="/Legal" element={<LegalDocumentsView />} />
 			<Route path="/RestorePassword" element={<RestorePassword />} />
-			<Route path="/Token" element={<TokenPassword />} />
-
-			<Route element={<ProtectedRoute requireMatchingUser={true} allowedRoles={[ROLE_USUARIOS]} />}>
-				<Route path="/Estudiante/:userId" element={<AppWithOnboarding />} />
-			</Route>
+		<Route path="/TokenPassword" element={<TokenPassword />} />
 
 
 			<Route element={<ProtectedRoute allowedRoles={[ROLE_ADMIN]} />}>
