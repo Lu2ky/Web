@@ -370,6 +370,53 @@ function PersonalFetcher({ onDataLoaded, userId, academicPeriod }) {
 }
 
 /**
+ * Convierte errores de la API en mensajes amigables para el usuario
+ * @param {string} statusCode - Código de estado HTTP
+ * @param {string} errorDetails - Detalles del error de la API
+ * @returns {string} Mensaje de error amigable en español
+ */
+function getErrorMessage(statusCode, errorDetails) {
+  const errorLower = errorDetails.toLowerCase();
+
+  // Detectar error de colisión/conflicto de horarios
+  if (
+    errorLower.includes("collision") ||
+    errorLower.includes("colision") ||
+    errorLower.includes("conflicto") ||
+    errorLower.includes("conflict") ||
+    errorLower.includes("overlap") ||
+    errorLower.includes("traslape") ||
+    errorLower.includes("horario")
+  ) {
+    return "La hora seleccionada tiene un conflicto con otra actividad. Por favor, elige un horario diferente.";
+  }
+
+  // Error de validación
+  if (statusCode === 400 || statusCode === 422) {
+    if (errorLower.includes("required") || errorLower.includes("obligatorio")) {
+      return "Falta información obligatoria. Verifica que todos los campos estén completos.";
+    }
+    if (errorLower.includes("invalid") || errorLower.includes("invalido")) {
+      return "Algunos datos no son válidos. Verifica los valores ingresados.";
+    }
+    return "Los datos ingresados no son válidos. Verifica e intenta nuevamente.";
+  }
+
+  // Error de no autorizado
+  if (statusCode === 401 || statusCode === 403) {
+    return "No tienes permiso para realizar esta acción. Intenta iniciar sesión nuevamente.";
+  }
+
+  // Error de servidor
+  if (statusCode === 500 || statusCode === 503) {
+    return "El servidor está experimentando problemas. Intenta más tarde.";
+  }
+
+  // Error genérico
+  return "No fue posible guardar la actividad. Intenta nuevamente.";
+}
+
+/**
  * Agrega una nueva actividad personal
  * @param {string} userId - ID del usuario
  * @param {Object} activityData - Datos de la actividad
@@ -438,7 +485,10 @@ export const addPersonalActivity = async (userId, activityData) => {
       
       console.error("Error " + response.status + " - Detalles completos:", errorDetails);
       console.error("Payload enviado:", JSON.stringify(payload, null, 2));
-      throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorDetails}`);
+      
+      // Usar función para obtener mensaje amigable
+      const friendlyMessage = getErrorMessage(response.status, errorDetails);
+      throw new Error(friendlyMessage);
     }
 
     // Parsear la respuesta exitosa
@@ -506,7 +556,10 @@ export const deletePersonalActivity = async (userId, activityId) => {
       }
       
       console.error("❌ Error de eliminación " + response.status + ":", errorDetails);
-      throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorDetails}`);
+      
+      // Usar función para obtener mensaje amigable
+      const friendlyMessage = getErrorMessage(response.status, errorDetails);
+      throw new Error(friendlyMessage);
     }
 
     // Parsear la respuesta exitosa
@@ -595,7 +648,10 @@ export const updatePersonalActivity = async (userId, activityId, updates) => {
       }
       
       console.error("❌ Error al actualizar " + response.status + ":", errorDetails);
-      throw new Error(`Error en la API: ${response.status} ${response.statusText} - ${errorDetails}`);
+      
+      // Usar función para obtener mensaje amigable
+      const friendlyMessage = getErrorMessage(response.status, errorDetails);
+      throw new Error(friendlyMessage);
     }
 
     // Parsear la respuesta exitosa

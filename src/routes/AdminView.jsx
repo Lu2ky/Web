@@ -25,15 +25,17 @@ function AdminView() {
     setParseError('');
     setImportStatus('');
 
+    let didStartImport = false;
+
     try {
       const parsed = await parseExcelFile(first);
-
+      didStartImport = true;
       setImportStatus('enviando');
       await importSchedule(parsed);
       setImportStatus('ok');
     } catch (error) {
       console.error('Error al procesar archivo:', error);
-      if (importStatus === 'enviando') {
+      if (didStartImport) {
         setImportStatus('error');
       } else {
         setParseError(error?.message || 'No se pudo procesar el archivo.');
@@ -45,43 +47,57 @@ function AdminView() {
     setPeriodRefreshToken((value) => value + 1);
   }, []);
 
+  const statusMessage = parseError
+    ? { tone: 'error', text: parseError }
+    : importStatus === 'enviando'
+      ? { tone: 'loading', text: 'Enviando horario...' }
+      : importStatus === 'ok'
+        ? { tone: 'success', text: 'Horario importado correctamente.' }
+        : importStatus === 'error'
+          ? { tone: 'error', text: 'Error al enviar el horario a la API.' }
+          : null;
+
   return (
     <div className="adminViewContainer">
       <div className="adminView__header">
-        <Header userId={userId} />
+        <Header userId={userId} variant="admin" />
       </div>
-      <div className="adminView">
 
-        <div className="adminView__overview">
-          <div className="page">
-            <div className="card adminPanel--import">
-              <ModalArchivo
-                label="Subir Archivo"
-                accept=".xlsx"
-                onFiles={handleFiles}
-              />
+      <main className="adminViewMain">
+        <div className="adminViewContent">
+          <div className="adminViewGrid">
+            <section className="adminPanel adminPanel--surface" aria-labelledby="admin-import-title">
+              <div className="adminPanelHeader">
+                <h2 id="admin-import-title">Importar horarios</h2>
+                <p>Sube el archivo oficial de planeacion academica en formato .xlsx.</p>
+              </div>
+
+              <ModalArchivo label="Subir Archivo" accept=".xlsx" onFiles={handleFiles} />
 
               <DropArea
                 title="Cargar archivo de horarios (.xlsx)"
-                subtitle="Arrastra el archivo oficial de planeación académica para actualizar el sistema global."
+                subtitle="Arrastra el archivo oficial de planeacion academica para actualizar el sistema global."
                 accept=".xlsx"
                 onFiles={handleFiles}
                 fileName={fileName}
               />
 
-              {parseError ? <p style={{ color: 'red' }}>{parseError}</p> : null}
-              {importStatus === 'enviando' && <p style={{ color: '#888' }}>Enviando horario...</p>}
-              {importStatus === 'ok' && <p style={{ color: 'green' }}>Horario importado correctamente.</p>}
-              {importStatus === 'error' && <p style={{ color: 'red' }}>Error al enviar el horario a la API.</p>}
-            </div>
+              {statusMessage ? (
+                <p className={`adminView__message adminView__message--${statusMessage.tone}`}>
+                  {statusMessage.text}
+                </p>
+              ) : null}
+            </section>
 
-            <div className="card adminPanel--period">
-              <AddAcademicPeriodCard userId={userId} onCreated={handlePeriodCreated} />
-              <AcademicPeriodListCard userId={userId} refreshToken={periodRefreshToken} />
-            </div>
+            <section className="adminPanel" aria-label="Gestion de periodos academicos">
+              <div className="adminPanelStack">
+                <AddAcademicPeriodCard userId={userId} onCreated={handlePeriodCreated} />
+                <AcademicPeriodListCard userId={userId} refreshToken={periodRefreshToken} />
+              </div>
+            </section>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

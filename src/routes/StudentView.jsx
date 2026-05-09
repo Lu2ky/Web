@@ -1,7 +1,7 @@
 import "./StudentView.css";
 
 // Hooks de react 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 // Id de LogIn
 import { useParams } from "react-router-dom";
 // Componentes Primarios
@@ -72,7 +72,7 @@ function normalizeApiData(apiData) {
 			academicPeriod: academicPeriod, // Período académico de la materia
 			// Datos para PopUp
 			campus: item.campus,
-			credits: item.Credits?.Float64 || 0,
+			credits: item.credits,
 			//tagColour: item.tagColour, // Para asignar color según el tipo de clase (Teoría, Práctica, etc.)
 			// Datos originales
 			apiData: item
@@ -235,7 +235,7 @@ function StudentView() {
 		setPersonalEvents(normalizedApiData);
 	}, []);
 
-	const handleClassClick = event => {
+	const handleClassClick = useCallback((event) => {
 		// Buscar todas las sesiones de esta clase (mismo NRC)
 		const allSessions = classEvents.filter(e => e.NRC === event.NRC);
 		const apiCourseId = event?.apiData?.N_idCurso
@@ -273,39 +273,39 @@ function StudentView() {
 
 		setSelectedClass(classData);
 		setShowClassPopup(true);
-	};
+	}, [classEvents]);
 	// Cierra el popup de detalles de clase y limpia la clase seleccionada
-	const handleClosePopup = () => {
+	const handleClosePopup = useCallback(() => {
 		setShowClassPopup(false);
 		setSelectedClass(null);
-	};
+	}, []);
 
 	// Abre el popup de detalles de una actividad personal
-	const handlePersonalClick = (event) => {
+	const handlePersonalClick = useCallback((event) => {
 		setSelectedPersonal(event);
 		setShowPersonalPopup(true);
-	};
+	}, []);
 
 	// Cierra el popup de detalles de actividad personal
-	const handleClosePersonalPopup = () => {
+	const handleClosePersonalPopup = useCallback(() => {
 		setShowPersonalPopup(false);
 		setSelectedPersonal(null);
-	};
+	}, []);
 
 	// Solicita confirmación para eliminar una actividad personal
-	const handleRequestDeletePersonal = (id) => {
+	const handleRequestDeletePersonal = useCallback((id) => {
 		setPendingDeletePersonalId(id);
 		setShowDeletePersonalConfirm(true);
-	};
+	}, []);
 
 	// Cierra modal de confirmación de eliminación
-	const handleCloseDeletePersonalConfirm = () => {
+	const handleCloseDeletePersonalConfirm = useCallback(() => {
 		setShowDeletePersonalConfirm(false);
 		setPendingDeletePersonalId(null);
-	};
+	}, []);
 
 	// Elimina una actividad personal (confirmado por modal)
-	const handleConfirmDeletePersonal = async () => {
+	const handleConfirmDeletePersonal = useCallback(async () => {
 		const id = pendingDeletePersonalId;
 		if (!id) {
 			handleCloseDeletePersonalConfirm();
@@ -326,24 +326,24 @@ function StudentView() {
 		);
 		handleClosePersonalPopup();
 		handleCloseDeletePersonalConfirm();
-	};
+	}, [handleCloseDeletePersonalConfirm, handleClosePersonalPopup, pendingDeletePersonalId, userId]);
 
 	// Agrega una nueva actividad personal creada desde AddActivityButton
-	const handleActivityAdd = (newActivity) => {
+	const handleActivityAdd = useCallback((newActivity) => {
 		// Agregar la nueva actividad al estado
 		setPersonalEvents(prevEvents => [
 			...prevEvents,
 			newActivity
 		]);
-	};
+	}, []);
 
 	// Actualiza una actividad personal después de editarla
-	const handleActivityUpdate = (updatedActivity) => {
+	const handleActivityUpdate = useCallback((updatedActivity) => {
 		setPersonalEvents(prevEvents => prevEvents.map(ev => ev.id === updatedActivity.id ? { ...ev, ...updatedActivity } : ev));
 		if (selectedPersonal && selectedPersonal.id === updatedActivity.id) {
 			setSelectedPersonal(updatedActivity);
 		}
-	};
+	}, [selectedPersonal]);
 
 	useEffect(() => {
 		getCategories().then(categories => {
@@ -372,12 +372,21 @@ function StudentView() {
 	}, []);
 
 	// Función de retorno que recibe ThemeSelector al cambiar el tema y actualiza su estado
-	const handleThemeChange = newThemeId => {
+	const handleThemeChange = useCallback((newThemeId) => {
 		setThemeId(newThemeId);
-	};
+	}, []);
+
+	const academicPeriodByName = useMemo(() => {
+		return academicPeriods.reduce((accumulator, period) => {
+			if (period?.nombre) {
+				accumulator[period.nombre] = period;
+			}
+			return accumulator;
+		}, {});
+	}, [academicPeriods]);
 
 	// Calcula el weekOffset basado en una fecha de inicio de período
-	const calculateWeekOffsetForDate = (dateString) => {
+	const calculateWeekOffsetForDate = useCallback((dateString) => {
 		if (!dateString) return 0;
 
 		try {
@@ -407,9 +416,9 @@ function StudentView() {
 			console.error("Error calculando weekOffset para fecha:", dateString, error);
 			return 0;
 		}
-	};
+	}, []);
 
-	const handlePeriodChange = (periodObj) => {
+	const handlePeriodChange = useCallback((periodObj) => {
 		setSelectedAcademicPeriod(periodObj);
 
 		// Si se selecciona un período específico con fecha de inicio, cambiar a esa semana
@@ -421,7 +430,7 @@ function StudentView() {
 			setWeekOffset(0);
 		}
 		// Los fetchers se re-ejecutarán automáticamente cuando cambien sus dependencias
-	};
+	}, [calculateWeekOffsetForDate]);
 
 	//Obtener color por etiqueta
 	const getTagColor = tag => {
@@ -438,31 +447,33 @@ function StudentView() {
 	};
 
 	//Calcular materias filtradas por PERÍODO, FECHA (weekOffset) y ETIQUETA
-	const filteredClassesEvents = classEvents.filter(event => {
-		// Filtro por período académico seleccionado
-		const periodMatch = !selectedAcademicPeriod || event.academicPeriod === selectedAcademicPeriod.nombre;
-		
-		// Filtro por etiqueta
-		const tagMatch = selectedTag === "Todos" || event.etiqueta === selectedTag;
-		
-		// Filtro por rango de fechas del período académico basado en weekOffset
-		// Buscar el período académico que corresponde a esta materia
-		const classPeriod = academicPeriods.find(p => p.nombre === event.academicPeriod);
-		const dateInRange = isWeekInPeriod(weekOffset, classPeriod);
-		
-		return periodMatch && tagMatch && dateInRange;
-	});
+	const filteredClassesEvents = useMemo(() => {
+		return classEvents.filter(event => {
+			// Filtro por período académico seleccionado
+			const periodMatch = !selectedAcademicPeriod || event.academicPeriod === selectedAcademicPeriod.nombre;
 
+			// Filtro por etiqueta
+			const tagMatch = selectedTag === "Todos" || event.etiqueta === selectedTag;
 
-	const filteredPersonalEvents = personalEvents.filter(event => {
-		// Filtro por etiqueta
-		const tagMatch = selectedTag === "Todos" || selectedTag === "Personal";
-		
-		// Filtro por vigencia: la actividad debe superponerse con la semana actual
-		const dateInRange = isActiveLaterallyInWeek(event, weekOffset);
-		
-		return tagMatch && dateInRange;
-	});
+			// Filtro por rango de fechas del período académico basado en weekOffset
+			const classPeriod = academicPeriodByName[event.academicPeriod];
+			const dateInRange = isWeekInPeriod(weekOffset, classPeriod);
+
+			return periodMatch && tagMatch && dateInRange;
+		});
+	}, [academicPeriodByName, classEvents, selectedAcademicPeriod, selectedTag, weekOffset]);
+
+	const filteredPersonalEvents = useMemo(() => {
+		return personalEvents.filter(event => {
+			// Filtro por etiqueta
+			const tagMatch = selectedTag === "Todos" || selectedTag === "Personal";
+
+			// Filtro por vigencia: la actividad debe superponerse con la semana actual
+			const dateInRange = isActiveLaterallyInWeek(event, weekOffset);
+
+			return tagMatch && dateInRange;
+		});
+	}, [personalEvents, selectedTag, weekOffset]);
 	return (
 
 		<div className="App">

@@ -54,6 +54,7 @@ function AcademicPeriodListCard({ userId = null, refreshToken = 0 }) {
   // Resolver userId (username) a idUsuario (numérico) desde userService
   useEffect(() => {
     let isMounted = true;
+    const abortController = new AbortController();
 
     const resolveUserId = async () => {
       if (!userId) {
@@ -63,7 +64,7 @@ function AcademicPeriodListCard({ userId = null, refreshToken = 0 }) {
 
       try {
         logAcademicPeriodsUiDebug("resolveUserId:start", { userId });
-        const currentData = await getUserData(userId);
+        const currentData = await getUserData(userId, { signal: abortController.signal });
         const currentUser = Array.isArray(currentData) ? currentData[0] : currentData;
         
         const candidateId =
@@ -88,7 +89,7 @@ function AcademicPeriodListCard({ userId = null, refreshToken = 0 }) {
           });
         }
       } catch (error) {
-        if (isMounted) {
+        if (error.name !== 'AbortError' && isMounted) {
           logAcademicPeriodsUiWarn("resolveUserId:error", {
             userId,
             error: error?.message || error
@@ -101,6 +102,7 @@ function AcademicPeriodListCard({ userId = null, refreshToken = 0 }) {
 
     return () => {
       isMounted = false;
+      abortController.abort();
     };
   }, [userId]);
 

@@ -33,5 +33,14 @@ body {
 html, body {
     min-height: 100vh;
     min-height: 100dvh;
-    overflow-x: hidden;   
+    width: 100%;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
 }

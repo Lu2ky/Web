@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import "../../styles/WeekView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
@@ -18,6 +18,7 @@ function WeekView({ events = [], personalEvents = [], weekOffset = 0, setWeekOff
   const HOUR_HEIGHT = 64; // 4rem = 64px
   const [hourPx, setHourPx] = useState(64); // Inicializar con 64px en lugar de 0
   const gridRef = useRef(null);
+  const scrollAreaRef = useRef(null);
   // Obtener rango de fechas de la semana
   const getWeekDateRange = () => {
       const today = new Date();
@@ -71,12 +72,39 @@ function WeekView({ events = [], personalEvents = [], weekOffset = 0, setWeekOff
     return hour * 60 + min;
   };
 
+  // Función para hacer scroll por defecto a las 6:00 AM
+  const scrollToCurrentTime = () => {
+    if (!scrollAreaRef.current) return;
+
+    const targetMinutes = 6 * MINUTES_IN_HOUR;
+    
+    const effectiveHourPx = hourPx > 0 ? hourPx : HOUR_HEIGHT;
+    const pxPerMinute = effectiveHourPx / MINUTES_IN_HOUR;
+    const scrollPosition = targetMinutes * pxPerMinute - effectiveHourPx; // Dejar 1 hora de contexto arriba
+
+    scrollAreaRef.current.scrollTop = Math.max(0, scrollPosition);
+  };
+
+  // Scroll a la hora actual cuando se monta o cambia el weekOffset
+  useLayoutEffect(() => {
+    const timer = setTimeout(() => {
+      scrollToCurrentTime();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [weekOffset, hourPx]);
+
   // Agrupar eventos por día
-  const eventsByDay = {};
-  [...events, ...personalEvents].forEach((event) => {
-    if (!eventsByDay[event.day]) eventsByDay[event.day] = [];
-    eventsByDay[event.day].push(event);
-  });
+  const eventsByDay = useMemo(() => {
+    const groupedEvents = {};
+    [...events, ...personalEvents].forEach((event) => {
+      if (!groupedEvents[event.day]) groupedEvents[event.day] = [];
+      groupedEvents[event.day].push(event);
+    });
+    return groupedEvents;
+  }, [events, personalEvents]);
+
+  const classEventIds = useMemo(() => new Set(events.map((event) => event.id)), [events]);
 
   const formatHour = (hour) => {
     const period = hour < 12 ? "AM" : "PM";
@@ -118,7 +146,7 @@ function WeekView({ events = [], personalEvents = [], weekOffset = 0, setWeekOff
       </div>
 
       {/* Área scrollable */}
-      <div className="weekScrollArea">
+      <div className="weekScrollArea" ref={scrollAreaRef}>
         <div className="weekGrid" ref={gridRef}>
           {/* Columna de horas */}
           <div className="hoursColumn">
@@ -141,7 +169,7 @@ function WeekView({ events = [], personalEvents = [], weekOffset = 0, setWeekOff
                   const pxPerMinute = effectiveHourPx / MINUTES_IN_HOUR;
                   const top = startMinutes * pxPerMinute;
                   const height = (endMinutes - startMinutes) * pxPerMinute;
-                  const isClass = events.some((e) => e.id === event.id);
+                  const isClass = classEventIds.has(event.id);
 
                   const commonProps = {
                     style: {
@@ -196,4 +224,4 @@ function WeekView({ events = [], personalEvents = [], weekOffset = 0, setWeekOff
   );
 }
 
-export default WeekView;
+export default memo(WeekView);

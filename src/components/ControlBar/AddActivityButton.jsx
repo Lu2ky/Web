@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import ModalBase from "../Templates/Modal";
 import "../../styles/ControlBar/AddActivityButton.css";
 import { addPersonalActivity } from "../../services/PersonalFetcher";
+import { isReminderDateInPast, PAST_REMINDER_DATE_MESSAGE } from "../TodoList/reminderDateValidation";
 
 const INITIAL_FORM_DATA = {
     title: "",
@@ -65,6 +66,14 @@ function AddActivityButton({ userId, idCourse, onActivityAdd }) {
         }
         if (!formData.dateEnd) {
             return "Debes seleccionar la fecha de fin.";
+        }
+        // Validar que la fecha de inicio no sea en el pasado
+        if (isReminderDateInPast(formData.dateStart)) {
+            return PAST_REMINDER_DATE_MESSAGE;
+        }
+        // Validar que la fecha de fin no sea en el pasado
+        if (isReminderDateInPast(formData.dateEnd)) {
+            return "La fecha de fin no puede ser en el pasado.";
         }
         const [startH, startM] = formData.startHour.split(":").map(Number);
         const [endH, endM] = formData.endHour.split(":").map(Number);
