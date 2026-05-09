@@ -1,3 +1,4 @@
+import { memo } from "react";
 import WeekView from "./WeekView";
 import DayView from "./DayView";
 
@@ -41,4 +42,4 @@ function Calendar({ viewMode, events = [], personalEvents = [], weekOffset = 0, 
         </div>
     );
 }
-export default Calendar;
+export default memo(Calendar);

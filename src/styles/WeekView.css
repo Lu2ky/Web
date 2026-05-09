@@ -107,26 +107,34 @@
   width: 100%;
   min-width: 0;
   position: relative;
+  scrollbar-width: auto;
+  scroll-behavior: smooth;
 }
 
 /* Scrollbar visible para mejor UX */
 .weekScrollArea::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
 }
 
 .weekScrollArea::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 4px;
+  border-radius: 6px;
+  margin: 5px 0;
 }
 
 .weekScrollArea::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+  background: #999999;
+  border-radius: 6px;
+  border: 2px solid #f1f1f1;
 }
 
 .weekScrollArea::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
+  background: #666666;
+}
+
+.weekScrollArea::-webkit-scrollbar-thumb:active {
+  background: #333333;
 }
 
 /* Grid general */

@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import "../../styles/DayView.css";
 import { BlockClasses } from "./BlockClasses";
 import { BlockPersonal } from "./BlockPersonal";
@@ -112,6 +112,15 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
         );
     }, [events, selectedDay]);
 
+    const scrollToDefaultTime = () => {
+        if (!bodyRef.current) return;
+        const targetMinutes = 6 * MINUTES_IN_HOUR;
+        const effectiveHourPx = hourPx > 0 ? hourPx : HOUR_HEIGHT;
+        const pxPerMinute = effectiveHourPx / MINUTES_IN_HOUR;
+        const scrollPosition = targetMinutes * pxPerMinute - effectiveHourPx; // 1 hora de contexto arriba
+        bodyRef.current.scrollTop = Math.max(0, scrollPosition);
+    };
+
     const formatHour = (hour) => {
         const period = hour < 12 ? "AM" : "PM";
         const displayHour = hour % 12 || 12;
@@ -159,9 +168,6 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
         return { width, left };
     };
 
-    // Filtrar eventos solo del día seleccionado
-    const dayEvents = [...events, ...personalEvents].filter(e => e.day === selectedDay);
-
     useEffect(() => {
         const scrollContainer = bodyRef.current;
         if (!scrollContainer || hourPx <= 0) return;
@@ -176,6 +182,18 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
 
         scrollContainer.scrollTop = targetTop;
     }, [earliestClassMinutes, hourPx, selectedDay]);
+    const dayEvents = useMemo(() => {
+        return [...events, ...personalEvents].filter(e => e.day === selectedDay);
+    }, [events, personalEvents, selectedDay]);
+
+    const classEventIds = useMemo(() => new Set(events.map((event) => event.id)), [events]);
+
+    useLayoutEffect(() => {
+        const timer = setTimeout(() => {
+            scrollToDefaultTime();
+        }, 100);
+        return () => clearTimeout(timer);
+    }, [hourPx, weekOffset, dayOffsetLocal]);
 
     return (
         <div className="dayViewContainer">
@@ -219,7 +237,7 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
                         const top = startMinutes * pxPerMinute;
                         const height = (endMinutes - startMinutes) * pxPerMinute;
                         const { width, left } = getEventDimensions(event, dayEvents);
-                        const isClass = events.some((e) => e.id === event.id);
+                        const isClass = classEventIds.has(event.id);
 
                         const commonProps = {
                             style: {
@@ -277,4 +295,4 @@ function DayView({ events = [], personalEvents = [], weekOffset = 0, setWeekOffs
         </div>
     );
 }
-export default DayView; 
+export default memo(DayView); 

@@ -103,9 +103,11 @@ export const getTimePart = (dateValue) => {
  * Builds a complete datetime string from date and time parts
  * datePart should be in YYYY-MM-DD format
  * timePart should be in HH:mm format
+ * If timePart is empty, defaults to 00:00:00 for consistency
  */
 export const buildDateTime = (datePart, timePart) => {
     if (!datePart) return '';
-    if (!timePart) return datePart;
+    // If no time specified, use default 00:00:00 for consistency
+    if (!timePart) return `${datePart} 00:00:00`;
     return `${datePart} ${timePart}:00`;
 };

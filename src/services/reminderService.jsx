@@ -211,7 +211,7 @@ class ReminderService {
 			String(rawCompleted).toLowerCase() === "true" ||
 			String(rawCompleted).toLowerCase() === "completed";
 
-		return {
+		const result = {
 			id:
 				reminder.N_idToDoList ??
 				reminder.idToDoList ??
@@ -241,6 +241,8 @@ class ReminderService {
 			priority,
 			tags,
 		};
+		
+		return result;
 	}
 
 	// Obtiene y normaliza todos los recordatorios de un usuario

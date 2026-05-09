@@ -25,15 +25,17 @@ function AdminView() {
     setParseError('');
     setImportStatus('');
 
+    let didStartImport = false;
+
     try {
       const parsed = await parseExcelFile(first);
-
+      didStartImport = true;
       setImportStatus('enviando');
       await importSchedule(parsed);
       setImportStatus('ok');
     } catch (error) {
       console.error('Error al procesar archivo:', error);
-      if (importStatus === 'enviando') {
+      if (didStartImport) {
         setImportStatus('error');
       } else {
         setParseError(error?.message || 'No se pudo procesar el archivo.');
@@ -45,10 +47,20 @@ function AdminView() {
     setPeriodRefreshToken((value) => value + 1);
   }, []);
 
+  const statusMessage = parseError
+    ? { tone: 'error', text: parseError }
+    : importStatus === 'enviando'
+      ? { tone: 'loading', text: 'Enviando horario...' }
+      : importStatus === 'ok'
+        ? { tone: 'success', text: 'Horario importado correctamente.' }
+        : importStatus === 'error'
+          ? { tone: 'error', text: 'Error al enviar el horario a la API.' }
+          : null;
+
   return (
     <div className="adminViewContainer">
       <div className="adminView__header">
-        <Header userId={userId} />
+        <Header userId={userId} variant="admin" />
       </div>
       <div className="adminView">
         <div className="adminView__overview">
@@ -62,7 +74,7 @@ function AdminView() {
 
               <DropArea
                 title="Cargar archivo de horarios (.xlsx)"
-                subtitle="Arrastra el archivo oficial de planeación académica para actualizar el sistema global."
+                subtitle="Arrastra el archivo oficial de planeacion academica para actualizar el sistema global."
                 accept=".xlsx"
                 onFiles={handleFiles}
                 fileName={fileName}
@@ -87,13 +99,15 @@ function AdminView() {
               </div>
             </div>
 
-            <div className="card adminPanel--period">
-              <AddAcademicPeriodCard userId={userId} onCreated={handlePeriodCreated} />
-              <AcademicPeriodListCard userId={userId} refreshToken={periodRefreshToken} />
-            </div>
+            <section className="adminPanel" aria-label="Gestion de periodos academicos">
+              <div className="adminPanelStack">
+                <AddAcademicPeriodCard userId={userId} onCreated={handlePeriodCreated} />
+                <AcademicPeriodListCard userId={userId} refreshToken={periodRefreshToken} />
+              </div>
+            </section>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
