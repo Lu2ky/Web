@@ -41,57 +41,80 @@
     padding: 0.5rem;
 }
 
-.adminPanel--surface {
-    padding: 2.8rem;
-    border-radius: 1rem;
-    background: #ffffff;
-    border: 2px solid transparent;
-    background-image:
-        linear-gradient(white, white),
-        linear-gradient(120deg, #ff4f73 0%, #ff5db1 45%, #8a3bf3 100%);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
-    box-shadow: 0 14px 28px rgba(138, 59, 243, 0.12);
+.adminView__overview .card.adminPanel--import {
+    min-height: 100%;
 }
 
-.adminPanelHeader {
+.adminPanel_downloadSection {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding: 1rem 1.1rem;
+    border: 1px solid #f1d3e6;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fff7fc 0%, #ffffff 100%);
 }
 
-.adminPanelHeader h2 {
-    margin: 0;
-    font-size: 1.35rem;
-    color: #111827;
-}
-
-.adminPanelHeader p {
+.adminPanel_downloadText {
     margin: 0;
     color: #4b5563;
-}
-
-.adminPanelStack {
-    display: grid;
-    gap: 1.25rem;
-}
-
-.adminView__message {
-    margin: 0.4rem 0 0;
+    line-height: 1.45;
     font-size: 0.95rem;
+}
+
+.adminPanel_downloadLink {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f6047b 0%, #c820c5 100%);
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.adminPanel_downloadLink:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.96);
+}
+
+.adminPanel_downloadLink:focus-visible {
+    outline: 2px solid #c820c5;
+    outline-offset: 2px;
+}
+
+.adminPanel_status {
+    margin: 0;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.92rem;
     font-weight: 600;
 }
 
-.adminView__message--error {
-    color: #dc2626;
+.adminPanel_status--loading {
+    color: #475569;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
 }
 
-.adminView__message--loading {
-    color: #6b7280;
+.adminPanel_status--success {
+    color: #ffffff;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
 }
 
-.adminView__message--success {
-    color: #059669;
+.adminPanel_status--error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
+
+.adminView__overview .card.adminPanel--period {
+    justify-content: flex-start;
 }
 
 @media (max-width: 980px) {
