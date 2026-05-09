@@ -107,7 +107,7 @@ function AdminView() {
             </section>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
