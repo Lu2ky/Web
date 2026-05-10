@@ -62,17 +62,15 @@ function AdminView() {
       <div className="adminView__header">
         <Header userId={userId} variant="admin" />
       </div>
-
-      <main className="adminViewMain">
-        <div className="adminViewContent">
-          <div className="adminViewGrid">
-            <section className="adminPanel adminPanel--surface" aria-labelledby="admin-import-title">
-              <div className="adminPanelHeader">
-                <h2 id="admin-import-title">Importar horarios</h2>
-                <p>Sube el archivo oficial de planeacion academica en formato .xlsx.</p>
-              </div>
-
-              <ModalArchivo label="Subir Archivo" accept=".xlsx" onFiles={handleFiles} />
+      <div className="adminView">
+        <div className="adminView__overview">
+          <div className="page">
+            <div className="card adminPanel--import">
+              <ModalArchivo
+                label="Subir Archivo"
+                accept=".xlsx"
+                onFiles={handleFiles}
+              />
 
               <DropArea
                 title="Cargar archivo de horarios (.xlsx)"
@@ -82,12 +80,24 @@ function AdminView() {
                 fileName={fileName}
               />
 
-              {statusMessage ? (
-                <p className={`adminView__message adminView__message--${statusMessage.tone}`}>
-                  {statusMessage.text}
+              {parseError ? <p className="adminPanel_status adminPanel_status--error">{parseError}</p> : null}
+              {importStatus === 'enviando' && <p className="adminPanel_status adminPanel_status--loading">Enviando horario...</p>}
+              {importStatus === 'ok' && <p className="adminPanel_status adminPanel_status--success">Horario importado correctamente.</p>}
+              {importStatus === 'error' && <p className="adminPanel_status adminPanel_status--error">Error al enviar el horario a la API.</p>}
+
+              <div className="adminPanel_downloadSection" aria-label="Descarga de plantilla">
+                <p className="adminPanel_downloadText">
+                  ¿No tienes el archivo listo? Descarga la plantilla oficial y completa la información antes de subirla.
                 </p>
-              ) : null}
-            </section>
+                <a
+                  className="adminPanel_downloadLink"
+                  href="/plantillaHorarios.xlsx"
+                  download
+                >
+                  Descargar plantilla de horarios
+                </a>
+              </div>
+            </div>
 
             <section className="adminPanel" aria-label="Gestion de periodos academicos">
               <div className="adminPanelStack">
@@ -97,7 +107,7 @@ function AdminView() {
             </section>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
