@@ -24,7 +24,7 @@ export default function RootRoutes() {
 			<Route path="/IdRestore" element={<RecoverPassword />} />
 			<Route path="/Legal" element={<LegalDocumentsView />} />
 			<Route path="/RestorePassword" element={<RestorePassword />} />
-		<Route path="/TokenPassword" element={<TokenPassword />} />
+		<Route path="/TokenPassword" element={<TokenPassword />} /> 
 
 
 			<Route element={<ProtectedRoute allowedRoles={[ROLE_ADMIN]} />}>
