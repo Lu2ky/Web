@@ -1,0 +1,131 @@
+.adminViewContainer {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    background: #f7f7fb;
+}
+
+.adminView__header {
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.adminViewMain {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    padding: clamp(0.5rem, 1.2vw, 1.5rem);
+    box-sizing: border-box;
+}
+
+.adminViewContent {
+    width: 100%;
+    max-width: 1680px;
+    margin: 0 auto;
+    display: grid;
+    gap: 2rem;
+}
+
+
+.adminViewGrid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
+}
+
+.adminPanel {
+    display: grid;
+    gap: 1.75rem;
+    padding: 0.5rem;
+}
+
+.adminView__overview .card.adminPanel--import {
+    min-height: 100%;
+}
+
+.adminPanel_downloadSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding: 1rem 1.1rem;
+    border: 1px solid #f1d3e6;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fff7fc 0%, #ffffff 100%);
+}
+
+.adminPanel_downloadText {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.45;
+    font-size: 0.95rem;
+}
+
+.adminPanel_downloadLink {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f6047b 0%, #c820c5 100%);
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.adminPanel_downloadLink:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.96);
+}
+
+.adminPanel_downloadLink:focus-visible {
+    outline: 2px solid #c820c5;
+    outline-offset: 2px;
+}
+
+.adminPanel_status {
+    margin: 0;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.adminPanel_status--loading {
+    color: #475569;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.adminPanel_status--success {
+    color: #ffffff;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+}
+
+.adminPanel_status--error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
+
+.adminView__overview .card.adminPanel--period {
+    justify-content: flex-start;
+}
+
+@media (max-width: 980px) {
+    .adminViewGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .adminPanel--surface {
+        padding: 1.2rem;
+    }
+}
+

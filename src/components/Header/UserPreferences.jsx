@@ -1,0 +1,549 @@
+import { useState, useEffect, useRef } from "react";
+import { FaEdit, FaTimes, FaCheck } from "react-icons/fa";
+import * as userService from "../../services/userService";
+import * as notificationsSilenceService from "../../services/notificationsSilenceService";
+import Modal from "../Templates/Modal";
+import "./UserPreferences.css";
+
+function parseAnticipationMinutes(userData) {
+    const rawValue = userData?.antelacionNotis ?? userData?.tiempoMute ?? userData?.anticipationTime;
+
+    if (!rawValue) {
+        return 0;
+    }
+
+    if (typeof rawValue === "string" && rawValue.includes(":")) {
+        const parts = rawValue.split(":");
+        const hours = parseInt(parts[0], 10) || 0;
+        const minutes = parseInt(parts[1], 10) || 0;
+        return hours * 60 + minutes;
+    }
+
+    if (typeof rawValue === "object") {
+        const hours = parseInt(rawValue.hours ?? rawValue.horas ?? 0, 10) || 0;
+        const minutes = parseInt(rawValue.minutes ?? rawValue.minutos ?? 0, 10) || 0;
+        return hours * 60 + minutes;
+    }
+
+    if (typeof rawValue === "number") {
+        return rawValue;
+    }
+
+    return 0;
+}
+
+export default function UserPreferences({ userId }) {
+    const [userData, setUserData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    
+    // Estado de edición de correo
+    const [isEditingEmail, setIsEditingEmail] = useState(false);
+    const [newEmail, setNewEmail] = useState("");
+    const [isSavingEmail, setIsSavingEmail] = useState(false);
+
+    // Estado de anticipación de recordatorios
+    const [isEditingAnticipation, setIsEditingAnticipation] = useState(false);
+    const [anticipationHours, setAnticipationHours] = useState(0);
+    const [anticipationMinutes, setAnticipationMinutes] = useState(0);
+    const [isSavingAnticipation, setIsSavingAnticipation] = useState(false);
+
+    // Estado de silenciamiento de notificaciones
+    const [muteInfo, setMuteInfo] = useState(null);
+    const [isSavingMute, setIsSavingMute] = useState(false);
+    const [showMuteConfirmModal, setShowMuteConfirmModal] = useState(false);
+    const transientTimersRef = useRef([]);
+
+    // Cargar datos del usuario al montar el componente
+    useEffect(() => {
+        loadUserData();
+        loadMuteInfo();
+    }, [userId]);
+
+    useEffect(() => {
+        return () => {
+            transientTimersRef.current.forEach((timerId) => clearTimeout(timerId));
+            transientTimersRef.current = [];
+        };
+    }, []);
+
+    const scheduleTransientUpdate = (callback, delayMs) => {
+        const timerId = setTimeout(() => {
+            callback();
+            transientTimersRef.current = transientTimersRef.current.filter((id) => id !== timerId);
+        }, delayMs);
+
+        transientTimersRef.current.push(timerId);
+    };
+
+    const loadMuteInfo = () => {
+        try {
+            const muteStatus = notificationsSilenceService.getMuteStatus();
+            setMuteInfo(muteStatus);
+        } catch (err) {
+            console.error("Error loading mute info:", err);
+        }
+    };
+
+    const loadUserData = async () => {
+        if (!userId) {
+            setError("Usuario no disponible");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const data = await userService.getUserData(userId);
+            if (data) {
+                // Backend puede devolver un array o un objeto
+                const userData = Array.isArray(data) ? data[0] : data;
+                setUserData(userData);
+                setNewEmail(userData.email || userData.correo || "");
+                const totalMinutes = parseAnticipationMinutes(userData);
+                
+                setAnticipationHours(Math.floor(totalMinutes / 60));
+                setAnticipationMinutes(totalMinutes % 60);
+                
+                setError("");
+            } else {
+                setError("No se pudieron cargar los datos del usuario");
+            }
+        } catch (err) {
+            setError("Error al cargar los datos del usuario");
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Validar formato de correo
+    const isValidEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const handleEditEmail = () => {
+        setIsEditingEmail(true);
+        setError("");
+        setSuccess("");
+        window.dispatchEvent(new CustomEvent("onboarding:preferences-email-edit-opened"));
+    };
+
+    const handleCancelEmail = () => {
+        setIsEditingEmail(false);
+        setNewEmail(userData?.email || userData?.correo || "");
+        setError("");
+    };
+
+    const handleSaveEmail = async (e) => {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("onboarding:preferences-email-saved"));
+        setError("");
+        setSuccess("");
+
+        const emailToSave = newEmail.trim();
+        
+        if (!emailToSave) {
+            setError("Por favor ingresa un correo electrónico");
+            return;
+        }
+
+        if (!isValidEmail(emailToSave)) {
+            setError("Por favor ingresa un correo electrónico válido");
+            return;
+        }
+
+        const currentEmail = userData?.email || userData?.correo || "";
+        if (emailToSave === currentEmail) {
+            setError("El correo nuevo debe ser diferente al actual");
+            return;
+        }
+
+        setIsSavingEmail(true);
+
+        try {
+            const result = await userService.updateUserEmail(userId, emailToSave);
+
+            if (result && (result.success || result.status === "success" || result.ok === true)) {
+                setSuccess("Correo actualizado exitosamente");
+                setUserData({
+                    ...userData,
+                    email: emailToSave,
+                    correo: emailToSave
+                });
+                setIsEditingEmail(false);
+                
+                // Limpiar mensaje de éxito después de 3 segundos
+                scheduleTransientUpdate(() => setSuccess(""), 3000);
+            } else {
+                setError(result?.message || "Error al actualizar el correo");
+            }
+        } catch (err) {
+            setError(err?.message || "Error al actualizar el correo");
+            console.error(err);
+        } finally {
+            setIsSavingEmail(false);
+        }
+    };
+
+    const handleEditAnticipation = () => {
+        setIsEditingAnticipation(true);
+        setError("");
+        setSuccess("");
+    };
+
+    const handleCancelAnticipation = () => {
+        setIsEditingAnticipation(false);
+        const totalMinutes = parseAnticipationMinutes(userData);
+        
+        setAnticipationHours(Math.floor(totalMinutes / 60));
+        setAnticipationMinutes(totalMinutes % 60);
+        setError("");
+    };
+
+    const handleSaveAnticipation = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+
+        const hours = parseInt(anticipationHours) || 0;
+        const minutes = parseInt(anticipationMinutes) || 0;
+        const totalMinutes = hours * 60 + minutes;
+
+        if (totalMinutes < 0) {
+            setError("El tiempo de anticipación no puede ser negativo");
+            return;
+        }
+
+        if (totalMinutes > 1440) {
+            setError("El tiempo de anticipación no puede ser mayor a 24 horas");
+            return;
+        }
+
+        const currentTotalMinutes = parseAnticipationMinutes(userData);
+        
+        if (totalMinutes === currentTotalMinutes) {
+            setError("El nuevo tiempo debe ser diferente al actual");
+            return;
+        }
+
+        setIsSavingAnticipation(true);
+
+        try {
+            const result = await userService.updateReminderAnticipation(userId, totalMinutes);
+
+            if (result && (result.success || result.status === "success" || result.ok === true)) {
+                setSuccess("Tiempo de anticipación actualizado exitosamente");
+                setUserData({
+                    ...userData,
+                    antelacionNotis: totalMinutes,
+                    tiempoMute: totalMinutes
+                });
+                window.dispatchEvent(new CustomEvent("preferences:anticipation-updated", {
+                    detail: {
+                        userId,
+                        minutes: totalMinutes,
+                        at: new Date().toISOString(),
+                    }
+                }));
+                setIsEditingAnticipation(false);
+                
+                // Limpiar mensaje de éxito después de 3 segundos
+                scheduleTransientUpdate(() => setSuccess(""), 3000);
+            } else {
+                setError(result?.message || "Error al actualizar el tiempo de anticipación");
+            }
+        } catch (err) {
+            setError(err?.message || "Error al actualizar el tiempo de anticipación");
+            console.error(err);
+        } finally {
+            setIsSavingAnticipation(false);
+        }
+    };
+
+    // Mute notifications handlers
+    const handleOpenMuteModal = () => {
+        setShowMuteConfirmModal(true);
+        setError("");
+        setSuccess("");
+    };
+
+    const handleCancelMute = () => {
+        setShowMuteConfirmModal(false);
+    };
+
+    const handleConfirmMute = async () => {
+        setShowMuteConfirmModal(false);
+        setIsSavingMute(true);
+        setError("");
+        setSuccess("");
+
+        try {
+            const result = await notificationsSilenceService.silenceNotifications(userId);
+
+            if (result.success) {
+                setMuteInfo(result.data);
+                setSuccess("Notificaciones silenciadas correctamente");
+                scheduleTransientUpdate(() => setSuccess(""), 3000);
+            } else {
+                setError(result.error || "Error al silenciar notificaciones");
+                scheduleTransientUpdate(() => setError(""), 4000);
+            }
+        } catch (err) {
+            setError("Error al silenciar notificaciones");
+            console.error(err);
+            scheduleTransientUpdate(() => setError(""), 4000);
+        } finally {
+            setIsSavingMute(false);
+        }
+    };
+
+    const handleUnmute = async () => {
+        setIsSavingMute(true);
+        setError("");
+        setSuccess("");
+
+        try {
+            const result = await notificationsSilenceService.activateNotifications(userId);
+
+            if (result.success) {
+                setMuteInfo(null);
+                setSuccess("Notificaciones reactivadas correctamente");
+                scheduleTransientUpdate(() => setSuccess(""), 3000);
+            } else {
+                setError(result.error || "Error al reactivar notificaciones");
+            }
+        } catch (err) {
+            setError("Error al reactivar notificaciones");
+            console.error(err);
+        } finally {
+            setIsSavingMute(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="user-preferences" data-onboarding-id="preferences-modal">
+                <p className="loading">Cargando datos...</p>
+            </div>
+        );
+    }
+
+    const currentEmail = userData?.email || userData?.correo || "No disponible";
+    const handleOnboardingEmailInput = (value) => {
+        setNewEmail(value);
+
+        const trimmedValue = String(value || "").trim();
+        if (trimmedValue && isValidEmail(trimmedValue)) {
+            window.dispatchEvent(new CustomEvent("onboarding:preferences-email-typed"));
+        }
+    };
+
+    return (
+        <div className="user-preferences" data-onboarding-id="preferences-modal">
+            {error && <div className="alert alert-error">{error}</div>}
+            {success && <div className="alert alert-success">{success}</div>}
+
+            {/* Email Preferences Section */}
+            <section className="preferences-section" data-onboarding-id="preferences-email-section">
+                <h3 className="preferences-section-title">Correo Electrónico</h3>
+                
+                <div className="pref-group">
+                    <label className="pref-label">Correo Principal</label>
+                    {isEditingEmail ? (
+                        <form onSubmit={handleSaveEmail} className="email-edit-form">
+                            <div className="email-input-wrapper" data-onboarding-id="preferences-email-input">
+                                <input
+                                    type="email"
+                                    value={newEmail}
+                                    onChange={(e) => handleOnboardingEmailInput(e.target.value)}
+                                    placeholder="nuevo.email@upb.edu"
+                                    className="form-input email-input"
+                                    disabled={isSavingEmail}
+                                />
+                                <button
+                                    type="submit"
+                                    className="email-action-btn email-save-btn"
+                                    disabled={isSavingEmail}
+                                    title="Guardar"
+                                    data-onboarding-id="preferences-email-save-button"
+                                >
+                                    <FaCheck />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="email-action-btn email-cancel-btn"
+                                    onClick={handleCancelEmail}
+                                    disabled={isSavingEmail}
+                                    title="Cancelar"
+                                >
+                                    <FaTimes />
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        <div className="email-display-wrapper">
+                            <div className="pref-value">{currentEmail}</div>
+                            <button
+                                className="email-edit-button"
+                                onClick={handleEditEmail}
+                                disabled={isSavingEmail}
+                                title="Editar correo"
+                                data-onboarding-id="preferences-email-edit-button"
+                            >
+                                <FaEdit />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* Notifications Preferences Section */}
+            <section className="preferences-section">
+                <h3 className="preferences-section-title">Notificaciones</h3>
+                
+                <div className="pref-group">
+                    <label className="pref-label">Notificaciones por Correo</label>
+                    <p className="pref-description">Recibe actualizaciones importantes en tu correo electrónico</p>
+                </div>
+
+                {/* Mute Notifications Section */}
+                <div className="pref-group">
+                    <label className="pref-label">Silenciar Notificaciones</label>
+                    
+                    {muteInfo?.enabled ? (
+                        <div className="mute-status-badge">
+                            <span className="mute-status-indicator">●</span>
+                            <div className="mute-status-content">
+                                <p className="mute-status-text">Notificaciones silenciadas</p>
+                            </div>
+                            <button
+                                type="button"
+                                className="email-action-btn email-cancel-btn"
+                                onClick={handleUnmute}
+                                title="Reactivar notificaciones"
+                                disabled={isSavingMute}
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            className="mute-toggle-btn"
+                            onClick={handleOpenMuteModal}
+                            disabled={isSavingMute}
+                        >
+                            Silenciar Notificaciones
+                        </button>
+                    )}
+                </div>
+            </section>
+
+            {/* Modal de confirmación para silenciar */}
+            <Modal
+                isOpen={showMuteConfirmModal}
+                onClose={handleCancelMute}
+                title="¿Silenciar notificaciones?"
+                confirmLabel="Sí, silenciar"
+                closeLabel="Cancelar"
+                onConfirm={isSavingMute ? null : handleConfirmMute}
+            >
+                {isSavingMute ? (
+                    <div style={{ textAlign: "center", padding: "1rem" }}>
+                        <div className="spinner" style={{ marginBottom: "1rem" }}></div>
+                        <p style={{ color: "#6b7280", marginTop: "1rem" }}>Silenciando notificaciones...</p>
+                    </div>
+                ) : (
+                    <p style={{ color: "#4b5563", lineHeight: "1.6" }}>
+                        Se desactivarán todas tus notificaciones. ¿Deseas continuar?
+                    </p>
+                )}
+            </Modal>
+
+            {/* Reminder Anticipation Section */}
+            <section className="preferences-section">
+                <h3 className="preferences-section-title">Recordatorios</h3>
+                
+                <div className="pref-group">
+                    <label className="pref-label">Tiempo de Anticipación</label>
+                    <p className="pref-description">¿Con cuánto tiempo de anticipación quieres ser recordado antes de que venza una tarea? (máximo 24 horas)</p>
+                    
+                    {isEditingAnticipation ? (
+                        <form onSubmit={handleSaveAnticipation} className="anticipation-edit-form">
+                            <div className="anticipation-input-wrapper">
+                                <div className="time-input-group">
+                                    <label htmlFor="anticipation-hours" className="time-label">Horas</label>
+                                    <select
+                                        id="anticipation-hours"
+                                        value={anticipationHours}
+                                        onChange={(e) => setAnticipationHours(e.target.value)}
+                                        className="time-select"
+                                        disabled={isSavingAnticipation}
+                                    >
+                                        {[...Array(24)].map((_, i) => (
+                                            <option key={i} value={i}>{i}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="time-input-group">
+                                    <label htmlFor="anticipation-minutes" className="time-label">Minutos</label>
+                                    <select
+                                        id="anticipation-minutes"
+                                        value={anticipationMinutes}
+                                        onChange={(e) => setAnticipationMinutes(e.target.value)}
+                                        className="time-select"
+                                        disabled={isSavingAnticipation}
+                                    >
+                                        {[...Array(60)].map((_, i) => (
+                                            <option key={i} value={i}>{String(i).padStart(2, '0')}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="time-actions">
+                                    <button
+                                        type="submit"
+                                        className="email-action-btn email-save-btn"
+                                        disabled={isSavingAnticipation}
+                                        title="Guardar"
+                                    >
+                                        <FaCheck />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="email-action-btn email-cancel-btn"
+                                        onClick={handleCancelAnticipation}
+                                        disabled={isSavingAnticipation}
+                                        title="Cancelar"
+                                    >
+                                        <FaTimes />
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    ) : (
+                        <div className="anticipation-display-wrapper">
+                            <div className="pref-value">
+                                {anticipationHours > 0 && `${anticipationHours}h `}
+                                {anticipationMinutes > 0 && `${anticipationMinutes}m `}
+                                {anticipationHours === 0 && anticipationMinutes === 0 && "Sin recordatorio"}
+                            </div>
+                            <button
+                                className="email-edit-button"
+                                onClick={handleEditAnticipation}
+                                disabled={isSavingAnticipation}
+                                title="Editar tiempo de anticipación"
+                            >
+                                <FaEdit />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+        </div>
+    );
+}

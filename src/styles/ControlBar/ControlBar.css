@@ -1,0 +1,338 @@
+.ControlBar {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top:unset;
+    bottom: 0;
+    z-index: 40;
+    overflow: visible;
+    width: 100%; 
+    box-sizing: border-box; 
+    padding: 0.4rem 1.2rem;
+    min-height: 56px;
+    background: linear-gradient(to right, #ffffff, #f9fafb);
+    border-bottom: 2px solid transparent;
+    background-image:
+        linear-gradient(#ffffff, #ffffff),
+        linear-gradient(90deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    border-top: 2px solid transparent;
+    border-bottom: none;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Agrupaciones */
+.ControlBar .Left,
+.ControlBar .Center,
+.ControlBar .Right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* SE PUEDE MEJORAR, ES PARA ESPACIAR LOS BOTONES */
+}
+
+/* Centrar el bloque del medio */
+.ControlBar .Center {
+    flex: 1;
+    justify-content: center;
+}
+
+/* Alinear el bloque derecho */
+.ControlBar .Right {
+    justify-content: flex-end;
+}
+
+.controlBarDropdownRoot {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.controlBarDropdownTrigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.5rem;
+    color: #000000;
+    background: white;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: 2px solid transparent;
+    background-image:
+        linear-gradient(white, white),
+        linear-gradient(135deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    max-width: 240px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.controlBarDropdownTrigger svg,
+.controlBarDropdownIcon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.controlBarDropdownTrigger:hover {
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
+    transform: translateY(-2px);
+}
+
+.controlBarDropdownTrigger:active,
+.controlBarDropdownTrigger:focus {
+    outline: none;
+    background-image: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    transform: scale(0.97);
+}
+
+.controlBarDropdownMenu {
+    position: absolute;
+    bottom: 115%;
+    min-width: 12rem;
+    background: white;
+    border-radius: 0.8rem;
+    padding: 0.4rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    list-style: none;
+    margin: 0;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+}
+
+.controlBarDropdownMenu--academicPeriod {
+    right: 0;
+}
+
+.controlBarDropdownMenu--filter {
+    left: 0;
+}
+
+.controlBarDropdownList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.controlBarDropdownList > li {
+    list-style: none;
+}
+
+.controlBarDropdownOption {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    background: none;
+    border: none;
+    border-radius: 0.5rem;
+    text-align: left;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: #000000;
+}
+
+.controlBarDropdownOption:hover {
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+}
+
+.controlBarDropdownOption.is-selected {
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+}
+
+/* Responsive */
+@media (min-width: 900px) {
+    .ControlBar {
+        flex-direction:row;
+        flex-wrap:nowrap;
+        justify-content: space-between;
+    }
+
+    .ControlBar .Left {
+        justify-content: flex-start;
+    }
+
+    .ControlBar .Center {
+        justify-content: center;
+        flex:1;
+    }
+
+    .ControlBar .Right {
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 1012px) {
+    .ControlBar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.3rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .ControlBar .Left,
+    .ControlBar .Center,
+    .ControlBar .Right {
+        width: auto;
+        gap:0.3rem;
+        justify-content: center;
+    }
+}
+/* Ajustes para mobile */
+@media (max-width: 768px) {
+    .ControlBar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap:0.3rem;
+        padding: 0.4rem 0.8rem;
+        flex-wrap: nowrap;
+    }
+
+    .ControlBar .Left,
+    .ControlBar .Center
+    {
+        width: auto;
+        gap:0.3rem;
+        justify-content: center;
+    }
+
+    .ControlBar .right {
+        width:auto;
+        gap:0.3rem;
+        justify-content: flex-end;
+        padding-right: 0.4;
+    }
+
+    .controlBarDropdownTrigger {
+        min-width: 36px;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 0.6rem;
+        font-size: 0;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+    }
+
+    .controlBarDropdownTrigger span {
+        display: none;
+    }
+
+    .controlBarDropdownTrigger svg,
+    .controlBarDropdownIcon {
+        width: 20px;
+        height: 20px;
+        display: block;
+    }
+
+    .controlBarDropdownMenu {
+        right: 0;
+        left: auto;
+        min-width: 150px;
+        max-width: 90vw;
+    }
+}
+
+/* Animaciones elegantes y suaves */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
+    }
+    to {
+        box-shadow: 0 8px 24px rgba(192, 38, 211, 0.5);
+    }
+}
+
+/* Animación suave del menú */
+.controlBarDropdownMenu {
+    animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: bottom right;
+}
+
+/* Animación suave del botón al pasar el mouse */
+.controlBarDropdownTrigger {
+    position: relative;
+    overflow: hidden;
+}
+
+.controlBarDropdownTrigger::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    pointer-events: none;
+}
+
+.controlBarDropdownTrigger:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Animación ripple en opciones */
+.controlBarDropdownOption {
+    position: relative;
+    overflow: hidden;
+}
+
+.controlBarDropdownOption::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 0, 110, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+    pointer-events: none;
+}
+
+.controlBarDropdownOption:active::before {
+    width: 300px;
+    height: 300px;
+}

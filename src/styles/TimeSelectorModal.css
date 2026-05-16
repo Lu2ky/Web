@@ -1,0 +1,205 @@
+.timeSelectorButton {
+    background:
+        linear-gradient(white, white) padding-box,
+        linear-gradient(135deg, #ff006e, #a100ff) border-box;
+    color: #000;
+    border: 2px solid transparent;
+    border-radius: 0.7rem;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+}
+
+.timeSelectorButton svg {
+    font-size: 20px;
+}
+
+.timeSelectorButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(161, 0, 255, 0.35);
+}
+
+.timeSelectorButton:active {
+    transform: scale(0.96);
+}
+
+.timeModalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.25s ease;
+    z-index: 210;
+    padding: 1.5rem;
+}
+
+.timeModalContainer {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    padding: 2rem;
+    border-radius: 1.1rem;
+    border: 2px solid transparent;
+    background-image:
+        linear-gradient(white, white),
+        linear-gradient(135deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    animation: slideUp 0.3s ease;
+}
+
+.timeModalContainer h2 {
+    text-align: center;
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+.timeModalClose {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.timeModalClose:hover {
+    color: #ff006e;
+}
+
+.timeFieldsRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.presetBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.presetLabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.presetChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.time-chip {
+    padding: 0.45rem 0.9rem;
+    background: #f3f4f6;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.time-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 24, 40, 0.06);
+}
+
+.time-chip.active {
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    box-shadow: 0 8px 22px rgba(192, 38, 211, 0.18);
+}
+
+.timeField {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.timeModalContainer label {
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+.timeModalContainer input {
+    padding: 0.75rem;
+    border-radius: 0.7rem;
+    border: 1px solid #e5e7eb;
+    font-size: 0.9rem;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+}
+
+.timeModalContainer input:focus {
+    background-color: white;
+    border-color: #c026d3;
+    box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.15);
+    outline: none;
+}
+
+.timeModalActions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.9rem;
+    margin-top: 0.4rem;
+}
+
+.timeCancelButton,
+.timeSaveButton {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timeCancelButton {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.timeCancelButton:hover {
+    background: #f3f4f6;
+}
+
+.timeSaveButton {
+    border: none;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+}
+
+.timeSaveButton:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 520px) {
+    .timeFieldsRow {
+        grid-template-columns: 1fr;
+    }
+}

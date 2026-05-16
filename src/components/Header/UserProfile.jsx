@@ -1,0 +1,401 @@
+import { useState, useEffect, useRef } from "react";
+import { FaEye, FaEyeSlash, FaCheckCircle, FaRegCircle, FaExclamationCircle } from "react-icons/fa";
+import * as userService from "../../services/userService";
+import LDAPservice from "../../services/LDAPservice";
+import useOnboarding from "../../hooks/useOnboarding";
+import "./UserProfile.css";
+
+function validatePasswordComplexity(password) {
+    const value = String(password || "");
+
+    if (value.length < 8) return "La contraseña debe tener al menos 8 caracteres";
+    if (!/[a-z]/.test(value)) return "La contraseña debe incluir al menos una letra minúscula";
+    if (!/[A-Z]/.test(value)) return "La contraseña debe incluir al menos una letra mayúscula";
+    if (!/\d/.test(value)) return "La contraseña debe incluir al menos un número";
+    if (!/[^A-Za-z0-9\s]/.test(value)) return "La contraseña debe incluir al menos un símbolo";
+
+    return null;
+}
+
+function getPasswordChecklist(password, currentPassword) {
+    const value = String(password || "");
+    const current = String(currentPassword || "");
+
+    return [
+        {
+            id: "min-length",
+            label: "Al menos 8 caracteres",
+            met: value.length >= 8,
+        },
+        {
+            id: "lowercase",
+            label: "Al menos una letra minúscula",
+            met: /[a-z]/.test(value),
+        },
+        {
+            id: "uppercase",
+            label: "Al menos una letra mayúscula",
+            met: /[A-Z]/.test(value),
+        },
+        {
+            id: "number",
+            label: "Al menos un número",
+            met: /\d/.test(value),
+        },
+        {
+            id: "symbol",
+            label: "Al menos un símbolo",
+            met: /[^A-Za-z0-9\s]/.test(value),
+        },
+        {
+            id: "different-current",
+            label: "Debe ser diferente a la contraseña actual",
+            met: value.length > 0 && current.length > 0 && value !== current,
+        },
+    ];
+}
+
+export default function UserProfile({ userId }) {
+    const [userData, setUserData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const { reset: resetOnboarding } = useOnboarding();
+    
+    // Estado del formulario de cambio de contraseña
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const transientTimersRef = useRef([]);
+
+    const passwordChecklist = getPasswordChecklist(newPassword, currentPassword);
+    const metCriteriaCount = passwordChecklist.filter((criteria) => criteria.met).length;
+    const checklistProgress = Math.round((metCriteriaCount / passwordChecklist.length) * 100);
+    const showMatchHint = confirmPassword.length > 0;
+    const passwordsMatch = newPassword.length > 0 && newPassword === confirmPassword;
+
+    // Cargar datos del usuario al montar el componente
+    useEffect(() => {
+        loadUserData();
+    }, [userId]);
+
+    useEffect(() => {
+        return () => {
+            transientTimersRef.current.forEach((timerId) => clearTimeout(timerId));
+            transientTimersRef.current = [];
+        };
+    }, []);
+
+    const scheduleTransientUpdate = (callback, delayMs) => {
+        const timerId = setTimeout(() => {
+            callback();
+            transientTimersRef.current = transientTimersRef.current.filter((id) => id !== timerId);
+        }, delayMs);
+
+        transientTimersRef.current.push(timerId);
+    };
+
+    const loadUserData = async () => {
+        if (!userId) {
+            setError("Usuario no disponible");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const data = await userService.getUserData(userId);
+            if (data) {
+                // Backend puede devolver un array o un objeto
+                const userData = Array.isArray(data) ? data[0] : data;
+                setUserData(userData);
+                setError("");
+            } else {
+                setError("No se pudieron cargar los datos del usuario");
+            }
+        } catch (err) {
+            setError("Error al cargar los datos del usuario");
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+
+        // Validaciones
+        if (!currentPassword.trim()) {
+            setError("Por favor ingresa tu contraseña actual");
+            return;
+        }
+
+        if (!newPassword.trim()) {
+            setError("Por favor ingresa una nueva contraseña");
+            return;
+        }
+
+        if (!confirmPassword.trim()) {
+            setError("Por favor confirma la nueva contraseña");
+            return;
+        }
+
+        const policyError = validatePasswordComplexity(newPassword);
+        if (policyError) {
+            setError(policyError);
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setError("Las contraseñas no coinciden");
+            return;
+        }
+
+        if (currentPassword === newPassword) {
+            setError("La nueva contraseña debe ser diferente a la actual");
+            return;
+        }
+
+        setIsChangingPassword(true);
+
+        try {
+            const authResult = await LDAPservice(String(userId || "").trim(), currentPassword);
+            const isCurrentPasswordValid = authResult
+                && (
+                    authResult.success
+                    || authResult.status === "success"
+                    || authResult.valid === true
+                    || Boolean(authResult.data)
+                );
+
+            if (!isCurrentPasswordValid) {
+                setError(authResult?.message || "La contraseña actual es incorrecta");
+                return;
+            }
+
+            const result = await userService.changePassword(
+                userId,
+                currentPassword,
+                newPassword
+            );
+
+            if (result && (result.success || result.status === "success")) {
+                setSuccess("Contraseña cambiada exitosamente");
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+                
+                // Disparar evento del onboarding
+                window.dispatchEvent(new CustomEvent("onboarding:password-changed"));
+                
+                // Limpiar mensaje de éxito después de 3 segundos
+                scheduleTransientUpdate(() => setSuccess(""), 3000);
+            } else {
+                setError(result?.message || "Error al cambiar la contraseña");
+            }
+        } catch (err) {
+            setError("Error al cambiar la contraseña");
+            console.error(err);
+        } finally {
+            setIsChangingPassword(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="user-profile">
+                <p className="loading">Cargando datos...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="user-profile" data-onboarding-id="profile-modal">
+            {error && <div className="alert alert-error">{error}</div>}
+            {success && <div className="alert alert-success">{success}</div>}
+
+            {/* User Information Section */}
+            <section className="profile-section">
+                <h3 className="profile-section-title">Información del Perfil</h3>
+                
+                <div className="info-group">
+                    <label className="info-label">Nombre</label>
+                    <div className="info-value">
+                        {userData?.nombre || userData?.name || userData?.fullName || userData?.nombreCompleto || "No disponible"}
+                    </div>
+                </div>
+
+                <div className="info-group">
+                    <label className="info-label">Semestre</label>
+                    <div className="info-value">
+                        {userData?.semestreActual || userData?.semestre || userData?.semester || userData?.nivel || userData?.level || "No disponible"}
+                    </div>
+                </div>
+
+                <div className="info-group">
+                    <label className="info-label">Programa Académico</label>
+                    <div className="info-value">
+                        {userData?.programa || userData?.program || userData?.carrera || userData?.career || userData?.programaAcademico || userData?.academicProgram || "No disponible"}
+                    </div>
+                </div>
+            </section>
+
+            {/* Change Password Section */}
+            <section className="profile-section" data-onboarding-id="password-change-section">
+                <h3 className="profile-section-title">Cambiar Contraseña</h3>
+                
+                <form onSubmit={handleChangePassword} className="password-form">
+                    <div className="form-group">
+                        <label htmlFor="currentPassword" className="form-label">
+                            Contraseña Actual
+                        </label>
+                        <div className="password-input-wrapper">
+                            <input
+                                id="currentPassword"
+                                type={showCurrentPassword ? "text" : "password"}
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                placeholder="Ingresa tu contraseña actual"
+                                className="form-input"
+                                disabled={isChangingPassword}
+                            />
+                            <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                disabled={isChangingPassword}
+                                title="Mostrar/ocultar contraseña"
+                                aria-label="Alternar visibilidad de contraseña"
+                            >
+                                {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="newPassword" className="form-label">
+                            Nueva Contraseña
+                        </label>
+                        <div className="password-input-wrapper">
+                            <input
+                                id="newPassword"
+                                type={showNewPassword ? "text" : "password"}
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="Ingresa una nueva contraseña"
+                                className="form-input"
+                                disabled={isChangingPassword}
+                            />
+                            <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                disabled={isChangingPassword}
+                                title="Mostrar/ocultar contraseña"
+                                aria-label="Alternar visibilidad de contraseña"
+                            >
+                                {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                        </div>
+
+                        <div className="password-checklist" aria-live="polite">
+                            <div className="password-checklist-header">
+                                <span className="password-checklist-title">Criterios de seguridad</span>
+                                <span className="password-checklist-score">{metCriteriaCount}/{passwordChecklist.length}</span>
+                            </div>
+
+                            <div className="password-checklist-progress-track" aria-hidden="true">
+                                <span
+                                    className="password-checklist-progress-fill"
+                                    style={{ width: `${checklistProgress}%` }}
+                                />
+                            </div>
+
+                            <ul className="password-checklist-list">
+                                {passwordChecklist.map((criteria) => (
+                                    <li
+                                        key={criteria.id}
+                                        className={`password-checklist-item ${criteria.met ? "met" : "pending"}`}
+                                    >
+                                        <span className="password-checklist-icon" aria-hidden="true">
+                                            {criteria.met ? <FaCheckCircle /> : <FaRegCircle />}
+                                        </span>
+                                        <span>{criteria.label}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="confirmPassword" className="form-label">
+                            Confirmar Nueva Contraseña
+                        </label>
+                        <div className="password-input-wrapper">
+                            <input
+                                id="confirmPassword"
+                                type={showConfirmPassword ? "text" : "password"}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Confirma tu nueva contraseña"
+                                className="form-input"
+                                disabled={isChangingPassword}
+                            />
+                            <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                disabled={isChangingPassword}
+                                title="Mostrar/ocultar contraseña"
+                                aria-label="Alternar visibilidad de contraseña"
+                            >
+                                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                        </div>
+
+                        {showMatchHint && (
+                            <p className={`password-match-hint ${passwordsMatch ? "match" : "no-match"}`}>
+                                <span aria-hidden="true">
+                                    {passwordsMatch ? <FaCheckCircle /> : <FaExclamationCircle />}
+                                </span>
+                                {passwordsMatch ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"}
+                            </p>
+                        )}
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="profile-submit-btn"
+                        disabled={isChangingPassword}
+                        title="Confirmar cambio de contraseña"
+                        aria-label="Cambiar contraseña"
+                    >
+                        {isChangingPassword ? "Actualizando..." : "Cambiar Contraseña"}
+                    </button>
+                </form>
+            </section>
+
+            {/* Reset Onboarding Section */}
+            <section className="profile-section">
+                <h3 className="profile-section-title">Guía de Inicio</h3>
+                <p className="profile-section-description">
+                    Reinicia la guía de inicio para repasar todas las funciones disponibles.
+                </p>
+                <button
+                    type="button"
+                    className="profile-reset-onboarding-btn"
+                    onClick={resetOnboarding}
+                    title="Reiniciar guía de inicio"
+                    aria-label="Reiniciar guía de inicio"
+                >
+                    Reiniciar Guía
+                </button>
+            </section>
+        </div>
+    );
+}

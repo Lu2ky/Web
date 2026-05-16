@@ -1,11 +1,14 @@
 .Calendar {
     display: flex;
+    flex: 1;
+    min-height: 0;
     flex-direction: column;
     height: 100%;
     width: 100%;
     background: white;
     border: none;
     border-radius: 0;
-    overflow: hidden;
     box-sizing: border-box;
+    overflow: hidden;
+    min-width: 0;
 }

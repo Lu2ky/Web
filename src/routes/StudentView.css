@@ -1,0 +1,167 @@
+*, *::before, *::after {
+        box-sizing: border-box;
+}
+#root {
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.App {
+    display: flex;
+    flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+    width: 100%;
+  overflow: hidden;
+}
+
+header {
+    flex-shrink: 0;
+    background: white;
+}
+
+ /* Lo cambie a mobile first */
+.mainContent {
+    display: grid;
+    grid-template-columns: 1fr; /*Cambiado a una sola columna para mobile first*/
+    gap: 0.5em;
+    padding: 0.5rem;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    box-sizing: border-box;
+  overflow: hidden;
+    height: 100%;
+}
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.card {
+  width: min(1120px, 95vw);
+  position: relative;
+  padding: 48px 40px 56px;
+  background: linear-gradient(180deg, #fdfdff 0%, #f7f7fb 100%) padding-box,
+    linear-gradient(135deg, #ff4f73 0%, #8a3bf3 100%) border-box;
+  border: 2px solid transparent;
+  border-radius: 32px;
+  box-shadow: 0 40px 120px rgba(105, 24, 140, 0.16);
+  overflow: hidden;
+  animation: fade-in 600ms ease;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border-radius: 24px;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 79, 115, 0.08), transparent 45%),
+    radial-gradient(circle at 80% 20%, rgba(138, 59, 243, 0.1), transparent 40%),
+    radial-gradient(circle at 40% 75%, rgba(15, 156, 102, 0.08), transparent 42%);
+  pointer-events: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+@media (max-width: 720px) {
+  .card {
+    padding: 32px 24px 40px;
+  }
+}
+
+
+.ToDoSection {
+    background: #f9fafb;
+    border-radius: 0.8rem;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+    min-height: 0;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    order: 2;
+    min-height: 0;
+    align-self: stretch;
+}
+
+.ToDoSection::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.CalendarSection {
+    display: flex;
+    flex-direction: column;
+  flex: 1;
+    min-width: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-sizing: border-box;
+    order: 1;
+    overflow: hidden;
+    height: 100%;
+    min-height: 0;
+}
+
+.Calendar {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+    .mainContent {
+        grid-template-columns: 0.85fr 2.15fr;
+        grid-template-rows: 1fr;
+        overflow: hidden;
+    }
+
+    .ToDoSection {
+        order: 1;
+        min-height:0;
+        height: 100%; /* Cambiado el orden para pantallas más grandes */
+    }
+    
+    .CalendarSection {
+        order: 2;
+        min-height: 0;
+        height:100%;
+        overflow: hidden; /* Cambiado el orden para pantallas más grandes */
+    }
+}
+
+@media (max-width: 1023px){
+    .ToDoSection {
+        padding:0;
+        height:0;
+        min-height: 0;
+        overflow:visible;
+        background:none;
+        box-shadow: none;
+        border:none;
+    }
+    
+}
+
