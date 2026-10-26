@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import '../../../shared/styles/glassComponents.css';
 
-interface GlassInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface GlassInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   /** Label text */
   label?: string;
   /** Error message */

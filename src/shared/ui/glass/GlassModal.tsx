@@ -3,7 +3,7 @@ import { GlassSurface } from './GlassSurface';
 import { GlassButton } from './GlassButton';
 import '../../../shared/styles/glassComponents.css';
 
-interface GlassModalProps {
+export interface GlassModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;

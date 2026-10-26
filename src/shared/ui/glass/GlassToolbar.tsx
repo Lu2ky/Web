@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 import '../../../shared/styles/liquidGlass.css';
 import { GlassButton } from './GlassButton';
 
-interface GlassToolbarProps extends React.HTMLAttributes<HTMLHeaderElement> {
+export interface GlassToolbarProps extends React.HTMLAttributes<HTMLHeaderElement> {
   /** Left side content */
   left?: React.ReactNode;
   /** Center content */
@@ -48,7 +48,7 @@ export const GlassToolbar = forwardRef<HTMLHeaderElement, GlassToolbarProps>(
         style={style}
         {...props}
       >
-        <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           {left}
         </div>
 
