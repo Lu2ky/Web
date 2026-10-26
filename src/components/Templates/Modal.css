@@ -1,0 +1,205 @@
+/* Modal Base*/
+:root {
+    --ui-surface: #ffffff;
+    --ui-surface-soft: #f9fafb;
+    --ui-surface-hover: #f9fafb;
+    --ui-border: #f3f4f6;
+    --ui-text: #111827;
+    --ui-text-muted: #6b7280;
+    --ui-accent-1: #f6047b;
+    --ui-accent-2: #c820c5;
+    --ui-shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.18);
+    --ui-focus-ring: 0 0 0 3px rgba(246, 4, 123, 0.2);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Overlay */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(17, 24, 39, 0.45);
+    backdrop-filter: blur(4px);
+}
+
+/* Container */
+.modal-container {
+    width: min(100%, 560px);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--ui-surface);
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+    border: none;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #f6047b 0%, #c820c5 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1.25rem;
+    border: none;
+    position: relative;
+}
+
+/*titulo*/
+.modal-title {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+}
+
+.modal-close-btn {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    line-height: 1.25;
+    transition: all 0.2s ease;
+}
+
+.modal-container .modal-header .modal-close-btn {
+    color: #ffffff;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.modal-close-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring);
+}
+
+/* Body */
+.modal-body {
+    padding: 1.75rem 1.75rem;
+    overflow-y: auto;
+    background: var(--ui-surface);
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+/* Footer */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1rem 1.75rem 1.5rem;
+    border-top: 1px solid #f3f4f6;
+    background: var(--ui-surface);
+}
+
+.modal-secondary-btn,
+.modal-action-btn,
+.modal-primary-btn {
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.8rem 1.4rem;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.modal-container .modal-footer .modal-secondary-btn {
+    color: #374151;
+}
+
+.modal-container .modal-footer .modal-action-btn,
+.modal-container .modal-footer .modal-primary-btn {
+    color: #ffffff;
+}
+
+.modal-secondary-btn {
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #374151;
+    flex: 0 1 auto;
+}
+
+.modal-secondary-btn:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.modal-action-btn,
+.modal-primary-btn {
+    color: #fff;
+    background: linear-gradient(135deg, #f6047b, #c820c5);
+    box-shadow: 0 2px 8px rgba(246, 4, 123, 0.2);
+    flex: 1;
+}
+
+.modal-action-btn:hover,
+.modal-primary-btn:hover {
+    filter: brightness(0.92);
+    box-shadow: 0 4px 12px rgba(246, 4, 123, 0.35);
+}
+
+.modal-secondary-btn:focus-visible,
+.modal-action-btn:focus-visible,
+.modal-primary-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring);
+}
+
+@media (max-width: 640px) {
+    .modal-overlay {
+        align-items: flex-end;
+        padding: 0.75rem;
+    }
+
+    .modal-container {
+        width: 100%;
+        max-height: 92vh;
+        border-radius: 14px 14px 10px 10px;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+
+    .modal-secondary-btn,
+    .modal-action-btn,
+    .modal-primary-btn {
+        flex: 1;
+        min-width:120px;
+    }
+}
+

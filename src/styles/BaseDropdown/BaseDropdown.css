@@ -1,0 +1,101 @@
+.dropdown-root {
+    position: relative;
+    display: inline-flex;
+}
+
+.dropdown-trigger {
+    display:inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background: #fff;
+    color: #111827;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.dropdown-trigger:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(246, 4, 123, 0.2);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 200px;
+    max-width: min(90vw, 360px);
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+    padding: 0.35rem;
+    z-index:1200;
+}
+
+.dropdown-listbox {
+    position:absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+    padding: 0.35rem;
+    z-index:1200;
+}
+
+.dropdown-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(92vw, 420px);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
+    padding: 0.75rem;
+    z-index: 1200;
+}
+
+.dropdown-item {
+    width: 100%;
+    border:none;
+    border-radius: 10px;
+    background: transparent;
+    color: #111827;
+    text-align: left;
+    font-size: 0.85rem;
+    padding: 0.55rem 0.7rem;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #f3f4f6;
+}
+
+.dropdown-item.active {
+    background: linear-gradient(135deg, #f6047b, #c820c5);
+    color: #fff;
+}
+
+.dropdown-item:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(246, 4, 123, 0.18);
+}
+
+@media (max-width: 768px) {
+    .dropdown-menu,
+    .dropdown-listbox,
+    .dropdown-panel {
+        right: 0;
+        left: auto;
+        max-width: 92vw;
+    }
+}

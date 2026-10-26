@@ -1,0 +1,97 @@
+import { useEffect } from "react";
+
+function normalizeTag(tag, index) {
+    if (typeof tag === "string") {
+        return { id: `tag-${index}`, label: tag };
+    }
+
+    if (tag?.label) {
+        return {
+            id: tag.id || `tag-${index}`,
+            label: tag.label,
+            type: tag.type || "custom"
+        };
+    }
+
+    if (tag?.name) {
+        return {
+            id: tag.id || `tag-${index}`,
+            label: tag.name,
+            type: tag.type || "custom"
+        };
+    }
+
+    return null;
+}
+
+import { useEffect, useState } from "react";
+import LoadingModal from "./LoadingModal";
+
+function ToDoListFetcher({ onDataLoaded, userId }) {
+    const [loading, setLoading] = useState(true);
+    const [apiData, setApiData] = useState([]);
+
+    useEffect(() => {
+        if (!userId) {
+            setLoading(false);
+            setApiData([]);
+            if (onDataLoaded) onDataLoaded([]);
+            return;
+        }
+
+        const baseUrl = import.meta.env.VITE_API_URL_REMINDERS_USER;
+
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                // Cabecera Authorization.
+                const tokenLocalStore = localStorage.getItem("token") || "";
+                const token = `Bearer ${tokenLocalStore}`;
+
+                const response = await fetch(`${baseUrl}${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": token,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const json = await response.json();
+
+                const data = Array.isArray(json?.data)
+                    ? json.data
+                    : Array.isArray(json)
+                        ? json
+                        : [];
+
+                setApiData(data);
+                if (onDataLoaded) onDataLoaded(data);
+
+            } catch (error) {
+                console.error("Error al cargar ToDo:", error);
+                setApiData([]);
+                if (onDataLoaded) onDataLoaded([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [userId, onDataLoaded]);
+
+    if (loading) {
+        return (
+            <LoadingModal
+                isOpen={loading}
+                title="Cargando tareas"
+            />
+        );
+    }
+
+    return null;
+}
+
+export default ToDoListFetcher;

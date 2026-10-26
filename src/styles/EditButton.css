@@ -1,0 +1,21 @@
+.edit-button {
+  background: none;
+  border: none;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+.edit-button svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.edit-button:hover {
+  color: #111827;
+}

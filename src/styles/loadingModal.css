@@ -1,0 +1,167 @@
+/* Overlay */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    animation: overlayFade 0.2s ease-out;
+}
+
+/* Modal */
+.loading-modal {
+    width: 380px;
+    max-width: 90%;
+    padding: 2.5rem 2.2rem;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow:
+        0 20px 45px rgba(0, 0, 0, 0.08),
+        0 4px 12px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    position: relative;
+    animation: modalFadeUp 0.25s ease-out;
+}
+
+/* Línea superior degradada */
+.loading-modal::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+}
+
+/* Icono */
+
+.loading-icon {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 1.8rem auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow:
+        0 10px 25px rgba(192, 38, 211, 0.25),
+        inset 0 0 15px rgba(255, 255, 255, 0.25);
+}
+
+/* Halo suave exterior */
+.loading-icon::after {
+    content: "";
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    opacity: 0.15;
+    animation: softPulse 2.5s ease-in-out infinite;
+    z-index: -1;
+}
+
+.icon-svg {
+    width: 38px;
+    height: 38px;
+    color: white;
+}
+
+/* Titulo*/
+.loading-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 2rem;
+}
+
+/* Barra de progreso */
+.progress-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-track {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+/* Brillo dinámico */
+.progress-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.6),
+        transparent
+    );
+    animation: shimmer 1.8s infinite;
+}
+
+.progress-percent {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #c026d3;
+    min-width: 36px;
+    text-align: right;
+}
+
+/* Animación  */
+@keyframes softPulse {
+    0% { transform: scale(1); opacity: 0.15; }
+    50% { transform: scale(1.1); opacity: 0.25; }
+    100% { transform: scale(1); opacity: 0.15; }
+}
+
+@keyframes overlayFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.25;
+    }
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}

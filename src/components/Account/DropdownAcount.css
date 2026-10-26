@@ -1,0 +1,109 @@
+/* Dropdown*/
+.dropdown-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.dropdown-account-root {
+    position: relative;
+    display: inline-flex;
+}
+
+.dropdown-account-host {
+    position: relative;
+}
+
+/* Botón de perfil */
+.dropdown-image-button {
+    background: linear-gradient(#fff, #fff) padding-box,
+                linear-gradient(90deg, #a855f7, #ff005c) border-box;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 2px;
+    transition: all 0.25s ease;
+}
+
+.dropdown-image-button:hover {
+    transform: scale(1.05);
+    filter: brightness(0.95);
+}
+
+/* Imagen */
+.dropdown-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: block;
+}
+
+/* Menú */
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: linear-gradient(#ffffff, #ffffff) padding-box,
+                linear-gradient(90deg, #a855f7, #ff005c) border-box;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+    min-width: 220px;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Iteams */
+.dropdown-menu-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 18px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    text-align: left;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+}
+
+/* Hover gris */
+.dropdown-menu-item:hover {
+    background: #f2f2f2;
+    color: #000;
+}
+
+/* Confirmar */
+.modal-confirm-btn {
+    margin-top: 12px;
+    padding: 10px 22px;
+    background: linear-gradient(90deg, #a855f7, #ff005c);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.modal-confirm-btn:hover {
+    filter: brightness(0.9);
+    transform: translateY(-1px);
+}
+
+/* Animación */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
