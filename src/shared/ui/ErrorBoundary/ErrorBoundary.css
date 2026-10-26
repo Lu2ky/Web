@@ -1,0 +1,73 @@
+.error-boundary {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--color-background, var(--surface-subtle));
+    color: var(--color-text, var(--text-primary));
+}
+
+.error-boundary-card {
+    width: 100%;
+    max-width: 560px;
+    padding: 32px;
+    border-radius: 16px;
+    background: var(--color-surface, var(--surface));
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+    text-align: center;
+}
+
+.error-boundary-title {
+    margin: 0 0 12px;
+    font-size: 1.5rem;
+}
+
+.error-boundary-title:focus {
+}
+
+.error-boundary-message {
+    margin: 0 0 24px;
+    line-height: 1.6;
+}
+
+.error-boundary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.error-boundary-button {
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.error-boundary-button--primary {
+    background: var(--color-primary, #2563eb);
+    border-color: var(--color-primary, #2563eb);
+    color: #ffffff;
+}
+
+.error-boundary-button:focus-visible {
+    outline: 3px solid var(--color-focus, #2563eb);
+    outline-offset: 2px;
+}
+
+.error-boundary-detail {
+    margin-top: 24px;
+    padding: 12px;
+    max-height: 220px;
+    overflow: auto;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.06);
+    text-align: left;
+    font-size: 0.75rem;
+    white-space: pre-wrap;
+}

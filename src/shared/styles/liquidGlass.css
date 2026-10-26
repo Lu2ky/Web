@@ -1,0 +1,268 @@
+/**
+ * Liquid Glass Material Tokens — UPB Planner
+ *
+ * Apple-style translucent materials with proper weight hierarchy.
+ * Bigger surfaces = thicker glass = more blur + more opacity.
+ * Dark mode values are separate (not just inverted).
+ */
+
+:root {
+  /* ============================================
+     GLASS SURFACES — Light Mode
+     Weight encodes hierarchy: thinner = more structural,
+     thicker = more attention-grabbing.
+     ============================================ */
+
+  /* Ultra-thin — toolbars, nav bars, sticky headers */
+  --glass-ultra-thin:       rgba(255, 255, 255, 0.08);
+  --glass-ultra-thin-border: rgba(255, 255, 255, 0.20);
+  --glass-ultra-thin-blur:  8px;
+
+  /* Thin — popovers, dropdowns, tooltips, small sheets */
+  --glass-thin:             rgba(255, 255, 255, 0.14);
+  --glass-thin-border:      rgba(255, 255, 255, 0.18);
+  --glass-thin-blur:        12px;
+
+  /* Regular — cards, standard modals, popovers */
+  --glass-regular:          rgba(255, 255, 255, 0.22);
+  --glass-regular-border:   rgba(255, 255, 255, 0.14);
+  --glass-regular-blur:     20px;
+
+  /* Thick — featured modals, full-screen sheets */
+  --glass-thick:            rgba(255, 255, 255, 0.32);
+  --glass-thick-border:     rgba(255, 255, 255, 0.10);
+  --glass-thick-blur:       30px;
+
+  /* Ultra-thick — hero surfaces, onboarding */
+  --glass-ultra-thick:      rgba(255, 255, 255, 0.42);
+  --glass-ultra-thick-border: rgba(255, 255, 255, 0.08);
+  --glass-ultra-thick-blur: 40px;
+
+  /* ============================================
+     GLASS SURFACES — Dark Mode
+     Dark mode glass is MORE transparent, not just inverted.
+     Less opacity, more blur to maintain legibility.
+     ============================================ */
+
+  --glass-dark-ultra-thin:       rgba(255, 255, 255, 0.04);
+  --glass-dark-ultra-thin-border: rgba(255, 255, 255, 0.10);
+  --glass-dark-ultra-thin-blur:  10px;
+
+  --glass-dark-thin:             rgba(255, 255, 255, 0.08);
+  --glass-dark-thin-border:      rgba(255, 255, 255, 0.08);
+  --glass-dark-thin-blur:        14px;
+
+  --glass-dark-regular:          rgba(255, 255, 255, 0.14);
+  --glass-dark-regular-border:   rgba(255, 255, 255, 0.06);
+  --glass-dark-regular-blur:     24px;
+
+  --glass-dark-thick:            rgba(255, 255, 255, 0.20);
+  --glass-dark-thick-border:     rgba(255, 255, 255, 0.05);
+  --glass-dark-thick-blur:       36px;
+
+  --glass-dark-ultra-thick:      rgba(255, 255, 255, 0.28);
+  --glass-dark-ultra-thick-border: rgba(255, 255, 255, 0.04);
+  --glass-dark-ultra-thick-blur: 48px;
+
+  /* ============================================
+     SATURATION — Vibrancy for legibility on glass
+     Higher saturation = text pops on blurred backgrounds
+     ============================================ */
+
+  --glass-saturation: 180%;
+
+  /* ============================================
+     SHADOWS — Context-aware depth
+     Light mode: subtle, warm shadows
+     Dark mode: deeper, cooler shadows
+     ============================================ */
+
+  /* Light mode shadows */
+  --shadow-glass-sm:   0 2px 8px   rgba(15, 23, 42, 0.06);
+  --shadow-glass-md:   0 8px 24px  rgba(15, 23, 42, 0.10);
+  --shadow-glass-lg:   0 16px 48px rgba(15, 23, 42, 0.14);
+  --shadow-glass-xl:   0 24px 64px rgba(15, 23, 42, 0.18);
+
+  /* Dark mode shadows — deeper, more pronounced */
+  --shadow-glass-dark-sm:  0 2px 8px   rgba(0, 0, 0, 0.25);
+  --shadow-glass-dark-md:  0 8px 24px  rgba(0, 0, 0, 0.35);
+  --shadow-glass-dark-lg:  0 16px 48px rgba(0, 0, 0, 0.45);
+  --shadow-glass-dark-xl:  0 24px 64px rgba(0, 0, 0, 0.55);
+
+  /* ============================================
+     CORNER RADII — Consistent with design system
+     ============================================ */
+
+  --glass-radius-sm:   8px;    /* chips, badges, small buttons */
+  --glass-radius-md:   12px;   /* cards, popovers, inputs */
+  --glass-radius-lg:   16px;   /* cards, sheets */
+  --glass-radius-xl:   24px;   /* modals, featured cards */
+  --glass-radius-full: 999px;  /* pills, avatars, FABs */
+
+  /* ============================================
+     VIBRANCY TEXT COLORS — Higher contrast on glass
+     Slightly heavier weight, slight letter-spacing bump
+     ============================================ */
+
+  --glass-text-primary:   var(--text-primary);
+  --glass-text-secondary: var(--text-secondary);
+  --glass-text-muted:     var(--text-muted);
+  --glass-text-inverse:   var(--text-inverse);
+}
+
+/* ============================================
+   THEME VARIANTS — Applied via [data-theme] on <html>
+   ============================================ */
+
+[data-theme="light"] {
+  --glass-surface:        var(--glass-regular);
+  --glass-surface-border: var(--glass-regular-border);
+  --glass-surface-blur:   var(--glass-regular-blur);
+
+  --glass-toolbar:        var(--glass-ultra-thin);
+  --glass-toolbar-border: var(--glass-ultra-thin-border);
+  --glass-toolbar-blur:   var(--glass-ultra-thin-blur);
+
+  --glass-popover:        var(--glass-thin);
+  --glass-popover-border: var(--glass-thin-border);
+  --glass-popover-blur:   var(--glass-thin-blur);
+
+  --glass-sheet:          var(--glass-thin);
+  --glass-sheet-border:   var(--glass-thin-border);
+  --glass-sheet-blur:     var(--glass-thin-blur);
+
+  --glass-card:           var(--glass-regular);
+  --glass-card-border:    var(--glass-regular-border);
+  --glass-card-blur:      var(--glass-regular-blur);
+
+  --glass-modal:          var(--glass-thick);
+  --glass-modal-border:   var(--glass-thick-border);
+  --glass-modal-blur:     var(--glass-thick-blur);
+
+  --glass-shadow-sm:  var(--shadow-glass-sm);
+  --glass-shadow-md:  var(--shadow-glass-md);
+  --glass-shadow-lg:  var(--shadow-glass-lg);
+  --glass-shadow-xl:  var(--shadow-glass-xl);
+
+  --glass-text-primary:   var(--text-primary);
+  --glass-text-secondary: var(--text-secondary);
+  --glass-text-muted:     var(--text-muted);
+}
+
+[data-theme="dark"] {
+  --glass-surface:        var(--glass-dark-regular);
+  --glass-surface-border: var(--glass-dark-regular-border);
+  --glass-surface-blur:   var(--glass-dark-regular-blur);
+
+  --glass-toolbar:        var(--glass-dark-ultra-thin);
+  --glass-toolbar-border: var(--glass-dark-ultra-thin-border);
+  --glass-toolbar-blur:   var(--glass-dark-ultra-thin-blur);
+
+  --glass-popover:        var(--glass-dark-thin);
+  --glass-popover-border: var(--glass-dark-thin-border);
+  --glass-popover-blur:   var(--glass-dark-thin-blur);
+
+  --glass-sheet:          var(--glass-dark-thin);
+  --glass-sheet-border:   var(--glass-dark-thin-border);
+  --glass-sheet-blur:     var(--glass-dark-thin-blur);
+
+  --glass-card:           var(--glass-dark-regular);
+  --glass-card-border:    var(--glass-dark-regular-border);
+  --glass-card-blur:      var(--glass-dark-regular-blur);
+
+  --glass-modal:          var(--glass-dark-thick);
+  --glass-modal-border:   var(--glass-dark-thick-border);
+  --glass-modal-blur:     var(--glass-dark-thick-blur);
+
+  --glass-shadow-sm:  var(--shadow-glass-dark-sm);
+  --glass-shadow-md:  var(--shadow-glass-dark-md);
+  --glass-shadow-lg:  var(--shadow-glass-dark-lg);
+  --glass-shadow-xl:  var(--shadow-glass-dark-xl);
+
+  --glass-text-primary:   var(--text-primary);
+  --glass-text-secondary: var(--text-secondary);
+  --glass-text-muted:     var(--text-muted);
+}
+
+/* ============================================
+   GLASS UTILITY CLASSES — For rapid composition
+   ============================================ */
+
+.glass-ultra-thin  { background: var(--glass-ultra-thin);  backdrop-filter: blur(var(--glass-ultra-thin-blur))  saturate(var(--glass-saturation)); border: 1px solid var(--glass-ultra-thin-border);  }
+.glass-thin        { background: var(--glass-thin);        backdrop-filter: blur(var(--glass-thin-blur))        saturate(var(--glass-saturation)); border: 1px solid var(--glass-thin-border);        }
+.glass-regular     { background: var(--glass-regular);     backdrop-filter: blur(var(--glass-regular-blur))     saturate(var(--glass-saturation)); border: 1px solid var(--glass-regular-border);     }
+.glass-thick       { background: var(--glass-thick);       backdrop-filter: blur(var(--glass-thick-blur))       saturate(var(--glass-saturation)); border: 1px solid var(--glass-thick-border);       }
+.glass-ultra-thick { background: var(--glass-ultra-thick); backdrop-filter: blur(var(--glass-ultra-thick-blur)) saturate(var(--glass-saturation)); border: 1px solid var(--glass-ultra-thick-border); }
+
+.glass-toolbar     { background: var(--glass-toolbar);     backdrop-filter: blur(var(--glass-toolbar-blur))     saturate(var(--glass-saturation)); border: 1px solid var(--glass-toolbar-border);     }
+.glass-popover     { background: var(--glass-popover);     backdrop-filter: blur(var(--glass-popover-blur))     saturate(var(--glass-saturation)); border: 1px solid var(--glass-popover-border);     }
+.glass-sheet       { background: var(--glass-sheet);       backdrop-filter: blur(var(--glass-sheet-blur))       saturate(var(--glass-saturation)); border: 1px solid var(--glass-sheet-border);       }
+.glass-card        { background: var(--glass-card);        backdrop-filter: blur(var(--glass-card-blur))        saturate(var(--glass-saturation)); border: 1px solid var(--glass-card-border);        }
+.glass-modal       { background: var(--glass-modal);       backdrop-filter: blur(var(--glass-modal-blur))       saturate(var(--glass-saturation)); border: 1px solid var(--glass-modal-border);       }
+
+/* Dark mode overrides handled by [data-theme="dark"] above */
+
+/* ============================================
+   VIBRANCY TEXT UTILITIES
+   ============================================ */
+
+.glass-text-primary   { color: var(--glass-text-primary);   font-weight: 500; letter-spacing: -0.01em; }
+.glass-text-secondary { color: var(--glass-text-secondary); font-weight: 400; letter-spacing: 0; }
+.glass-text-muted     { color: var(--glass-text-muted);     font-weight: 400; letter-spacing: 0.01em; }
+
+/* ============================================
+   REDUCED TRANSPARENCY — prefers-reduced-transparency
+   ============================================ */
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-ultra-thin,
+  .glass-thin,
+  .glass-regular,
+  .glass-thick,
+  .glass-ultra-thick,
+  .glass-toolbar,
+  .glass-popover,
+  .glass-sheet,
+  .glass-card,
+  .glass-modal {
+    backdrop-filter: none !important;
+    background: var(--surface) !important;
+    border-color: var(--border-default) !important;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION — prefers-reduced-motion
+   (Also handled in base.css, but glass-specific here)
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-animate-enter,
+  .glass-animate-exit,
+  .glass-spring {
+    transition: opacity var(--duration-base) var(--ease-out) !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+/* ============================================
+   HIGH CONTRAST — prefers-contrast: more
+   ============================================ */
+
+@media (prefers-contrast: more) {
+  .glass-ultra-thin,
+  .glass-thin,
+  .glass-regular,
+  .glass-thick,
+  .glass-ultra-thick,
+  .glass-toolbar,
+  .glass-popover,
+  .glass-sheet,
+  .glass-card,
+  .glass-modal {
+    backdrop-filter: none !important;
+    background: var(--surface) !important;
+    border: 2px solid var(--border-strong) !important;
+  }
+}

@@ -1,0 +1,152 @@
+/**
+ * Tokens de diseño de UPB Planner — Apple Liquid Glass Edition
+ *
+ * Solo incluye valores que no dependen del tema (tipografía, espaciado,
+ * radios, sombras, capas y movimiento). Los colores viven en `themes.css`
+ * y los materiales glass en `liquidGlass.css`.
+ *
+ * Regla de uso: los componentes deben consumir estos tokens en vez de
+ * repetir valores literales.
+ */
+
+:root {
+  /* ============================================
+     TIPOGRAFÍA — Apple Optical Sizing
+     System font stack, Dynamic Type ready, optical sizing per size
+     ============================================ */
+
+  --font-sans: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Font sizes — Dynamic Type compatible (16px base = 1rem) */
+  --font-size-xs:      0.75rem;    /* 12px — captions, labels */
+  --font-size-sm:      0.875rem;   /* 14px — secondary, metadata */
+  --font-size-md:      1rem;       /* 16px — body */
+  --font-size-lg:      1.125rem;   /* 18px — emphasized body */
+  --font-size-xl:      1.25rem;    /* 20px — titles */
+  --font-size-2xl:     1.5rem;     /* 24px — headlines */
+  --font-size-3xl:     2rem;       /* 32px — display */
+  --font-size-4xl:     2.5rem;     /* 40px — hero */
+
+  /* Line heights — inverse to size */
+  --line-height-tight:     1.05;   /* display, hero */
+  --line-height-snug:      1.2;    /* headlines, titles */
+  --line-height-normal:    1.5;    /* body */
+  --line-height-relaxed:   1.7;    /* reading, long-form */
+
+  /* Font weights */
+  --font-weight-regular:   400;
+  --font-weight-medium:    500;
+  --font-weight-semibold:  600;
+  --font-weight-bold:      700;
+
+  /* Optical sizing / tracking — size-specific, never fixed */
+  --tracking-display:  -0.03em;   /* ≥ 3xl — tightens as it grows */
+  --tracking-headline: -0.02em;   /* 2xl — headlines */
+  --tracking-title:    -0.01em;   /* xl — titles */
+  --tracking-body:     0;         /* md, lg, xl — body text */
+  --tracking-caption:  +0.01em;   /* xs, sm — captions, metadata */
+  --tracking-label:    +0.02em;   /* uppercase labels, buttons */
+
+  /* Escala de texto elegida por la persona usuaria (sm | md | lg). */
+  --app-font-scale: 1;
+
+  /* ============================================
+     ESPACIADO — 4px base scale
+     ============================================ */
+
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-7: 2rem;      /* 32px */
+  --space-8: 2.5rem;    /* 40px */
+  --space-9: 3rem;      /* 48px */
+  --space-10: 4rem;     /* 64px */
+
+  /* ============================================
+     RADIOS — Contextual, not uniform
+     ============================================ */
+
+  --radius-xs: 4px;       /* chips, badges, small buttons */
+  --radius-sm: 6px;       /* inputs, buttons */
+  --radius-md: 10px;      /* cards, dropdowns, popovers */
+  --radius-lg: 14px;      /* cards, sheets */
+  --radius-xl: 20px;      /* modals, featured cards */
+  --radius-2xl: 28px;     /* hero cards, full-screen modals */
+  --radius-pill: 999px;   /* pills, avatars, FABs */
+
+  /* ============================================
+     SHADOWS — Depth hierarchy, context-aware
+     Light mode defined here; dark mode in liquidGlass.css
+     ============================================ */
+
+  --shadow-sm: 0 1px 2px   rgba(15, 23, 42, 0.05);   /* inline, chips, badges */
+  --shadow-md: 0 4px 12px  rgba(15, 23, 42, 0.08);   /* cards, dropdowns */
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);   /* cards, sheets, popovers */
+  --shadow-xl: 0 20px 48px rgba(15, 23, 42, 0.16);   /* modals, sheets */
+  --shadow-2xl: 0 28px 64px rgba(15, 23, 42, 0.20);  /* full-screen overlays */
+
+  /* ============================================
+     FOCUS RING — Visible, accessible
+     ============================================ */
+
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
+  /* ============================================
+     MOTION — Spring-based, Apple-style
+     ============================================ */
+
+  /* Durations */
+  --duration-instant:  80ms;   /* press feedback */
+  --duration-fast:     120ms;  /* hover, small transitions */
+  --duration-base:     200ms;  /* standard UI */
+  --duration-slow:     350ms;  /* sheets, modals */
+  --duration-slower:   500ms;  /* full-screen transitions */
+
+  /* Easing curves — semantic names */
+  --ease-out:      cubic-bezier(0.23, 1, 0.32, 1);      /* enter, responsive */
+  --ease-in-out:   cubic-bezier(0.77, 0, 0.175, 1);    /* on-screen reposition */
+  --ease-spring:   cubic-bezier(0.32, 0.72, 0, 1);     /* spring-like, no JS */
+  --ease-drawer:   cubic-bezier(0.32, 0.72, 0, 1);     /* sheets, drawers */
+
+  /* Spring configs — damping + response (Apple-style) */
+  /* Use with Motion/Framer Motion: { type: 'spring', damping: X, response: Y } */
+  --spring-critical-damping:  1.0;   /* no overshoot, default UI */
+  --spring-critical-response: 0.35;
+  --spring-momentum-damping:  0.8;   /* flick, throw */
+  --spring-momentum-response: 0.35;
+  --spring-sheet-damping:     0.8;   /* sheets, drawers */
+  --spring-sheet-response:    0.30;
+  --spring-popover-damping:   1.0;   /* popovers, tooltips */
+  --spring-popover-response:  0.25;
+  --spring-modal-damping:     1.0;   /* modals */
+  --spring-modal-response:    0.40;
+
+  /* ============================================
+     Z-INDEX LAYERS — Single documented order
+     ============================================ */
+
+  --z-below:           -1;
+  --z-base:             0;
+  --z-content:          1;
+  --z-content-raised:   2;
+  --z-overlay-content:  3;
+  --z-events:          10;
+  --z-events-hover:    20;
+  --z-float:           30;
+  --z-sticky:          40;
+  --z-sticky-raised:   41;
+  --z-confirm:         50;
+  --z-dropdown:        100;
+  --z-dropdown-top:    200;
+  --z-overlay:         1000;
+  --z-dropdown-overlay: 1001;
+  --z-modal:           1500;
+  --z-loading:         3000;
+  --z-session:         9999;
+  --z-onboarding:      10000;
+}

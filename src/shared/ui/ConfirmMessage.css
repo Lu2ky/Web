@@ -1,0 +1,215 @@
+/* Overlay del modal */
+.confirmacion-message-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--z-confirm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    font-family: system-ui, -apple-system, sans-serif;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.confirmacion-message-overlay:not(.closing) {
+    opacity: 1;
+}
+
+.confirmacion-message-overlay.closing {
+    opacity: 0;
+}
+
+/* Contenedor Principal del Modal */
+.confirmacion-message-container {
+    background: var(--surface);
+    width: 100%;
+    max-width: 28rem; /* 448px */
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform var(--duration-base) var(--ease-out), opacity var(--duration-base) var(--ease-out);
+}
+
+.confirmacion-message-overlay:not(.closing) .confirmacion-message-container {
+    transform: scale(1);
+    opacity: 1;
+}
+
+@starting-style {
+    .confirmacion-message-container {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+}
+
+/* Barra decorativa con gradiente */
+.confirmacion-message-gradient-bar {
+    height: 0.5rem; /* 8px */
+    background: linear-gradient(to right, #f6047b, #c820c5,#c820c5);
+}
+
+/* Contenido principal */
+.confirmacion-message-content {
+    padding: 1.5rem; /* 24px */
+}
+
+/* Container del botón de cierre */
+.confirmacion-message-close-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem; /* 8px */
+}
+
+/* Botón de cierre */
+.confirmacion-message-close-btn {
+    padding: 0.25rem; /* 4px */
+    border-radius: var(--radius-pill);
+    background: none;
+    border: none;
+    color: var(--text-muted); /* gray-400 */
+    cursor: pointer;
+    transition: background-color var(--duration-base) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .confirmacion-message-close-btn:hover {
+        background-color: var(--surface-hover); /* gray-100 */
+    }
+    .confirmacion-message-close-btn:active {
+        transform: scale(0.95);
+        transition: transform var(--duration-fast) var(--ease-out);
+    }
+}
+
+/* Sección central */
+.confirmacion-message-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 1.5rem; /* 24px */
+}
+
+/* Contenedor del icono */
+.confirmacion-message-icon-container {
+    width: 4rem; /* 64px */
+    height: 4rem; /* 64px */
+    background-color: var(--tint-brand-bg); /* pink-50 */
+    border-radius: var(--radius-pill);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem; /* 16px */
+    color: var(--tint-danger-text);
+}
+
+/* Título */
+.confirmacion-message-title {
+    font-size: 1.25rem; /* 20px */
+    font-weight: 700;
+    color: var(--text-primary); /* gray-800 */
+    margin-bottom: 0.5rem; /* 8px */
+    margin: 0 0 0.5rem 0;
+}
+
+/* Descripción */
+.confirmacion-message-description {
+    color: var(--text-muted); /* gray-500 */
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5;
+    max-width: 17.5rem; /* 280px */
+    margin: 0;
+}
+
+/* Contenedor de botones de acción */
+.confirmacion-message-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* 12px */
+}
+
+@media (min-width: 640px) {
+    .confirmacion-message-actions {
+        flex-direction: row;
+    }
+}
+
+/* Botón cancelar */
+.confirmacion-message-cancel-btn {
+    flex: 1;
+    padding: 0.625rem 1rem; /* 10px 16px */
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border-subtle); /* gray-100 */
+    background: var(--surface);
+    color: var(--text-secondary); /* gray-600 */
+    font-weight: 600;
+    font-size: 0.875rem; /* 14px */
+    cursor: pointer;
+    transition: background-color var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .confirmacion-message-cancel-btn:hover {
+        background-color: var(--surface-hover); /* gray-50 */
+    }
+    .confirmacion-message-cancel-btn:active {
+        transform: scale(0.97);
+        transition: transform var(--duration-fast) var(--ease-out);
+    }
+}
+
+/* Botón confirmar */
+.confirmacion-message-confirm-btn {
+    flex: 1;
+    padding: 0.625rem 1rem; /* 10px 16px */
+    border-radius: var(--radius-md);
+    background-color: var(--brand-600);
+    color: var(--brand-contrast);
+    border: none;
+    font-weight: 600;
+    font-size: 0.875rem; /* 14px */
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(219, 39, 119, 0.1), 0 2px 4px -1px rgba(219, 39, 119, 0.06);
+    transition: background-color var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .confirmacion-message-confirm-btn:hover {
+        background-color: color-mix(in srgb, var(--brand-600) 85%, #000);
+    }
+    .confirmacion-message-confirm-btn:active {
+        transform: scale(0.97);
+        transition: transform var(--duration-fast) var(--ease-out);
+    }
+}
+
+/* Footer */
+.confirmacion-message-footer {
+    background-color: var(--surface-subtle); /* gray-50 */
+    padding: 1rem 1.5rem; /* 16px 24px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* 8px */
+    border-top: 1px solid var(--border-subtle); /* gray-100 */
+}
+
+/* Texto del footer */
+.confirmacion-message-footer-text {
+    font-size: 0.625rem; /* 10px */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted); /* gray-400 */
+    font-weight: 700;
+}

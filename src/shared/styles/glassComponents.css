@@ -1,0 +1,291 @@
+/**
+ * Glass Component Styles — Shared styles for all glass components
+ * Imported by components that need glass utilities
+ */
+
+@import '../styles/liquidGlass.css';
+
+/* ============================================
+   GLASS TOOLBAR — Scroll edge fade effect
+   ============================================ */
+
+.toolbar-scroll-edge {
+  position: relative;
+}
+
+.toolbar-fade-bottom {
+  background: linear-gradient(
+    to bottom,
+    var(--glass-toolbar) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Dark mode handled by [data-theme] on <html> */
+
+/* ============================================
+   GLASS BUTTON — Press feedback with spring
+   ============================================ */
+
+.glass-btn {
+  @apply inline-flex items-center justify-center gap-2
+    font-medium
+    rounded-lg
+    transition-all duration-fast ease-out
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2
+    disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.glass-btn:active {
+  transform: scale(0.97);
+  transition: transform 80ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ============================================
+   GLASS INPUT — Transparent on glass
+   ============================================ */
+
+.glass-input {
+  @apply w-full
+    bg-transparent
+    border border-border-subtle
+    rounded-md
+    px-3 py-2
+    text-text-primary
+    placeholder:text-text-muted
+    transition-all duration-base ease-out
+    focus:outline-none focus:ring-2 focus:ring-focus-ring focus:ring-offset-2
+    focus:border-brand-500
+    disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.glass-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ============================================
+   GLASS CARD — Content cards
+   ============================================ */
+
+.glass-card {
+  @apply glass-card rounded-xl shadow-lg;
+}
+
+.glass-card-hover {
+  @apply transition-all duration-base ease-out;
+}
+
+.glass-card-hover:hover {
+  @apply shadow-lg -translate-y-0.5;
+}
+
+/* ============================================
+   GLASS SHEET — Bottom sheets, drawers
+   ============================================ */
+
+.glass-sheet {
+  @apply glass-sheet rounded-2xl shadow-xl;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.glass-sheet-handle {
+  @apply w-8 h-1 bg-border-subtle rounded-full mx-auto mt-3 mb-2;
+}
+
+/* ============================================
+   GLASS MODAL — Full-screen modals
+   ============================================ */
+
+.glass-modal {
+  @apply glass-modal rounded-2xl shadow-2xl;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.glass-modal-header {
+  @apply flex items-center justify-between px-6 py-4 border-b border-border-subtle;
+}
+
+.glass-modal-body {
+  @apply p-6 overflow-y-auto;
+}
+
+.glass-modal-footer {
+  @apply flex justify-end gap-3 px-6 py-4 border-t border-border-subtle;
+}
+
+/* ============================================
+   GLASS POPOVER — Dropdowns, tooltips
+   ============================================ */
+
+.glass-popover {
+  @apply glass-popover rounded-lg shadow-lg;
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.glass-popover-arrow {
+  @apply absolute w-2 h-2 bg-inherit rotate-45;
+}
+
+/* ============================================
+   GLASS TAG/CHIP
+   ============================================ */
+
+.glass-tag {
+  @apply inline-flex items-center gap-1.5
+    px-2.5 py-0.5
+    rounded-pill
+    text-xs font-medium
+    transition-all duration-fast ease-out;
+}
+
+.glass-tag-subject {
+  @apply glass-regular text-tint-info-text border-tint-info-border;
+}
+
+.glass-tag-category {
+  @apply glass-regular text-tint-warning-text border-tint-warning-border;
+}
+
+.glass-tag-custom {
+  @apply glass-regular text-brand-text border-tint-brand-border;
+}
+
+.glass-tag-priority-high {
+  @apply glass-regular text-tint-danger-text border-tint-danger-border;
+}
+
+.glass-tag-priority-medium {
+  @apply glass-regular text-tint-warning-text border-tint-warning-border;
+}
+
+.glass-tag-priority-low {
+  @apply glass-regular text-tint-success-text border-tint-success-border;
+}
+
+/* ============================================
+   GLASS AVATAR
+   ============================================ */
+
+.glass-avatar {
+  @apply inline-block relative overflow-hidden rounded-full
+    bg-surface-subtle border border-border-subtle;
+}
+
+.glass-avatar img {
+  @apply w-full h-full object-cover;
+}
+
+/* ============================================
+   GLASS DROPDOWN / MENU
+   ============================================ */
+
+.glass-dropdown {
+  @apply glass-popover;
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.glass-dropdown-item {
+  @apply flex items-center gap-2
+    w-full px-3 py-2
+    text-left text-sm font-medium text-text-secondary
+    rounded-md
+    transition-colors duration-fast ease-out
+    hover:bg-surface-hover hover:text-text-primary
+    focus:outline-none focus:bg-surface-hover focus:text-text-primary;
+}
+
+.glass-dropdown-divider {
+  @apply h-px bg-border-subtle my-1;
+}
+
+/* ============================================
+   GLASS TOOLTIP
+   ============================================ */
+
+.glass-tooltip {
+  @apply glass-thin rounded-md px-2 py-1 text-xs
+    text-text-secondary
+    shadow-lg
+    pointer-events-none;
+  animation: tooltipFadeIn 120ms ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   ANIMATIONS — Spring-based entrances
+   ============================================ */
+
+@keyframes glassFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes glassSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glassScaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.glass-animate-fade-in {
+  animation: glassFadeIn var(--duration-base) var(--ease-out);
+}
+
+.glass-animate-slide-up {
+  animation: glassSlideUp var(--duration-slow) var(--ease-spring);
+}
+
+.glass-animate-scale-in {
+  animation: glassScaleIn var(--duration-base) var(--ease-out);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .glass-animate-fade-in,
+  .glass-animate-slide-up,
+  .glass-animate-scale-in {
+    animation: none !important;
+    opacity: 1;
+    transform: none !important;
+  }
+}
+
+/* ============================================
+   SCROLLBAR — Thin on glass surfaces
+   ============================================ */
+
+.glass-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.glass-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.glass-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 3px;
+}
+
+.glass-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* Firefox */
+.glass-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}

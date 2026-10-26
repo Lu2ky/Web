@@ -1,0 +1,16 @@
+.overview-panel {
+    background: var(--surface);
+    border: 1.5px solid var(--border-default);
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+}
+
+.overview-panel__title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}

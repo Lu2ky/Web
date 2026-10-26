@@ -1,0 +1,131 @@
+/**
+ * Temas de color y escala tipográfica.
+ *
+ * `data-theme` y `data-font-size` se escriben en `<html>` desde
+ * `shared/storage/appearance.js` (y desde el script anti-FOUC de `index.html`).
+ * Los componentes solo deben consumir las variables; nunca colores literales.
+ */
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Superficies */
+  --surface-page: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-subtle: #f9fafb;
+  --surface-muted: #f3f4f6;
+  --surface-hover: #f3f4f6;
+  --surface-overlay: rgba(255, 255, 255, 0.96);
+
+  /* Texto */
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
+  --text-inverse: #ffffff;
+
+  /* Bordes y foco */
+  --border-subtle: #e5e7eb;
+  --border-default: #d1d5db;
+  --border-strong: #9ca3af;
+  --focus-ring: #c026d3;
+
+  /* Marca */
+  --brand-text: #c026d3;
+  --brand-500: #c026d3;
+  --brand-600: #a21caf;
+  --brand-accent: #ff006e;
+  --brand-contrast: #ffffff;
+  --brand-gradient: linear-gradient(135deg, #ff006e 0%, #c026d3 100%);
+  --brand-gradient-strong: linear-gradient(135deg, #f6047b 0%, #c820c5 100%);
+
+  /* Fondo de overlays */
+  --backdrop: rgba(17, 24, 39, 0.45);
+
+  /* Tintes semánticos (chips, avisos, estados) */
+  --tint-danger-bg: #fef2f2;
+  --tint-danger-text: #b91c1c;
+  --tint-danger-border: #fca5a5;
+  --tint-success-bg: #f0fdf4;
+  --tint-success-text: #166534;
+  --tint-success-border: #86efac;
+  --tint-warning-bg: #fffbeb;
+  --tint-warning-text: #a16207;
+  --tint-warning-border: #fde047;
+  --tint-info-bg: #eff6ff;
+  --tint-info-text: #1d4ed8;
+  --tint-info-border: #93c5fd;
+  --tint-brand-bg: #fdf4ff;
+  --tint-brand-text: #a21caf;
+  --tint-brand-border: #f0abfc;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Superficies */
+  --surface-page: #070b14;
+  --surface: #121826;
+  --surface-raised: #1a2233;
+  --surface-subtle: #181f2f;
+  --surface-muted: #212a3d;
+  --surface-hover: #273248;
+  --surface-overlay: rgba(18, 24, 38, 0.96);
+
+  /* Texto */
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #0b1020;
+
+  /* Bordes y foco */
+  --border-subtle: #263044;
+  --border-default: #37425a;
+  --border-strong: #5b6880;
+  --focus-ring: #e879f9;
+
+  /* Marca */
+  --brand-text: #f0abfc;
+  --brand-500: #d946ef;
+  --brand-600: #c026d3;
+  --brand-accent: #ff4f9a;
+  --brand-contrast: #ffffff;
+
+  /* Fondo de overlays */
+  --backdrop: rgba(2, 6, 23, 0.68);
+
+  /* Tintes semánticos */
+  --tint-danger-bg: #3b1a24;
+  --tint-danger-text: #fecaca;
+  --tint-danger-border: #7f2d3d;
+  --tint-success-bg: #102b20;
+  --tint-success-text: #86efac;
+  --tint-success-border: #276749;
+  --tint-warning-bg: #332510;
+  --tint-warning-text: #fde68a;
+  --tint-warning-border: #7a5216;
+  --tint-info-bg: #14243f;
+  --tint-info-text: #93c5fd;
+  --tint-info-border: #2b4c86;
+  --tint-brand-bg: #2c1636;
+  --tint-brand-text: #f5d0fe;
+  --tint-brand-border: #6b2f7d;
+}
+
+/* Escala de texto elegida en Apariencia. */
+[data-font-size="sm"] {
+  --app-font-scale: 0.9375;
+}
+
+[data-font-size="md"] {
+  --app-font-scale: 1;
+}
+
+[data-font-size="lg"] {
+  --app-font-scale: 1.125;
+}
+
+html {
+  font-size: calc(100% * var(--app-font-scale));
+}

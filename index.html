@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="./Calendar.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#070b14" />
+    <title>UPB Planner</title>
+    <script>
+      // Anti-FOUC: aplica tema y escala de letra antes del primer pintado.
+      // Debe mantenerse en sincronía con src/shared/storage/appearance.js.
+      (function () {
+        try {
+          var raw = window.localStorage.getItem("upb:appearance");
+          var saved = raw ? JSON.parse(raw) : {};
+          var theme = saved.theme === "light" || saved.theme === "dark" ? saved.theme : "auto";
+          var size = saved.fontSize === "sm" || saved.fontSize === "lg" ? saved.fontSize : "md";
+          var resolved =
+            theme === "auto"
+              ? window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light"
+              : theme;
+          var root = document.documentElement;
+          root.setAttribute("data-theme", resolved);
+          root.setAttribute("data-font-size", size);
+          root.style.colorScheme = resolved;
+        } catch (error) {
+          // Si localStorage no está disponible se usan los valores por defecto.
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./src/app/main.jsx"></script>
+  </body>
+</html>

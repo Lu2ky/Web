@@ -1,0 +1,56 @@
+[1m[46m RUN [49m[22m [36mv4.1.0 [39m[90mC:/Users/Juaco/OneDrive/Documentos/Web[39m
+
+[90mstdout[2m | src/components/Account/UserProfile.changePassword.test.jsx[2m > [22m[2mUserProfile - cambio de contrasena[2m > [22m[2menvia cambio cuando los datos son validos
+[22m[39m[UserProfile] userData procesado: {
+  nombre: [32m'Usuario Prueba'[39m,
+  semestreActual: [32m'7'[39m,
+  programa: [32m'Ingenieria'[39m
+}
+
+[90mstdout[2m | src/components/Account/UserProfile.changePassword.test.jsx[2m > [22m[2mUserProfile - cambio de contrasena[2m > [22m[2mmuestra validacion y no llama al servicio cuando no coinciden
+[22m[39m[UserProfile] userData procesado: {
+  nombre: [32m'Usuario Prueba'[39m,
+  semestreActual: [32m'7'[39m,
+  programa: [32m'Ingenieria'[39m
+}
+
+[90mstdout[2m | src/components/Account/UserProfile.changePassword.test.jsx[2m > [22m[2mUserProfile - cambio de contrasena[2m > [22m[2mmuestra validacion por longitud minima y no llama al servicio
+[22m[39m[UserProfile] userData procesado: {
+  nombre: [32m'Usuario Prueba'[39m,
+  semestreActual: [32m'7'[39m,
+  programa: [32m'Ingenieria'[39m
+}
+
+[90mstdout[2m | src/components/Account/UserProfile.changePassword.test.jsx[2m > [22m[2mUserProfile - cambio de contrasena[2m > [22m[2mactualiza checklist en tiempo real segun criterios cumplidos
+[22m[39m[UserProfile] userData procesado: {
+  nombre: [32m'Usuario Prueba'[39m,
+  semestreActual: [32m'7'[39m,
+  programa: [32m'Ingenieria'[39m
+}
+
+[90mstdout[2m | src/components/Account/UserProfile.changePassword.test.jsx[2m > [22m[2mUserProfile - cambio de contrasena[2m > [22m[2mmuestra validacion cuando la nueva contrasena es igual a la actual
+[22m[39m[UserProfile] userData procesado: {
+  nombre: [32m'Usuario Prueba'[39m,
+  semestreActual: [32m'7'[39m,
+  programa: [32m'Ingenieria'[39m
+}
+
+[90mstdout[2m | src/components/Account/UserProfile.changePassword.test.jsx[2m > [22m[2mUserProfile - cambio de contrasena[2m > [22m[2mmuestra error cuando el servicio falla
+[22m[39m[UserProfile] userData procesado: {
+  nombre: [32m'Usuario Prueba'[39m,
+  semestreActual: [32m'7'[39m,
+  programa: [32m'Ingenieria'[39m
+}
+
+ [32m✓[39m src/components/Account/UserProfile.changePassword.test.jsx [2m([22m[2m6 tests[22m[2m)[22m[33m 4977[2mms[22m[39m
+     [33m[2m✓[22m[39m envia cambio cuando los datos son validos [33m 1098[2mms[22m[39m
+     [33m[2m✓[22m[39m muestra validacion y no llama al servicio cuando no coinciden [33m 830[2mms[22m[39m
+     [33m[2m✓[22m[39m muestra validacion por longitud minima y no llama al servicio [33m 644[2mms[22m[39m
+     [33m[2m✓[22m[39m actualiza checklist en tiempo real segun criterios cumplidos [33m 923[2mms[22m[39m
+     [33m[2m✓[22m[39m muestra validacion cuando la nueva contrasena es igual a la actual [33m 746[2mms[22m[39m
+     [33m[2m✓[22m[39m muestra error cuando el servicio falla [33m 731[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 12:55:36
+[2m   Duration [22m 7.92s[2m (transform 157ms, setup 216ms, import 565ms, tests 4.98s, environment 1.83s)[22m

@@ -1,0 +1,562 @@
+/* Contenedor principal */
+.weekViewWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+  background: var(--surface);
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Selector de semana */
+.weekSelector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, var(--surface-subtle) 0%, var(--surface-muted) 100%);
+    border-bottom: 2px solid transparent;
+    border-image: linear-gradient(135deg, #ff006e, #c026d3) 1;
+}
+
+.weekSelectorArrow {
+    padding: 0.5rem 0.8rem;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    border: none;
+    border-radius: 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(192, 38, 211, 0.2);
+}
+
+.weekSelectorArrow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(192, 38, 211, 0.35);
+}
+
+.weekSelectorArrow:active {
+    transform: translateY(0);
+}
+
+.weekSelectorText {
+    flex: 1;
+    text-align: center;
+}
+
+.weekSelectorDate {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+/* Encabezados */
+.weekHeaderRow {
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  background: var(--surface-subtle);
+  border-bottom: 2px solid var(--border-subtle);
+  width: 100%;
+}
+
+.hourHeaderCell {
+  flex: 0 0 5rem;
+  padding: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-right: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dayHeaderCell {
+  flex: 1;
+  padding: 1rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.dayHeaderCell:last-child {
+  border-right: none;
+}
+
+/* Scroll principal */
+.weekScrollArea {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+  min-width: 0;
+  position: relative;
+  scrollbar-width: auto;
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar visible para mejor UX */
+.weekScrollArea::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.weekScrollArea::-webkit-scrollbar-track {
+  background: var(--surface-muted);
+  border-radius: 6px;
+  margin: 5px 0;
+}
+
+.weekScrollArea::-webkit-scrollbar-thumb {
+  background: #999999;
+  border-radius: 6px;
+  border: 2px solid var(--border-subtle);
+}
+
+.weekScrollArea::-webkit-scrollbar-thumb:hover {
+  background: #666666;
+}
+
+.weekScrollArea::-webkit-scrollbar-thumb:active {
+  background: #333333;
+}
+
+/* Grid general */
+.weekGrid {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  position: relative;
+}
+
+/* Columna de horas */
+.hoursColumn {
+  flex: 0 0 5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Columnas de días */
+.dayColumn {
+  flex: 1;
+  height: calc(24 * 4rem);
+  display: grid;
+  grid-template-rows: repeat(24, 4rem);
+  position: relative;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.dayColumn:last-child {
+  border-right: none;
+}
+
+/* Filas de horas */
+.hourRow {
+  display: flex;
+  flex-direction: row;
+  min-height: 4rem;
+  border-bottom: 1px solid var(--border-subtle);
+  width: 100%;
+}
+
+.hourCell {
+  flex: 0 0 5rem;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: var(--surface-subtle);
+}
+
+/* Celdas de cada día */
+.dayCell {
+  flex: 0 0 4rem; /* altura exacta de cada hora */
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface);
+  box-sizing: border-box;
+}
+
+.dayCell:hover {
+  background: var(--surface-hover);
+  cursor: pointer;
+}
+
+/* Capa de eventos */
+.eventsLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(24 * 4rem); /* 24 horas * altura por hora */
+  pointer-events: none;
+  z-index: var(--z-events);
+}
+
+.eventsLayer > * {
+  pointer-events: auto;
+  z-index: var(--z-events-hover);
+  position: absolute;
+}
+
+/* Envoltorio posicionado: permite que la tarjeta sea un control y el
+   botón de eliminar un hermano (nada de interactivos anidados). */
+.activity-card-shell {
+  min-height: 0;
+}
+
+.activity-card-shell > .activity-card {
+  position: static;
+  width: 100%;
+  height: 100%;
+}
+
+/* Tarjetas de actividad: son botones reales, así que se resetea su estilo. */
+.activity-card {
+  appearance: none;
+  border: none;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  min-height: 0;
+  /* height viene del inline style — no poner height: auto aquí */
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: clip;
+  background: var(--tint-info-bg); /* color base, puedes personalizar */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .activity-card:active {
+    transform: scale(0.98);
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+}
+
+.activity-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.activity-card-header {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 0;
+  width: 100%;
+}
+
+.activity-card-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activity-card-time {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 0.68rem;
+}
+
+.activity-delete-button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: rgba(0,0,0,0.06);
+  border: none;
+  color: rgba(0,0,0,0.9);
+  font-size: 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: var(--z-float);
+}
+
+.activity-delete-button:hover {
+  background: rgba(185, 28, 28, 0.12);
+  color: var(--tint-danger-text);
+}
+
+.activity-card-title {
+  font-size: 0.78rem;
+  line-height: 1.2;
+  text-align: left;
+  margin: 0;
+  font-weight: 600;
+}
+
+.activity-card-description {
+  font-size: 0.68rem;
+  line-height: 1.3;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+}
+
+.activity-card-tag {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-label {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  font-size: 0.62rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activity-card-professor,
+.activity-card-time,
+.activity-card-footer,
+.activity-card-classroom,
+.activity-card-nrc {
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.activity-card-footer {
+  margin-top: 6px;
+  gap: 4px;
+}
+
+.official-class-card {
+  container-type: size;
+  gap: 2px;
+}
+
+.official-class-card .activity-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.official-class-card .activity-card-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.official-class-card .activity-card-title,
+.official-class-card .activity-card-professor,
+.official-class-card .activity-card-classroom,
+.official-class-card .activity-card-nrc {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.official-class-card .activity-card-title {
+  margin: 0;
+  font-size: clamp(0.56rem, 7.2cqh, 0.78rem);
+  line-height: 1.1;
+}
+
+.official-class-card .activity-card-professor {
+  margin: 0;
+  font-size: clamp(0.52rem, 6cqh, 0.68rem);
+  line-height: 1.1;
+}
+
+.official-class-card .activity-card-time {
+  font-size: clamp(0.5rem, 5.5cqh, 0.66rem);
+  line-height: 1;
+}
+
+.official-class-card .activity-card-footer {
+  margin-top: 2px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+@container (max-height: 72px) {
+  .official-class-card {
+    padding: 4px 6px;
+  }
+
+  .official-class-card .activity-card-footer {
+    display: flex;
+    margin-top: 1px;
+    gap: 2px;
+  }
+
+  .official-class-card .activity-card-nrc {
+    display: none;
+  }
+}
+
+@container (max-height: 54px) {
+  .official-class-card .activity-card-time {
+    display: none;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .hourHeaderCell,
+  .hourCell {
+    flex: 0 0 4rem;
+    font-size: 0.7rem;
+  }
+
+  .dayHeaderCell {
+    font-size: 0.8rem;
+  }
+
+  .weekGrid {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .dayColumn {
+    min-width: 7.25rem;
+  }
+
+  .dayHeaderCell {
+    min-width: 7.25rem;
+  }
+
+  .activity-card {
+    padding: 5px 6px;
+  }
+
+  .activity-card-content {
+    gap: 3px;
+  }
+
+  .activity-card-title {
+    font-size: 0.74rem;
+    line-height: 1.15;
+    text-transform: none;
+  }
+
+  .activity-card-time,
+  .activity-card-professor,
+  .activity-card-footer,
+  .activity-card-classroom,
+  .activity-card-nrc,
+  .activity-card-description {
+    font-size: 0.64rem;
+    line-height: 1.15;
+  }
+
+  .activity-card-description {
+    line-clamp: 1;
+    -webkit-line-clamp: 1;
+  }
+
+  .tag-label {
+    font-size: 0.58rem;
+    padding: 1px 5px;
+  }
+
+  .official-class-card .activity-card-title {
+    font-size: clamp(0.58rem, 6.2cqh, 0.74rem);
+    line-height: 1.1;
+  }
+
+  .official-class-card .activity-card-professor {
+    font-size: clamp(0.54rem, 5.2cqh, 0.64rem);
+    line-height: 1.1;
+  }
+
+  .official-class-card .activity-card-time {
+    font-size: clamp(0.52rem, 4.7cqh, 0.62rem);
+  }
+
+  .official-class-card .activity-card-header {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .official-class-card .activity-card-time {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .hourHeaderCell,
+  .hourCell {
+    flex: 0 0 3.5rem;
+    font-size: 0.65rem;
+  }
+
+  .dayHeaderCell {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.2rem;
+  }
+
+  .hourRow {
+    min-height: 3.5rem;
+  }
+
+  .dayCell {
+    flex: 0 0 3.5rem;
+  }
+
+  .official-class-card .activity-card-header {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .official-class-card .activity-card-time {
+    align-self: flex-start;
+  }
+}
+

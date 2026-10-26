@@ -1,0 +1,769 @@
+/* Botón principal con borde degradado */
+.addButton {
+    padding: 0.7rem 1.2rem;
+    font-weight: 600;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    border: 2px solid transparent;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    background-image:
+        linear-gradient(var(--surface), var(--surface)),
+        linear-gradient(135deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    transition: all 0.25s ease;
+}
+
+.addButton:hover {
+    color: white;
+    background-image: linear-gradient(135deg, #ff006e, #c026d3);
+    box-shadow: 0 6px 18px rgba(192, 38, 211, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Overlay más suave */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.25s ease;
+    z-index: var(--z-modal);
+}
+
+/* Contenedor con borde degradado */
+.modalContainer {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    padding: 2.2rem;
+    border-radius: 1.2rem;
+    background: var(--surface);
+
+    border: 2px solid transparent;
+    background-image:
+        linear-gradient(var(--surface), var(--surface)),
+        linear-gradient(135deg, #ff006e, #c026d3);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    animation: slideUp 0.3s ease;
+}
+
+/* Header del modal */
+.modalContainer h2 {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Botón cerrar */
+.modalClose {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+}
+
+.modalClose:hover {
+    color: #ff006e;
+}
+
+/* Inputs más suaves */
+/* Inputs más suaves */
+input,
+select,
+textarea {
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    font-size: 0.9rem;
+    background-color: var(--surface);
+    transition: all 0.2s ease;
+    font-family: inherit;
+    width: 100%;
+}
+
+textarea {
+    resize: none;
+    height: 90px;
+    min-height: 44px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    background-color: var(--surface);
+    border-color: #c820c5;
+    box-shadow: 0 0 0 3px rgba(192, 32, 197, 0.1);
+}
+
+/* Encabezados de secciones */
+h4 {
+    margin: 0.8rem 0 0.6rem 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: none;
+    letter-spacing: 0px;
+}
+
+/* Mensaje de error */
+.errorMessage {
+    color: var(--tint-danger-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    background: var(--tint-danger-bg);
+    border-radius: 8px;
+    border-left: 3px solid #ef4444;
+}
+
+/* Acciones del modal */
+.modalActions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Botón cancelar */
+.cancelButton {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 0.8rem;
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-subtle);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+    background: var(--surface-hover);
+}
+
+/* Botón guardar */
+.saveButton {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 0.8rem;
+    border: none;
+    background: linear-gradient(135deg, #ff006e, #c026d3);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.saveButton:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+@keyframes fadeOff {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+@keyframes SlideDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+}
+
+/* Estilos del calendario */
+.react-calendar {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.8rem;
+    font-family: inherit;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.react-calendar__tile {
+    background: var(--surface);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    padding: 0.5rem;
+}
+
+.react-calendar__tile:hover {
+    background: var(--surface-hover);
+    transform: scale(1.05);
+}
+
+.react-calendar__tile.react-calendar__tile--active,
+.react-calendar__tile.react-calendar__tile--active:hover {
+    background: linear-gradient(135deg, #f6047b, #c820c5);
+    color: white;
+    box-shadow: 0 4px 12px rgba(192, 38, 211, 0.3);
+}
+
+.react-calendar__navigation button {
+    color: var(--text-primary);
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.react-calendar__navigation button:hover {
+    color: var(--brand-text);
+}
+
+@media (max-width: 768px) {
+    .addButton {
+        font-size: 0;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: 25%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.addButton::before {
+    content: "+";
+    font-size: 1.5rem;
+    color: black;
+    transition: color 0.25s ease;
+}
+
+.addButton:hover::before {
+    color: white;
+    /* ← AQUÍ cambia a blanco */
+}
+
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    z-index: var(--z-modal);
+}
+
+.modalContainer {
+    width: 100%;
+    max-width: 560px;
+    /* ancho controlado */
+    max-height: 85vh;
+    /* NO ocupa toda la pantalla */
+    overflow-y: auto;
+    /* scroll interno */
+    padding: 2rem;
+    
+    /* Ocultar scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.modalContainer::-webkit-scrollbar {
+    display: none;
+}
+
+.dateInputContainer {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+}
+
+.dateInputContainer input {
+    flex: 1;
+    text-align: left;
+}
+
+.calendarToggle {
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.calendarToggle:hover {
+    background: var(--surface-hover);
+    color: var(--brand-text);
+    border-color: var(--border-default);
+}
+
+.calendarWrapper {
+    margin-top: 0.8rem;
+}
+
+
+/* Grupo prioridad */
+.priorityGroup {
+    display: flex;
+    gap: 0.8rem;
+}
+
+/* Botón base prioridad */
+.priorityButton {
+    flex: 1;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 2px solid;
+    background: var(--surface);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: capitalize;
+    font-size: 0.95rem;
+}
+
+.priorityButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Alta */
+.priority-alta {
+    border-color: #ef4444;
+    color: var(--tint-danger-text);
+}
+
+.priority-alta.priorityActive {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
+}
+
+/* Media */
+.priority-media {
+    border-color: #f59e0b;
+    color: var(--tint-warning-text);
+}
+
+.priority-media.priorityActive {
+    background: #f59e0b;
+    color: white;
+    box-shadow: 0 6px 15px rgba(245, 158, 11, 0.3);
+}
+
+/* Baja */
+.priority-baja {
+    border-color: #22c55e;
+    color: var(--tint-success-text);
+}
+
+.priority-baja.priorityActive {
+    background: #22c55e;
+    color: white;
+    box-shadow: 0 6px 15px rgba(34, 197, 94, 0.3);
+}
+.priorityActive {
+    animation: pop 0.2s ease;
+}
+
+@keyframes pop {
+    0% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* Etiquetas */
+.tagsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.tagChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.tagChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    animation: fadeIn 0.2s ease;
+}
+
+.tagChip.subject {
+    background: linear-gradient(135deg, var(--tint-info-bg), var(--tint-info-bg));
+    color: var(--tint-info-text);
+    border-left: 3px solid #1e40af;
+}
+
+.tagChip.category {
+    background: linear-gradient(135deg, var(--tint-warning-bg), var(--tint-warning-bg));
+    color: var(--tint-warning-text);
+    border-left: 3px solid #92400e;
+}
+
+.tagChip.priority-high {
+    background: linear-gradient(135deg, var(--tint-danger-bg), #fecaca);
+    color: var(--tint-danger-text);
+    border-left: 3px solid #991b1b;
+}
+
+.tagChip.priority-medium {
+    background: linear-gradient(135deg, var(--tint-warning-bg), var(--tint-warning-bg));
+    color: var(--tint-warning-text);
+    border-left: 3px solid #9a3412;
+}
+
+.tagChip.priority-low {
+    background: linear-gradient(135deg, var(--tint-success-bg), var(--tint-success-bg));
+    color: var(--tint-success-text);
+    border-left: 3px solid #065f46;
+}
+
+.tagChip.custom {
+    background: linear-gradient(135deg, var(--surface-muted), var(--surface-muted));
+    color: var(--text-secondary);
+    border-left: 3px solid var(--border-strong);
+}
+
+.tagChipRemove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    padding: 0;
+    margin-left: 0.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.tagChipRemove:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.tagInputRow {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+}
+
+.tagInputRow input {
+    flex: 2;
+}
+
+.tagInputWrapper {
+    position: relative;
+    flex: 2;
+    display: flex;
+}
+
+.tagInputWrapper input {
+    width: 100%;
+}
+
+/* Dropdown portal */
+.tagDropdown {
+    position: fixed;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    z-index: var(--z-session);
+    animation: tagDropdownIn 0.15s ease;
+    max-width: 90vw;
+}
+
+@keyframes tagDropdownIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.tagDropdownList {
+    padding: 0.25rem 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.tagDropdownItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-weight: 500;
+}
+
+.tagDropdownItem:hover {
+    background: linear-gradient(135deg, var(--surface-hover), var(--surface-hover));
+}
+
+.tagDropdownItemLabel {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.tagDropdownItemActions {
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.tagDropdownItem:hover .tagDropdownItemActions {
+    opacity: 1;
+}
+
+.tagActionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    background: transparent;
+}
+
+.tagActionDelete {
+    color: var(--tint-danger-text);
+}
+
+.tagActionDelete:hover {
+    background: var(--tint-danger-bg);
+}
+
+.addTagButton {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #f6047b, #c820c5);
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 2px 8px rgba(192, 38, 211, 0.2);
+}
+
+.addTagButton:hover {
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 4px 12px rgba(192, 38, 211, 0.3);
+}
+
+.addTagButton:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 1023px) {
+    .modalOverlay {
+        align-items: center;
+        padding: 1rem;
+    }
+    .modalContainer {
+        width: 100%;
+        max-height: 85dvh;
+        overflow-y: auto;
+        padding: 1.5rem;
+        gap: 0.8rem;
+    }
+
+    .modalContainer h2 {
+        font-size: 1.2rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .modalClose {
+        top: 1rem;
+        right: 1rem;
+        font-size: 1rem;
+    }
+
+    input,
+    select,
+    textarea {
+        padding: 0.7rem;
+        font-size: 0.9rem;
+    }
+
+    textarea {
+        height: 75px;
+    }
+
+    .modal-footer {
+        margin-top: 0.8rem;
+        gap: 0.6rem;
+    }
+
+    .modal-secondary-btn,
+    .modal-primary-btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .errorMessage {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.7rem;
+    }
+}
+
+/* ============================================
+   FILTER FORM STYLES
+   ============================================ */
+
+label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.6rem;
+}
+
+/* Filter dropdown trigger button */
+.filterTrigger {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background-color: var(--surface);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+}
+
+.filterTrigger:hover {
+    border-color: #c820c5;
+    background-color: var(--surface-hover);
+}
+
+.filterTrigger:focus {
+    border-color: #c820c5;
+    box-shadow: 0 0 0 3px rgba(192, 32, 197, 0.1);
+}
+
+.filterTrigger::after {
+    content: '▼';
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+/* Filter dropdown menu */
+.filterDropdown {
+    position: fixed;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    z-index: var(--z-session);
+    animation: tagDropdownIn 0.15s ease;
+    max-width: 90vw;
+}
+
+/* Filter dropdown list */
+.filterDropdownList {
+    padding: 0.5rem 0;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+/* Filter dropdown option */
+.filterOption {
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.filterOption:hover {
+    background: linear-gradient(135deg, var(--surface-hover), var(--surface-hover));
+}
+
+.filterOption.active {
+    background: linear-gradient(135deg, #f6047b, #c820c5);
+    color: white;
+    font-weight: 700;
+}
